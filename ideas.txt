@@ -1,0 +1,32 @@
+Constituents database = user table.   Additional fields are user meta.  Create fnln## as uid and dummy email if needed.
+Store personal cases as notes on the user
+Issues are always posts -- private or public
+Contacts about an issue are always comments -- can add comment meta
+     ?Decision -- store as comment hold or create additional private status?  Comments on a private post do not show. Seems not to show anywhere on comment lists!
+Issue: user data -- does it belong to us or user?  Can create data that only shows on our profile screens -- admin notes.
+
+
+create new role
+http://codex.wordpress.org/Function_Reference/add_role
+http://codex.wordpress.org/Function_Reference/register_activation_hook 
+
+add user
+http://codex.wordpress.org/Function_Reference/wp_create_user
+http://codex.wordpress.org/Class_Reference/WP_User
+http://codex.wordpress.org/Function_Reference/get_userdata
+username and id must be unique
+username cannot be changed (but display name can)
+email can be changed
+NOTE:  WILL HAVE CONVERSION TO DO
+
+Subject matter activity is a just a post with visibility = private.
+Workflow is just start the issue with a private post
+Feedback is just a comment
+
+Adding custom fields to profile
+http://wpengineer.com/2173/custom-fields-wordpress-user-profile/
+see includes/user.php -- contact fields are treated preferentially
+
+
+http://codex.wordpress.org/Plugin_API/Filter_Reference/user_registration_email
+place to put check for emails in mailchimp??
