@@ -35,7 +35,7 @@ function custom_post_type() {
 		'label'               => __( 'constituent', 'simple-wp-crm' ),
 		'description'         => __( 'constituents -- people', 'simple-wp-crm' ),
 		'labels'              => $labels,
-		'supports'            => array( 'title', 'author', 'thumbnail', 'revisions', 'custom-fields', ),
+		'supports'            => array( 'title', 'author', 'editor', 'thumbnail', 'revisions', 'custom-fields', ),
 		// comments are not private; labels inappropriate
 		// general editor doesn't make sense
 		'taxonomies'          => array( 'category' ),
@@ -52,11 +52,11 @@ function custom_post_type() {
 		'publicly_queryable'  => false, // controls if URL to constituent is accessible on front end (independent of log in status) -- false for privacy
 		'capabilities'        => $capabilities,
 	);
-	register_post_type( 'constituent', $args );
+	register_post_type( 'wic_constituent', $args );
 
 }
 
 // Hook into the 'init' action
 add_action( 'init', 'custom_post_type', 0 );
 
-?>
+

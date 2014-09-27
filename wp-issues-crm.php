@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Issues CRM
  * Plugin URI: 
- cd * Description: Constituent Relationship Management for organizations that respond to constituents primarily on issues (e.g., legislators); does support basic case notes as well. 
+ * Description: Constituent Relationship Management for organizations that respond to constituents primarily on issues (e.g., legislators); does support basic case notes as well. 
  * Version: 1.0
  * Author: Will Brownsberger
  
@@ -29,7 +29,6 @@ include plugin_dir_path( __FILE__ ) . 'definitions.php';
 
 
 
-
 /**
  * SEARCH FORM AND LIST
  * 
@@ -37,281 +36,162 @@ include plugin_dir_path( __FILE__ ) . 'definitions.php';
  *
  */
 
-	function simple_wp_crm($atts) {
-		
-		extract( shortcode_atts( array(
-		'count' => 100
-	        ), $atts ) );
-
-		/* first check capabilities -- must be user */
-		if ( ! current_user_can ( 'activate_plugins' ) ) {
-			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators', 'simple-wp-crm' ) . '<h3>';
-		} else {
-			echo 'welcome -- you have a short code!';		
-		}
-
-		if($count == 0){$count = 100;}
-/*	
-		$widget_query = new WP_Query( array(
-			'post_type'           => 'constituents',
-			'post_status'         => array( bbp_get_public_status_id(), bbp_get_closed_status_id() ),
-			'posts_per_page'      => $count,
-			'show_stickies' => true,
-			'no_found_rows'       => true,
-                        'order'               => 'DESC'
-                        
-		) );
-
-        ?>
-        <?php ob_start(); ?>   <!-- start an output buffer -->
-	<?php while ( $widget_query->have_posts() ) : $widget_query->the_post(); 
-	endwhile; 
-          ?>
-
-
-		<!-- Reset the $post global -->
-	<?php	wp_reset_postdata();
-	return ob_get_clean(); */
-	}
-
-/**
-* Enqueue Styles and Scripts for Datatables
-*  datatables js -- www.datatables.net
-*
-
-
-function bbp_resp_setup_datatables() {
-	
-	// this style is necessary, contains misc styles common to tabs and to datatables
-	wp_register_style(
-		'bbp_resp_tab_style',  
-		plugins_url( 'jquery-ui-1.10.4.custom.min.0741.css' , __FILE__ ) // customized style from http://jqueryui.com/themeroller/
-	);
-	wp_enqueue_style('bbp_resp_tab_style');  
-	
-	/* datables styles and scripts 
-	
-	wp_register_style(
-		'jquery_dataTables_themeroller_style',  
-	   	'http://cdnjs.cloudflare.com/ajax/libs/datatables/1.9.4/css/jquery.dataTables_themeroller.css',
-	   	array('bbp_resp_tab_style')
-	);
-	wp_enqueue_style('jquery_dataTables_themeroller_style');
-	
-	wp_register_style(
-		'bbp_resp_datatables_styles',  
-	   	plugins_url( 'bbp_resp_datatables_styles.css' , __FILE__ ),
-	   	array('jquery_dataTables_themeroller_style')
-	);
-	wp_enqueue_style('bbp_resp_datatables_styles');
-	
-	wp_register_script(
-	  	'bbp_resp_datatables',
-		'http://cdnjs.cloudflare.com/ajax/libs/datatables/1.9.4/jquery.dataTables.min.js', 
-	   	array('jquery')
-	 );
-	wp_enqueue_script('bbp_resp_datatables');
-	
-	wp_register_script(
-		'add_bbp_datatables',
-	  	plugins_url( 'add_bbp_datatables.js' , __FILE__ ),  // invokes datatables from the plugin reply and topic tables
-	  	array('bbp_resp_datatables')
-	);
-	wp_enqueue_script('add_bbp_datatables');
-
-}
-
-add_action('wp_enqueue_scripts', 'bbp_resp_setup_datatables');
-/**
- * Register Shortcodes
- *
- */
-
-add_shortcode('simple-wp-crm', 'simple_wp_crm');
-
-http://wpengineer.com/2173/custom-fields-wordpress-user-profile/
-function fb_add_custom_user_profile_fields( $user ) {
-?>
-
-		<tr>
-			<th>
-				<label for="address"><?php _e('Address', 'your_textdomain'); ?>
-			</label></th>
-			<td>
-				<input type="text" name="address" id="address" value="<?php echo esc_attr( get_the_author_meta( 'address', $user->ID ) ); ?>" class="regular-text" /><br />
-				<span class="description"><?php _e('Please enter Monicas address.', 'your_textdomain'); ?></span>
-			</td>
-		</tr>
-	
-<?php }
-
-function fb_save_custom_user_profile_fields( $user_id ) {
-	
-	if ( !current_user_can( 'edit_user', $user_id ) )
-		return FALSE;
-	
-	update_usermeta( $user_id, 'address', $_POST['address'] );
-}
-
-//http://codex.wordpress.org/Plugin_API/Action_Reference/personal_options_update
-add_action( 'profile_personal_options', 'fb_add_custom_user_profile_fields' );
-add_action( 'personal_options', 'fb_add_custom_user_profile_fields' );
-
-add_action( 'personal_options_update', 'fb_save_custom_user_profile_fields' );
-add_action( 'edit_user_profile_update', 'fb_save_custom_user_profile_fields' );
-
-// http://codex.wordpress.org/Plugin_API/Filter_Reference/user_contactmethods
-function modify_user_contact_methods( $user_contact) {
-   var_dump($user_contact);
-	/* Add user contact methods */
-	$user_contact['mailing_address'] = __('Mailing Address'); 
-	$user_contact['city'] = __('City'); 
-	$user_contact['zip'] = __('Zip');
-	$user_contact['landline'] = __('Landline');
-	$user_contact['mobile'] = __('Mobile');
-
-	/* Remove user contact methods */
-	unset($user_contact['aim']);
-	unset($user_contact['jabber']);
-	unset($user_contact['website']);
-	unset($user_contact['yim']);
-
-	return $user_contact;
-}
-
-add_filter('user_contactmethods', 'modify_user_contact_methods');
-
-add_filter( 'user_search_columns', 'filter_function_name', 10, 3 );
-// http://codex.wordpress.org/Plugin_API/Filter_Reference/user_search_columns (user search from wp_comment table columns)
-function filter_function_name( $search_columns, $search, $this ) {
-    $search_columns[] = 'user_url';
-    return $search_columns;
-}
-// http://wpsnipp.com/index.php/functions-php/remove-admin-color-scheme-options-from-user-profile/
-
-if(is_admin()){
-  remove_action("admin_color_scheme_picker", "admin_color_scheme_picker");
-} 
-/*
-function admin_color_scheme() {
-
-   global $_wp_admin_css_colors;
-   global $_wp_show_admin_bar;
-   $_wp_admin_css_colors = 0;
-   $_wp_show_admin_bar = 0;
-}
-add_action('admin_head', 'admin_color_scheme');
-*/
-
-if ( ! function_exists( 'cor_remove_personal_options' ) ) {
-  /**
-   * Removes the leftover 'Visual Editor', 'Keyboard Shortcuts' and 'Toolbar' options.
-   */
-  function cor_remove_personal_options( $subject ) {
-    $subject = preg_replace( '#<h3>Personal Options</h3>.+?/table>#s', '', $subject, 1 );
-    return $subject;
-  }
-
-  function cor_profile_subject_start() {
-    ob_start( 'cor_remove_personal_options' );
-  }
-
-  function cor_profile_subject_end() {
-    ob_end_flush();
-  }
-}
-add_action( 'admin_head-profile.php', 'cor_profile_subject_start' );
-add_action( 'admin_footer-profile.php', 'cor_profile_subject_end' );
-
-
-
-<?php
-/**
- * Plugin Name: Frontend Post No Spam
- * Plugin URI: http://twowayconstituentcommunication.com
- * Description: Allows better anonymous or logged in front end posting.
- * Version: 1.0
- * Author: Will Brownsberger
- * Author URI: http://willbrownsberger.com
- * License: GPL2
- */
-/*  Copyright 2014  WILL BROWNSBERGER  (email : willbrownsberger@gmail.com)
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, version 2, as 
-    published by the Free Software Foundation.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-
-// include Akismet class
-		include plugin_dir_path( __FILE__ ) . 'class-responsive-tabs-akismet.php';
-
-
-//  enqueue widget styles
-
-function responsive_tabs_setup_clippings_styles() 
-{
-	wp_register_style(
-		'new_post_styles',  
-	   	plugins_url( 'front-end-post.css' , __FILE__ ) // ,
-	);
-	wp_enqueue_style('new_post_styles');
-
-}
-add_action( 'wp_enqueue_scripts', 'responsive_tabs_setup_clippings_styles');
-
-// Register Custom Status -- does not work in admin panel to create new columns as advertised.
- function new_post_spam_register() {
-
-	$args = array(
-		'label'                     => _x( 'new_post_spam', 'Status General Name', 'text_domain' ),
-		'label_count'               => _n_noop( 'Spam Post (%s)',  'Spam Posts (%s)', 'text_domain' ), 
-		'public'                    => false,
-		'show_in_admin_all_list'    => true,
-		'show_in_admin_status_list' => true,
-		'exclude_from_search'       => true,
-	);
-	register_post_status( 'new_post_spam', $args );
-
-}
-// Hook into the 'init' action
-add_action( 'init', 'new_post_spam_register', 0 ); 
-
-function register_new_post_widget() {
-	register_widget ( 'Front_Page_New_Post' );
-}
-add_action( 'widgets_init', 'register_new_post_widget' );
-
-
+// http://code.tutsplus.com/articles/create-wordpress-plugins-with-oop-techniques--net-20153
 class WP_Issues_CRM {
 
-	function __construct() {
-		
+/*
+*
+* field definition array for constituents
+*
+*/
+	public $constituent_fields = array( 
+	  			// 'slug',				'label',						'show online' 	'type' not implemented: 'readonly', 'required', 'searchable'
+		array( 'first_name', 		'First Name',					true,			'text', ),		
+		array( 'middle_name', 		'Middle Name',					false,		'text', ),		
+		array( 'last_name', 			'Last Name',					true,			'text', ),		
+		array( 'email', 				'eMail',							true,			'email',),		
+		array( 'phone', 				'Land Line',					true,			'text', ),		
+		array( 'mobile_phone',		'Mobile Phone',				true,			'text', ),
+		array( 'street_address', 	'Street Address',				true,			'text', ),
+		array( 'city', 				'City',							true,			'text', ),
+		array( 'state_province_id','State', 						true,			'text', ),
+		array( 'zip',					'Zip Code', 					true,			'text', ),
+		array( 'job_title', 			'Job Title',					true,			'text', ),
+		array( 'organization_name', 'Organization',				true,			'text', ),
+		array( 'gender_id', 			'Gender',						true,			array ( 'M', 'F'), ),
+		array( 'birth_date',			'Date of Birth',				true,			'date', ),
+		array( 'is_deceased', 		'Is Deceased',					true,			'check' ),
+		array( 'civicrm_id', 		'CiviCRM ID',					false,		'text', ),
+		array( 'ss_id',				'Secretary of State ID',	false,		'text', ),
+		array( 'VAN_id', 				'VAN ID',						false,		'text', ),
+	);
+	
+
+
+	public function __construct() {
+		add_shortcode( 'wp_issues_crm', array( $this, 'wp_issues_crm' ) );
 	}
 
-	function widget( $args, $instance ) {
+	public function wp_issues_crm() {
+
+		/* first check capabilities -- must be administrative user */
+		if ( ! current_user_can ( 'activate_plugins' ) ) { 
+			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
+			return;
+		} 
+ 
+		/* test if form has been submitted and check nonce -- if so, process $_POST input */
 		
- 		extract($args, EXTR_SKIP);
+		if(isset($_POST['submitted']) && isset($_POST['wp_issues_crm_constituent_search_nonce_field']) && 
+		wp_verify_nonce($_POST['wp_issues_crm_constituent_search_nonce_field'], 'wp_issues_crm_constituent_search'))	{
+			 
+        /****************$this->import();**************/
+ 		
+ 		
+ 		}
+  
+  		/* display form */
+  		var_dump ($_POST);
+     $add_post = 'shit';
+	  ?>
+		<form id = "constituent-search-form" method="POST">
+			<?php $post_message = 'test';
+			$has_error = 1; 
+			if ( $post_message != '' ) { 
+				$message_class = $has_error ? 'wp-issues-crm-warning' : 'wp-issues-crm-update'; ?>
+		   	<div id="new-post-message-box" class="<?php echo $message_class; ?>"><?php echo $post_message; ?></div>
+		   <?php }
+			foreach ( $this->constituent_fields as $field ) {
+				if( $field[2] ) {
+					switch ( $field[3] ) {
+						case 'text':
+							$value = isset ($_POST[$field[0]]) ? $_POST[$field[0]] : '';
+							?><p><label for="<?php echo $field[0] ?>"><?php _e( $field[1], 'wp_issues_crm' ); ?></label>
+							<input  id="<?php echo $field[0] ?>" name="<?php echo $field[0] ?>" type="text" value="<?php echo $value; ?>" /></p><?php
+							break;
+						case 'email':
+							$value = isset ($_POST[$field[0]]) ? $_POST[$field[0]] : '';
+							?><p><label for="<?php echo $field[0] ?>"><?php _e( $field[1], 'wp_issues_crm' ); ?></label>
+							<input  id="<?php echo $field[0] ?>" name="<?php echo $field[0] ?>" type="text" value="<?php echo $value; ?>" 
+							placeholder="<?php _e( 'Enter a valid email if available', 'wp_issues_crm' )?>" /></p><?php
+							break;
+							/* insert dates and text logic */
+					}
+				}
+			}   ?>
+	  
+	  		<button id="new_post_submit" type="submit"><?php _e($add_post, 'wp_issues_crm'); ?></button>	  
+	 		<?php wp_nonce_field('wp_issues_crm_constituent_search', 'wp_issues_crm_constituent_search_nonce_field', true, true); ?>
+			<input type="hidden" name="submitted" id="submitted" value="true" />
+
+		</form>
+		<?php
+
+
+
+
+
+
+
+
+
+
+
+
+
+   }
+   /* import */
+   public function import(){
+	   
+	   $i=0;
+	   			
+		
+	   
+	   global $wpdb;
+	   $contacts = $wpdb->get_results( 'select * from wp_swc_contacts' );
+	   foreach ($contacts as $contact ) {
+		   /* $i++;
+		   if ($i > 3 ) break; */
+		   			
+			$post_information = array(
+				'post_title' => wp_strip_all_tags ( $contact->last_name . ', ' . $contact->first_name ),
+				'post_type' => 'wic_constituent',
+				'post_status' => 'private',
+				'post_author' => 15,
+				'ping_status' => 'closed',
+			);
+		
+			$post_id = wp_insert_post($post_information);
+			
+			foreach ($fields as $field) {			
+				if ( isset ( $contact->$field ) ) {
+					if ( $contact->$field > 0 and $contact->$field > '' ) {
+						add_post_meta ($post_id, '_wic_' . $field, $contact->$field );							
+					}				
+				} 
+			}
+		}
+	}
+	
+	
+}	
+
+$wp_issues_crm = new WP_Issues_CRM;
+
+
+
  		
 /*
 *
 * code to save new posts on submission 
 *
-*/
+*
 
 $post_ID = 0;
 $post_message = '';
 $has_error = false;
 
-/* do nothing unless submitted and passed nonce test */
+// do nothing unless submitted and passed nonce test 
 if(isset($_POST['submitted']) && isset($_POST['twcc_front_page_new_post_nonce_field']) && 
 		wp_verify_nonce($_POST['twcc_front_page_new_post_nonce_field'], 'twcc_front_page_new_post')) 
 		{
@@ -351,9 +231,9 @@ if(isset($_POST['submitted']) && isset($_POST['twcc_front_page_new_post_nonce_fi
 		}				
    	else {// if no errors, spam check and save or udpate post
 
-					/* note, need to use generic akismet interface as Wordpress plugin class 
-					does not offer functions serving non-comments compare bbpress which writes its own class using elements from 
-					the main plugin and the class referenced here */ 
+					// note, need to use generic akismet interface as Wordpress plugin class 
+					//does not offer functions serving non-comments compare bbpress which writes its own class using elements from 
+					//the main plugin and the class referenced here  
 		   
 		   $comment = array(
 		        'author'    => trim($_POST['post_guest_author']),
@@ -362,35 +242,9 @@ if(isset($_POST['submitted']) && isset($_POST['twcc_front_page_new_post_nonce_fi
 		        'permalink' => 'http://localhost/?frontpagetab=4'
 		   );
 		  
-		  $akismet_api_key = apply_filters( 'akismet_get_api_key', defined('WPCOM_API_KEY') ? constant('WPCOM_API_KEY') : get_option('wordpress_api_key') );
-		  
-		  $akismet = new Akismet_TWCC('http://willbrownsberger.com', $akismet_api_key, $comment);
-		 
-		  if($akismet->errorsExist()) {
-		      echo"Problem with Akismet spam detection.";
-		  } else {
-		      if($akismet->isSpam()) {
-		         // $post_message .= '<li>Your post is activating our spam filters.</li>';
-		         // $has_error = true;
-		         $new_post_status = 'new_post_spam'; 
-		      }
-		  }
-		 /* end akismet call */
-      
-	   		
-		
-		
-		
-			/* $all_of_it = $_POST['post_title']. $_POST['twcc_new_post_content'] . 
-					$_POST['twcc_new_post_cat'] . $_POST['post_guest_author'] . 
-						$_POST['post_guest_author_email'];
-			$hash_crc32 = hash('crc32', $all_of_it);
-			if(isset($_COOKIE[$hash_crc32]))
-					echo 'you refreshed chump';
-					else setcookie ($hash_crc32); */
-			 /* possible TODO: provide protection against refresh dupe post.  This approach doesn't work because headers already sent */
+
 			
-			if (!$new_post_status=='new_post_spam')  $new_post_status = $instance['initial_post_status'];			
+		
 			
 			$default_comment_status = get_option('default_comment_status');
 			
@@ -407,15 +261,7 @@ if(isset($_POST['submitted']) && isset($_POST['twcc_front_page_new_post_nonce_fi
 		
 			$post_id = wp_insert_post($post_information);
 		
-		   if (!get_current_user_id()) {
-	
-					if ( ! update_post_meta ($post_id, 'twcc_post_guest_author', $_POST['post_guest_author']) ) { 
-					add_post_meta($post_id, 'twcc_post_guest_author', $_POST['post_guest_author'], true );
-						}	
-					if ( ! update_post_meta ($post_id, 'twcc_post_guest_author_email', $_POST['post_guest_author_email']) ) { 
-					add_post_meta($post_id, 'twcc_post_guest_author_email', $_POST['post_guest_author_email'], true );
-						}
-			}; 
+
 			
 			if($post_id > 0)	{
 			   if ($_POST['post_id']> 0) {	
@@ -436,26 +282,7 @@ if(isset($_POST['submitted']) && isset($_POST['twcc_front_page_new_post_nonce_fi
 
 
 
-// output widget title
-		
-		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? '' : $instance['title'], $instance, $this->id_base );
-		echo  $before_widget;
-		if ( $title )	echo $before_title . $title . $after_title;
- 		echo '<div id = "new-post-widget">';	
-// output before text matter 		
- 		echo $instance['before_text'] ;
-// output form
-?>
-<?php if (current_user_can('edit_posts') || get_user_by('id',$instance['guest_post_id']) ) { 
-  // only show form if user can edit posts or anonymous users can post to the guest ID;  
-  // note that if logged in user cannot edit posts, but anonymous can, the logged in user will be allowed to post  
- 
-?><form action="" id="front-page-new-post-form" method="POST">
-     
-		<?php if ( $post_message != '' ) { 
-					$message_class = $has_error ? 'twcc-warning' : 'twcc-update'; ?>
-		    <div id="new-post-message-box" class="<?php echo $message_class; ?>"><?php echo $post_message; ?></div>
-		    <?php } ?> 
+
  
  		<?php if(get_current_user_id() == 0) { ?>
     					<p><input type="text" name="post_guest_author" id="post_guest_author" value="<?php if ( isset( $_POST['post_guest_author'] ) ) echo $_POST['post_guest_author']; ?>"/>
@@ -498,101 +325,5 @@ if(isset($_POST['submitted']) && isset($_POST['twcc_front_page_new_post_nonce_fi
 	             <br/><br />
 	   <?php } ?>
 	   
-		<?php wp_nonce_field('twcc_front_page_new_post', 'twcc_front_page_new_post_nonce_field'); ?>
 
-		<input type="hidden" name="submitted" id="submitted" value="true" />
-
-		<input type="hidden" name="post_id" value="<?php echo $post_id; ?>"> 
-
-		<?php $add_post = ($post_id > 0) ? 'Update' : 'Save'; ?>
-		<button id="new_post_submit" type="submit"><?php _e($add_post, 'twcc_text_domain') ?></button>
-		<br />
-</form>
-<?php
- }// end output new post form
-else {
-		echo '<h3>New post form not configured for anonymous input, please login to post. </h3>';
-		}
-
- 		echo $instance['after_text'];
-		echo '</div>';
-		echo $after_widget ;
-} // close widget output
-
-
-/*
-* update the widget itself
 */
-
-
-	function update( $new_instance, $old_instance ) {
-		$instance = $old_instance;
-		$instance['title'] = strip_tags($new_instance['title']);
-		$instance['before_text'] = force_balance_tags($new_instance['before_text']);
-		$instance['after_text'] = force_balance_tags($new_instance['after_text']);
-		$instance['guest_post_id'] = absint($new_instance['guest_post_id']);
-		$instance['initial_post_status'] = strip_tags($new_instance['initial_post_status']);
-		$instance['show_category_select'] = absint($new_instance['show_category_select']);
-		return $instance;
-	}
-
-/*
-* form for update of new widget
-*
-*/
-
-	function form( $instance ) {
-		$title  = isset( $instance['title'] ) ? esc_attr( $instance['title'] ) : '';
-		$before_text = isset( $instance['before_text'] ) ?  $instance['before_text']  : '';
-		$after_text = isset( $instance['after_text'] ) ?  $instance['after_text']  : '';
-		$guest_post_id = isset( $instance['guest_post_id'] ) ?  $instance['guest_post_id']  : 0;
-		$initial_post_status = isset( $instance['initial_post_status'] ) ?  $instance['initial_post_status']  : '';
-		$show_category_select = isset( $instance['show_category_select'] ) ?  $instance['show_category_select']  : 0;
-?>
-		<p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:' ); ?></label>
-		<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo $title; ?>" /></p>
-
-		<p><label for="<?php echo $this->get_field_id( 'before_text' ); ?>"><?php _e( 'Text before form:<br />' ); ?></label>
-		 <textarea type="text" cols="40" rows="5"  id="<?php echo $this->get_field_id( 'before_text' ); ?>"  name="<?php echo $this->get_field_name( 'before_text' ); ?>"><?php echo $before_text;?> </textarea>
-
-		<p><label for="<?php echo $this->get_field_id( 'after_text' ); ?>"><?php _e( 'Text after form:<br />' ); ?></label>
-		 <textarea type="text" cols="40" rows="5"  id="<?php echo $this->get_field_id( 'after_text' ); ?>"  name="<?php echo $this->get_field_name( 'after_text' ); ?>"><?php echo $after_text;?> </textarea>
-
-		<p><label for="<?php echo $this->get_field_id( 'guest_post_id' ); ?>"><?php _e( 'User ID# for guest posts if to be permitted (adding a valid ID # here will permit them):' ); ?></label>
-		<input id="<?php echo $this->get_field_id( 'guest_post_id' ); ?>" name="<?php echo $this->get_field_name( 'guest_post_id' ); ?>" type="text" value="<?php echo $guest_post_id; ?>" size="8" /></p>
-
-<?php
-       $post_status_options = array(
-		'0' => array(
-			'value' =>	'pending',
-			'label' =>      'Save new posts as pending '
-		),
-		'1' => array(
-			'value' =>	'publish',
-			'label' =>  	'Save new posts as published' 
-		),
-		
-			);
-	$selected = $initial_post_status; 	 
-    ?><label for="initial_post_status">Choose post status for new posts<br /> </label>
-		<select id="<?php echo $this->get_field_id( 'initial_post_status' ); ?>" name="<?php echo $this->get_field_name( 'initial_post_status' ); ?>">   	
-<?php
-	$p = '';
-	$r = '';
-	foreach (  $post_status_options as $option ) {
-	    	$label = $option['label'];
-		if ( $selected == $option['value'] ) // Make selected first in list
-		     $p = "\n\t<option style=\"padding-right: 10px;\" selected='selected' value='" . esc_attr( $option['value'] ) . "'>$label</option>";
-		else $r .= "\n\t<option style=\"padding-right: 10px;\" value='" . esc_attr( $option['value'] ) . "'>$label</option>";
-               	}
- 	echo $p . $r. '</select>';
-   ?><p><label for="<?php echo $this->get_field_id( 'show_category_select' ); ?>"><?php _e( 'Allow user to assign category: ' ); ?></label><?php
-   echo  '<input type="checkbox" id="'. $this->get_field_id('show_category_select')  .'" name="'. $this->get_field_name('show_category_select')  .'" value="1" ' . checked( '1',  $instance['show_category_select'] , false ) .'/></p>';
-   
- 
-       
-	}
-}
-
-
-
