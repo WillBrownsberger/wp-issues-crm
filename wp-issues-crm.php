@@ -44,7 +44,7 @@ class WP_Issues_CRM {
 * field definition array for constituents
 *
 */
-	public $constituent_fields = array( 
+	private $constituent_fields = array( 
 	  			// 'slug',				'label',						'show online' 	'type' not implemented: 'readonly', 'required', 'searchable'
 		array( 'first_name', 		'First Name',					true,			'text', ),		
 		array( 'middle_name', 		'Middle Name',					false,		'text', ),		
@@ -54,7 +54,7 @@ class WP_Issues_CRM {
 		array( 'mobile_phone',		'Mobile Phone',				true,			'text', ),
 		array( 'street_address', 	'Street Address',				true,			'text', ),
 		array( 'city', 				'City',							true,			'text', ),
-		array( 'state_province_id','State', 						true,			'text', ),
+		array( 'state',				'State', 						true,			'text', ),
 		array( 'zip',					'Zip Code', 					true,			'text', ),
 		array( 'job_title', 			'Job Title',					true,			'text', ),
 		array( 'organization_name', 'Organization',				true,			'text', ),
@@ -66,7 +66,7 @@ class WP_Issues_CRM {
 		array( 'VAN_id', 				'VAN ID',						false,		'text', ),
 	);
 	
-
+	private $post_message = 'Welcome to the search screen';
 
 	public function __construct() {
 		add_shortcode( 'wp_issues_crm', array( $this, 'wp_issues_crm' ) );
@@ -85,21 +85,54 @@ class WP_Issues_CRM {
 		if(isset($_POST['submitted']) && isset($_POST['wp_issues_crm_constituent_search_nonce_field']) && 
 		wp_verify_nonce($_POST['wp_issues_crm_constituent_search_nonce_field'], 'wp_issues_crm_constituent_search'))	{
 			 
-        /****************$this->import();**************/
- 		
- 		
- 		}
+        	if ($_POST['first_name'] == 'import_this_muffa' ) 
+        	{$this->import();} else {
+		       
+
+      	$meta_query_args = array(
+        		'relation'=> 'AND',
+        	);
+			$index = 1;
+	 		foreach ( $this->constituent_fields as $field ) {
+	 			if( isset( $_POST[$field[0]] ) ) {
+	 				if ( $_POST[$field[0]] > '' ) {
+						$meta_query_args[$index] = array(
+							'meta_key' 	=> '_wic_' . $field[0],
+							'value'		=> $_POST[$field[0]],
+							'compare'	=>	'=',
+						);	 
+						$index++;
+					}	
+	 			}
+	 		}
+	 		
+	 		$query_args = array (
+	 			'post_type' 	=>	'wic_constituent',
+	 			'meta_query' 	=> $meta_query_args, 
+	 		);
+	 		
+	 		$wic_query = new WP_Query($query_args);
+			echo '<ul>';	 		
+	 		while ( $wic_query->have_posts() ) {
+				$wic_query->next_post();
+				echo '<li>' . $wic_query->post->post_title . '</li>'; 	 		
+	 		}
+			echo '</ul>';
+			var_dump( $wic_query->query);
+		} // close not import this mf
+ 		} //close if cleared nonce check 
   
   		/* display form */
+		echo '<br /> $_POST:';  		
   		var_dump ($_POST);
      $add_post = 'shit';
 	  ?>
 		<form id = "constituent-search-form" method="POST">
-			<?php $post_message = 'test';
+			<?php 
 			$has_error = 1; 
-			if ( $post_message != '' ) { 
+			if ( $this->post_message != '' ) { 
 				$message_class = $has_error ? 'wp-issues-crm-warning' : 'wp-issues-crm-update'; ?>
-		   	<div id="new-post-message-box" class="<?php echo $message_class; ?>"><?php echo $post_message; ?></div>
+		   	<div id="new-post-message-box" class="<?php echo $message_class; ?>"><?php echo $this->post_message; ?></div>
 		   <?php }
 			foreach ( $this->constituent_fields as $field ) {
 				if( $field[2] ) {
@@ -144,14 +177,17 @@ class WP_Issues_CRM {
    public function import(){
 	   
 	   $i=0;
-	   			
-		
+	   $seconds = 5000;
+		set_time_limit ( $seconds );
 	   
 	   global $wpdb;
 	   $contacts = $wpdb->get_results( 'select * from wp_swc_contacts' );
 	   foreach ($contacts as $contact ) {
-		   /* $i++;
-		   if ($i > 3 ) break; */
+			if ( $i/1000 == floor($i/1000 ) ) {
+				echo '<p>' . $i . 'records processed</p>';			
+			}	   
+		   $i++;
+		   if ($i>3) break;
 		   			
 			$post_information = array(
 				'post_title' => wp_strip_all_tags ( $contact->last_name . ', ' . $contact->first_name ),
@@ -163,14 +199,16 @@ class WP_Issues_CRM {
 		
 			$post_id = wp_insert_post($post_information);
 			
-			foreach ($fields as $field) {			
-				if ( isset ( $contact->$field ) ) {
-					if ( $contact->$field > 0 and $contact->$field > '' ) {
-						add_post_meta ($post_id, '_wic_' . $field, $contact->$field );							
+			foreach ($this->constituent_fields as $field) {			
+				if ( isset ( $contact->$field[0] ) ) {
+					e
+					if ( $contact->$field[0] > 0 and $contact->$field[0] > '' ) {
+						add_post_meta ($post_id, '_wic_' . $field[0], $contact->$field[0] );							
 					}				
 				} 
 			}
 		}
+		echo '<p>' . $i . 'records in total processed</p>';
 	}
 	
 	
