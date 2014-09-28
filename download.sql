@@ -16,7 +16,14 @@ from civicrm_activity a inner join civicrm_activity_contact ac on ac.activity_id
 left join civicrm_value_activity_tracking_1 v on v.entity_id = a.id where record_type_id = 3 
 
 /* 
-	delete FROM `wp_postmeta` WHERE left(meta_key,5) = '_wic_'
-	delete  FROM `wp_posts` WHERE post_type = 'wic_constituent'
+sudo /etc/init.d/mysql restart
+sudo /etc/init.d/apache2 
+delete FROM `wp_postmeta` WHERE left(meta_key,5) = '_wic_'
+delete  FROM `wp_posts` WHERE post_type = 'wic_constituent'
 	
 	SELECT meta_key, count(meta_id) FROM `wp_postmeta` where left(meta_key, 5) = '_wic_' group by meta_key
+	
+update wp_postmeta set meta_value = 'MA' where meta_key = '_wic_state' and meta_value = '1020'	
+	
+	SELECT count(id) FROM wp_posts WHERE post_type = 'wic_constituent' 
+http://www.php-mysql-tutorial.com/wikis/mysql-tutorials/uploading-files-to-mysql-database.aspx
