@@ -31,7 +31,7 @@ class WP_Issues_CRM_Constituents {
 		array( 'job_title', 			'Job Title',					true,			'text', 		false, ),
 		array( 'organization_name', 'Organization',				true,			'text', 		false, ),
 		array( 'gender_id', 			'Gender',						false,			array ( 'M', 'F'),	false, ),
-		array( 'birth_date',			'Date of Birth',				true,			'date', 		false, ),
+		array( 'birth_date',			'Date of Birth',				false,			'date', 		false, ),
 		array( 'is_deceased', 		'Is Deceased',					false,			'check',  	false, ),
 		array( 'civicrm_id', 		'CiviCRM ID',					false,		'text',  	false,),
 		array( 'ss_id',				'Secretary of State ID',	false,		'text', 		false, ),
@@ -137,9 +137,9 @@ class WP_Issues_CRM_Constituents {
 	
 	public function display_form ( $last_user_request, $main_button_value, $form_notices, &$wic_query, $post_id ) {
 		$main_button_label = $this->button_actions[$main_button_value];
-		echo '<span style="color:green;"> $_POST:';  		
+		/* echo '<span style="color:green;"> $_POST:';  		
   		var_dump ($_POST);
-  		echo '</span>'; 
+  		echo '</span>';  */
 
 		?>
 		<form id = "constituent-search-form" method="POST">
