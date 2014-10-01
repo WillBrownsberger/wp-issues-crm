@@ -16,26 +16,54 @@ class WP_Issues_CRM_Constituents {
 	* field definition array for constituents
 	*
 	*/
+	
+	private $constituent_field_groups = array (
+		array (
+			name		=> 'required',
+			label		=>	'Identity',
+			legend	=>	'Constituents must be identified by at least one of these fields.',
+			order		=>	10,
+		),
+		array (
+			name		=> 'contact',
+			label		=>	'Contact Information',
+			legend	=>	'',
+			order		=>	20,
+		),
+		array (
+			name		=> 'personal',
+			label		=>	'Personal Information',
+			legend	=>	'',
+			order		=> 30,
+		),
+		array (
+			name		=> 'links',
+			label		=>	'Identity Codes',
+			legend	=>	'Cannot be updated online.',
+			order		=> 40,
+		),	
+	);
+	
 	private $constituent_fields = array( // fields must include so labelled first_name, last_name, email, otherwise may be replaced freely
-	  			// 'slug',				'label',						'show online' 	'type' 		like search   dedup search . . . . not implemented: 'readonly', 'required', 'searchable'
-		array( 'first_name', 		'First Name',					true,			'text', 		true,				true,	),		
-		array( 'middle_name', 		'Middle Name',					false,		'text', 		false, 			false,),		
-		array( 'last_name', 			'Last Name',					true,			'text', 		true, 			true,),		
-		array( 'email', 				'eMail',							true,			'email', 	true,				true,),		
-		array( 'phone', 				'Land Line',					true,			'text',  	true, 			false,),		
-		array( 'mobile_phone',		'Mobile Phone',				true,			'text', 		false, 			false,),
-		array( 'street_address', 	'Street Address',				true,			'text', 		true, 			true,),
-		array( 'city', 				'City',							true,			'text', 		false, 			false,),
-		array( 'state',				'State', 						true,			'text', 		false, 			false,),
-		array( 'zip',					'Zip Code', 					true,			'text', 		false, 			false,),
-		array( 'job_title', 			'Job Title',					true,			'text', 		false, 			false,),
-		array( 'organization_name','Organization',				true,			'text', 		false, 			false,),
-		array( 'gender_id', 			'Gender',						false,		array ( 'M', 'F'),false,false, ),
-		array( 'birth_date',			'Date of Birth',				true,			'date', 		false, 			false,),
-		array( 'is_deceased', 		'Is Deceased',					false,		'check',  	false, 			false,),
-		array( 'civicrm_id', 		'CiviCRM ID',					false,		'text',  	false,			false,),
-		array( 'ss_id',				'Secretary of State ID',	false,		'text', 		false, 			false,),
-		array( 'VAN_id', 				'VAN ID',						false,		'text', 		false, 			false,),
+	  			// 0-slug,			1-label,							2-online 		3-type 		4-like   		5-dedup 	6-group 		7-order search . . . . not implemented: 'readonly', 'required', 'searchable'
+		array( 'first_name', 		'First Name',					true,			'text', 		true,				true,		'required', 	10,	),		
+		array( 'middle_name', 		'Middle Name',					false,		'text', 		false, 			false,	'personal',		100,	),		
+		array( 'last_name', 			'Last Name',					true,			'text', 		true, 			true,		'required',		20,	),		
+		array( 'email', 				'eMail',							true,			'email', 	true,				true,		'required',		30,	),	
+		array( 'phone', 				'Land Line',					true,			'text',  	true, 			false,	'contact',		70,	),		
+		array( 'mobile_phone',		'Mobile Phone',				true,			'text', 		false, 			false,	'contact',		80,	),
+		array( 'street_address', 	'Street Address',				true,			'text', 		true, 			true,		'contact',		40,	),
+		array( 'city', 				'City',							true,			'text', 		false, 			false,	'contact',		50,	),
+		array( 'state',				'State', 						true,			'text', 		false, 			false,	'contact',		60,	),
+		array( 'zip',					'Zip Code', 					true,			'text', 		false, 			false,	'contact',		65,	),
+		array( 'job_title', 			'Job Title',					true,			'text', 		false, 			false,	'personal',		90,	),
+		array( 'organization_name','Organization',				true,			'text', 		false, 			false,	'personal',		95,	),
+		array( 'gender_id', 			'Gender',						false,		array ( 'M', 'F'),false,	false, 	'personal',		85,	),
+		array( 'birth_date',			'Date of Birth',				true,			'date', 		false, 			false,	'personal',		84,	),
+		array( 'is_deceased', 		'Is Deceased',					false,		'check',  	false, 			false,	'personal',		87,	),
+		array( 'civicrm_id', 		'CiviCRM ID',					false,		'text',  	false,			false,	'links',			1,	),
+		array( 'ss_id',				'Secretary of State ID',	false,		'text', 		false, 			false,	'links',			3,	),
+		array( 'VAN_id', 				'VAN ID',						false,		'text', 		false, 			false,	'links',			5, ),
 	);
 	
 
@@ -163,31 +191,44 @@ class WP_Issues_CRM_Constituents {
 		   	<div id="constituent-form-message-box" <strong><em><?php echo $form_notices; ?></em></strong></div>
 		   <?php }
 		   /* input meta fields */
-			foreach ( $this->constituent_fields as $field ) {
-				if( $field[2] ) { // if is a field displayed online
-					$value = '';
-					if ( ! ( 'reset' == $last_user_request ) ) { 
-						if ( 'search' == $last_user_request && isset ( $wic_query ) ) { 
-							// if original user ask was a search, logic above only passes query if exactly one found, so overlaying form values will lose no input
-							$post_field_key =  '_wic_' . $field[0];
-							$value =  $wic_query->post->$post_field_key;
-						} else {
-							// otherwise preserving user input after sanitization 
-							$value = isset ($_POST[$field[0]]) ? sanitize_text_field( $_POST[$field[0]] ) : '';
-						}
-					}
-					switch ( $field[3] ) {
-						case 'email':						
-						case 'text':
-						case 'date':
-
-							$contains = $field[4] ? __( ' contains ', 'wp-issues-crm' ) : '';
-							?><p><label for="<?php echo $field[0] ?>"><?php echo __( $field[1], 'wp-issues-crm' ) . ' ' . $contains; ?></label>
-							<input  id="<?php echo $field[0] ?>" name="<?php echo $field[0] ?>" type="text" value="<?php echo $value; ?>" /></p><?php 
-							break;
-					}
-				}
-			} // close foreach  
+			$sorted_groups = $this->multi_array_key_sort ( $this->constituent_field_groups, 'order' );	
+		   foreach ( $sorted_groups as $group ) {
+				$filtered_fields = $this->select_key ( $this->constituent_fields, 6, $group['name'] );
+				$sorted_filtered_fields = $this->multi_array_key_sort( $filtered_fields, 7 );
+				echo '<div class = "constituent-field-group" id = "' . $group['name'] . '">' .
+					'<h2 class = "constituent-field-group-label">' . $group['label'] . '</h2>' .
+					'<p class = "constituent-field-group-legend">' . $group['legend'] . '</p>';
+					//foreach ( $this->constituent_fields as $field ) {
+					//	if ($field[6] == $group['name']) {
+					foreach ( $sorted_filtered_fields as $field ) {							
+							if( $field[2] ) { // if is a field displayed online
+								$value = '';
+								if ( ! ( 'reset' == $last_user_request ) ) { 
+									if ( 'search' == $last_user_request && isset ( $wic_query ) ) { 
+										// if original user ask was a search, logic above only passes query if exactly one found, so overlaying form values will lose no input
+										$post_field_key =  '_wic_' . $field[0];
+										$value =  $wic_query->post->$post_field_key;
+									} else {
+										// otherwise preserving user input after sanitization 
+										$value = isset ($_POST[$field[0]]) ? sanitize_text_field( $_POST[$field[0]] ) : '';
+									}
+								}
+								switch ( $field[3] ) {
+									case 'email':						
+									case 'text':
+									case 'date':
+			
+										$contains = $field[4] ? __( ' contains ', 'wp-issues-crm' ) : '';
+										?><p><label for="<?php echo $field[0] ?>"><?php echo __( $field[1], 'wp-issues-crm' ) . ' ' . $contains; ?></label>
+										<input  id="<?php echo $field[0] ?>" name="<?php echo $field[0] ?>" type="text" value="<?php echo $value; ?>" /></p><?php 
+										break;
+								}
+							}
+					//	}
+					} // close foreach 				
+				echo '<div>';		   
+		   }
+ 
 		
 			if ( 'update' == $main_button_value || 'save' == $main_button_value ) { 
 				/* input field for constituent notes (post content) */		
@@ -223,6 +264,37 @@ class WP_Issues_CRM_Constituents {
 		<?php 
 		
 	}
+	/*
+	*	sort array of arrays by one value of the arrays
+	*
+	*/		
+	public function multi_array_key_sort ( $multi_array, $key )	{
+		$temp = array();
+		foreach ( $multi_array as $line_item ) {
+			 $temp[$line_item[$key]] = $line_item;
+		}
+		ksort ($temp);
+		$sorted_line_items = array();
+		foreach ($temp as $key => $value ) {
+			array_push( $sorted_line_items, $value );			
+		}
+		return ( $sorted_line_items) ;
+	}
+
+	/*
+	*	filter array of arrays by one value of the arrays
+	*
+	*/		
+	public function select_key ( $line_item_array, $key, $value )	{
+		$filtered_line_items = array();
+		foreach ( $line_item_array as $line_item ) {
+			if ( $line_item[$key] == $value ) {
+				array_push( $filtered_line_items, $line_item );
+			}			
+		}
+		return ( $filtered_line_items ) ;
+	}
+		
 		
 	/*
 	*  constituent search function
@@ -322,7 +394,7 @@ class WP_Issues_CRM_Constituents {
 						try {
 							$test = new DateTime( $_POST[$field[0]] );
 						}	catch ( Exception $e ) {
-							$form_notices .= __( 'Unsupported date format -- yy/mm/dd will work:', 'wp-issues-crm' );
+							$form_notices .= __( 'Unsupported date format -- yyyy-mm-dd will work:', 'wp-issues-crm' );
 							$date_error = true;
 						}	   			
 		   			if ( ! $date_error ) {
