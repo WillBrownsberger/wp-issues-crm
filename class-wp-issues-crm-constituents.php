@@ -17,27 +17,28 @@ class WP_Issues_CRM_Constituents {
 	*
 	*/
 	private $constituent_fields = array( // fields must include so labelled first_name, last_name, email, otherwise may be replaced freely
-	  			// 'slug',				'label',						'show online' 	'type' 		like search  . . . . not implemented: 'readonly', 'required', 'searchable'
-		array( 'first_name', 		'First Name',					true,			'text', 		true,),		
-		array( 'middle_name', 		'Middle Name',					false,		'text', 		false, ),		
-		array( 'last_name', 			'Last Name',					true,			'text', 		true, ),		
-		array( 'email', 				'eMail',							true,			'email', 	true,),		
-		array( 'phone', 				'Land Line',					true,			'text',  	true,),		
-		array( 'mobile_phone',		'Mobile Phone',				true,			'text', 		false, ),
-		array( 'street_address', 	'Street Address',				true,			'text', 		true, ),
-		array( 'city', 				'City',							true,			'text', 		false, ),
-		array( 'state',				'State', 						true,			'text', 		false, ),
-		array( 'zip',					'Zip Code', 					true,			'text', 		false, ),
-		array( 'job_title', 			'Job Title',					true,			'text', 		false, ),
-		array( 'organization_name', 'Organization',				true,			'text', 		false, ),
-		array( 'gender_id', 			'Gender',						false,			array ( 'M', 'F'),	false, ),
-		array( 'birth_date',			'Date of Birth',				false,			'date', 		false, ),
-		array( 'is_deceased', 		'Is Deceased',					false,			'check',  	false, ),
-		array( 'civicrm_id', 		'CiviCRM ID',					false,		'text',  	false,),
-		array( 'ss_id',				'Secretary of State ID',	false,		'text', 		false, ),
-		array( 'VAN_id', 				'VAN ID',						false,		'text', 		false, ),
+	  			// 'slug',				'label',						'show online' 	'type' 		like search   dedup search . . . . not implemented: 'readonly', 'required', 'searchable'
+		array( 'first_name', 		'First Name',					true,			'text', 		true,				true,	),		
+		array( 'middle_name', 		'Middle Name',					false,		'text', 		false, 			false,),		
+		array( 'last_name', 			'Last Name',					true,			'text', 		true, 			true,),		
+		array( 'email', 				'eMail',							true,			'email', 	true,				true,),		
+		array( 'phone', 				'Land Line',					true,			'text',  	true, 			false,),		
+		array( 'mobile_phone',		'Mobile Phone',				true,			'text', 		false, 			false,),
+		array( 'street_address', 	'Street Address',				true,			'text', 		true, 			true,),
+		array( 'city', 				'City',							true,			'text', 		false, 			false,),
+		array( 'state',				'State', 						true,			'text', 		false, 			false,),
+		array( 'zip',					'Zip Code', 					true,			'text', 		false, 			false,),
+		array( 'job_title', 			'Job Title',					true,			'text', 		false, 			false,),
+		array( 'organization_name','Organization',				true,			'text', 		false, 			false,),
+		array( 'gender_id', 			'Gender',						false,		array ( 'M', 'F'),false,false, ),
+		array( 'birth_date',			'Date of Birth',				true,			'date', 		false, 			false,),
+		array( 'is_deceased', 		'Is Deceased',					false,		'check',  	false, 			false,),
+		array( 'civicrm_id', 		'CiviCRM ID',					false,		'text',  	false,			false,),
+		array( 'ss_id',				'Secretary of State ID',	false,		'text', 		false, 			false,),
+		array( 'VAN_id', 				'VAN ID',						false,		'text', 		false, 			false,),
 	);
 	
+
 	private $button_actions = array(
 		'save' 	=>	'Save New Constituent Record',
 		'search' => 'Search Constituents',
@@ -50,8 +51,19 @@ class WP_Issues_CRM_Constituents {
 		add_shortcode( 'wp_issues_crm_constituents', array( $this, 'wp_issues_crm_constituents' ) );
 	}
 
-	public function wp_issues_crm_constituents() {
+	public function create_dup_check_fields_list() {
+		$fields_string = '';
+		foreach ( $this->constituent_fields as $field ) {
+			if( $field[5] ) {
+				$fields_string = ( $fields_string > '' ) ? $fields_string . ', ' : '';
+				$fields_string .= $field[1];
+			}		
+		}
+		return ( $fields_string . '.' );	
+	}
 
+	public function wp_issues_crm_constituents() {
+		
 		/* first check capabilities -- must be administrative user */
 		if ( ! current_user_can ( 'activate_plugins' ) ) { 
 			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
@@ -62,21 +74,23 @@ class WP_Issues_CRM_Constituents {
 			$user_request = $_POST['main_button'];
 		} elseif ( isset ( $_POST['redo_search_button'] ) ) {
 			$user_request = 'search';	
-		} else $user_request = 'reset';
+		} else { 
+			$user_request = 'reset';
+		}
 		
 		 
-		if( 'reset' == $user_request ) { // if form has not been submitted 		
+		if( 'reset' == $user_request ) { // if form has not been submitted or has been reset		
 			$this->display_form( 'reset', 'search', __( 'Enter values and search for constituents.', 'wp-issues-crm' ), $this->unset_value, null ) ;	
 		} else {
 			if( ! wp_verify_nonce($_POST['wp_issues_crm_constituent_nonce_field'], 'wp_issues_crm_constituent'))	{
 				die ( 'Security check failed.' ); // if not nonce OK, die, otherwise continue  
 			} else {
 				//if ($_POST['first_name'] == 'import_this_muffa'  &&  $_POST['last_name'] == 'not_playing') {$this->import();} 
-				
-				$wic_query = $this->search_constituents( false ); // always need to do test for dup based on latest values
-				if ( 0 == $wic_query->found_posts && isset ( $_POST['constituent_id'] ) ) {
-					$wic_query = $this->search_constituents( $_POST['constituent_id'] );				
-				}
+				$is_dedup_check = ( 'search' == $user_request ) ? false : true; // if doing update or save, $is_dedup_check  
+				$wic_query = $this->search_constituents( $is_dedup_check, false ); // always need to do test for dup based on latest values -- false means not a direct test
+				if ( 0 == $wic_query->found_posts && isset ( $_POST['constituent_id'] ) && ! isset( $_POST['redo_search_button'] ) ) {
+					$wic_query = $this->search_constituents( $is_dedup_check, $_POST['constituent_id'] );				
+				} 
 				
 				switch ( $user_request ) {	
 					case 'search':
@@ -93,7 +107,7 @@ class WP_Issues_CRM_Constituents {
 						if ( 0 == $wic_query->found_posts || ( 1 == $wic_query->found_posts && $wic_query->post->ID == $_POST['constituent_id'] ) ) {
 							$validation_errors = $this->validate_input();
 							if ( $validation_errors > '' ) {
-								$this->display_form( $user_request,  'update', __( 'Please correct form errors.', 'wp-issues-crm' ) . $validation_errors, $this->unset_value, $_POST['constituent_id'] );
+								$this->display_form( $user_request,  'update', __( 'Please correct form errors: ', 'wp-issues-crm' ) . $validation_errors, $this->unset_value, $_POST['constituent_id'] );
 							} else {
 								$return_post_id = $this->save_update_constituent( $_POST['constituent_id'], $wic_query );
 								if ( ! is_numeric( $return_post_id ) ) { // alpha return_post_id is error string
@@ -103,7 +117,7 @@ class WP_Issues_CRM_Constituents {
 								}					
 							}
 						} else {
-							$this->display_form( $user_request, 'search', __( 'Record not updated -- your form entries now duplicate one or more records other than the one you originally retrieved.', 'wp-issues-crm' ), $this->unset_value, null );
+							$this->display_form( $user_request, 'search', __( 'Record not updated -- other records match the new combination of  ', 'wp-issues-crm' ) . $this->create_dup_check_fields_list(), $this->unset_value, null );
 							echo $this->format_constituent_list( $wic_query );
 						}						
 						break;				
@@ -121,13 +135,13 @@ class WP_Issues_CRM_Constituents {
 								}					
 							}
 						} else {
-							$this->display_form( $user_request, 'search', __( 'Record not saved -- your form entries now duplicate one or more records.', 'wp-issues-crm' ), $this->unset_value, null );
+							$this->display_form( $user_request, 'search', __( 'Record not saved -- other records match the new combination of  ', 'wp-issues-crm' ) . $this->create_dup_check_fields_list(), $this->unset_value, null );
 							echo $this->format_constituent_list( $wic_query );
 						}						
 						break;
 				} // closes switch statement	
 			} // close nonces OK	 		
- 		} // close form submitted
+ 		} // close not a reset
    } // close function
 	/*
 	*
@@ -137,12 +151,12 @@ class WP_Issues_CRM_Constituents {
 	
 	public function display_form ( $last_user_request, $main_button_value, $form_notices, &$wic_query, $post_id ) {
 		$main_button_label = $this->button_actions[$main_button_value];
-		/* echo '<span style="color:green;"> $_POST:';  		
+		echo '<span style="color:green;"> $_POST:';  		
   		var_dump ($_POST);
-  		echo '</span>';  */
+  		echo '</span>';  
 
 		?>
-		<form id = "constituent-search-form" method="POST">
+		<form id = "constituent-form" method="POST">
 			<?php 
 			/* notices section */
 			if ( $form_notices != '' ) { ?>
@@ -214,15 +228,31 @@ class WP_Issues_CRM_Constituents {
 	*  constituent search function
 	*
 	*/
-   private function search_constituents( $constituent_id ) {
+   private function search_constituents( $is_dedup_check, $constituent_id ) {
 		if ( ! $constituent_id ) {  	
 	   	$meta_query_args = array(
 	     		'relation'=> 'AND',
 	     	);
 			$index = 1;
 	 		foreach ( $this->constituent_fields as $field ) {
-	 			if( isset( $_POST[$field[0]] ) ) {
+	 			if( isset( $_POST[$field[0]] ) && ( ( ! $is_dedup_check ) || $field[5] ) )  { 
 	 				$value = sanitize_text_field ( $_POST[$field[0]] );
+	 				switch ($field[3]) { 
+						case 'date': // preprocess dates
+							$date_error = false;
+							try {
+								$test = new DateTime( $_POST[$field[0]] );
+							}	catch ( Exception $e ) {
+								$_POST[$field[0]] = __( 'Enter yyyy-mm-dd.', 'wp-issues-crm' );
+								$value = '';
+								$date_error = true;
+							}	   			
+			   			if ( ! $date_error ) {
+			   				$_POST[$field[0]] = date_format($test, 'Y-m-d' );
+			   				$value = $_POST[$field[0]];
+			   			} 
+						break;	 				
+	 				}
 	 				if ( $value > '' ) {
 						$meta_query_args[$index] = array(
 							'key' 	=> '_wic_' . $field[0], // wants key, not meta_key, otherwise searches across all keys 
@@ -230,7 +260,7 @@ class WP_Issues_CRM_Constituents {
 							'compare'	=>	( $field[4] ? 'LIKE' : '=' ),
 						);	 
 						$index++;
-					}	
+					}		
 	 			}
 	 		}
 	 		
@@ -272,8 +302,7 @@ class WP_Issues_CRM_Constituents {
 	*/   
    
    private function validate_input() {
-   	
-   	
+
    	$form_notices = '';
    	if ( '' == sanitize_text_field ( $_POST['first_name'] ) &&  '' == sanitize_text_field ( $_POST['last_name'] ) && '' == sanitize_text_field ( $_POST['email'] ) ) {
 			$form_notices .= __( 'Please enter at least one of first name, last name or email. ', 'wp-issues-crm' );
@@ -289,13 +318,16 @@ class WP_Issues_CRM_Constituents {
 		   			$form_notices .= __( 'Email address is not valid. ', 'wp-issues-crm' );
 					}	
 		   		if	( "date" == $field[3] )  {
-	   				$test = new DateTime( $_POST[$field[0]] );
-	   				if ( $test ) {
-	   					 $_POST[$field[0]] = date_format($test, 'Y-m-d' );
-	   				} else {
-			   			$this->error_flag = true;
-			   			$form_notices .= __( 'Please reenter date -- YY/MM/DD will work. ', 'wp-issues-crm' );
-		   			}
+		   			$date_error = false;
+						try {
+							$test = new DateTime( $_POST[$field[0]] );
+						}	catch ( Exception $e ) {
+							$form_notices .= __( 'Unsupported date format -- yy/mm/dd will work:', 'wp-issues-crm' );
+							$date_error = true;
+						}	   			
+		   			if ( ! $date_error ) {
+		   				$_POST[$field[0]] = date_format($test, 'Y-m-d' );
+		   			} 
 					}						   		
 	   		}
    		} 
@@ -311,13 +343,13 @@ class WP_Issues_CRM_Constituents {
 	*
 	*/
    private function save_update_constituent( $constituent_id, &$wic_query ) {
-   	
+
    	// title is ln OR ln,fn OR fn OR email -- one of these is required in validation to be non-blank.	
 		$title = 	isset ( $_POST['last_name'] ) ? $_POST['last_name'] : '';
 		$title .= 	isset ( $_POST['first_name'] ) ? ( $title > '' ? ', ' : '' ) . $_POST['first_name'] : '';
 		$title =		( '' == $title ) ? $_POST['email'] : $title;
 		
-		$post = array(
+		$post_args = array(
 		  'post_content'   => $_POST['constituent_notes'], 
 		  'post_title'     => $title,
 		  'post_status'    => 'private',
@@ -326,15 +358,15 @@ class WP_Issues_CRM_Constituents {
 		); 
 		
 		if ( $constituent_id ) {
-			$post['ID'] = $_POST['constituent_id'];
+			$post_args['ID'] = $_POST['constituent_id'];
 			if ( $_POST[ 'constituent_notes' ]	!= $wic_query->post->post_content ||
 				$title 							 	!= $wic_query->post->post_title ) {
-				$return_post_id = wp_update_post( $post );
+				$return_post_id = wp_update_post( $post_args );
 			} else {
 				$return_post_id = $constituent_id;			
 			}
 		} else {
-			$return_post_id = wp_insert_post( $post );		
+			$return_post_id = wp_insert_post( $post_args );		
 		}				
 
 		if ( 0 == $return_post_id ) {
