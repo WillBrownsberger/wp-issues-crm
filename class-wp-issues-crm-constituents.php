@@ -19,28 +19,28 @@ class WP_Issues_CRM_Constituents {
 	
 	private $constituent_field_groups = array (
 		array (
-			name		=> 'required',
-			label		=>	'Identity',
-			legend	=>	'Constituents must be identified by at least one of these fields.',
-			order		=>	10,
+			'name'		=> 'required',
+			'label'		=>	'Identity',
+			'legend'		=>	'Constituents must be identified by at least one of these fields.',
+			'order'		=>	10,
 		),
 		array (
-			name		=> 'contact',
-			label		=>	'Contact Information',
-			legend	=>	'',
-			order		=>	20,
+			'name'		=> 'contact',
+			'label'		=>	'Contact Information',
+			'legend'		=>	'',
+			'order'		=>	20,
 		),
 		array (
-			name		=> 'personal',
-			label		=>	'Personal Information',
-			legend	=>	'',
-			order		=> 30,
+			'name'		=> 'personal',
+			'label'		=>	'Personal Information',
+			'legend'		=>	'',
+			'order'		=> 30,
 		),
 		array (
-			name		=> 'links',
-			label		=>	'Identity Codes',
-			legend	=>	'Cannot be updated online.',
-			order		=> 40,
+			'name'		=> 'links',
+			'label'		=>	'Identity Codes',
+			'legend'		=>	'Cannot be updated online.',
+			'order'		=> 40,
 		),	
 	);
 	
@@ -98,78 +98,109 @@ class WP_Issues_CRM_Constituents {
 			return;
 		} 
 
-		if ( isset ( $_POST['main_button'] ) ) { // what did the user just ask to do
-			$user_request = $_POST['main_button'];
-		} elseif ( isset ( $_POST['redo_search_button'] ) ) {
-			$user_request = 'search';	
-		} else { 
-			$user_request = 'reset';
-		}
-		
-		 
-		if( 'reset' == $user_request ) { // if form has not been submitted or has been reset		
-			$this->display_form( 'reset', 'search', __( 'Enter values and search for constituents.', 'wp-issues-crm' ), $this->unset_value, null ) ;	
+		$next_form_output = array();
+		// new or reset form
+		if ( ! isset ( $_POST['main_button'] ) && ! isset ( $_POST['redo_search_button'] ) ) { 
+			foreach ( $this->constituent_fields as $field ) {
+				$next_form_output[$field[0]] 			=	'';
+			}
+			$next_form_output['constituent_notes']	=	'';
+			$next_form_output['constituent_id']		=	false;			
+			$next_form_output['form_notices']		=	__( 'Enter values and search for constituents.', 'wp-issues-crm' );
+			$next_form_output['next_action'] 		=	'search';
+			
+		// working with form input
 		} else {
+			// test nonce before going further
 			if( ! wp_verify_nonce($_POST['wp_issues_crm_constituent_nonce_field'], 'wp_issues_crm_constituent'))	{
 				die ( 'Security check failed.' ); // if not nonce OK, die, otherwise continue  
-			} else {
-				//if ($_POST['first_name'] == 'import_this_muffa'  &&  $_POST['last_name'] == 'not_playing') {$this->import();} 
-				$is_dedup_check = ( 'search' == $user_request ) ? false : true; // if doing update or save, $is_dedup_check  
-				$wic_query = $this->search_constituents( $is_dedup_check, false ); // always need to do test for dup based on latest values -- false means not a direct test
-				if ( 0 == $wic_query->found_posts && isset ( $_POST['constituent_id'] ) && ! isset( $_POST['redo_search_button'] ) ) {
-					$wic_query = $this->search_constituents( $is_dedup_check, $_POST['constituent_id'] );				
-				} 
-				
-				switch ( $user_request ) {	
-					case 'search':
-						if ( 0 == $wic_query->found_posts ) {
-						  	$this->display_form( $user_request, 'save', __('No matching record found -- you can save as a new record.', 'wp-issues-crm' ) , $this->unset_value, null );
-						} elseif ( 1 == $wic_query->found_posts ) {
-							$this->display_form( $user_request, 'update', __('One matching record found -- you can update this record.', 'wp-issues-crm' ), $wic_query, null );
+			}
+
+			// clean validate input	and pass through to next form, including hidden post ID field	
+			$next_form_output = $this->sanitize_validate_input();
+			
+			// read button pushed to determine what the user asked to do (one or the other button is definitely set in current condition )
+			if ( isset ( $_POST['main_button'] ) ) { 
+				$user_request = $_POST['main_button']; // search, update or save
+			} elseif ( isset ( $_POST['redo_search_button'] ) ) {
+				$user_request = 'search';	
+			} 
+
+			// do search in all cases, but do only on dup check fields if request is a save or update 
+			$is_dedup_check = ( 'search' == $user_request ) ? false : true;   
+			$wic_query = $this->search_constituents( $is_dedup_check, $next_form_output ); 
+			
+			// if search was user request, and found exactly one record, overwrite form with that records values
+			if ( 'search' == $user_request && 1 == $wic_query->found_posts ) {			
+				foreach ( $this->constituent_fields as $field ) {
+					$post_field_key =  '_wic_' . $field[0];
+					$next_form_output[$field[0]] 				= $wic_query->post->$post_field_key;
+				}
+				$next_form_output['constituent_notes'] = $wic_query->post->post_content;	
+				$next_form_output['constituent_id'] 	= $wic_query->post->ID;				
+			} 
+
+			// define next form cases based on form input 
+			switch ( $user_request ) {	
+				case 'search':
+					if ( 0 == $wic_query->found_posts ) {
+						$next_form_output['form_notices']	=	__( 'No matching record found. Try a save?', 'wp-issues-crm' );
+						$next_form_output['next_action'] 	=	'save';
+					} elseif ( 1 == $wic_query->found_posts ) {
+						$next_form_output['form_notices']	=	__( 'One matching record found. Try an update?', 'wp-issues-crm' );
+						$next_form_output['next_action'] 	=	'update';
+					} else {
+						$next_form_output['form_notices']	=	__( 'Multiple records found.', 'wp-issues-crm' );
+						$next_form_output['next_action'] 	=	'search';
+					}						
+					break;
+				case 'update':							
+					if ( 0 == $wic_query->found_posts || ( 1 == $wic_query->found_posts && $wic_query->post->ID == $_POST['constituent_id'] ) ) {
+						$next_form_output['next_action'] 	=	'update'; // always proceed to further update after an update whether or not successful 
+						if ( $clean_input['form_notices'] > '' ) { // validation errors from sanitize_validate_input, always called above
+							$next_form_output['form_notices']	=	__( 'Please correct form errors: ', 'wp-issues-crm' ) . $next_form_output['form_notices'];	
 						} else {
-							$this->display_form( $user_request, 'search', __( 'Adjust values to search for different constituents.', 'wp-issues-crm' ), $this->unset_value, null );
-							echo $this->format_constituent_list( $wic_query );
-						}						
-						break;
-					case 'update':							
-						if ( 0 == $wic_query->found_posts || ( 1 == $wic_query->found_posts && $wic_query->post->ID == $_POST['constituent_id'] ) ) {
-							$validation_errors = $this->validate_input();
-							if ( $validation_errors > '' ) {
-								$this->display_form( $user_request,  'update', __( 'Please correct form errors: ', 'wp-issues-crm' ) . $validation_errors, $this->unset_value, $_POST['constituent_id'] );
+							$outcome = $this->save_update_constituent();
+							if ( $outcome['notices'] > '' )  { 
+								$next_form_output['form_notices'] = __( 'Please retry -- there were database errors. ', 'wp-issues-crm' ) . $outcome['notices'];
 							} else {
-								$return_post_id = $this->save_update_constituent( $_POST['constituent_id'], $wic_query );
-								if ( ! is_numeric( $return_post_id ) ) { // alpha return_post_id is error string
-									$this->display_form( $user_request, 'update', __( 'Please retry -- there were database errors. ', 'wp-issues-crm' ) . $return_post_id, $this->unset_value, $_POST['constituent_id'] );
-								} else {
-									$this->display_form( $user_request, 'update', __( 'Update successful -- you can further update this record.', 'wp-issues-crm' ), $this->unset_value,  $_POST['constituent_id'] );								
-								}					
-							}
+								$next_form_output['form_notices'] = __( 'Update successful -- you can further update this record.', 'wp-issues-crm' );								
+							}					
+						}
+					} else {
+						$next_form_output['form_notices']	=	 __( 'Record not updated -- other records match the combination of  ', 'wp-issues-crm' ) . $this->create_dup_check_fields_list();
+						$next_form_output['next_action'] 	=	'search';
+					}						
+					break;				
+				case 'save':	
+					if ( 0 == $wic_query->found_posts ) {
+						if ( $validation_errors > '' ) {
+							$next_form_output['form_notices']	=	__( 'Please correct form errors: ', 'wp-issues-crm' ) . $next_form_output['form_notices'];
+							$next_form_output['next_action'] 	=	'save';
 						} else {
-							$this->display_form( $user_request, 'search', __( 'Record not updated -- other records match the new combination of  ', 'wp-issues-crm' ) . $this->create_dup_check_fields_list(), $this->unset_value, null );
-							echo $this->format_constituent_list( $wic_query );
-						}						
-						break;				
-					case 'save':	
-						if ( 0 == $wic_query->found_posts ) {
-							$validation_errors = $this->validate_input();
-							if ( $validation_errors > '' ) {
-								$this->display_form( $user_request, 'save', __( 'Please correct form errors: ', 'wp-issues-crm' ) . $validation_errors, $this->unset_value, null );
+							$return_post_id = $this->save_update_constituent();
+							if ( ! is_numeric( $return_post_id  ) ) { // alpha return_post_id is error string
+								$next_form_output['form_notices']	=	__( 'Please retry -- there were database errors: ', 'wp-issues-crm' ) . $return_post_id;
+								$next_form_output['next_action'] 	=	'save';
 							} else {
-								$return_post_id = $this->save_update_constituent( false, $this->unset_value );
-								if ( ! is_numeric( $return_post_id  ) ) { // alpha return_post_id is error string
-									$this->display_form( $user_request, 'save', __( 'Please retry -- there were database errors: ', 'wp-issues-crm' ) . $return_post_id, $this->unset_value, null );
-								} else {
-									$this->display_form( $user_request, 'update', __( 'Record saved -- you can further update this record.', 'wp-issues-crm' ), $this->unset_value,  $return_post_id  );								
-								}					
-							}
-						} else {
-							$this->display_form( $user_request, 'search', __( 'Record not saved -- other records match the new combination of  ', 'wp-issues-crm' ) . $this->create_dup_check_fields_list(), $this->unset_value, null );
-							echo $this->format_constituent_list( $wic_query );
-						}						
-						break;
-				} // closes switch statement	
-			} // close nonces OK	 		
+								$next_form_output['form_notices']	=	__( 'Record saved -- you can further update this record.', 'wp-issues-crm' );
+								$next_form_output['next_action'] 	=	'update';
+							}					
+						}
+					} else {
+						$next_form_output['form_notices']	=	__( 'Record not saved -- other records match the new combination of  ', 'wp-issues-crm' ) . $this->create_dup_check_fields_list();
+						$next_form_output['next_action'] 	=	'search';
+					}						
+					break;
+			} // closes switch statement	
  		} // close not a reset
+ 		
+ 		
+ 		$this->display_form( $next_form_output );
+		if ( $wic_query->found_posts > 1 ) {
+			echo $this->format_constituent_list( $wic_query );
+		}
+		wp_reset_postdata();
    } // close function
 	/*
 	*
@@ -177,86 +208,61 @@ class WP_Issues_CRM_Constituents {
 	*
 	*/
 	
-	public function display_form ( $last_user_request, $main_button_value, $form_notices, &$wic_query, $post_id ) {
-		$main_button_label = $this->button_actions[$main_button_value];
+	public function display_form ( &$next_form_output ) {
+		
 		echo '<span style="color:green;"> $_POST:';  		
-  		var_dump ($_POST);
+  		var_dump ($next_form_output);
   		echo '</span>';  
 
 		?>
 		<form id = "constituent-form" method="POST">
 			<?php 
 			/* notices section */
-			if ( $form_notices != '' ) { ?>
-		   	<div id="constituent-form-message-box" <strong><em><?php echo $form_notices; ?></em></strong></div>
+			if ( $next_form_output['form_notices'] != '' ) { ?>
+		   	<div id="constituent-form-message-box" <strong><em><?php echo $next_form_output['form_notices']; ?></em></strong></div>
 		   <?php }
-		   /* input meta fields */
+		   
+			/* format meta fields */
 			$sorted_groups = $this->multi_array_key_sort ( $this->constituent_field_groups, 'order' );	
 		   foreach ( $sorted_groups as $group ) {
 				$filtered_fields = $this->select_key ( $this->constituent_fields, 6, $group['name'] );
 				$sorted_filtered_fields = $this->multi_array_key_sort( $filtered_fields, 7 );
+
 				echo '<div class = "constituent-field-group" id = "' . $group['name'] . '">' .
 					'<h2 class = "constituent-field-group-label">' . $group['label'] . '</h2>' .
 					'<p class = "constituent-field-group-legend">' . $group['legend'] . '</p>';
-					//foreach ( $this->constituent_fields as $field ) {
-					//	if ($field[6] == $group['name']) {
 					foreach ( $sorted_filtered_fields as $field ) {							
-							if( $field[2] ) { // if is a field displayed online
-								$value = '';
-								if ( ! ( 'reset' == $last_user_request ) ) { 
-									if ( 'search' == $last_user_request && isset ( $wic_query ) ) { 
-										// if original user ask was a search, logic above only passes query if exactly one found, so overlaying form values will lose no input
-										$post_field_key =  '_wic_' . $field[0];
-										$value =  $wic_query->post->$post_field_key;
-									} else {
-										// otherwise preserving user input after sanitization 
-										$value = isset ($_POST[$field[0]]) ? sanitize_text_field( $_POST[$field[0]] ) : '';
-									}
-								}
-								switch ( $field[3] ) {
-									case 'email':						
-									case 'text':
-									case 'date':
-			
-										$contains = $field[4] ? __( ' contains ', 'wp-issues-crm' ) : '';
-										?><p><label for="<?php echo $field[0] ?>"><?php echo __( $field[1], 'wp-issues-crm' ) . ' ' . $contains; ?></label>
-										<input  id="<?php echo $field[0] ?>" name="<?php echo $field[0] ?>" type="text" value="<?php echo $value; ?>" /></p><?php 
-										break;
-								}
+						if( $field[2] ) { // if is a field displayed online
+							switch ( $field[3] ) {
+								case 'email':						
+								case 'text':
+								case 'date':
+		
+									$contains = $field[4] ? __( ' contains ', 'wp-issues-crm' ) : '';
+									?><p><label for="<?php echo $field[0] ?>"><?php echo __( $field[1], 'wp-issues-crm' ) . ' ' . $contains; ?></label>
+									<input  id="<?php echo $field[0] ?>" name="<?php echo $field[0] ?>" type="text" value="<?php echo $next_form_output[$field[0]]; ?>" /></p><?php 
+									break;
 							}
-					//	}
+						}
 					} // close foreach 				
 				echo '<div>';		   
 		   }
- 
 		
-			if ( 'update' == $main_button_value || 'save' == $main_button_value ) { 
-				/* input field for constituent notes (post content) */		
-				$constituent_notes = '';				
-				if ( 'search' == $last_user_request && isset ( $wic_query ) ) {
-					$constituent_notes =  $wic_query->post->post_content;
-				} elseif ( isset ($_POST['constituent_notes'] ) ) {
-					$constituent_notes = $_POST['constituent_notes'];
-				}
-				?><p><label for="constituent_notes"><?php _e( "Constituent Notes", 'wp-issues-crm' ); ?></label></p>				
-				<p><textarea id="constituent_notes" name="constituent_notes" rows="10" cols="50"><?php echo wp_kses_post( $constituent_notes ); ?></textarea></p><?php 
+			if ( 'search' != $next_form_output[['next_action']] ){ ?> 
+				<p><label for="constituent_notes"><?php _e( "Constituent Notes", 'wp-issues-crm' ); ?></label></p>
+				<p><textarea id="constituent_notes" name="constituent_notes" rows="10" cols="50"><?php $next_form_output['constituent_notes']; ?></textarea></p> 
+			<?php } ?>
+			
+			<input type = "hidden" id = "constituent_id" name = "constituent_id" value ="<?php $next_form_output['constituent_id']; ?>" />					
+	  		
+	  		<button id="main_button" name="main_button" type="submit" value = "<?php echo $next_form_output['next_action']; ?>"><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></button>	  
 
-				/* post ID pass through for update cases (including update after save) */				
-				$pass_through_post_id = null;				
-				if ( isset ( $post_id ) ) {
- 					$pass_through_post_id = $post_id;
-				} elseif ( isset ( $wic_query->post->ID ) ) {
-					$pass_through_post_id = $wic_query->post->ID;
-				}
-				?><input type = "hidden" id = "constituent_id" name = "constituent_id" value ="<?php echo $pass_through_post_id; ?>" /><?php					
-			} 
-	  
-	  		/* buttons and nonces */ ?>
-	  		<button id="main_button" name="main_button" type="submit" value = "<?php echo $main_button_value; ?>"><?php _e( $main_button_label, 'wp_issues_crm'); ?></button>	  
-			<?php if ( 'update' == $main_button_value || 'save' == $main_button_value ) { ?>
+			<?php if ( 'update' == $next_form_output['next_action'] || 'save' == $next_form_output['next_action'] ) { ?>
 				<button id="redo_search_button" name="redo_search_button" type="submit" value = "redo_search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
 			<?php } ?>		 		
+
 	  		<button id="reset_button" name="reset_button" type="submit" value = "<?php echo 'reset_form' ?>"><?php _e( 'Reset Form', 'wp_issues_crm'); ?></button>
+
 	 		<?php wp_nonce_field( 'wp_issues_crm_constituent', 'wp_issues_crm_constituent_nonce_field', true, true ); ?>
 
 		</form>
@@ -300,40 +306,21 @@ class WP_Issues_CRM_Constituents {
 	*  constituent search function
 	*
 	*/
-   private function search_constituents( $is_dedup_check, $constituent_id ) {
-		if ( ! $constituent_id ) {  	
+   private function search_constituents( $is_dedup_check, &$next_form_output) {
+		if ( ! $$next_form_output['constituent_id'] ) {  	
 	   	$meta_query_args = array(
 	     		'relation'=> 'AND',
 	     	);
 			$index = 1;
 	 		foreach ( $this->constituent_fields as $field ) {
-	 			if( isset( $_POST[$field[0]] ) && ( ( ! $is_dedup_check ) || $field[5] ) )  { 
-	 				$value = sanitize_text_field ( $_POST[$field[0]] );
-	 				switch ($field[3]) { 
-						case 'date': // preprocess dates
-							$date_error = false;
-							try {
-								$test = new DateTime( $_POST[$field[0]] );
-							}	catch ( Exception $e ) {
-								$_POST[$field[0]] = __( 'Enter yyyy-mm-dd.', 'wp-issues-crm' );
-								$value = '';
-								$date_error = true;
-							}	   			
-			   			if ( ! $date_error ) {
-			   				$_POST[$field[0]] = date_format($test, 'Y-m-d' );
-			   				$value = $_POST[$field[0]];
-			   			} 
-						break;	 				
-	 				}
-	 				if ( $value > '' ) {
-						$meta_query_args[$index] = array(
-							'key' 	=> '_wic_' . $field[0], // wants key, not meta_key, otherwise searches across all keys 
-							'value'		=> $value,
-							'compare'	=>	( $field[4] ? 'LIKE' : '=' ),
-						);	 
-						$index++;
-					}		
-	 			}
+	 			if( $next_form_output[$field[0]] > '' && ( ( ! $is_dedup_check ) || $field[5] ) )  { 
+					$meta_query_args[$index] = array(
+						'key' 	=> '_wic_' . $field[0], // wants key, not meta_key, otherwise searches across all keys 
+						'value'		=> $next_form_output[$field[0]],
+						'compare'	=>	( $field[4] ? 'LIKE' : '=' ),
+					);	 
+					$index++;
+				}		
 	 		}
 	 		
 	 		$query_args = array (
@@ -343,10 +330,11 @@ class WP_Issues_CRM_Constituents {
 	 		);
 	 	} else {
 			$query_args = array (
-				'p' => $constituent_id,
+				'p' => $$next_form_output['constituent_id'],
 				'post_type' => 'wic_constituent',			
 			);	 	
-	 	}
+	 	} echo 'iam here'; 
+	 
  		$wic_query = new WP_Query($query_args);
  
  		return $wic_query;
@@ -364,107 +352,115 @@ class WP_Issues_CRM_Constituents {
 				 '</li>'; 	 		
  		}
  		$output .= '</ul>';
-		wp_reset_postdata();
 		return $output;
    }
 	/*
 	*
-	*	form validation function
-	*
+	*	sanitize_validate_input: form sanitization and validation function
+	*  takes $_POST as direct input and returns cleaned and expanded array including all defined fields and validation messages
+	*	converts dates from most formats to yyyy-mm-dd
+	*  
 	*/   
    
-   private function validate_input() {
+   private function sanitize_validate_input() {
 
-   	$form_notices = '';
-   	if ( '' == sanitize_text_field ( $_POST['first_name'] ) &&  '' == sanitize_text_field ( $_POST['last_name'] ) && '' == sanitize_text_field ( $_POST['email'] ) ) {
-			$form_notices .= __( 'Please enter at least one of first name, last name or email. ', 'wp-issues-crm' );
-			$this->error_flag = true;			   	
-   	}
-   	
+		$clean_input = array();
+   	$clean_input['form_notices'] = '';
+    	
    	foreach ( $this->constituent_fields as $field ) {
-			if ( isset( $_POST[$field[0]] ) ) {
-   			$_POST[$field[0]] = sanitize_text_field( $_POST[$field[0]] );
-	   		if ( $_POST[$field[0]] > '' ) {
-		   		if	( "email" == $field[3] && ! filter_var( $_POST[$field[0]], FILTER_VALIDATE_EMAIL ) ) {
-		   			$this->error_flag = true;
-		   			$form_notices .= __( 'Email address is not valid. ', 'wp-issues-crm' );
-					}	
-		   		if	( "date" == $field[3] )  {
-		   			$date_error = false;
-						try {
-							$test = new DateTime( $_POST[$field[0]] );
-						}	catch ( Exception $e ) {
-							$form_notices .= __( 'Unsupported date format -- yyyy-mm-dd will work:', 'wp-issues-crm' );
-							$date_error = true;
-						}	   			
-		   			if ( ! $date_error ) {
-		   				$_POST[$field[0]] = date_format($test, 'Y-m-d' );
-		   			} 
-					}						   		
-	   		}
-   		} 
+			$clean_input[$field[0]] = isset( $_POST[$field[0]] ) ? sanitize_text_field( $_POST[$field[0]] ) : ''; 		
+			if ( $clean_input[$field[0]] > '' ) {
+	   		if	( "email" == $field[3] && ! filter_var( $clean_input[$field[0]], FILTER_VALIDATE_EMAIL ) ) {
+	   			$clean_input['form_notices'] .= __( 'Email address is not valid. ', 'wp-issues-crm' );
+				}	
+	   		if	( "date" == $field[3] )  {
+	   			$date_error = false;
+					try {
+						$test = new DateTime( $clean_input[$field[0]] );
+					}	catch ( Exception $e ) {
+						$clean_input['form_notices'] .= __( 'Unsupported date format -- yyyy-mm-dd will work.', 'wp-issues-crm' );
+						$clean_input[$field[0]] = ''; // note will give no notice on search, but field will comeback blank
+						$date_error = true;
+					}	   			
+	   			if ( ! $date_error ) {
+	   				$clean_input[$field[0]] = date_format( $test, 'Y-m-d' );
+	   			} 
+				}						   		
+   		}
    	}
 		
-		$_POST['constituent_notes'] = wp_kses_post ( $_POST['constituent_notes'] );   	
-   	
-   	return ( $form_notices );
+		if ( '' == ( $clean_input['first_name'] . $clean_input['last_name'] . $clean_input['email'] ) ) {
+			$clean_input['form_notices'] .= __( 'Please enter at least one of first name, last name or email. ', 'wp-issues-crm' );
+   	}
+
+		$clean_input['constituent_notes'] = isset ( $_POST['constituent_notes'] ) ? wp_kses_post ( $_POST['constituent_notes'] ) : '' ;   	
+   	$clean_input['constituent_id'] = $_POST['constituent_id']; // always included in form; false if unknown;
+   	return ( $clean_input );
    } 
    /*
    *
 	*  save_update_constituent() 
 	*
 	*/
-   private function save_update_constituent( $constituent_id, &$wic_query ) {
+   private function save_update_constituent() { // taking values, (including constituent ID which > 0 indicates update) from next form output
+
+		$outcome = array (
+			'post_id'	=> 0,
+		   'notices'	=> '', 
+		);		
 
    	// title is ln OR ln,fn OR fn OR email -- one of these is required in validation to be non-blank.	
-		$title = 	isset ( $_POST['last_name'] ) ? $_POST['last_name'] : '';
-		$title .= 	isset ( $_POST['first_name'] ) ? ( $title > '' ? ', ' : '' ) . $_POST['first_name'] : '';
-		$title =		( '' == $title ) ? $_POST['email'] : $title;
+		$title = 	isset ( $next_form_output['last_name'] ) ? $next_form_output['last_name'] : '';
+		$title .= 	isset ( $next_form_output['first_name'] ) ? ( $title > '' ? ', ' : '' ) . $next_form_output['first_name'] : '';
+		$title =		( '' == $title ) ? $next_form_output['email'] : $title;
 		
 		$post_args = array(
-		  'post_content'   => $_POST['constituent_notes'], 
+		  'post_content'   => $next_form_output['constituent_notes'], 
 		  'post_title'     => $title,
 		  'post_status'    => 'private',
 		  'post_type'      => 'wic_constituent',
 		  'comment_status' => 'closed' 
 		); 
 		
-		if ( $constituent_id ) {
-			$post_args['ID'] = $_POST['constituent_id'];
-			if ( $_POST[ 'constituent_notes' ]	!= $wic_query->post->post_content ||
-				$title 							 	!= $wic_query->post->post_title ) {
-				$return_post_id = wp_update_post( $post_args );
+		if ( $next_form_output['constituent_id'] > 0 ) { // if have constitutent ID, do update if notes or title changed
+			$check_on_database = $this->search_constituents( false, $next_form_output['constituent_id'] );
+			if ( ! isset ( $check_on_database->post->ID ) )  {
+				$outcome['notices'] = __( 'Unknown error. Could not find record to update', 'wp-issues-crm' );
+				return ( $outcome );			
+			}
+			$post_args['ID'] = $next_form_output['constituent_id'];
+			if ( $next_form_output[ 'constituent_notes' ] != $check_on_database->post->post_content ||
+				$title != $check_on_database->post->post_title ) {
+				$outcome['post_id'] = wp_update_post( $post_args );
 			} else {
-				$return_post_id = $constituent_id;			
+				$outcome['post_id'] = $next_form_output['constituent_id'];			
 			}
 		} else {
-			$return_post_id = wp_insert_post( $post_args );		
+			$outcome['post_id'] = wp_insert_post( $post_args );		
 		}				
 
-		if ( 0 == $return_post_id ) {
-			$form_notices = __( 'Unknown error. Could not save/update constituent record.  Reset form, search for constituent and check results.', 'wp-issues-crm' );
-			return $form_notices;					
-		} else {
+		if ( 0 == $outcome['post_id'] ) {
+			$outcome['notices'] = __( 'Unknown error. Could not save/update constituent record.  Reset form, search for constituent and check results.', 'wp-issues-crm' );
+			return ($outcome);					
+		} else { // If save/update successful, update metafields
 			foreach ( $this->constituent_fields as $field ) {
 				if( $field[2] ) {
 					$post_field_key =  '_wic_' . $field[0];
-					if ( isset( $wic_query ) ) {
-						$value =  $wic_query->post->$post_field_key;
-						if( $_POST[$field[0]] != $wic_query->post->$post_field_key ) {
-							$meta_return = update_post_meta ( $return_post_id, $post_field_key, $_POST[$field[0]] );
+					if ( $next_form_output['constituent_id'] > 0 ) {
+						if( $next_form_output[$field[0]] != $check_on_database->post->$post_field_key ) {
+							$meta_return = update_post_meta ( $next_form_output['constituent_id'], $post_field_key, $next_form_output[$field[0]] );
 						} else {
 							$meta_return = 1; 						
 						}
 					} else {
-						$meta_return = add_post_meta ( $return_post_id, $post_field_key, $_POST[$field[0]] );
+						$meta_return = add_post_meta ( $outcome['post_id'], $post_field_key, $next_form_output[$field[0]] );
 					}
 				}
 				if ( ! $meta_return ) {
-					$form_notices = __( 'Unknown error. Could not save/update constituent details.  Reset form, search for constituent and check results.', 'wp-issues-crm' );
-					return $form_notices;					
+					$outcome['notices'] = __( 'Unknown error. Could not save/update constituent details.  Reset form, search for constituent and check results.', 'wp-issues-crm' );
 				}
 			}
-			return $return_post_id;
+			return ( $outcome );
 		}
 	}	  
 
