@@ -13,34 +13,13 @@
 class WP_Issues_CRM_Constituents {
 	/*
 	*
-	* field definition array for constituents
+	* field definitions for ready reference array 
 	*
 	*/
-	
+		
+	private $constituent_fields = array();
+	private $constituent_field_groups = array(); 
 
-	
-	private $constituent_fields = $wic_definitions->constituent_fields // fields must include so labelled first_name, last_name, email, otherwise may be replaced freely
-	  			// 0-slug,			1-label,							2-online 		3-type 		4-like   		5-dedup 	6-group 		7-order search . . . . not implemented: 'readonly', 'required', 'searchable'
-		array( 'first_name', 		'First Name',					true,			'text', 		true,				true,		'required', 	10,	),		
-		array( 'middle_name', 		'Middle Name',					false,		'text', 		false, 			false,	'personal',		100,	),		
-		array( 'last_name', 			'Last Name',					true,			'text', 		true, 			true,		'required',		20,	),		
-		array( 'email', 				'eMail',							true,			'email', 	true,				true,		'required',		30,	),	
-		array( 'phone', 				'Land Line',					true,			'text',  	true, 			false,	'contact',		70,	),		
-		array( 'mobile_phone',		'Mobile Phone',				true,			'text', 		false, 			false,	'contact',		80,	),
-		array( 'street_address', 	'Street Address',				true,			'text', 		true, 			true,		'contact',		40,	),
-		array( 'city', 				'City',							true,			'text', 		false, 			false,	'contact',		50,	),
-		array( 'state',				'State', 						true,			'text', 		false, 			false,	'contact',		60,	),
-		array( 'zip',					'Zip Code', 					true,			'text', 		false, 			false,	'contact',		65,	),
-		array( 'job_title', 			'Job Title',					true,			'text', 		false, 			false,	'personal',		90,	),
-		array( 'organization_name','Organization',				true,			'text', 		false, 			false,	'personal',		95,	),
-		array( 'gender_id', 			'Gender',						false,		array ( 'M', 'F'),false,	false, 	'personal',		85,	),
-		array( 'birth_date',			'Date of Birth',				true,			'date', 		false, 			false,	'personal',		84,	),
-		array( 'is_deceased', 		'Is Deceased',					false,		'check',  	false, 			false,	'personal',		87,	),
-		array( 'civicrm_id', 		'CiviCRM ID',					false,		'text',  	false,			false,	'links',			1,	),
-		array( 'ss_id',				'Secretary of State ID',	false,		'text', 		false, 			false,	'links',			3,	),
-		array( 'VAN_id', 				'VAN ID',						false,		'text', 		false, 			false,	'links',			5, ),
-	);
-	
 	private $search_terms_max = 5; // don't allow searches that will likely degrade performance 
 
 	private $button_actions = array(
@@ -49,18 +28,22 @@ class WP_Issues_CRM_Constituents {
 		'update' => 'Update Constituent Record',
 	);
  	
-	private $unset_value = null; // used as placeholder in function call by pointer	
- 	
 	public function __construct() {
 		add_shortcode( 'wp_issues_crm_constituents', array( $this, 'wp_issues_crm_constituents' ) );
+		global $wic_definitions;
+		foreach ( $wic_definitions->constituent_fields as $field )
+			if ( $field[online] ) { 		
+ 				 array_push( $this->constituent_fields, $field );
+ 			}
+		$this->constituent_field_groups 	= &$wic_definitions->constituent_field_groups;
 	}
 
 	public function create_dup_check_fields_list() {
 		$fields_string = '';
 		foreach ( $this->constituent_fields as $field ) {
-			if( $field[5] ) {
+			if( $field['dedup'] ) {
 				$fields_string = ( $fields_string > '' ) ? $fields_string . ', ' : '';
-				$fields_string .= $field[1];
+				$fields_string .= $field['label'];
 			}		
 		}
 		return ( $fields_string . '.' );	
@@ -104,7 +87,7 @@ class WP_Issues_CRM_Constituents {
 		// new or reset form -- serve blank fields
 		if ( ! isset ( $_POST['main_button'] ) && ! isset ( $_POST['redo_search_button'] ) ) { 
 			foreach ( $this->constituent_fields as $field ) {
-				$next_form_output[$field[0]] 			=	'';
+				$next_form_output[$field['slug']] =	'';
 			}
 			$next_form_output['constituent_notes']	=	'';
 			$next_form_output['constituent_id']		=	0;			
@@ -145,8 +128,9 @@ class WP_Issues_CRM_Constituents {
 						$next_form_output['next_action'] 	=	'save';
 					} elseif ( 1 == $wic_query->found_posts ) { // overwrite form with that unique record's  values
 						foreach ( $this->constituent_fields as $field ) {
-							$post_field_key =  '_wic_' . $field[0];
-							$next_form_output[$field[0]] 				= $wic_query->post->$post_field_key;
+							$post_field_key =  '_wic_' . $field['slug'];
+							// the following isset check should be necessary only if a search requesting more than the maximum search terms is executed 
+							$next_form_output[$field['slug']] = isset ( $wic_query->post->$post_field_key ) ? $wic_query->post->$post_field_key : '';
 						}
 						$next_form_output['constituent_notes'] = $wic_query->post->post_content;	
 						$next_form_output['constituent_id'] 	= $wic_query->post->ID;	
@@ -238,7 +222,7 @@ class WP_Issues_CRM_Constituents {
   		echo '</span>';  */
 
 		?>
-		<form id = "constituent-form" method="POST">
+		<form id = "constituent-form" method="POST" autocomplete = "on">
 			<?php 
 			/* notices section */
 			$notice_class = $next_form_output['errors_found'] ? 'wic_form_errors_found' : 'wic_form_no_errors';
@@ -249,24 +233,28 @@ class WP_Issues_CRM_Constituents {
 			/* format meta fields */
 			$sorted_groups = $this->multi_array_key_sort ( $this->constituent_field_groups, 'order' );	
 		   foreach ( $sorted_groups as $group ) {
-				$filtered_fields = $this->select_key ( $this->constituent_fields, 6, $group['name'] );
-				$sorted_filtered_fields = $this->multi_array_key_sort( $filtered_fields, 7 );
+				$filtered_fields = $this->select_key ( $this->constituent_fields, 'group', $group['name'] );
+				$sorted_filtered_fields = $this->multi_array_key_sort( $filtered_fields, 'order' );
 
 				echo '<div class = "constituent-field-group" id = "' . $group['name'] . '">' .
 					'<h2 class = "constituent-field-group-label">' . $group['label'] . '</h2>' .
 					'<p class = "constituent-field-group-legend">' . $group['legend'] . '</p>';
 					foreach ( $sorted_filtered_fields as $field ) {							
-						if( $field[2] ) { // if is a field displayed online
-							switch ( $field[3] ) {
-								case 'email':						
-								case 'text':
-								case 'date':
-		
-									$contains = $field[4] ? __( ' contains ', 'wp-issues-crm' ) : '';
-									?><p><label for="<?php echo $field[0] ?>"><?php echo __( $field[1], 'wp-issues-crm' ) . ' ' . $contains; ?></label>
-									<input  id="<?php echo $field[0] ?>" name="<?php echo $field[0] ?>" type="text" value="<?php echo $next_form_output[$field[0]]; ?>" /></p><?php 
-									break;
-							}
+						switch ( $field['type'] ) {
+							case 'email':						
+							case 'text':
+							case 'date':
+	
+								$contains = $field['like'] ? __( ' contains ', 'wp-issues-crm' ) : '';
+								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' . $contains; ?></label>
+								<input  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="text" value="<?php echo $next_form_output[$field['slug']]; ?>" /></p><?php 
+								break;
+							case 'readonly':
+								
+								$contains = $field['like'] ? __( ' contains ', 'wp-issues-crm' ) : '';
+								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' . $contains; ?></label>
+								<input  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="text" value="<?php echo $next_form_output[$field['slug']]; ?>" readonly /></p><?php 
+								break;
 						}
 					} // close foreach 				
 				echo '<div>';		   
@@ -343,15 +331,15 @@ class WP_Issues_CRM_Constituents {
 			$index = 1;
 			$ignored_fields_list = '';
 	 		foreach ( $this->constituent_fields as $field ) {
-	 			if( $next_form_output[$field[0]] > '' && ( ( 'new' == $search_mode ) || $field[5] ) )  { 
+	 			if( $next_form_output[$field['slug']] > '' && ( ( 'new' == $search_mode ) || $field['dedup'] ) && ( 'readonly' != $field['type'] ) )  { 
 					if ( ( $index - 1 ) < $this->search_terms_max )	{		
 							$meta_query_args[$index] = array(
-							'key' 	=> '_wic_' . $field[0], // wants key, not meta_key, otherwise searches across all keys 
-							'value'		=> $next_form_output[$field[0]],
-							'compare'	=>	( $field[4] ? 'LIKE' : '=' ),
+							'key' 	=> '_wic_' . $field['slug'], // wants key, not meta_key, otherwise searches across all keys 
+							'value'		=> $next_form_output[$field['slug']],
+							'compare'	=>	( $field['like'] ? 'LIKE' : '=' ),
 						);	
 					} else { 
-						$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field[1] : ( $ignored_fields_list .= ', ' . $field[1] ); 
+						$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] : ( $ignored_fields_list .= ', ' . $field['label'] ); 
 					}
 					$index++;
 				}		
@@ -411,22 +399,22 @@ class WP_Issues_CRM_Constituents {
    	$clean_input['form_notices'] = '';
     	
    	foreach ( $this->constituent_fields as $field ) {
-			$clean_input[$field[0]] = isset( $_POST[$field[0]] ) ? sanitize_text_field( $_POST[$field[0]] ) : ''; 		
-			if ( $clean_input[$field[0]] > '' ) {
-	   		if	( "email" == $field[3] && ! filter_var( $clean_input[$field[0]], FILTER_VALIDATE_EMAIL ) ) {
+			$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? sanitize_text_field( $_POST[$field['slug']] ) : ''; 		
+			if ( $clean_input[$field['slug']] > '' ) {
+	   		if	( "email" == $field['type'] && ! filter_var( $clean_input[$field['slug']], FILTER_VALIDATE_EMAIL ) ) {
 	   			$clean_input['form_notices'] .= __( 'Email address is not valid. ', 'wp-issues-crm' );
 				}	
-	   		if	( "date" == $field[3] )  {
+	   		if	( "date" == $field['type'] )  {
 	   			$date_error = false;
 					try {
-						$test = new DateTime( $clean_input[$field[0]] );
+						$test = new DateTime( $clean_input[$field['slug']] );
 					}	catch ( Exception $e ) {
-						$clean_input['form_notices'] .= $field[1] .__( 'had unsupported date format -- yyyy-mm-dd will work.', 'wp-issues-crm' );
-						$clean_input[$field[0]] = ''; 
+						$clean_input['form_notices'] .= $field['label'] .__( 'had unsupported date format -- yyyy-mm-dd will work.', 'wp-issues-crm' );
+						$clean_input[$field['slug']] = ''; 
 						$date_error = true;
 					}	   			
 	   			if ( ! $date_error ) {
-	   				$clean_input[$field[0]] = date_format( $test, 'Y-m-d' );
+	   				$clean_input[$field['slug']] = date_format( $test, 'Y-m-d' );
 	   			} 
 				}						   		
    		}
@@ -490,23 +478,44 @@ class WP_Issues_CRM_Constituents {
 			return ($outcome);					
 		}
 		// otherwise proceed to update metafields
-		foreach ( $this->constituent_fields as $field ) {
-			if( $field[2] ) {
-				$post_field_key =  '_wic_' . $field[0];
-				if ( $next_form_output['constituent_id'] > 0 ) {
-					if( $next_form_output[$field[0]] != $check_on_database->post->$post_field_key ) {
-						$meta_return = update_post_meta ( $next_form_output['constituent_id'], $post_field_key, $next_form_output[$field[0]] );
-					} else {
-						$meta_return = 1; 						
+		 foreach ( $this->constituent_fields as $field ) {
+		 	if ( 'readonly' != $field['type'] {
+				$post_field_key =  '_wic_' . $field['slug'];
+				// first handle existing post meta records already
+				if ( $next_form_output['constituent_id'] > 0 ) { 
+					if ( $next_form_output[$field['slug']] > '' { 
+						if ( isset ( $check_on_database->post->$post_field_key ) ) {
+							if( $next_form_output[$field['slug']] != $check_on_database->post->$post_field_key ) {
+								$meta_return = update_post_meta ( $next_form_output['constituent_id'], $post_field_key, $next_form_output[$field['slug']] );
+							} else {
+								$meta_return = 1; // no action if field value already on db correctly
+							} 
+						} else { // no value yet on database 
+							$meta_return = add_post_meta ( $next_form_output['constituent_id'], $post_field_key, $next_form_output[$field['slug']] );							
+						}
+					} else { // have empty field value
+						if ( isset ( $check_on_database->post->$post_field_key ) ) {
+							$meta_return = delete_post_meta( $next_form_output['constituent_id'], $post_field_key );					
+						} else {
+							$meta_return = 1; // no action of field is blank and meta record not exist					
+						}
+						
 					}
+				// new constituent record
 				} else {
-					$meta_return = add_post_meta ( $outcome['post_id'], $post_field_key, $next_form_output[$field[0]] );
+					if ( $next_form_output[$field['slug']] > '' ) {
+						$meta_return = add_post_meta ( $outcome['post_id'], $post_field_key, $next_form_output[$field['slug']] );
+					}
 				}
-			}
-			if ( ! $meta_return ) {
-				$outcome['notices'] = __( 'Unknown error. Could not save/update constituent details.  Reset form, search for constituent and check results.', 'wp-issues-crm' );
-			}
-		}
+				
+				if ( ! $meta_return ) {
+					$outcome['notices'] = __( 'Unknown error. Could not save/update constituent details.  Reset form, search for constituent and check results.', 'wp-issues-crm' );
+				}
+			}	
+		} 
+		 && ( 'readonly' != $field['type'] )
+		/* foreach ( $this->constituent_fields as $field ) { */
+		
 		return ( $outcome );
 	}	  
 
@@ -519,7 +528,7 @@ class WP_Issues_CRM_Constituents {
    *
    */
    function import(){ // fields must include so formatted first_name, last_name, email
-	   
+	   // NEEDS UPDATEING TO REFLECT ONLINE EXCLUSION
 	   $i=0;
 	   $j=0;
 	   $seconds = 5000;
@@ -545,9 +554,9 @@ class WP_Issues_CRM_Constituents {
 			$post_id = wp_insert_post($post_information);
 			
 			foreach ($this->constituent_fields as $field) {			
-				if ( isset ( $contact->$field[0] ) ) {
-					if ( $contact->$field[0] > '' ) {
-						$stored_record = add_post_meta ($post_id, '_wic_' . $field[0], $contact->$field[0] );
+				if ( isset ( $contact->$field['slug'] ) ) {
+					if ( $contact->$field['slug'] > '' ) {
+						$stored_record = add_post_meta ($post_id, '_wic_' . $field['slug'], $contact->$field['slug'] );
 						if ( $stored_record ) {
 							$j++;						
 						}

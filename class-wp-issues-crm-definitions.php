@@ -6,7 +6,7 @@
 
 class WP_Issues_CRM_Definitions {
 	
-	private $constituent_field_groups = array (
+	public $constituent_field_groups = array (
 		array (
 			'name'		=> 'required',
 			'label'		=>	'Identity',
@@ -33,19 +33,20 @@ class WP_Issues_CRM_Definitions {
 		),	
 	);
 
-	private $constituent_fields = array( 
+	public $constituent_fields = array( 
 	  	/* fields control -- all definitions of fields are in this array (except for native post fields -- content and title)
 	  	*  the only field slug specific logic in the whole class is requirement that one of first_name, last_name and email not be blank
 	  	*  so, fields must include so labeled first_name, last_name, email, otherwise may be replaced freely
 	  	*  -- slug is the no-spaces name of the field
 	  	* 	-- is the front facing name
-	  	*	--	online is whether field should appear in online forms
-	  	*	-- type determines what control is displayed for the field and also validation
+	  	*	--	online is whether field should appear at all in online access (may or may not be updateable -- that is determined by type)
+	  	*	-- type determines what control is displayed for the field ( may be readonly ) and also validation
 	  	*	-- like indicates whether full text searching is enabled for the field
 	  	*	-- dedup indicates whether field should be on list of fields tested for deduping
 	  	*	-- group is just for form layout purposes
 	  	*	-- order is just for form layout purposes
-	  	*// 0-slug,			1-label,							2-online 		3-type 		4-like   		5-dedup 	6-group 		7-order search . . . . not implemented: 'readonly', 'required', 'searchable'
+	  	*  . . . . not implemented: 'readonly', 'required', 'searchable'
+	  	*/
 		array( 'slug'	=> 'first_name', 		
 			'label'	=>	'First Name',					
 			'online'	=>	true,			
@@ -184,7 +185,7 @@ class WP_Issues_CRM_Definitions {
 		array( 'slug'	=> 'civicrm_id', 	
 			'label'	=>	'CiviCRM ID',					
 			'online'	=>	false,		
-			'type'	=>	'text',  	
+			'type'	=>	'readonly',  	
 			'like'	=>	false,			
 			'dedup'	=>	false,	
 			'group'	=>	'links',			
@@ -192,8 +193,8 @@ class WP_Issues_CRM_Definitions {
 			),
 		array( 'slug'	=> 'ss_id',			
 			'label'	=>	'Secretary of State ID',	
-			'online'	=>	false,		
-			'type'	=>	'text', 		
+			'online'	=>	true,		
+			'type'	=>	'readonly', 		
 			'like'	=>	false, 			
 			'dedup'	=>	false,	
 			'group'	=>	'links',			
@@ -201,8 +202,8 @@ class WP_Issues_CRM_Definitions {
 			),
 		array( 'slug'	=> 'VAN_id', 			
 			'label'	=>	'VAN ID',						
-			'online'	=>	false,		
-			'type'	=>	'text', 		
+			'online'	=>	true,		
+			'type'	=>	'readonly', 		
 			'like'	=>	false, 			
 			'dedup'	=>	false,	
 			'group'	=>	'links',			
@@ -211,7 +212,7 @@ class WP_Issues_CRM_Definitions {
 	);
 		
 	public function __construct() {
-		add_action( 'init', 'custom_post_type', 0 );
+		add_action( 'init', array( $this, 'custom_post_type' ), 0 );
 	}
 
 	// Register Custom Post Type

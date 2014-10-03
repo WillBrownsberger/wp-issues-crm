@@ -24,7 +24,7 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-include plugin_dir_path( __FILE__ ) . 'definitions.php';
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-definitions.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents.php';
 
 
