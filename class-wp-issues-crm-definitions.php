@@ -1,10 +1,12 @@
 <?php
 /*
-* post-type and taxonomy definitions for simple-wp-crm
+* post-type and taxonomy definitions for wp_issues_crm
 * 
 */
 
 class WP_Issues_CRM_Definitions {
+	
+	public $wic_metakey = 'wic_data_';	
 	
 	public $constituent_field_groups = array (
 		array (
@@ -158,8 +160,15 @@ class WP_Issues_CRM_Definitions {
 		array( 
 			'slug'	=> 'gender_id', 			
 			'label'	=>	'Gender',						
-			'online'	=>	false,		
-			'type'	=>	array ( 'M', 'F'),
+			'online'	=>	true,		
+			'type'	=>	array ( 
+				array(
+					'value'	=> 'M',
+					'label'	=>	'Male' ),
+				array(
+					'value'	=> 'F',
+					'label'	=>	'Female' ),
+				),
 			'like'	=>	false,	
 			'dedup'	=>	false, 	
 			'group'	=>	'personal',		
@@ -175,7 +184,7 @@ class WP_Issues_CRM_Definitions {
 			'order'	=>	84,	),
 		array( 'slug'	=> 'is_deceased', 	
 			'label'	=>	'Is Deceased',					
-			'online'	=>	false,		
+			'online'	=>	true,		
 			'type'	=>	'check',  	
 			'like'	=>	false, 			
 			'dedup'	=>	false,	
@@ -252,11 +261,11 @@ class WP_Issues_CRM_Definitions {
 			'taxonomies'          => array( 'category' ),
 			'hierarchical'        => false,
 			'public'              => false, // controls if view link appears in edit menu (but not whether URL is visible on front end)
-			'show_ui'             => false, // exclusively through our front end
-			'show_in_menu'        => false, // exclusively through our front end
+			'show_ui'             => true, // exclusively through our front end
+			'show_in_menu'        => true, // exclusively through our front end
 			'show_in_nav_menus'   => false, // not something that one would navigate to
 			'show_in_admin_bar'   => false, // assure that all navigation to constituents goes through the plugin
-			'menu_position'       => 10,    // irrelevant
+			'menu_position'       => 100,    // irrelevant
 			'can_export'          => false, // control export through own security
 			'has_archive'         => false, // no support in general themes
 			'exclude_from_search' => true,  // don't want in queries
