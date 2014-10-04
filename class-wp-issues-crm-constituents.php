@@ -78,7 +78,8 @@ class WP_Issues_CRM_Constituents {
 	*
 	*/
 	public function wp_issues_crm_constituents() {
-		
+		echo 'really???';
+		var_dump($_POST);
 		/* first check capabilities -- must be administrative user */
 		if ( ! current_user_can ( 'activate_plugins' ) ) { 
 			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
@@ -87,7 +88,7 @@ class WP_Issues_CRM_Constituents {
 
 		$next_form_output = array();
 		// new or reset form -- serve blank fields
-		if ( ! isset ( $_POST['main_button'] ) && ! isset ( $_POST['redo_search_button'] ) ) { 
+		if ( ! isset ( $_POST['main_button'] ) && ! isset ( $_POST['redo_search_button'] ) && ! isset ( $_POST['direct_button'] ) ) { 
 			foreach ( $this->constituent_fields as $field ) {
 				$next_form_output[$field['slug']] =	'';
 			}
@@ -109,14 +110,21 @@ class WP_Issues_CRM_Constituents {
 			$next_form_output = $this->sanitize_validate_input();
 			
 			// read button pushed to determine what the user asked to do (one or the other button is definitely set in current condition )
-			if ( isset ( $_POST['main_button'] ) ) { 
+			if ( isset( $_POST['main_button'] ) ) { 
 				$user_request = $_POST['main_button']; // search, update or save
-			} elseif ( isset ( $_POST['redo_search_button'] ) ) {
+			} elseif ( isset( $_POST['redo_search_button'] ) ) {
 				$user_request = 'search';	
-			} 
+			} elseif ( isset( $_POST['direct_button'] ) ) { // coming in from crm-constituents-list.php
+				$user_request = 'search';
+			}
 
 			// do search in all cases, but do only on dup check fields if request is a save or update (does not alter next_form_output)
-			$search_mode = ( 'search' == $user_request ) ? 'new' : 'dup';   
+			if ( isset( $_POST['direct_button'] ) ) { // in direct case, want to trigger lookup of single known ID (as in pre-update check)
+				$next_form_output['constituent_id']	= $_POST['direct_button'];
+				$search_mode = 'db_check';			
+			}	else {
+				$search_mode = ( 'search' == $user_request ) ? 'new' : 'dup';
+			}   
 			$wic_query = $this->search_constituents( $search_mode, $next_form_output ); 
 			
 			// set flag to indicate that form message should highlight errors
@@ -195,8 +203,9 @@ class WP_Issues_CRM_Constituents {
 					break;
 			} // closes switch statement	
 
-			// prepare to show list of constituents if found more than one			
-			$constituent_list = $show_list ? $this->format_constituent_list( $wic_query ) : '';
+			// prepare to show list of constituents if found more than one
+			global $wic_list_constituents;			
+			$constituent_list = $show_list ? $wic_list_constituents::format_constituent_list( $wic_query ) : '';
 			
 			// done with query
 			wp_reset_postdata();
@@ -473,7 +482,7 @@ class WP_Issues_CRM_Constituents {
 
 		$clean_input['constituent_notes'] = isset ( $_POST['constituent_notes'] ) ? wp_kses_post ( $_POST['constituent_notes'] ) : '' ;   	
    	$clean_input['constituent_id'] = $_POST['constituent_id']; // always included in form; 0 if unknown;
-		$clean_input['strict_match']	=	$_POST['strict_match']; // only updated on the form; only affects search_constituents
+		$clean_input['strict_match']	=	isset( $_POST['strict_match'] ) ? true : false; // only updated on the form; only affects search_constituents
    	return ( $clean_input );
    } 
    /*

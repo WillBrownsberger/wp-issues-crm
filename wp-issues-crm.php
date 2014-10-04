@@ -26,5 +26,5 @@
 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-definitions.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents.php';
-
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents-list.php';
 
