@@ -18,8 +18,9 @@ class WP_Issues_CRM_Constituents_List {
 	*/
 		
 	private $constituent_fields = array();
+	public $constituent_list;
 
-	public function __construct() {
+	public function __construct( &$wic_query) {
 		add_shortcode( 'wp_issues_crm_constituents', array( $this, 'wp_issues_crm_constituents' ) );
 		global $wic_definitions;
 		foreach ( $wic_definitions->constituent_fields as $field )
@@ -27,25 +28,28 @@ class WP_Issues_CRM_Constituents_List {
  				 array_push( $this->constituent_fields, $field );
  			}
 		$this->wic_metakey = &$wic_definitions->wic_metakey;
+		$this->constituent_list = $this->format_constituent_list($wic_query);
 	}
 
 
-  public function format_constituent_list(&$wic_query) {
+  public function format_constituent_list( &$wic_query) {
  		// deliver the results
  		
-		$output = '<form method="POST"><h1> Found ' . $wic_query->found_posts . ' yyyyyconstituents, showing ' . $wic_query->post_count . ' </h1>';	
+		$output = '<form method="POST"><h1> Found ' . $wic_query->found_posts . ' constituents, showing ' . $wic_query->post_count . ' </h1>';	
+		$output .= '<ul>';
 		while ( $wic_query->have_posts() ) {
 		$wic_query->next_post();
-		$output .= '<button id="direct_button" name="direct_button" type="submit" value =" '.  $wic_query->post->ID . '">' . $wic_query->post->wic_data_first_name .
+		$output .= '<li><button id="direct_button" name="direct_button" type="submit" class = "constituent-list-button" value =" '.  $wic_query->post->ID . '">' . $wic_query->post->wic_data_first_name .
 		' ' . $wic_query->post->wic_data_last_name .
 		', ' . $wic_query->post->wic_data_street_address .
 		', ' . $wic_query->post->wic_data_email .
-		'</button>';
+		'</button></li>';
 		}
 		$output .= 	wp_nonce_field( 'wp_issues_crm_constituent', 'wp_issues_crm_constituent_nonce_field', true, true ) .
-		'</form>';
+		'</form>'; 
+		
 		return $output;
    } // close function
 }	
 
-$wic_list_constituents = new WP_Issues_CRM_Constituents_List;
+// $wic_list_constituents = new WP_Issues_CRM_Constituents_List;

@@ -1,0 +1,25 @@
+/*
+*
+*	Styling for wp-issues-crm output
+*
+*/
+
+#constituent-form-message-box {
+	background: #aaffaa;
+	margin:  20px 0;
+	padding: 20px;
+}
+
+#constituent-form-message-box.wic-form-errors-found {
+	background: #ffeeaa;
+}
+
+#wic-forms {
+	max-width: 640px
+}
+
+.constituent-list-button {
+	background: white;
+	border: none;
+	cursor: pointer;
+}

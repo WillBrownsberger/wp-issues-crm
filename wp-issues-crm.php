@@ -28,3 +28,17 @@ include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-definitions.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents-list.php';
 
+
+function wp_issue_crm_setup_styles() {
+
+	wp_register_style(
+		'wp-issues-crm-styles',
+			plugins_url( 'wp-issues-crm.css' , __FILE__ ) // ,
+		);
+	wp_enqueue_style('wp-issues-crm-styles');
+
+}
+
+add_action( 'wp_enqueue_scripts', 'wp_issue_crm_setup_styles');
+
+

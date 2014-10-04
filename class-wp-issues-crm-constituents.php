@@ -49,7 +49,23 @@ class WP_Issues_CRM_Constituents {
 		}
 		return ( $fields_string . '.' );	
 	}
-
+/*
+*
+*	Initializes blank form -- all form values and display switches set
+*  	see inventory below
+*
+*/
+	public function initialize_blank_form(&$next_form_output)	{ 
+			foreach ( $this->constituent_fields as $field ) {
+				$next_form_output[$field['slug']] =	'';
+			}
+			$next_form_output['constituent_notes']	=	'';
+			$next_form_output['constituent_id']		=	0;			
+			$next_form_output['form_notices']		=	__( 'Enter values and search for constituents.', 'wp-issues-crm' );
+			$next_form_output['next_action'] 		=	'search';
+			$next_form_output['errors_found']		=	false;
+			$next_form_output['strict_match']		=	false;
+		}
 	/*
 	*
 	* wp_issues_crm_constituent -- function manages search/save/update of constituent records
@@ -60,12 +76,12 @@ class WP_Issues_CRM_Constituents {
 	* the components of $next_form_output are: 
 	* 		1. all meta fields defined as displayable for constituents
 	*			-- initialized to empty on reset or new; otherwise passed through from form by sanitize_validate_input
-	*			-- not altered except are overlayed if found unique on search
+	*			-- not otherwise altered except are overlayed if found unique on search
 	*		2. constituent notes
 	*			-- same as 1
 	*		3. constituent id 
 	*			-- initialized to zero on reset or new; otherwise passed through from form by sanitize_validate_input
-	*			-- set if search found 1 (then offer update)
+	*			-- set if search found unique (then offer update)
 	* 			-- reset to zero if, on update attempt, found dups for new form values (then send back to search)
 	*			-- set on save successful (then offer update) 
 	*			-- so, is always zero if next_action is search or save and always set if next action is update
@@ -74,12 +90,11 @@ class WP_Issues_CRM_Constituents {
 	*		5. next_action (search/update/save) 
 	*			-- set by main logic in this function 
 	*		6.	errors_found -- set by main logic in this function; serves only to support formatting of message 
-	*		7.	strict match check box
+	*		7.	strict match check box -- passed through from form
 	*
 	*/
 	public function wp_issues_crm_constituents() {
-		echo 'really???';
-		var_dump($_POST);
+
 		/* first check capabilities -- must be administrative user */
 		if ( ! current_user_can ( 'activate_plugins' ) ) { 
 			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
@@ -87,47 +102,32 @@ class WP_Issues_CRM_Constituents {
 		} 
 
 		$next_form_output = array();
+		$this->initialize_blank_form($next_form_output);
+		
 		// new or reset form -- serve blank fields
-		if ( ! isset ( $_POST['main_button'] ) && ! isset ( $_POST['redo_search_button'] ) && ! isset ( $_POST['direct_button'] ) ) { 
-			foreach ( $this->constituent_fields as $field ) {
-				$next_form_output[$field['slug']] =	'';
-			}
-			$next_form_output['constituent_notes']	=	'';
-			$next_form_output['constituent_id']		=	0;			
-			$next_form_output['form_notices']		=	__( 'Enter values and search for constituents.', 'wp-issues-crm' );
-			$next_form_output['next_action'] 		=	'search';
-			$next_form_output['errors_found']		=	false;
-			$next_form_output['strict_match']		=	false;
+		if ( isset ( $_POST['main_button'] ) || isset ( $_POST['direct_button'] ) ) { 
 			
-		// working with form input
-		} else {
 			// test nonce before going further
 			if( ! wp_verify_nonce($_POST['wp_issues_crm_constituent_nonce_field'], 'wp_issues_crm_constituent'))	{
 				die ( 'Security check failed.' ); // if not nonce OK, die, otherwise continue  
 			}
-
-			// clean and validate input and pass through to next form output, including hidden post ID field	
-			$next_form_output = $this->sanitize_validate_input();
 			
-			// read button pushed to determine what the user asked to do (one or the other button is definitely set in current condition )
 			if ( isset( $_POST['main_button'] ) ) { 
 				$user_request = $_POST['main_button']; // search, update or save
-			} elseif ( isset( $_POST['redo_search_button'] ) ) {
-				$user_request = 'search';	
+				// clean and validate input and pass through to next form output, including hidden post ID field	
+				$next_form_output = $this->sanitize_validate_input();
+				// do search in all submitted cases, but do only on dup check fields if request is a save or update (does not alter next_form_output)
+				$search_mode = ( 'search' == $user_request ) ? 'new' : 'dup';
 			} elseif ( isset( $_POST['direct_button'] ) ) { // coming in from crm-constituents-list.php
 				$user_request = 'search';
+				$next_form_output['constituent_id']	= $_POST['direct_button'];
+				$next_form_output['form_notices'] = '';
+				$search_mode = 'db_check';		
 			}
 
-			// do search in all cases, but do only on dup check fields if request is a save or update (does not alter next_form_output)
-			if ( isset( $_POST['direct_button'] ) ) { // in direct case, want to trigger lookup of single known ID (as in pre-update check)
-				$next_form_output['constituent_id']	= $_POST['direct_button'];
-				$search_mode = 'db_check';			
-			}	else {
-				$search_mode = ( 'search' == $user_request ) ? 'new' : 'dup';
-			}   
 			$wic_query = $this->search_constituents( $search_mode, $next_form_output ); 
 			
-			// set flag to indicate that form message should highlight errors
+			// set flag to indicate that form message should highlight errors (from either search or update)
 			$next_form_output['errors_found'] =  ( $next_form_output['form_notices'] > '' ) ? true : false;
 			
 			// show list if found multiple or found a dup
@@ -204,9 +204,13 @@ class WP_Issues_CRM_Constituents {
 			} // closes switch statement	
 
 			// prepare to show list of constituents if found more than one
-			global $wic_list_constituents;			
-			$constituent_list = $show_list ? $wic_list_constituents::format_constituent_list( $wic_query ) : '';
-			
+			if ( $show_list ) {
+				$wic_list_constituents = new WP_Issues_CRM_Constituents_List ($wic_query);			
+				$constituent_list = $wic_list_constituents->constituent_list;
+			} else {
+				$constituent_list = '';			
+			}
+
 			// done with query
 			wp_reset_postdata();
 
@@ -234,54 +238,94 @@ class WP_Issues_CRM_Constituents {
 	*		3. constituent id
 	*		4. form_notices
 	*		5. next_action (search/update/save) 
-	*
+	*		6.	errors_found 
+	*		7.	strict match check box
 	* 
 	*/
 	
 	public function display_form ( &$next_form_output ) {
 		
-		/* echo '<span style="color:green;"> $_POST:';  		
+		/*
+		echo '<span style="color:green;"> $_POST:';  		
   		var_dump ($next_form_output);
-  		echo '</span>';  */
-
-		?>
+  		echo '</span>'; */ 
+		
+		?><div id='wic-forms'>
+		<h2><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></h2>
 		<form id = "constituent-form" method="POST" autocomplete = "on">
 			<?php 
 			/* notices section */
-			$notice_class = $next_form_output['errors_found'] ? 'wic_form_errors_found' : 'wic_form_no_errors';
+			$notice_class = $next_form_output['errors_found'] ? 'wic-form-errors-found' : 'wic-form-no-errors';
 			if ( $next_form_output['form_notices'] != '' ) { ?>
-		   	<div id="constituent-form-message-box" class = "<?php echo $notice_class; ?>" > <strong><em><?php echo $next_form_output['form_notices']; ?></em></strong></div>
+		   	<div id="constituent-form-message-box" class = "<?php echo $notice_class; ?>" ><?php echo $next_form_output['form_notices']; ?></div>
 		   <?php }
 		   
+			/* first instance of buttons */		   
+	  		?><button name="main_button" type="submit" value = "<?php echo $next_form_output['next_action']; ?>"><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></button>	  
+
+			<?php if ( 'update' == $next_form_output['next_action'] || 'save' == $next_form_output['next_action'] ) { ?>
+				<button name="main_button" type="submit" value = "search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
+			<?php } ?>		 		
+
+	  		<button name="reset_button" type="submit" value = "<?php echo 'reset_form' ?>"><?php _e( 'Reset Form', 'wp_issues_crm'); ?></button><?php
+		   
 			/* format meta fields */
+
+			/* initialize field flags and legends */
+			$required_individual = '';
+			$required_group = '';
+			$contains = '';
+			$required_group_legend = '';
+			$required_individual_legend = ''; 								
+			$contains_legend = false;
+
+
 			$sorted_groups = $this->multi_array_key_sort ( $this->constituent_field_groups, 'order' );	
 		   foreach ( $sorted_groups as $group ) {
 				$filtered_fields = $this->select_key ( $this->constituent_fields, 'group', $group['name'] );
 				$sorted_filtered_fields = $this->multi_array_key_sort( $filtered_fields, 'order' );
 
 				echo '<div class = "constituent-field-group" id = "' . $group['name'] . '">' .
-					'<h2 class = "constituent-field-group-label">' . $group['label'] . '</h2>' .
+					'<h3 class = "constituent-field-group-label">' . $group['label'] . '</h3>' .
 					'<p class = "constituent-field-group-legend">' . $group['legend'] . '</p>';
 					foreach ( $sorted_filtered_fields as $field ) {	
+
+						/* set flags (toggling for each field) and legends (setting if for any field) */
+						if ( 'update' == $next_form_output['next_action'] || 'save' == $next_form_output['next_action'] ) {
+							$required_group = ( 'group' == $field['required'] ) ? '(+)' : '';
+							if( 'group' == $field['required'] ) {
+								$required_group_legend = '(+) ' . __('At least one among these fields must be supplied.', 'wp-issues-crm' );						
+							}
+							
+							$required_individual = ( 'individual' == $field['required'] ) ? '*' : '';
+							if( 'individual' == $field['required'] ) {
+								$required_individual_legend = '* ' . __('Required field.', 'wp-issues-crm' );						
+							}
+						}								
+						$contains = $field['like'] ? '(%)' : '';
+						if( $field['like'] ) {
+							$contains_legend = 'true';	
+						}
+
+
 						$field_type = is_array( $field['type'] ) ? 'dropdown' : $field['type']; 						
 						switch ( $field_type ) {
 							case 'email':						
 							case 'text':
 							case 'date':
-	
-								$contains = $field['like'] ? '*' : '';
-								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' . $contains; ?></label>
+								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' . $required_individual . $required_group . $contains . ' '; ?></label>
 								<input  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="text" value="<?php echo $next_form_output[$field['slug']]; ?>" /></p><?php 
 								break;
 							case 'readonly':
-								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) ?></label>
+								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' ; ?></label>
 								<input  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="text" value="<?php echo $next_form_output[$field['slug']]; ?>" readonly /></p><?php 
 								break;
 							case 'check':
-								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) ; ?></label>
+								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' ; ?></label>
 								<input  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="checkbox"  value="1" <?php checked( $next_form_output[$field['slug']], 1 );?> /></p><?php
 								break;
 							case 'dropdown':
+
 								$selected = $next_form_output[$field['slug']];
 								$not_selected_option = array (
 									'value' 	=> '',
@@ -289,7 +333,8 @@ class WP_Issues_CRM_Constituents {
 									);  
 								$option_array =  $field['type'];
 								array_push( $option_array, $not_selected_option );
-								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) ; ?></label>
+
+								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . $required_individual . $required_group ; ?></label>
 								<select id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" >
 									<?php
 									$p = '';
@@ -323,17 +368,29 @@ class WP_Issues_CRM_Constituents {
 	  		<button id="main_button" name="main_button" type="submit" value = "<?php echo $next_form_output['next_action']; ?>"><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></button>	  
 
 			<?php if ( 'update' == $next_form_output['next_action'] || 'save' == $next_form_output['next_action'] ) { ?>
-				<button id="redo_search_button" name="redo_search_button" type="submit" value = "redo_search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
+				<button id="redo_search_button" name="main_button" type="submit" value = "search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
 			<?php } ?>		 		
 
 	  		<button id="reset_button" name="reset_button" type="submit" value = "<?php echo 'reset_form' ?>"><?php _e( 'Reset Form', 'wp_issues_crm'); ?></button>
 
 	 		<?php wp_nonce_field( 'wp_issues_crm_constituent', 'wp_issues_crm_constituent_nonce_field', true, true ); ?>
 
-			<p><label for="strict_match"><?php echo '* ' . __( 'Full-text search enabled for these fields -- disable (require strict match): ' , 'wp-issues-crm' ) ; ?></label>
-			<input  id="strict_match" name="strict_match" type="checkbox"  value="1" <?php checked( $next_form_output['strict_match'], 1 );?> /></p>
+		   
+			<?php if ( $contains_legend ) { ?>
+				<p><label for="strict_match"><?php echo '(%) ' . __( 'Full-text search enabled for these fields -- require strict match instead? ' , 'wp-issues-crm' ) ; ?></label>
+				<input  id="strict_match" name="strict_match" type="checkbox"  value="1" <?php checked( $next_form_output['strict_match'], 1 );?> /></p>
+			<?php } ?>
+
+			<?php if ( $required_individual_legend > '' ) { ?>
+				<p><?php echo $required_individual_legend; ?> </p>
+			<?php } ?> 								
+
+			<?php if ( $required_group_legend > '' ) { ?>
+				<p><?php echo $required_group_legend; ?> </p>
+			<?php } ?> 								
 
 		</form>
+		</div>
 		
 		<?php 
 		
@@ -420,21 +477,7 @@ class WP_Issues_CRM_Constituents {
  
  		return $wic_query;
 	}
- 	
- 	public function format_constituent_list ( &$wic_query ) {
-		$output =  '<h1> Found ' .  $wic_query->found_posts . ' constituents, showing ' .  $wic_query->post_count . ' </h1>';			
-		$output .= '<ul>';	 		
- 		while (  $wic_query->have_posts() ) {
-			 $wic_query->next_post();
-			$output .= '<li>' .  $wic_query->post->wic_data_first_name .
-							  ' ' .  $wic_query->post->wic_data_last_name . 
-							  ', ' .  $wic_query->post->wic_data_street_address .
-							  ', ' .  $wic_query->post->wic_data_email .
-				 '</li>'; 	 		
- 		}
- 		$output .= '</ul>';
-		return $output;
-   }
+
 	/*
 	*
 	*	sanitize_validate_input: form sanitization and validation function
@@ -453,9 +496,18 @@ class WP_Issues_CRM_Constituents {
 
 		$clean_input = array();
    	$clean_input['form_notices'] = '';
+   	$group_required_test = '';
+   	$group_required_label = '';
     	
    	foreach ( $this->constituent_fields as $field ) {
 			$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? sanitize_text_field( $_POST[$field['slug']] ) : ''; 		
+			
+			if ( 'group' == $field['required'] ) {
+				$group_required_test .=	$clean_input[$field['slug']];
+				$group_required_label .= ( '' == $group_required_label ) ? '' : ', ';	
+				$group_required_label .= $field['label'];	
+			}
+
 			if ( $clean_input[$field['slug']] > '' ) {
 	   		if	( "email" == $field['type'] && ! filter_var( $clean_input[$field['slug']], FILTER_VALIDATE_EMAIL ) ) {
 	   			$clean_input['form_notices'] .= __( 'Email address is not valid. ', 'wp-issues-crm' );
@@ -465,7 +517,7 @@ class WP_Issues_CRM_Constituents {
 					try {
 						$test = new DateTime( $clean_input[$field['slug']] );
 					}	catch ( Exception $e ) {
-						$clean_input['form_notices'] .= $field['label'] .__( 'had unsupported date format -- yyyy-mm-dd will work.', 'wp-issues-crm' );
+						$clean_input['form_notices'] .= $field['label'] .__( ' had unsupported date format -- yyyy-mm-dd will work. ', 'wp-issues-crm' );
 						$clean_input[$field['slug']] = ''; 
 						$date_error = true;
 					}	   			
@@ -473,11 +525,16 @@ class WP_Issues_CRM_Constituents {
 	   				$clean_input[$field['slug']] = date_format( $test, 'Y-m-d' );
 	   			} 
 				}						   		
+   		} else {
+				if( 'individual' == $field['required'] ) {
+					$clean_input['form_notices'] .= ' ' . sprintf( __( ' On a record save, %s is a required field. ' , 'wp-issues-crm' ), $field['label'] );				
+				}   		
    		}
+   		
    	}
 		
-		if ( '' == ( $clean_input['first_name'] . $clean_input['last_name'] . $clean_input['email'] ) ) {
-			$clean_input['form_notices'] .= __( 'On a record save, at least one of first name, last name or email is required. ', 'wp-issues-crm' );
+		if ( '' == $group_required_test && $group_required_label > '' ) {
+			$clean_input['form_notices'] .= sprintf ( __( ' On a record save, at least one among %s is required. ', 'wp-issues-crm' ), $group_required_label );
    	}
 
 		$clean_input['constituent_notes'] = isset ( $_POST['constituent_notes'] ) ? wp_kses_post ( $_POST['constituent_notes'] ) : '' ;   	
