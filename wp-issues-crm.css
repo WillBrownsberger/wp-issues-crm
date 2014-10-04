@@ -4,22 +4,164 @@
 *
 */
 
+.wic-form-open {
+	display: block;
+}
+
+.wic-form-closed {
+	display: none;
+}
+
+.wic-group-even {
+	background: #f5f0f0;
+}
+.wic-group-odd {
+	background: #f0f0fa;
+}
+
+.constituent-field-group {
+	padding: 16px 8px; 
+	max-width: 100%;
+}
+
+h3.constituent-field-group-label {
+	margin-top: 0;
+}
+
+.wic-form-button,
+#form-toggle-button {
+	background: #C6C2BA;
+	border: 0px;
+	color: white;
+	cursor: pointer;
+	font-size: 1em;
+	margin: 0px;
+	padding: 0px 8px;
+	
+}
+
+.wic-form-button:hover,
+#form-toggle-button:hover {
+	background: #D2CEC6;
+	color: black;
+}
+
+
 #constituent-form-message-box {
-	background: #aaffaa;
+	background: #e0fae0;
 	margin:  20px 0;
 	padding: 20px;
 }
 
 #constituent-form-message-box.wic-form-errors-found {
-	background: #ffeeaa;
+	background: #fff0aa;
+}
+
+#wic-constituent-list,
+#wic-forms {
+	max-width: 100%;
 }
 
 #wic-forms {
-	max-width: 640px
+	margin-bottom: 20px;
 }
 
-.constituent-list-button {
-	background: white;
-	border: none;
+.wic-label {
+	display: inline-block;
+	min-width: 160px;
+	color: #333;
+}
+
+.wic-label:hover {
+	color: #999;
 	cursor: pointer;
+}
+
+
+.wic-input {
+	background: #f6f6f6;
+	border: none;
+	min-width: 200px;
+} 
+
+.wic-input:hover {
+	background: #fff;
+	
+}
+.constituent-field-group-label {
+ 	color: #777;
+}
+
+.constituent-field-group-legend {
+	font-size: 0.8em;
+}
+
+/* 
+*
+* constituent list styling 
+*
+*/
+
+/* outer ul for whole list */
+.constituent-list {
+	list-style: none;
+	margin: 0;
+	padding-left: 0px;
+}
+
+/* alternating row colors applied to li's in outer list */
+.cl-odd {
+	background: #f5f0f0;
+}
+
+.cl-odd:hover {
+	background: #faf5f5;
+}
+
+.cl-even {
+	background: #f0f0fa;
+}
+
+.cl-even:hover {
+	background: #f5f5fa;
+}
+
+
+/* header (horizontal) list styling */
+ul.cl-headers {
+	font-size: 14px;
+	font-weight: 700;
+	list-style: none;
+	padding: 8px 8px;
+}
+
+li.cl-header,
+li.cl-field {
+	display: inline-block;
+	vertical-align: top;	
+}
+button.constituent-list-button
+ {
+	border: none;	
+	cursor: pointer;
+	margin: 0;
+	padding: 0;
+	text-align: left; 
+	width: 100%;
+}
+
+ul.constituent-list-line {
+ 	
+	display: inline-block;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	padding: 8px 8px;
+	vertical-align: top;
+	list-style: none;
+	width: 100%;	
+}
+
+#full-width-content-wrapper .constituent-list li {
+	max-width: 100%;
 }

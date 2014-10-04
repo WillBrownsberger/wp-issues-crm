@@ -30,7 +30,7 @@ class WP_Issues_CRM_Definitions {
 		array (
 			'name'		=> 'links',
 			'label'		=>	'Identity Codes',
-			'legend'		=>	'Cannot be updated online.',
+			'legend'		=>	'These codes can be searched, but cannot be updated online.',
 			'order'		=> 40,
 		),	
 	);
@@ -55,7 +55,7 @@ class WP_Issues_CRM_Definitions {
 			'group'	=>	'required',
 			'label'	=>	'First Name',
 			'like'	=>	true,	
-			'list'	=> '20',
+			'list'	=> '14',
 			'online'	=>	true,	
 			'order'	=>	10,
 			'required'	=> 'group',
@@ -80,7 +80,7 @@ class WP_Issues_CRM_Definitions {
 			'group'	=>	'required',
 			'label'	=>	'Last Name',
 			'like'	=>	true,
-			'list'	=> '20',
+			'list'	=> '14',
 			'online'	=>	true,
 			'order'	=>	20,
 			'required'	=> 'group',
@@ -92,7 +92,7 @@ class WP_Issues_CRM_Definitions {
 			'group'	=>	'required',
 			'label'	=>	'eMail',
 			'like'	=>	true,
-			'list'	=> '20',
+			'list'	=> '28',
 			'online'	=>	true,
 			'order'	=>	30,
 			'required'	=> 'group',
@@ -104,7 +104,7 @@ class WP_Issues_CRM_Definitions {
 			'group'	=>	'contact',
 			'label'	=>	'Land Line',
 			'like'	=>	true,
-			'list'	=> '10',
+			'list'	=> '15',
 			'online'	=>	true,
 			'order'	=>	70,
 			'required'	=> false,
@@ -129,7 +129,7 @@ class WP_Issues_CRM_Definitions {
 			'group'	=>	'contact',
 			'label'	=>	'Street Address',
 			'like'	=>	true,
-			'list'	=> '30',
+			'list'	=> '29',
 			'online'	=>	true,
 			'order'	=>	40,
 			'required'	=> '',
@@ -235,7 +235,7 @@ class WP_Issues_CRM_Definitions {
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
-			'order'	=>	87,
+			'order'	=>	97,
 			'required'	=> '',
 			'slug'	=> 'is_deceased',
 			'type'	=>	'check',
@@ -245,7 +245,7 @@ class WP_Issues_CRM_Definitions {
 			'group'	=>	'links',
 			'label'	=>	'CiviCRM ID',
 			'like'	=>	false,
-			'online'	=>	false,
+			'online'	=>	true,
 			'order'	=>	1,
 			'required'	=> '',
 			'slug'	=> 'civicrm_id',
@@ -280,6 +280,8 @@ class WP_Issues_CRM_Definitions {
 		
 	public function __construct() {
 		add_action( 'init', array( $this, 'custom_post_type' ), 0 );
+		$this->constituent_field_groups = $this->multi_array_key_sort ( $this->constituent_field_groups, 'order' );
+		$this->constituent_fields		  = $this->multi_array_key_sort ( $this->constituent_fields, 'order' );
 	}
 
 	// Register Custom Post Type
@@ -316,7 +318,7 @@ class WP_Issues_CRM_Definitions {
 			'supports'            => array( 'title', 'author', 'editor', 'thumbnail', 'revisions', 'custom-fields', ),
 			// comments are not private; labels inappropriate
 			// general editor doesn't make sense
-			'taxonomies'          => array( 'category' ),
+			// 'taxonomies'          => array( 'category' ),
 			'hierarchical'        => false,
 			'public'              => false, // controls if view link appears in edit menu (but not whether URL is visible on front end)
 			'show_ui'             => true, // exclusively through our front end
@@ -333,6 +335,23 @@ class WP_Issues_CRM_Definitions {
 		register_post_type( 'wic_constituent', $args );
 	
 	}
+	
+	/*
+	*	sort array of arrays by one value of the arrays
+	*
+	*/		
+	public function multi_array_key_sort ( $multi_array, $key )	{
+		$temp = array();
+		foreach ( $multi_array as $line_item ) {
+			 $temp[$line_item[$key]] = $line_item;
+		}
+		ksort ($temp);
+		$sorted_line_items = array();
+		foreach ($temp as $key => $value ) {
+			array_push( $sorted_line_items, $value );			
+		}
+		return ( $sorted_line_items) ;
+	}	
 	
 }
 

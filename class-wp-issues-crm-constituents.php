@@ -65,6 +65,7 @@ class WP_Issues_CRM_Constituents {
 			$next_form_output['next_action'] 		=	'search';
 			$next_form_output['errors_found']		=	false;
 			$next_form_output['strict_match']		=	false;
+			$next_form_output['initial_form_state']= 	'wic-form-open';
 		}
 	/*
 	*
@@ -91,6 +92,7 @@ class WP_Issues_CRM_Constituents {
 	*			-- set by main logic in this function 
 	*		6.	errors_found -- set by main logic in this function; serves only to support formatting of message 
 	*		7.	strict match check box -- passed through from form
+	*		8. initial form state (show/hide)
 	*
 	*/
 	public function wp_issues_crm_constituents() {
@@ -207,6 +209,7 @@ class WP_Issues_CRM_Constituents {
 			if ( $show_list ) {
 				$wic_list_constituents = new WP_Issues_CRM_Constituents_List ($wic_query);			
 				$constituent_list = $wic_list_constituents->constituent_list;
+				$next_form_output['initial_form_state'] = 'wic-form-closed';
 			} else {
 				$constituent_list = '';			
 			}
@@ -240,6 +243,7 @@ class WP_Issues_CRM_Constituents {
 	*		5. next_action (search/update/save) 
 	*		6.	errors_found 
 	*		7.	strict match check box
+	*		8. initial form state
 	* 
 	*/
 	
@@ -249,28 +253,33 @@ class WP_Issues_CRM_Constituents {
 		echo '<span style="color:green;"> $_POST:';  		
   		var_dump ($next_form_output);
   		echo '</span>'; */ 
+		if ( 'wic-form-closed' == $next_form_output['initial_form_state'] ) {
+			echo '<button id = "form-toggle-button" type="button" onclick = "toggleConstituentForm()">' . __( 'Show Search Form', 'wp-issues-crm' ) . '</button>';		
+		}
 		
-		?><div id='wic-forms'>
-		<h2><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></h2>
+		?><div id='wic-forms' class = "<?php echo $next_form_output['initial_form_state'] ?>">
+
 		<form id = "constituent-form" method="POST" autocomplete = "on">
-			<?php 
-			/* notices section */
-			$notice_class = $next_form_output['errors_found'] ? 'wic-form-errors-found' : 'wic-form-no-errors';
-			if ( $next_form_output['form_notices'] != '' ) { ?>
-		   	<div id="constituent-form-message-box" class = "<?php echo $notice_class; ?>" ><?php echo $next_form_output['form_notices']; ?></div>
-		   <?php }
-		   
-			/* first instance of buttons */		   
-	  		?><button name="main_button" type="submit" value = "<?php echo $next_form_output['next_action']; ?>"><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></button>	  
-
-			<?php if ( 'update' == $next_form_output['next_action'] || 'save' == $next_form_output['next_action'] ) { ?>
-				<button name="main_button" type="submit" value = "search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
-			<?php } ?>		 		
-
-	  		<button name="reset_button" type="submit" value = "<?php echo 'reset_form' ?>"><?php _e( 'Reset Form', 'wp_issues_crm'); ?></button><?php
-		   
-			/* format meta fields */
-
+			<div class = "constituent-field-group wic-group-odd">
+				<h2><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></h2>
+				<?php 
+				/* notices section */
+				$notice_class = $next_form_output['errors_found'] ? 'wic-form-errors-found' : 'wic-form-no-errors';
+				if ( $next_form_output['form_notices'] != '' ) { ?>
+			   	<div id="constituent-form-message-box" class = "<?php echo $notice_class; ?>" ><?php echo $next_form_output['form_notices']; ?></div>
+			   <?php }
+			   
+				/* first instance of buttons */		   
+		  		?><button class = "wic-form-button" name="main_button" type="submit" value = "<?php echo $next_form_output['next_action']; ?>"><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></button>	  
+	
+				<?php if ( 'save' == $next_form_output['next_action'] ) {  // show this on save, but not update -- on update, have too much data in form, need to reset ?>  
+					<button  class = "wic-form-button" name="main_button" type="submit" value = "search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
+				<?php } ?>		 		
+	
+		  		<button  class = "wic-form-button" name="reset_button" type="submit" value = "<?php echo 'reset_form' ?>"><?php _e( 'Reset Form', 'wp_issues_crm'); ?></button>
+			</div>   
+		
+			<?php
 			/* initialize field flags and legends */
 			$required_individual = '';
 			$required_group = '';
@@ -280,15 +289,16 @@ class WP_Issues_CRM_Constituents {
 			$contains_legend = false;
 
 
-			$sorted_groups = $this->multi_array_key_sort ( $this->constituent_field_groups, 'order' );	
-		   foreach ( $sorted_groups as $group ) {
+			/* format meta fields  -- loop through constituent field groups and within them through fields */
+			$group_count = 0;
+		   foreach ( $this->constituent_field_groups as $group ) {
 				$filtered_fields = $this->select_key ( $this->constituent_fields, 'group', $group['name'] );
-				$sorted_filtered_fields = $this->multi_array_key_sort( $filtered_fields, 'order' );
-
-				echo '<div class = "constituent-field-group" id = "' . $group['name'] . '">' .
+				$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
+				$group_count++;
+				echo '<div class = "constituent-field-group ' . $row_class . '" id = "' . $group['name'] . '">' .
 					'<h3 class = "constituent-field-group-label">' . $group['label'] . '</h3>' .
 					'<p class = "constituent-field-group-legend">' . $group['legend'] . '</p>';
-					foreach ( $sorted_filtered_fields as $field ) {	
+					foreach ( $filtered_fields as $field ) {	
 
 						/* set flags (toggling for each field) and legends (setting if for any field) */
 						if ( 'update' == $next_form_output['next_action'] || 'save' == $next_form_output['next_action'] ) {
@@ -313,16 +323,19 @@ class WP_Issues_CRM_Constituents {
 							case 'email':						
 							case 'text':
 							case 'date':
-								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' . $required_individual . $required_group . $contains . ' '; ?></label>
-								<input  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="text" value="<?php echo $next_form_output[$field['slug']]; ?>" /></p><?php 
+								?><p><label class="wic-label" for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' . $required_individual . $required_group . $contains . ' '; ?></label>
+								<input class="wic-input" id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="text" value="<?php echo $next_form_output[$field['slug']]; ?>" /></p><?php 
 								break;
 							case 'readonly':
-								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' ; ?></label>
-								<input  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="text" value="<?php echo $next_form_output[$field['slug']]; ?>" readonly /></p><?php 
+								if ( 'search' == $next_form_output['next_action'] || 'update' == $next_form_output['next_action'] ) {
+									$readonly = ( 'update' == $next_form_output['next_action'] ) ? 'readonly' : '';
+									?><p><label class="wic-label" for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' ; ?></label>
+									<input class="wic-input"  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="text" value="<?php echo $next_form_output[$field['slug']]; ?>" <?php echo $readonly ?> /></p><?php
+								} 
 								break;
 							case 'check':
-								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' ; ?></label>
-								<input  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="checkbox"  value="1" <?php checked( $next_form_output[$field['slug']], 1 );?> /></p><?php
+								?><p><label class="wic-label" for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' ; ?></label>
+								<input class="wic-input"  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="checkbox"  value="1" <?php checked( $next_form_output[$field['slug']], 1 );?> /></p><?php
 								break;
 							case 'dropdown':
 
@@ -334,8 +347,8 @@ class WP_Issues_CRM_Constituents {
 								$option_array =  $field['type'];
 								array_push( $option_array, $not_selected_option );
 
-								?><p><label for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . $required_individual . $required_group ; ?></label>
-								<select id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" >
+								?><p><label class="wic-label" for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . $required_individual . $required_group ; ?></label>
+								<select class="wic-input"  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" >
 									<?php
 									$p = '';
 									$r = '';
@@ -351,65 +364,56 @@ class WP_Issues_CRM_Constituents {
 								'</select></p>';						
 						}
 					} // close foreach 				
-				echo '<div>';		   
+				echo '</div>';		   
 		   }
 		
-			if ( 'search' != $next_form_output['next_action'] ){ ?> 
-				<p><label for="constituent_notes"><?php _e( "Constituent Notes", 'wp-issues-crm' ); ?></label></p>
-				<p><textarea id="constituent_notes" name="constituent_notes" rows="10" cols="50"><?php echo $next_form_output['constituent_notes']; ?></textarea></p> 
-			<?php } ?>
+			if ( 'search' != $next_form_output['next_action'] ){  
+				$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd"; 
+				$group_count++;
+				echo '<div class = "constituent-field-group ' . $row_class . '" id = "constituent-notes">';?>				
+					<p><label for="constituent_notes"><?php _e( "Constituent Notes", 'wp-issues-crm' ); ?></label></p>
+					<p><textarea class = "wic-input" id="constituent_notes" name="constituent_notes" rows="10" cols="50"><?php echo $next_form_output['constituent_notes']; ?></textarea></p>
+				</div> 
+			<?php } 
 			
-			<?php if ( 'update' == $next_form_output['next_action'] ) { ?>
-				<p><a href="<?php echo( home_url( '/' ) ) . 'wp-admin/post.php?post=' . $next_form_output['constituent_id'] . '&action=edit' ; ?>" class = "back-end-link"><?php printf ( __('Direct edit constituent # %1$s <br/>', 'wp_issues_crm'), $next_form_output['constituent_id'] ); ?></a></p>
-			<?php } ?>		
-		
-			<input type = "hidden" id = "constituent_id" name = "constituent_id" value ="<?php echo $next_form_output['constituent_id']; ?>" />					
-	  		
-	  		<button id="main_button" name="main_button" type="submit" value = "<?php echo $next_form_output['next_action']; ?>"><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></button>	  
-
-			<?php if ( 'update' == $next_form_output['next_action'] || 'save' == $next_form_output['next_action'] ) { ?>
-				<button id="redo_search_button" name="main_button" type="submit" value = "search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
-			<?php } ?>		 		
-
-	  		<button id="reset_button" name="reset_button" type="submit" value = "<?php echo 'reset_form' ?>"><?php _e( 'Reset Form', 'wp_issues_crm'); ?></button>
-
-	 		<?php wp_nonce_field( 'wp_issues_crm_constituent', 'wp_issues_crm_constituent_nonce_field', true, true ); ?>
-
-		   
-			<?php if ( $contains_legend ) { ?>
-				<p><label for="strict_match"><?php echo '(%) ' . __( 'Full-text search enabled for these fields -- require strict match instead? ' , 'wp-issues-crm' ) ; ?></label>
-				<input  id="strict_match" name="strict_match" type="checkbox"  value="1" <?php checked( $next_form_output['strict_match'], 1 );?> /></p>
-			<?php } ?>
-
-			<?php if ( $required_individual_legend > '' ) { ?>
-				<p><?php echo $required_individual_legend; ?> </p>
-			<?php } ?> 								
-
-			<?php if ( $required_group_legend > '' ) { ?>
-				<p><?php echo $required_group_legend; ?> </p>
-			<?php } ?> 								
+			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
+			echo '<div class = "constituent-field-group ' . $row_class . '" id = "bottom-button-group">';?>
+				<?php if ( 'update' == $next_form_output['next_action'] ) { ?>
+					<p><a href="<?php echo( home_url( '/' ) ) . 'wp-admin/post.php?post=' . $next_form_output['constituent_id'] . '&action=edit' ; ?>" class = "back-end-link"><?php printf ( __('Direct edit constituent # %1$s <br/>', 'wp_issues_crm'), $next_form_output['constituent_id'] ); ?></a></p>
+				<?php } ?>		
+			
+				<input type = "hidden" id = "constituent_id" name = "constituent_id" value ="<?php echo $next_form_output['constituent_id']; ?>" />					
+		  		
+		  		<button  class = "wic-form-button" id="main_button" name="main_button" type="submit" value = "<?php echo $next_form_output['next_action']; ?>"><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></button>	  
+	
+				<?php if ( 'save' == $next_form_output['next_action'] ) { ?>
+					<button  class = "wic-form-button" id="redo_search_button" name="main_button" type="submit" value = "search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
+				<?php } ?>		 		
+	
+		  		<button  class = "wic-form-button" id="reset_button" name="reset_button" type="submit" value = "<?php echo 'reset_form' ?>"><?php _e( 'Reset Form', 'wp_issues_crm'); ?></button>
+	
+		 		<?php wp_nonce_field( 'wp_issues_crm_constituent', 'wp_issues_crm_constituent_nonce_field', true, true ); ?>
+	
+			   
+				<?php if ( $contains_legend ) { ?>
+					<p><label for="strict_match"><?php echo '(%) ' . __( 'Full-text search enabled for these fields -- require strict match instead? ' , 'wp-issues-crm' ) ; ?></label>
+					<input  id="strict_match" name="strict_match" type="checkbox"  value="1" <?php checked( $next_form_output['strict_match'], 1 );?> /></p>
+				<?php } ?>
+	
+				<?php if ( $required_individual_legend > '' ) { ?>
+					<p><?php echo $required_individual_legend; ?> </p>
+				<?php } ?> 								
+	
+				<?php if ( $required_group_legend > '' ) { ?>
+					<p><?php echo $required_group_legend; ?> </p>
+				<?php } ?> 
+			</div>								
 
 		</form>
 		</div>
 		
 		<?php 
 		
-	}
-	/*
-	*	sort array of arrays by one value of the arrays
-	*
-	*/		
-	public function multi_array_key_sort ( $multi_array, $key )	{
-		$temp = array();
-		foreach ( $multi_array as $line_item ) {
-			 $temp[$line_item[$key]] = $line_item;
-		}
-		ksort ($temp);
-		$sorted_line_items = array();
-		foreach ($temp as $key => $value ) {
-			array_push( $sorted_line_items, $value );			
-		}
-		return ( $sorted_line_items) ;
 	}
 
 	/*
@@ -444,7 +448,7 @@ class WP_Issues_CRM_Constituents {
 			$index = 1;
 			$ignored_fields_list = '';
 	 		foreach ( $this->constituent_fields as $field ) {
-	 			if( $next_form_output[$field['slug']] > '' && ( ( 'new' == $search_mode ) || $field['dedup'] ) && ( 'readonly' != $field['type'] ) )  { 
+	 			if( $next_form_output[$field['slug']] > '' && ( 'new' == $search_mode  || $field['dedup'] ) )  { 
 					if ( ( $index - 1 ) < $this->search_terms_max )	{		
 							$meta_query_args[$index] = array(
 							'key' 	=> $this->wic_metakey . $field['slug'], // wants key, not meta_key, otherwise searches across all keys 
@@ -462,9 +466,11 @@ class WP_Issues_CRM_Constituents {
 	 				$this->search_terms_max, $ignored_fields_list ); 
 	 		} 
 	 		$query_args = array (
-	 			'posts_per_page' => 50,
+	 			'posts_per_page' => 100,
 	 			'post_type' 	=>	'wic_constituent',
 	 			'meta_query' 	=> $meta_query_args, 
+	 			'orderby'		=> 'title',
+	 			'order'			=> 'ASC'
 	 		);
 	 	} elseif ( 'db_check' == $search_mode ) { 
 			$query_args = array (
@@ -540,6 +546,8 @@ class WP_Issues_CRM_Constituents {
 		$clean_input['constituent_notes'] = isset ( $_POST['constituent_notes'] ) ? wp_kses_post ( $_POST['constituent_notes'] ) : '' ;   	
    	$clean_input['constituent_id'] = $_POST['constituent_id']; // always included in form; 0 if unknown;
 		$clean_input['strict_match']	=	isset( $_POST['strict_match'] ) ? true : false; // only updated on the form; only affects search_constituents
+		$clean_input['initial_form_state'] = 'wic-form-open';		
+		
    	return ( $clean_input );
    } 
    /*
