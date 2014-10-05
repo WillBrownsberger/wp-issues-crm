@@ -396,7 +396,7 @@ class WP_Issues_CRM_Constituents {
 	
 			   
 				<?php if ( $contains_legend ) { ?>
-					<p><label for="strict_match"><?php echo '(%) ' . __( 'Full-text search enabled for these fields -- require strict match instead? ' , 'wp-issues-crm' ) ; ?></label>
+					<p><label class="wic-label" for="strict_match"><?php echo '(%) ' . __( 'Full-text search enabled for these fields -- require strict match instead? ' , 'wp-issues-crm' ) ; ?></label>
 					<input  id="strict_match" name="strict_match" type="checkbox"  value="1" <?php checked( $next_form_output['strict_match'], 1 );?> /></p>
 				<?php } ?>
 	
