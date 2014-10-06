@@ -117,7 +117,8 @@ class WP_Issues_CRM {
 	public function show_dashboard() {
 		echo '<div class = "constituent-field-group wic-group-odd">';
 		echo '<h1>Dashboard under development</h1>' . 
-		'<h2>"New constituent search" only option implemented so far</h2>' .			
+		'<h2>"New constituent search" only option implemented so far on this screen. </h2>' .
+		'<h2> The search option feeds through to constituent save and update functions, which are fully implemented.</h2>' . 			
 		'</div>';
 	}
 }

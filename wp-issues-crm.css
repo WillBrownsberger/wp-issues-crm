@@ -33,7 +33,8 @@ h3.constituent-field-group-label {
 }
 
 .wic-form-button,
-#form-toggle-button {
+#form-toggle-button,
+#form-toggle-button-on-list  {
 	background: #C6C2BA;
 	border: 0px;
 	color: white;
@@ -45,12 +46,14 @@ h3.constituent-field-group-label {
 	
 }
 
+#form-toggle-button-on-list, 
 #form-toggle-button {
 	margin-left: 20px; 
 }
 
 .wic-form-button:hover,
-#form-toggle-button:hover {
+#form-toggle-button:hover,
+#form-toggle-button-on-list:hover {
 	background: #D2CEC6;
 	color: black;
 }

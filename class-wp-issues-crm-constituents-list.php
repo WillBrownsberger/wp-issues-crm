@@ -35,8 +35,8 @@ class WP_Issues_CRM_Constituents_List {
 		$output = '<div id="wic-constituent-list"><form method="POST">' . 
 			'<div class = "constituent-field-group wic-group-odd">
 				<h2> Found ' . $wic_query->found_posts . ' constituents, showing ' . $wic_query->post_count . '</h2>' . 
-				'<button id = "form-toggle-button" type="button" onclick = "toggleConstituentForm()">' . __( 'Show Search', 'wp-issues-crm' ) . '</button>' .
-				'<button id = "constituent-export-button" class = "wic-form-button" type="button" >' . __( 'Export (not hooked up yet)', 'wp-issues-crm' ) . '</button>' .
+				'<button id = "form-toggle-button-on-list" type="button" onclick = "toggleConstituentForm()">' . __( 'Show Search', 'wp-issues-crm' ) . '</button>' .
+				'<button id = "constituent-export-button" class = "wic-form-button" type="button" >' . __( 'Export (not built yet)', 'wp-issues-crm' ) . '</button>' .
 				'</div>';
 		$line_count = 1;	
 		$output .= '<ul class = "constituent-list">' .  // out ul for the list
