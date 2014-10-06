@@ -33,7 +33,11 @@ class WP_Issues_CRM_Constituents_List {
   public function format_constituent_list( &$wic_query) {
  		global $wic_definitions;
 		$output = '<div id="wic-constituent-list"><form method="POST">' . 
-			'<div class = "constituent-field-group wic-group-odd"><h2> Found ' . $wic_query->found_posts . ' constituents, showing ' . $wic_query->post_count . ' </h2></div>';
+			'<div class = "constituent-field-group wic-group-odd">
+				<h2> Found ' . $wic_query->found_posts . ' constituents, showing ' . $wic_query->post_count . '</h2>' . 
+				'<button id = "form-toggle-button" type="button" onclick = "toggleConstituentForm()">' . __( 'Show Search', 'wp-issues-crm' ) . '</button>' .
+				'<button id = "constituent-export-button" class = "wic-form-button" type="button" >' . __( 'Export (not hooked up yet)', 'wp-issues-crm' ) . '</button>' .
+				'</div>';
 		$line_count = 1;	
 		$output .= '<ul class = "constituent-list">' .  // out ul for the list
 			'<li class = "cl-odd">' .							// header is a list item with a ul within it
@@ -46,7 +50,7 @@ class WP_Issues_CRM_Constituents_List {
 				$wic_query->next_post();
 				$line_count++;
 				$row_class = ( 0 == $line_count % 2 ) ? "cl-even" : "cl-odd";
-				$output .= '<li><button name="direct_button" type="submit" class = "constituent-list-button ' . $row_class . '" value =" '.  $wic_query->post->ID . '">';		
+				$output .= '<li><button name="wic_constituent_direct_button" type="submit" class = "constituent-list-button ' . $row_class . '" value =" '.  $wic_query->post->ID . '">';		
 				$output .= '<ul class = "constituent-list-line">';			
 					foreach ( $this->constituent_fields as $field ) {
 						$key = $wic_definitions->wic_metakey . $field['slug'];
@@ -66,4 +70,3 @@ class WP_Issues_CRM_Constituents_List {
    } // close function
 }	
 
-// $wic_list_constituents = new WP_Issues_CRM_Constituents_List;

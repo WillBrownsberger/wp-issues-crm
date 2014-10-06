@@ -24,6 +24,10 @@
 	max-width: 100%;
 }
 
+.constituent-field-group h2 {
+	display: inline-block;
+}
+
 h3.constituent-field-group-label {
 	margin-top: 0;
 }
@@ -34,10 +38,15 @@ h3.constituent-field-group-label {
 	border: 0px;
 	color: white;
 	cursor: pointer;
+	display: inline-block;
 	font-size: 1em;
-	margin: 0px;
+	margin-right: 8px;
 	padding: 0px 8px;
 	
+}
+
+#form-toggle-button {
+	margin-left: 20px; 
 }
 
 .wic-form-button:hover,
@@ -54,6 +63,10 @@ h3.constituent-field-group-label {
 }
 
 #constituent-form-message-box.wic-form-errors-found {
+	background: #fae0e0;
+}
+
+#constituent-form-message-box.wic-form-search-notices {
 	background: #fff0aa;
 }
 
@@ -63,7 +76,7 @@ h3.constituent-field-group-label {
 }
 
 #wic-forms {
-	margin-bottom: 20px;
+	border-bottom: 6px solid #999;
 }
 
 .wic-label {
@@ -72,6 +85,13 @@ h3.constituent-field-group-label {
 	color: #333;
 }
 
+.wic-label-2 {
+	display: inline-block;
+	color: #333;
+	padding: 0 20px;
+}
+
+.wic-label-2:hover,
 .wic-label:hover {
 	color: #999;
 	cursor: pointer;
@@ -163,5 +183,9 @@ ul.constituent-list-line {
 }
 
 #full-width-content-wrapper .constituent-list li {
+	max-width: 100%;
+}
+
+#full-width-content-wrapper #wic-forms p {
 	max-width: 100%;
 }

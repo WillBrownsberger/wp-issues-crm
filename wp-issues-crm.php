@@ -67,3 +67,59 @@ function wic_utilities_script_setup() {
 	}
 }
 add_action('wp_enqueue_scripts', 'wic_utilities_script_setup');
+
+
+class WP_Issues_CRM {
+
+	public function __construct() {
+		add_shortcode( 'wp_issues_crm', array( $this, 'wp_issues_crm' ) );
+	}
+		
+	public function wp_issues_crm() {
+
+		// here declare as global all the  classes that implement forms
+		global $wp_issues_crm_constituents;
+		 
+		// here run list of forms to buttons 
+		echo '<form id = "top-level-form" method="POST" autocomplete = "on">';
+		echo '<button class = "wic-form-button" type="submit" name = "wic_top_menu_button" value = "dashboard">' . __( 'Dashboard (not built yet)', 'wp-issues-crm' ) . '</button>';
+		echo '<button class = "wic-form-button" type="submit" name = "wic_top_menu_button" value = "constituents">' . __( 'New Constituent Search', 'wp-issues-crm' ) . '</button>';
+		echo '<button class = "wic-form-button" type="submit" name = "wic_top_menu_button" value = "issues">' . __( 'New Issue (not built yet)', 'wp-issues-crm' ) . '</button>';
+		echo '</form>';		
+
+		// list all button names for subsidiary forms and the top menu button		
+		if ( // default is show dashboard
+				! isset ( $_POST['wic_constituent_main_button'] ) &&
+				! isset ( $_POST['wic_constituent_direct_button'] ) && 
+				! isset ( $_POST['wic_top_menu_button'] )
+
+				) 
+		{
+			$this->show_dashboard();
+		} elseif ( isset ( $_POST['wic_top_menu_button'] ) ) { // act on buttons
+			switch ( $_POST['wic_top_menu_button'] ) {
+				case 'dashboard':
+					$this->show_dashboard();
+					break;
+				case 'constituents':
+					$wp_issues_crm_constituents = new WP_Issues_CRM_Constituents( 0 );
+					break;
+			}
+		} else { // route second level buttons from classes	
+			if ( isset ( $_POST['wic_constituent_main_button'] ) 
+			 ||  isset ( $_POST['wic_constituent_direct_button'] ) )	{ 
+				$wp_issues_crm_constituents = new WP_Issues_CRM_Constituents( 0 ); 
+		 	}
+		 	// invoke each subsidiary form's button names  
+		} 
+	}
+	
+	public function show_dashboard() {
+		echo '<div class = "constituent-field-group wic-group-odd">';
+		echo '<h1>Dashboard under development</h1>' . 
+		'<h2>"New constituent search" only option implemented so far</h2>' .			
+		'</div>';
+	}
+}
+
+$wp_issues_crm = new WP_Issues_CRM;

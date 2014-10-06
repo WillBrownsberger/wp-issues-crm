@@ -169,7 +169,7 @@ class WP_Issues_CRM_Definitions {
 			'list'	=> '0',
 			'online'	=>	true,
 			'order'	=>	65,
-			'required'	=> '',
+			'required'	=> 'individual',
 			'slug'	=> 'zip',
 			'type'	=>	'text',
 			),
