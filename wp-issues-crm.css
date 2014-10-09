@@ -107,9 +107,15 @@ h3.constituent-field-group-label {
 	min-width: 200px;
 } 
 
+.wic-input-checked:hover, 
 .wic-input:hover {
 	background: #fff;
-	
+}
+
+.wic-input-checked {
+	background: #f6f6f6;
+	border: none;
+
 }
 .constituent-field-group-label {
  	color: #777;

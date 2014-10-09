@@ -351,7 +351,112 @@ class WP_Issues_CRM_Definitions {
 			array_push( $sorted_line_items, $value );			
 		}
 		return ( $sorted_line_items) ;
+	}
+	
+	public function create_check_control ( $control_args ) {
+		
+		/* control args = array (
+			'field_name_id' 		=> name/id
+			'field_label'			=>	label for field
+			'label_class'			=> for css
+			'value'					=> from database or blank
+			'read_only_flag'		=>	whether should be a read only -- true false
+			'field_label_suffix'	=> any string to append to the field label in control (but not in drop down)								
+		);	
+		*/			
+
+		$read_only_flag 		= false; 				
+		$field_label_suffix 	= '';
+		$label_class = 'wic-label';
+
+		
+		extract ( $control_args, EXTR_OVERWRITE ); 
+	
+		$readonly = $read_only_flag ? 'readonly' : '';
+		 
+		$control = '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . ' ' . $field_label_suffix . '</label>';
+		$control .= '<input class="wic-input-checked"  id="' . $field_name_id . ' " name="' . $field_name_id . '" type="checkbox"  value="1"' . checked( $value, 1, false) . $readonly  .'/>';	
+
+		return ( $control );
+
+	}
+	
+		
+	
+	
+	
+	
+	public function create_text_control ( $control_args ) {
+		
+		/* control args = array (
+			'field_name_id' 		=> name/id
+			'field_label'			=>	label for field
+			'label_class'			=> for css
+			'value'					=> from database or blank
+			'read_only_flag'		=>	whether should be a read only -- true false
+			'field_label_suffix'	=> any string to append to the field label in control (but not in drop down)								
+		);	
+		*/			
+
+		$read_only_flag 		= false; 				
+		$field_label_suffix 	= '';
+		$label_class = 'wic-label';
+
+		
+		extract ( $control_args, EXTR_OVERWRITE ); 
+	
+		$readonly = $read_only_flag ? 'readonly' : '';
+		 
+		$control = '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . ' ' . $field_label_suffix . '</label>';
+		$control .= '<input class="wic-input" id="' . $field_name_id . ' " name="' . $field_name_id . '" type="text" value="' . $value . '"' . $readonly  . '/>';
+			
+		return ( $control );
+
+	}
+	
+	
+	public function create_select_control ( $control_args ) {
+		
+		/* $control_args = array (
+			'field_name_id' => name/id
+			'field_label'	=>	label for field
+			'selected'		=> initial value 
+			'select_array'	=>	the options for the selected -- key value array with keys 'value' and 'label' 
+			'field_label_suffix'	=> any string to append to the field label in control (but not in drop down)
+		*/								
+
+		$label_suffix = '';
+		$selected = '';
+
+		extract ( $control_args, EXTR_OVERWRITE ); 
+
+		$control = '';
+				
+		$not_selected_option = array (
+			'value' 	=> '',
+			'label'	=> 'Select ' . $field_label,								
+		);  
+		$option_array =  $select_array;
+		array_push( $option_array, $not_selected_option );
+		
+		$control = 	'<label class="wic-label" for="' . $field_name_id . '">' . $field_label . $field_label_suffix . '</label>';
+		$control .= '<select class="wic-input" id="' . $field_name_id . '" name="' . $field_name_id . '" >';
+		$p = '';
+		$r = '';
+		foreach ( $option_array as $option ) {
+			$label = $option['label'];
+			if ( $selected == $option['value'] ) { // Make selected first in list
+				$p = '<option selected="selected" value="' . $option['value'] . '">' . $label . '</option>';
+			} else {
+				$r .= '<option value="' . $option['value'] . '">' . $label . '</option>';
+			}
+		}
+		$control .=	$p . $r .	'</select>';	
+	
+		return ( $control );
+	
 	}	
+	
 	
 }
 

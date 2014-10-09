@@ -115,7 +115,7 @@ class WP_Issues_CRM_Constituents {
 	*
 	*/
 	public function wp_issues_crm_constituents() {
-
+		
 		/* first check capabilities -- must be administrative user */
 		if ( ! current_user_can ( 'activate_plugins' ) ) { 
 			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
@@ -259,6 +259,7 @@ class WP_Issues_CRM_Constituents {
 	
 	public function display_form ( &$next_form_output ) {
 		
+		global $wic_definitions; // access for functions ( field definitions already instantiated  in construct )
 		/*
 		echo '<span style="color:green;"> $_POST:';  		
   		var_dump ($next_form_output);
@@ -328,67 +329,90 @@ class WP_Issues_CRM_Constituents {
 							if( 'individual' == $field['required'] ) {
 								$required_individual_legend = '* ' . __('Required field.', 'wp-issues-crm' );						
 							}
-						}								
-						$contains = $field['like'] ? '(%)' : '';
-						if( $field['like'] ) {
-							$contains_legend = 'true';	
+						} else { // search case								
+							$contains = $field['like'] ? '(%)' : '';
+							if( $field['like'] ) {
+								$contains_legend = 'true';	
+							}
 						}
 
-
 						$field_type = is_array( $field['type'] ) ? 'dropdown' : $field['type']; 						
+
 						switch ( $field_type ) {
 							case 'email':						
 							case 'text':
-								?><p><label class="wic-label" for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' . $required_individual . $required_group . $contains . ' '; ?></label>
-								<input class="wic-input" id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="text" value="<?php echo $next_form_output[$field['slug']]; ?>" /></p><?php 
+								$text_control_args = array (
+										'field_name_id'		=> $field['slug'],
+										'field_label'			=>	$field['label'],
+										'value'					=> $next_form_output[$field['slug']],
+										'read_only_flag'		=>	false, 
+										'field_label_suffix'	=> $required_individual . $required_group . $contains, 								
+									);
+								echo '<p>' . $wic_definitions->create_text_control ( $text_control_args ) . '</p>'; 
 								break;
 							case 'date':
 								if ( 'search' == $next_form_output['next_action'] ) { 
-									?><p><label class="wic-label" for="<?php echo $field['slug'] . '_lo' ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' >= '; ?></label>
-									<input class="wic-input" id="<?php echo $field['slug'] . '_lo'; ?>" name="<?php echo $field['slug'] . '_lo' ?>" type="text" value="<?php echo $next_form_output[$field['slug']. '_lo' ]; ?>" /><?php
-									?><label class="wic-label-2" for="<?php echo $field['slug'] . '_hi' ?>"> and <=  </label>
-									<input class="wic-input" id="<?php echo $field['slug'] . '_hi'; ?>" name="<?php echo $field['slug'] . '_hi' ?>" type="text" value="<?php echo $next_form_output[$field['slug'] . '_hi']; ?>" /></p><?php	
+									$text_control_args = array (
+										'field_name_id'		=> $field['slug'] . '_lo',
+										'field_label'			=>	$field['label'] . ' >= ' ,
+										'value'					=> $next_form_output[$field['slug'] . '_lo'],
+										'read_only_flag'		=>	false, 
+										'field_label_suffix'	=> '', 								
+									);
+									echo '<p>' . $wic_definitions->create_text_control ( $text_control_args ); 
+
+									$text_control_args = array (
+										'field_name_id'		=> $field['slug'] . '_hi',
+										'field_label'			=>	__( 'and <=', 'wp_issues_crm' ),
+										'label_class'			=> 'wic-label-2',
+										'value'					=> $next_form_output[$field['slug']. '_hi'],
+										'read_only_flag'		=>	false, 
+										'field_label_suffix'	=> '', 								
+									);
+									echo $wic_definitions->create_text_control ( $text_control_args ) . '</p>'; 
 								}	else {
-									?><p><label class="wic-label" for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' . $required_individual . $required_group . $contains . ' '; ?></label>
-									<input class="wic-input" id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="text" value="<?php echo $next_form_output[$field['slug']]; ?>" /></p><?php
+									$text_control_args = array (
+										'field_name_id'		=> $field['slug'],
+										'field_label'			=>	$field['label'],
+										'value'					=> $next_form_output[$field['slug']],
+										'read_only_flag'		=>	false, 
+										'field_label_suffix'	=> $required_individual . $required_group,  								
+									);
+									echo '<p>' . $wic_definitions->create_text_control ( $text_control_args ) . '</p>'; 
 								} 
 								break;
-							case 'readonly':
-								if ( 'search' == $next_form_output['next_action'] || 'update' == $next_form_output['next_action'] ) {
-									$readonly = ( 'update' == $next_form_output['next_action'] ) ? 'readonly' : '';
-									?><p><label class="wic-label" for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' ; ?></label>
-									<input class="wic-input"  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="text" value="<?php echo $next_form_output[$field['slug']]; ?>" <?php echo $readonly ?> /></p><?php
+							case 'readonly': 
+								if ( 'save' != $next_form_output['next_action'] ) { // do not display for save
+									$text_control_args = array (
+										'field_name_id'		=> $field['slug'],
+										'field_label'			=>	$field['label'],
+										'value'					=> $next_form_output[$field['slug']],
+										'read_only_flag'		=>	( 'update' == $next_form_output['next_action'] ), // true or false 
+										'field_label_suffix'	=> $required_individual . $required_group . $contains,  								
+									);
+									echo '<p>' . $wic_definitions->create_text_control ( $text_control_args ) . '</p>'; 
 								} 
 								break;
 							case 'check':
-								?><p><label class="wic-label" for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . ' ' ; ?></label>
-								<input class="wic-input"  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" type="checkbox"  value="1" <?php checked( $next_form_output[$field['slug']], 1 );?> /></p><?php
+								$text_control_args = array (  // args same as for text
+									'field_name_id'		=> $field['slug'],
+									'field_label'			=>	$field['label'],
+									'value'					=> $next_form_output[$field['slug']],
+									'read_only_flag'		=>	false, 
+									'field_label_suffix'	=> $required_individual . $required_group . $contains, 								
+								);
+								echo '<p>' . $wic_definitions->create_check_control ( $text_control_args ) . '</p>'; 
 								break;
 							case 'dropdown':
-
-								$selected = $next_form_output[$field['slug']];
-								$not_selected_option = array (
-									'value' 	=> '',
-									'label'	=> 'Select ' . $field['label'],								
-									);  
-								$option_array =  $field['type'];
-								array_push( $option_array, $not_selected_option );
-
-								?><p><label class="wic-label" for="<?php echo $field['slug'] ?>"><?php echo __( $field['label'], 'wp-issues-crm' ) . $required_individual . $required_group ; ?></label>
-								<select class="wic-input"  id="<?php echo $field['slug'] ?>" name="<?php echo $field['slug'] ?>" >
-									<?php
-									$p = '';
-									$r = '';
-									foreach ( $option_array as $option ) {
-										$label = $option['label'];
-										if ( $selected == $option['value'] ) { // Make selected first in list
-											$p = '<option selected="selected" value="' . $option['value'] . '">' . $label . '</option>';
-										} else {
-											$r .= '<option value="' . $option['value'] . '">' . $label . '</option>';
-										}
-									}
-								echo $p . $r .
-								'</select></p>';						
+								$select_control_args = array (
+									'field_name_id' 			=> $field['slug'],
+									'field_label'	=>	$field['label'],
+									'selected'		=> $next_form_output[$field['slug']],
+									'select_array'	=>	$field['type'], 
+									'field_label_suffix'	=> $required_individual . $required_group,								
+								);
+							echo '<p>' . $wic_definitions->create_select_control ( $select_control_args ) . '</p>'; 
+			
 						}
 					} // close foreach 				
 				echo '</div>';		   
@@ -420,11 +444,16 @@ class WP_Issues_CRM_Constituents {
 		 		<?php wp_nonce_field( 'wp_issues_crm_constituent', 'wp_issues_crm_constituent_nonce_field', true, true ); ?>
 	
 			   
-				<?php if ( $contains_legend ) { ?>
-					<p><label class="wic-label" for="strict_match"><?php echo '(%) ' . __( 'Full-text search enabled for these fields -- require strict match instead? ' , 'wp-issues-crm' ) ; ?></label>
-					<input  id="strict_match" name="strict_match" type="checkbox"  value="1" <?php checked( $next_form_output['strict_match'], 1 );?> /></p>
-				<?php } ?>
-	
+				<?php if ( $contains_legend > '') { 
+					$text_control_args = array ( 
+						'field_name_id'		=> 'strict_match',
+						'field_label'			=>	'(%) ' . __( 'Full-text search enabled for these fields -- require strict match instead? ' , 'wp-issues-crm' ),
+						'value'					=> $next_form_output['strict_match'],
+						'read_only_flag'		=>	false, 
+						'field_label_suffix'	=> '', 	
+					);
+					echo '<p>' . $wic_definitions->create_check_control ( $text_control_args ) . '</p>';
+				} ?>	
 				<?php if ( $required_individual_legend > '' ) { ?>
 					<p><?php echo $required_individual_legend; ?> </p>
 				<?php } ?> 								
@@ -475,30 +504,22 @@ class WP_Issues_CRM_Constituents {
 
 	 		foreach ( $this->constituent_fields as $field ) {
 				if ( 'date' == $field['type'] && 'new' == $search_mode ) { // handle date as range in new searches 
-					if ( $next_form_output[$field['slug'] . '_lo'] > '' ) { 
-						if ( ( $index - 1 ) < $this->search_terms_max )	{ 	
+					if ( $next_form_output[$field['slug'] . '_lo'] > '' || $next_form_output[$field['slug'] . '_hi'] > '' ) {
+						if ( ( $index - 1 ) < $this->search_terms_max )	{
+							$date_range = array ( 
+								$next_form_output[$field['slug'] . '_lo'],
+								$next_form_output[$field['slug'] . '_hi'],						
+								); 	
 							$meta_query_args[$index] = array(
 								'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
-								'value'		=> $next_form_output[$field['slug'] . '_lo'],
-								'compare'	=>	'>=',
+								'value'		=> $date_range,
+								'compare'	=>	'between',
 							);	
 						} else { 
-							$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] . ' (low) '  : ( $ignored_fields_list .= ', ' . $field['label'] . ' (low) ' ); 
-						}
-						$index++;
+							$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] : ( $ignored_fields_list .= ', ' . $field['label'] ); 
+						}					
+					
 					}	
-					if ( $next_form_output[$field['slug'] . '_hi'] > '' ) {
-						if ( ( $index - 1 ) < $this->search_terms_max )	{		
-							$meta_query_args[$index] = array(
-								'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
-								'value'		=> $next_form_output[$field['slug'] . '_hi'],
-								'compare'	=>	'<=',
-							);	
-						} else { 
-							$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] . ' (high) ' : ( $ignored_fields_list .= ', ' . $field['label'] . ' (high) ' ); 
-						}
-						$index++;
-					}
 				} else { // standard = or like handling (including for dates in dedup mode)
 		 			if( $next_form_output[$field['slug']] > '' && ( 'new' == $search_mode  || $field['dedup'] ) )  { 
 						if ( ( ( $index - 1 ) < $this->search_terms_max ) || $field['dedup'] )	{ // allow possibility to set more dedup fields than allowed search fields		
