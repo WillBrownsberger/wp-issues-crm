@@ -405,14 +405,23 @@ class WP_Issues_CRM_Constituents {
 								break;
 							case 'dropdown':
 								$select_control_args = array (
-									'field_name_id' 			=> $field['slug'],
-									'field_label'	=>	$field['label'],
-									'selected'		=> $next_form_output[$field['slug']],
-									'select_array'	=>	$field['type'], 
+									'field_name_id' 		=> $field['slug'],
+									'field_label'			=>	$field['label'],
+									'selected'				=> $next_form_output[$field['slug']],
+									'select_array'			=>	$field['type'], 
 									'field_label_suffix'	=> $required_individual . $required_group,								
 								);
-							echo '<p>' . $wic_definitions->create_select_control ( $select_control_args ) . '</p>'; 
-			
+								echo '<p>' . $wic_definitions->create_select_control ( $select_control_args ) . '</p>';
+								break; 
+							
+							case 'phones':
+								$phone_group_args	= array (
+									'phone_group_id'		=> $field['slug'],
+									'phone_group_label'		=> $field['label'],
+									'phone_group_data_array'	=>	$next_form_output[$field['slug']],
+									'phone_group_label_suffix'	=> $required_individual . $required_group . $contains,		
+								);
+							echo $wic_definitions->create_phone_group ( $phone_group_args );
 						}
 					} // close foreach 				
 				echo '</div>';		   

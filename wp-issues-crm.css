@@ -198,3 +198,8 @@ ul.constituent-list-line {
 #full-width-content-wrapper #wic-forms p {
 	max-width: 100%;
 }
+
+.phone-number-row-hidden {
+	display: none;
+}
+

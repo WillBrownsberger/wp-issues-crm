@@ -8,6 +8,31 @@ class WP_Issues_CRM_Definitions {
 	
 	public $wic_metakey = 'wic_data_';	
 	
+	
+	public $phone_type_options = array(	
+		array(
+			'value'	=> '', // use empty string as base value for consistency with other phone variables
+			'label'	=>	'Phone' ),
+		array(
+			'value'	=> '1',
+			'label'	=>	'Mobile' ),
+		array(
+			'value'	=> '2',
+			'label'	=>	'Home' ),
+		array(
+			'value'	=> '3',
+			'label'	=>	'Work' ),
+		array(
+			'value'	=> '4',
+			'label'	=>	'Home Fax' ),					
+		array(
+			'value'	=> '5',
+			'label'	=>	'Work Fax' ),
+		array(
+			'value'	=> '6',
+			'label'	=>	'Assistant' ),
+		);
+		
 	public $constituent_field_groups = array (
 		array (
 			'name'		=> 'required',
@@ -114,14 +139,14 @@ class WP_Issues_CRM_Definitions {
 		array(  // 6
 			'dedup'	=>	false,
 			'group'	=>	'contact',
-			'label'	=>	'Mobile Phone',
-			'like'	=>	false,
+			'label'	=>	'Phones',
+			'like'	=>	true,
 			'list'	=> '0',
 			'online'	=>	true,
 			'order'	=>	80,
 			'required'	=> '',
-			'slug'	=> 'mobile_phone',
-			'type'	=>	'text',
+			'slug'	=> 'phone_numbers',
+			'type'	=>	'phones',
 
 			),
 		array( // 7
@@ -374,7 +399,7 @@ class WP_Issues_CRM_Definitions {
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
 		 
-		$control = '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . ' ' . $field_label_suffix . '</label>';
+		$control = ( $field_label > '' ) ?  '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . ' ' . $field_label_suffix . '</label>' : '';
 		$control .= '<input class="wic-input-checked"  id="' . $field_name_id . ' " name="' . $field_name_id . '" type="checkbox"  value="1"' . checked( $value, 1, false) . $readonly  .'/>';	
 
 		return ( $control );
@@ -392,6 +417,7 @@ class WP_Issues_CRM_Definitions {
 			'field_name_id' 		=> name/id
 			'field_label'			=>	label for field
 			'label_class'			=> for css
+			'input_class'			=>	for css
 			'value'					=> from database or blank
 			'read_only_flag'		=>	whether should be a read only -- true false
 			'field_label_suffix'	=> any string to append to the field label in control (but not in drop down)								
@@ -401,14 +427,15 @@ class WP_Issues_CRM_Definitions {
 		$read_only_flag 		= false; 				
 		$field_label_suffix 	= '';
 		$label_class = 'wic-label';
+		$input_class = 'wic-input';
 
 		
 		extract ( $control_args, EXTR_OVERWRITE ); 
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
 		 
-		$control = '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . ' ' . $field_label_suffix . '</label>';
-		$control .= '<input class="wic-input" id="' . $field_name_id . ' " name="' . $field_name_id . '" type="text" value="' . $value . '"' . $readonly  . '/>';
+		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . ' ' . $field_label_suffix . '</label>' : '' ;
+		$control .= '<input class="' . $input_class . '" id="' . $field_name_id . ' " name="' . $field_name_id . '" type="text" value="' . $value . '"' . $readonly  . '/>';
 			
 		return ( $control );
 
@@ -421,12 +448,16 @@ class WP_Issues_CRM_Definitions {
 			'field_name_id' => name/id
 			'field_label'	=>	label for field
 			'selected'		=> initial value 
+			'field_label_class'			=> for css
+			'field_input_class'			=> for css
 			'select_array'	=>	the options for the selected -- key value array with keys 'value' and 'label' 
 			'field_label_suffix'	=> any string to append to the field label in control (but not in drop down)
 		*/								
 
 		$label_suffix = '';
 		$selected = '';
+		$field_label_class = 'wic-label';
+		$field_input_class = 'wic-input'; 	
 
 		extract ( $control_args, EXTR_OVERWRITE ); 
 
@@ -439,8 +470,8 @@ class WP_Issues_CRM_Definitions {
 		$option_array =  $select_array;
 		array_push( $option_array, $not_selected_option );
 		
-		$control = 	'<label class="wic-label" for="' . $field_name_id . '">' . $field_label . $field_label_suffix . '</label>';
-		$control .= '<select class="wic-input" id="' . $field_name_id . '" name="' . $field_name_id . '" >';
+		$control = ( $field_label > '' ) ? '<label class="' . $field_label_class . '" for="' . $field_name_id . '">' . $field_label . $field_label_suffix . '</label>' : '';
+		$control .= '<select class="' . $field_input_class . '" id="' . $field_name_id . '" name="' . $field_name_id . '" >';
 		$p = '';
 		$r = '';
 		foreach ( $option_array as $option ) {
@@ -457,7 +488,83 @@ class WP_Issues_CRM_Definitions {
 	
 	}	
 	
-	
+	public function create_phone_group ( $phone_group_args ) {
+		
+		extract ( $phone_group_args, EXTR_OVERWRITE );
+		
+		$i = 'x'; // array index
+
+		$phone_group_data_array_stub_row_x = array ( // set up to generate hidden empty row
+			array( 
+			'',
+			'',
+			'',				
+			),
+		);
+
+		if ( '' == $phone_group_data_array ) { // instantiate as array with one empty row if only a string
+			$phone_group_data_array = array ();
+		}
+
+		$working_array = array_merge( $phone_group_data_array_stub_row_x, $phone_group_data_array );
+
+		$phone_group_control_set = '<div id = "' . $phone_group_id . '-control-set' . '">';
+
+		foreach ( $working_array as $phone_number ) {
+			
+			$row_class = ( 'x' == $i ) ? 'phone-number-row-hidden' : 'phone-number-row';
+			
+			$row = '<p class = "' . $row_class . '" id = "' . $phone_group_id . '-row-' . $i . '">';
+						
+			$phone_type_array = array ( 
+				'field_name_id' 	=> $phone_group_id . '[' . $i  . '][0]',
+				'field_label'		=>	'',
+				'select_array'		=>	$this->phone_type_options,
+				'selected'			=> $phone_group_data_array[$i][0],
+				'field_input_class' 	=> 'wic-phone-type-dropdown',
+				'field_label_suffix'	=> '',
+			);
+		
+			$row .= $this->create_select_control ( $phone_type_array );
+
+			$phone_number_array = array ( 
+				'field_name_id' 		=> $phone_group_id . '[' . $i  . '][1]',
+				'field_label'			=>	'',
+ 				'value'					=> $phone_group_data_array[$i][1],
+				'field_input_class' 	=> 'wic-phone-number',
+				'field_label_suffix'	=> '',
+			);
+
+			$row .= $this->create_text_control( $phone_number_array );
+
+			$phone_extension_array = array ( 
+				'field_name_id' 		=> $phone_group_id . '[' . $i  . '][2]',
+				'field_label'			=>	'',
+ 				'value'					=> $phone_group_data_array[$i][2],
+				'field_input_class' 	=> 'wic-phone-extension',
+				'field_label_suffix'	=> '',
+			);
+
+			$row .= $this->create_text_control( $phone_extension_array );
+			
+			$row .= '<button class="destroy-button" id="destroy-' . $phone_group_id . '-row-' . $i . '-button" onclick="destroyParentElement(\'destroy-' . $phone_group_id . '-row-' . $i . '-button\')" type="button">x</button>';
+			
+			$row .= '</p>';
+			
+			$phone_group_control_set .= $row;
+			
+		
+			$i = ('x' == $i ) ? 0 : ( $i + 1 );
+
+		}
+		
+		$phone_group_control_set .= '<button id = "' . $phone_group_id . '-add-button" type = "button" class = "row-add-button" onclick="moreFields(\'' . $phone_group_id . '\')" > add phone </button>';
+		$phone_group_control_set .= '</div>';
+		$phone_group_control_set .= '<div id = "' . $phone_group_id . '-row-counter">' . $i . '</div>';
+		
+		
+		return ($phone_group_control_set);	
+	}
 }
 
 $wic_definitions = new WP_Issues_CRM_Definitions;

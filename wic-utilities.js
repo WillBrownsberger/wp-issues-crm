@@ -14,9 +14,9 @@ function toggleConstituentForm() {
 	}
 }
 
-function destroyParentElement() {
-	alert('wtf?');
-	var destroyButtonParent = document.getElementById( 'destroy-button' ).parentNode;
+function destroyParentElement(elementID) {
+	
+	var destroyButtonParent = document.getElementById( elementID ).parentNode;
 	destroyButtonParent.parentNode.removeChild(destroyButtonParent); 
 }
 
@@ -29,22 +29,24 @@ function addNewInputElement() {
 	addPhoneButtonParent.insertBefore(para,addPhoneButton); 
 }
 
-var counter = 0;
 
-function moreFields() {
+function moreFields(base) {
+
+	// counter always unique since gets incremented on add, but not decremented on delete
+	var counter = document.getElementById(base + '-row-counter').innerHTML;
 	counter++;
-	var newFields = document.getElementById('readroot').cloneNode(true);
+	document.getElementById(base + '-row-counter').innerHTML = counter;
+	
+	var newFields = document.getElementById(base + '-row-x').cloneNode(true);
 	newFields.id = '';
 	newFields.style.display = 'block';
 	var newField = newFields.childNodes;
 	for (var i=0;i<newField.length;i++) {
+		newField[i].value = '';
 		var theName = newField[i].name
-		
-		if (theName)
-			newField[i].name = theName.replace('0',counter);
-		//if ( undefined != theName ) {alert('index of [ in ' + newField[i].name + 'is' + newField[i].name.indexOf("["));}
+		newField[i].name = theName.replace('[x]','[' + counter + ']');
 	}
-	var insertHere = document.getElementById('writeroot');
+	var insertHere = document.getElementById( base + '-add-button' );
 	insertHere.parentNode.insertBefore(newFields,insertHere);
 }
 
