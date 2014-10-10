@@ -4,6 +4,26 @@
 *
 */
 
+/* main form layout */
+
+#full-width-content-wrapper .constituent-list li {
+	max-width: 100%;
+}
+
+#full-width-content-wrapper #wic-forms p {
+	max-width: 100%;
+}
+
+#wic-constituent-list {
+	max-width: 100%;
+}
+
+#wic-forms {
+	border-bottom: 6px solid #999;
+	max-width: 100%;
+}
+
+
 .wic-form-open {
 	display: block;
 }
@@ -32,6 +52,8 @@ h3.constituent-field-group-label {
 	margin-top: 0;
 }
 
+
+/* buttons to show hide form */
 .wic-form-button,
 #form-toggle-button,
 #form-toggle-button-on-list  {
@@ -58,7 +80,7 @@ h3.constituent-field-group-label {
 	color: black;
 }
 
-
+/* message box and notices */
 #constituent-form-message-box {
 	background: #e0fae0;
 	margin:  20px 0;
@@ -73,15 +95,7 @@ h3.constituent-field-group-label {
 	background: #fff0aa;
 }
 
-#wic-constituent-list,
-#wic-forms {
-	max-width: 100%;
-}
-
-#wic-forms {
-	border-bottom: 6px solid #999;
-}
-
+/* individual field formatting */
 .wic-label {
 	display: inline-block;
 	min-width: 160px;
@@ -107,6 +121,7 @@ h3.constituent-field-group-label {
 	min-width: 200px;
 } 
 
+
 .wic-input-checked:hover, 
 .wic-input:hover {
 	background: #fff;
@@ -115,8 +130,54 @@ h3.constituent-field-group-label {
 .wic-input-checked {
 	background: #f6f6f6;
 	border: none;
-
 }
+
+.wic-phone-type-dropdown {
+	min-width: 140px;
+}
+
+.wic-phone-number {
+	margin-left: 20px
+}
+
+.wic-phone-extension {
+	min-width: 80px;
+	width: 80px;
+	margin-left: 10px;
+}
+
+.destroy-button {
+	background: #ee9999;
+	border: none;
+	color: #f6f6f6;
+	cursor: pointer;
+	margin-left: 10px;
+}
+
+.destroy-button:hover {
+	background: red;
+	color: white;
+	font-weight: 700;
+}
+
+/* style to line up with labels above it */
+.row-add-button {
+	background: none;
+	border: none;
+	color: #333;
+	cursor: pointer;
+	font-size: 1em;
+	margin: 0 0 0 -2px;
+	padding: 0;
+}
+
+.row-add-button:hover {
+	background: #C6C2BA;
+	color: white;
+	font-weight: 700;	
+} 
+
+
 .constituent-field-group-label {
  	color: #777;
 }
@@ -124,6 +185,17 @@ h3.constituent-field-group-label {
 .constituent-field-group-legend {
 	font-size: 0.8em;
 }
+
+/* styling of field rows */
+.hidden-template {
+	display: none;
+}
+
+.visible-templated-row {
+	display: block;
+}
+
+
 
 /* 
 *
@@ -191,15 +263,4 @@ ul.constituent-list-line {
 	width: 100%;	
 }
 
-#full-width-content-wrapper .constituent-list li {
-	max-width: 100%;
-}
-
-#full-width-content-wrapper #wic-forms p {
-	max-width: 100%;
-}
-
-.phone-number-row-hidden {
-	display: none;
-}
 

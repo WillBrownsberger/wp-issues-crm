@@ -159,7 +159,8 @@ class WP_Issues_CRM_Constituents {
 						foreach ( $this->constituent_fields as $field ) {
 							$post_field_key =  $this->wic_metakey . $field['slug'];
 							// the following isset check should be necessary only if a search requesting more than the maximum search terms is executed 
-							$next_form_output[$field['slug']] = isset ( $wic_query->post->$post_field_key ) ? $wic_query->post->$post_field_key : '';
+							// note -- don't need to unserialize phones, etc. -- wp_query does this. see save_update_constituent for serialize 
+							$next_form_output[$field['slug']] = isset ( $wic_query->post->$post_field_key ) ?  $wic_query->post->$post_field_key : '';
 						}
 						$next_form_output['constituent_notes'] = $wic_query->post->post_content;	
 						$next_form_output['constituent_id'] 	= $wic_query->post->ID;	
@@ -260,10 +261,18 @@ class WP_Issues_CRM_Constituents {
 	public function display_form ( &$next_form_output ) {
 		
 		global $wic_definitions; // access for functions ( field definitions already instantiated  in construct )
-		/*
-		echo '<span style="color:green;"> $_POST:';  		
+		
+		/* echo '<span style="color:green;"> <br /> $_POST:';  		
+  		var_dump ($_POST);
+  		echo '</span>';  
+
+		 echo '<span style="color:red;"> <br />next_form_output:';  		
   		var_dump ($next_form_output);
   		echo '</span>'; */ 
+  		
+  		echo '<span style="color:blue;"> <br />phone_numbers:';  		
+  		var_dump ($_POST['phone_numbers']);
+  		echo '</span>'; 
 
 		?><div id='wic-forms' class = "<?php echo $next_form_output['initial_form_state'] ?>">
 
@@ -408,6 +417,7 @@ class WP_Issues_CRM_Constituents {
 									'field_name_id' 		=> $field['slug'],
 									'field_label'			=>	$field['label'],
 									'selected'				=> $next_form_output[$field['slug']],
+									'select_field_placeholder' => __( 'Select', 'wp-issues-crm' ) . ' ' .$field['label'],
 									'select_array'			=>	$field['type'], 
 									'field_label_suffix'	=> $required_individual . $required_group,								
 								);
@@ -415,13 +425,25 @@ class WP_Issues_CRM_Constituents {
 								break; 
 							
 							case 'phones':
-								$phone_group_args	= array (
-									'phone_group_id'		=> $field['slug'],
-									'phone_group_label'		=> $field['label'],
-									'phone_group_data_array'	=>	$next_form_output[$field['slug']],
-									'phone_group_label_suffix'	=> $required_individual . $required_group . $contains,		
-								);
-							echo $wic_definitions->create_phone_group ( $phone_group_args );
+								if ( 'search' != $next_form_output['next_action'] ) { // do field array on search / save
+										$phone_group_args	= array (
+										'phone_group_id'		=> $field['slug'],
+										'phone_group_label'		=> $field['label'],
+										'phone_group_data_array'	=>	$next_form_output[$field['slug']],
+										'phone_group_label_suffix'	=> $required_individual . $required_group . $contains,		
+									);
+									echo $wic_definitions->create_phone_group ( $phone_group_args );
+								} else { // do straight text field for search
+									$text_control_args = array (
+										'field_name_id'		=> $field['slug'],
+										'field_label'			=>	$field['label'],
+										'value'					=> $next_form_output[$field['slug']],
+										'read_only_flag'		=>	false, 
+										'field_label_suffix'	=> $required_individual . $required_group . $contains, 								
+									);
+									echo '<p>' . $wic_definitions->create_text_control ( $text_control_args ) . '</p>'; 
+								}
+								break;
 						}
 					} // close foreach 				
 				echo '</div>';		   
@@ -590,8 +612,26 @@ class WP_Issues_CRM_Constituents {
     	
    	foreach ( $this->constituent_fields as $field ) {
    		
-			$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? sanitize_text_field( $_POST[$field['slug']] ) : '';
-			 
+			if ( 'phones' == $field['type'] ) { // sanitize phones to numbers only
+				if ( is_array( $_POST[$field['slug']] ) ) {
+					$phone_count = 0;
+					foreach( $_POST[$field['slug']] as $key => $value ) {	
+						if ( ( 'row-template' !== $key )  && ( preg_replace("/[^0-9]/", '', $value[1] ) > '' ) ) { // skips template row and blank  phones (redundant in template row case )
+								// NB:  true: 0 == 'alphastring' false: 0 != 'alphastring true 0 !== 'alphastring'  
+							foreach( $value as $phone_key => $phone_column ) {
+								
+								$clean_input[$field['slug']][$phone_count][$phone_key] = preg_replace("/[^0-9]/", '', $phone_column );
+							}	 						
+							$phone_count++;
+						}
+					}
+				} elseif ( isset( $_POST[$field['slug']] ) ) {
+					$clean_input[$field['slug']] = preg_replace("/[^0-9]/", '', $_POST[$field['slug']] );
+				}
+				
+			} else {   		
+ 				$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? sanitize_text_field( $_POST[$field['slug']] ) : '';
+			}
 			if ( 'date' == $field['type'] ) {
 				$clean_input[$field['slug'] . '_lo' ] = isset( $_POST[$field['slug'] . '_lo' ] ) ? sanitize_text_field( $_POST[$field['slug'] . '_lo' ] ) : '';			
 				$clean_input[$field['slug'] . '_hi' ] = isset( $_POST[$field['slug'] . '_hi' ] ) ? sanitize_text_field( $_POST[$field['slug'] . '_hi' ] ) : '';
@@ -659,6 +699,8 @@ class WP_Issues_CRM_Constituents {
 	*  save_update_constituent
 	*
 	*  does save or update based on next form input ( update if constituent_id is populated with value > 0 ) 
+	*	
+	*  note: here do serialization (and on extraction, so could change db interface for repeating fields with change here and in update/populate)
 	*
 	*/
    private function save_update_constituent( &$next_form_output ) { 
@@ -705,6 +747,7 @@ class WP_Issues_CRM_Constituents {
 		// otherwise proceed to update metafields
 		 foreach ( $this->constituent_fields as $field ) {
 		 	if ( 'readonly' != $field['type'] ) {
+				// note: add/update post meta automatically serializes arrays!				
 				$post_field_key =  $this->wic_metakey . $field['slug'];
 				// first handle existing post meta records already
 				if ( $next_form_output['constituent_id'] > 0 ) { 

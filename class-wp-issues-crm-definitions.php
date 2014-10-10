@@ -11,17 +11,17 @@ class WP_Issues_CRM_Definitions {
 	
 	public $phone_type_options = array(	
 		array(
-			'value'	=> '', // use empty string as base value for consistency with other phone variables
-			'label'	=>	'Phone' ),
+			'value'	=> '0',
+			'label'	=>	'Home Landline' ),
 		array(
 			'value'	=> '1',
-			'label'	=>	'Mobile' ),
+			'label'	=>	'Personal Mobile' ),
 		array(
 			'value'	=> '2',
-			'label'	=>	'Home' ),
+			'label'	=>	'Work Landline' ),
 		array(
 			'value'	=> '3',
-			'label'	=>	'Work' ),
+			'label'	=>	'Work Mobile' ),
 		array(
 			'value'	=> '4',
 			'label'	=>	'Home Fax' ),					
@@ -30,7 +30,7 @@ class WP_Issues_CRM_Definitions {
 			'label'	=>	'Work Fax' ),
 		array(
 			'value'	=> '6',
-			'label'	=>	'Assistant' ),
+			'label'	=>	'Other Phone' ),
 		);
 		
 	public $constituent_field_groups = array (
@@ -139,7 +139,7 @@ class WP_Issues_CRM_Definitions {
 		array(  // 6
 			'dedup'	=>	false,
 			'group'	=>	'contact',
-			'label'	=>	'Phones',
+			'label'	=>	'Phone',
 			'like'	=>	true,
 			'list'	=> '0',
 			'online'	=>	true,
@@ -418,6 +418,7 @@ class WP_Issues_CRM_Definitions {
 			'field_label'			=>	label for field
 			'label_class'			=> for css
 			'input_class'			=>	for css
+			'placeholder'			=> placeholder in input field
 			'value'					=> from database or blank
 			'read_only_flag'		=>	whether should be a read only -- true false
 			'field_label_suffix'	=> any string to append to the field label in control (but not in drop down)								
@@ -428,6 +429,7 @@ class WP_Issues_CRM_Definitions {
 		$field_label_suffix 	= '';
 		$label_class = 'wic-label';
 		$input_class = 'wic-input';
+		$placeholder = '';
 
 		
 		extract ( $control_args, EXTR_OVERWRITE ); 
@@ -435,7 +437,7 @@ class WP_Issues_CRM_Definitions {
 		$readonly = $read_only_flag ? 'readonly' : '';
 		 
 		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . ' ' . $field_label_suffix . '</label>' : '' ;
-		$control .= '<input class="' . $input_class . '" id="' . $field_name_id . ' " name="' . $field_name_id . '" type="text" value="' . $value . '"' . $readonly  . '/>';
+		$control .= '<input class="' . $input_class . '" id="' . $field_name_id . '" name="' . $field_name_id . '" type="text" placeholder = "' . $placeholder . '" value="' . $value . '" ' . $readonly  . '/>';
 			
 		return ( $control );
 
@@ -447,6 +449,7 @@ class WP_Issues_CRM_Definitions {
 		/* $control_args = array (
 			'field_name_id' => name/id
 			'field_label'	=>	label for field
+			'select_field_placeholder' => label that will appear in drop down for empty string
 			'selected'		=> initial value 
 			'field_label_class'			=> for css
 			'field_input_class'			=> for css
@@ -457,7 +460,9 @@ class WP_Issues_CRM_Definitions {
 		$label_suffix = '';
 		$selected = '';
 		$field_label_class = 'wic-label';
-		$field_input_class = 'wic-input'; 	
+		$field_input_class = 'wic-input';
+		$select_field_placeholder = '';
+	
 
 		extract ( $control_args, EXTR_OVERWRITE ); 
 
@@ -465,7 +470,7 @@ class WP_Issues_CRM_Definitions {
 				
 		$not_selected_option = array (
 			'value' 	=> '',
-			'label'	=> 'Select ' . $field_label,								
+			'label'	=> $select_field_placeholder,								
 		);  
 		$option_array =  $select_array;
 		array_push( $option_array, $not_selected_option );
@@ -488,79 +493,132 @@ class WP_Issues_CRM_Definitions {
 	
 	}	
 	
+	public function create_destroy_button () {
+
+		$button = '<button ' .  
+			' class	="destroy-button"' . 
+			' onclick = {this.parentNode.parentNode.removeChild(this.parentNode);}' .
+			' type 	= "button" ' .
+			' title  = ' . __( 'Remove Row', 'wp-issues-crm' ) .
+			' >x</button>';	
+
+		return ($button);
+	}
+	
+	
+	public function create_add_button ( $base, $button_label ) {
+
+		$button = '<button ' . 
+			' class = "row-add-button" ' .
+			' id = "' . $base . '-add-button" ' .
+			' type = "button" ' .
+			' onclick="moreFields(\'' . $base . '\')" ' .
+			' >' . $button_label . '</button> '; 
+
+		return ($button);
+	}
+	
 	public function create_phone_group ( $phone_group_args ) {
+		/*
+      *		'phone_group_id'		=> $field['slug'],
+		*		'phone_group_label'		=> $field['label'],
+		*		'phone_group_data_array'	=>	$next_form_output[$field['slug']],
+		*		'phone_group_label_suffix'	=> $required_individual . $required_group . $contains,		
+		*/
+		
 		
 		extract ( $phone_group_args, EXTR_OVERWRITE );
 		
-		$i = 'x'; // array index
-
-		$phone_group_data_array_stub_row_x = array ( // set up to generate hidden empty row
-			array( 
-			'',
-			'',
-			'',				
-			),
-		);
-
-		if ( '' == $phone_group_data_array ) { // instantiate as array with one empty row if only a string
-			$phone_group_data_array = array ();
-		}
-
-		$working_array = array_merge( $phone_group_data_array_stub_row_x, $phone_group_data_array );
-
+		// create phones division opening tag 		
 		$phone_group_control_set = '<div id = "' . $phone_group_id . '-control-set' . '">';
 
-		foreach ( $working_array as $phone_number ) {
-			
-			$row_class = ( 'x' == $i ) ? 'phone-number-row-hidden' : 'phone-number-row';
-			
-			$row = '<p class = "' . $row_class . '" id = "' . $phone_group_id . '-row-' . $i . '">';
-						
-			$phone_type_array = array ( 
-				'field_name_id' 	=> $phone_group_id . '[' . $i  . '][0]',
+		// create a hidden template row for adding phone fields in wic-utilities.js through moreFields() 
+		// moreFields will replace the string 'row-template' with row-counter index value after creating the new row
+		// this will change row id and the field indexes - the array will be $phone_group_id[x][y] (x = row, y = field)
+		$row = '<p class = "hidden-template" id = "' . $phone_group_id . '-row-template' . '">'; // template opening line	
+	
+		$phone_type_array = array ( 
+				'field_name_id' 	=> $phone_group_id . '[row-template][0]',
 				'field_label'		=>	'',
+				'select_field_placeholder' => __( 'Phone type?', 'wp-issues-crm' ),
 				'select_array'		=>	$this->phone_type_options,
-				'selected'			=> $phone_group_data_array[$i][0],
-				'field_input_class' 	=> 'wic-phone-type-dropdown',
+				'selected'			=> '',
+				'field_input_class' 	=> 'wic-input wic-phone-type-dropdown',
 				'field_label_suffix'	=> '',
-			);
+			);	
+		$row .= $this->create_select_control ( $phone_type_array );
+
+		$phone_number_array = array ( 
+			'field_name_id' 	=> $phone_group_id . '[row-template][1]',
+			'field_label'			=>	'',
+ 			'value'					=> '', 
+ 			'placeholder'			=> __( 'Phone number?', 'wic-issues-crm' ),
+			'input_class' 	=> 'wic-input wic-phone-number',
+			'field_label_suffix'	=> '',
+		);
+
+		$row .= $this->create_text_control( $phone_number_array );
+
+		$phone_extension_array = array ( 
+			'field_name_id' 	=> $phone_group_id . '[row-template][2]',
+			'field_label'			=>	'',
+ 			'value'					=> '',
+			'placeholder'			=> __( 'Extension?', 'wic-issues-crm' ),
+			'input_class' 	=> 'wic-input wic-phone-extension',
+			'field_label_suffix'	=> '',
+		);
+
+		$row .= $this->create_text_control( $phone_extension_array );
+
+		$row .= $this->create_destroy_button ();
+
+		$row .= '</p>';
+	
+		// put completed template row into phones division			
+		$phone_group_control_set .= $row;
+
+
+		// now proceed to add rows for any existing phones from database or previous form
+		$i = '0'; // array index
 		
-			$row .= $this->create_select_control ( $phone_type_array );
+		if ( is_array( $phone_group_data_array ) ) {
 
-			$phone_number_array = array ( 
-				'field_name_id' 		=> $phone_group_id . '[' . $i  . '][1]',
-				'field_label'			=>	'',
- 				'value'					=> $phone_group_data_array[$i][1],
-				'field_input_class' 	=> 'wic-phone-number',
-				'field_label_suffix'	=> '',
-			);
+			foreach ( $phone_group_data_array as $phone_number ) {
+				
+				// note, in this loop, need only instantiate the changing arguments in the arrays			
+				
+				$row_class = ( 'x' == $i ) ? 'phone-number-row-hidden' : 'phone-number-row';
+				
+				$row = '<p class = "phone-number-row" id = "' . $phone_group_id . '-' . $i . '">';
+							
+				$phone_type_array['field_name_id'] 	= $phone_group_id . '[' . $i  . '][0]';
+				$phone_type_array['selected']			= $phone_group_data_array[$i][0];
+				$row .= $this->create_select_control ( $phone_type_array );
+	
+			
+				$phone_number_array['field_name_id'] 	= $phone_group_id . '[' . $i  . '][1]';
+	 			$phone_number_array['value']				= $phone_group_data_array[$i][1];
+				$row .= $this->create_text_control( $phone_number_array );
+	
 
-			$row .= $this->create_text_control( $phone_number_array );
-
-			$phone_extension_array = array ( 
-				'field_name_id' 		=> $phone_group_id . '[' . $i  . '][2]',
-				'field_label'			=>	'',
- 				'value'					=> $phone_group_data_array[$i][2],
-				'field_input_class' 	=> 'wic-phone-extension',
-				'field_label_suffix'	=> '',
-			);
-
-			$row .= $this->create_text_control( $phone_extension_array );
-			
-			$row .= '<button class="destroy-button" id="destroy-' . $phone_group_id . '-row-' . $i . '-button" onclick="destroyParentElement(\'destroy-' . $phone_group_id . '-row-' . $i . '-button\')" type="button">x</button>';
-			
-			$row .= '</p>';
-			
-			$phone_group_control_set .= $row;
-			
+				$phone_extension_array['field_name_id'] 	= $phone_group_id . '[' . $i  . '][2]';
+	 			$phone_extension_array['value']				= $phone_group_data_array[$i][2];
+				$row .= $this->create_text_control( $phone_extension_array );
+				
+				$row .= $this->create_destroy_button ();
+				
+				$row .= '</p>';
+				
+				$phone_group_control_set .= $row;
+				
+				$i++;
+	
+			}
+		}		
 		
-			$i = ('x' == $i ) ? 0 : ( $i + 1 );
-
-		}
-		
-		$phone_group_control_set .= '<button id = "' . $phone_group_id . '-add-button" type = "button" class = "row-add-button" onclick="moreFields(\'' . $phone_group_id . '\')" > add phone </button>';
+		$phone_group_control_set .= $this->create_add_button ( $phone_group_id, __( 'Add Phone', 'wp-issues-crm' ) );
 		$phone_group_control_set .= '</div>';
-		$phone_group_control_set .= '<div id = "' . $phone_group_id . '-row-counter">' . $i . '</div>';
+		$phone_group_control_set .= '<div class = "hidden-template" id = "' . $phone_group_id . '-row-counter">' . $i . '</div>';
 		
 		
 		return ($phone_group_control_set);	

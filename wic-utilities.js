@@ -14,40 +14,36 @@ function toggleConstituentForm() {
 	}
 }
 
-function destroyParentElement(elementID) {
-	
-	var destroyButtonParent = document.getElementById( elementID ).parentNode;
-	destroyButtonParent.parentNode.removeChild(destroyButtonParent); 
-}
 
-function addNewInputElement() {
-	var addPhoneButton =	document.getElementById( 'phone-button' );
-	var addPhoneButtonParent = document.getElementById( 'phone-button' ).parentNode;
-	var para = document.createElement("p");
-	var node = document.createTextNode("This is new.");
-	para.appendChild(node);
-	addPhoneButtonParent.insertBefore(para,addPhoneButton); 
-}
-
-
-function moreFields(base) {
+function moreFields( base ) {
 
 	// counter always unique since gets incremented on add, but not decremented on delete
-	var counter = document.getElementById(base + '-row-counter').innerHTML;
+	var counter = document.getElementById( base + '-row-counter' ).innerHTML;
 	counter++;
-	document.getElementById(base + '-row-counter').innerHTML = counter;
+	document.getElementById( base + '-row-counter' ).innerHTML = counter;
 	
-	var newFields = document.getElementById(base + '-row-x').cloneNode(true);
-	newFields.id = '';
-	newFields.style.display = 'block';
-	var newField = newFields.childNodes;
-	for (var i=0;i<newField.length;i++) {
-		newField[i].value = '';
-		var theName = newField[i].name
-		newField[i].name = theName.replace('[x]','[' + counter + ']');
-	}
-	var insertHere = document.getElementById( base + '-add-button' );
-	insertHere.parentNode.insertBefore(newFields,insertHere);
-}
+	var newFields = document.getElementById( base + '-row-template' ).cloneNode(true);
 
-window.onload = moreFields;
+	/* set up row paragraph with  id and class */
+	newFields.id = base + '-' + counter ;
+	newFieldsClass = newFields.className; 
+	newFields.className = newFieldsClass.replace('hidden-template', 'visible-templated-row') ;
+	
+	/* set up each field within row with indexed id, class and on-click (for destroy button) */
+	var newField = newFields.childNodes;
+	for (var i = 0; i < newField.length; i++ ) {
+		if ( "BUTTON" != newField[i].tagName ) {
+			var theName = newField[i].name;
+			newField[i].name = theName.replace( 'row-template', counter );
+			var theID = newField[i].id;
+			newField[i].id = theID.replace( 'row-template', counter );
+		} else { /*
+			newField[i].onclick = function () {
+					var destroyButtonParent = this.parentNode;
+					destroyButtonParent.parentNode.removeChild(destroyButtonParent); */ 
+		}
+	}		
+	
+	var insertHere = document.getElementById( base + '-add-button' );
+	insertHere.parentNode.insertBefore( newFields, insertHere );
+}
