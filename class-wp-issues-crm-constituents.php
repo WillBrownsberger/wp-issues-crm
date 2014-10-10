@@ -884,17 +884,16 @@ class WP_Issues_CRM_Constituents {
 		set_time_limit ( $seconds );
 	   
 	   global $wpdb;
-	   $contacts = $wpdb->get_results( 'SELECT p.id as ID, m1.meta_value as phone, m2.meta_value as mobile from wp_posts p 
-	   											left join wp_postmeta m1 on m1.post_id = p.ID 
-	   											left join wp_postmeta m2 on m2.post_ID = p.ID 
-	   											where m1.meta_key = "wic_data_phone"  
-	   											and m2.meta_key = "wic_data_mobile_phone"' );
+	   $contacts = $wpdb->get_results( 'SELECT p.id as ID, max(m1.meta_value) as phone, max(m2.meta_value) as mobile from wp_posts p 
+	   											left join wp_postmeta m1 on m1.post_id = p.ID and m1.meta_key = "wic_data_phone"
+	   											left join wp_postmeta m2 on m2.post_ID = p.ID and m2.meta_key = "wic_data_mobile_phone"
+	   											group by p.ID having max(m1.meta_value) is not null or max(m2.meta_value) is not null' );
 	   foreach ($contacts as $contact ) {
 			if ( $i/1000 == floor($i/1000 ) ) {
 				echo '<h3>' . $i . ' records processed</h3>';			
 			}	   
 		   $i++;
-		    // if ($i>10) break;
+		   // if ($i>10) break;
 		   			
 			
 			$phone_array = array ();
