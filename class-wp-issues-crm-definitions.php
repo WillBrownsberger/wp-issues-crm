@@ -8,6 +8,15 @@ class WP_Issues_CRM_Definitions {
 	
 	public $wic_metakey = 'wic_data_';	
 	
+	/* this array determines:
+		- whether field will always be searched on a like compare (instead of = ), regardless of field or screen settings
+		- whether will look second field at first member of array when doing dedup and required field checking (i.e., first phone, email or street address)
+	*/
+	public $serialized_field_types = array ( 
+		'phones',
+		'emails',
+		'addresses',
+	);
 	
 	public $phone_type_options = array(	
 		array(
@@ -137,7 +146,7 @@ class WP_Issues_CRM_Definitions {
 			'type'	=>	'text',
 			),		
 		array(  // 6
-			'dedup'	=>	false,
+			'dedup'	=>	true,
 			'group'	=>	'contact',
 			'label'	=>	'Phone',
 			'like'	=>	true,
@@ -597,7 +606,7 @@ class WP_Issues_CRM_Definitions {
 	
 			
 				$phone_number_array['field_name_id'] 	= $phone_group_id . '[' . $i  . '][1]';
-	 			$phone_number_array['value']				= $phone_group_data_array[$i][1];
+	 			$phone_number_array['value']				= $this->format_phone ( $phone_group_data_array[$i][1] );
 				$row .= $this->create_text_control( $phone_number_array );
 	
 
@@ -623,6 +632,17 @@ class WP_Issues_CRM_Definitions {
 		
 		return ($phone_group_control_set);	
 	}
-}
+	
+    function format_phone ($phone) {
+		if ( 7 == strlen($phone) ) {
+			return ( substr ( $phone, 0, 3 ) . '-' . substr($phone,3,4) );		
+		} elseif ( 10  == strlen($phone) ) {
+			return ( '(' . substr ( $phone, 0, 3 ) . ') ' . substr($phone, 3, 3) . '-' . substr($phone,6,4) );	
+		} else {
+			return ($phone);		
+		}
+    
+    }
+ }
 
 $wic_definitions = new WP_Issues_CRM_Definitions;

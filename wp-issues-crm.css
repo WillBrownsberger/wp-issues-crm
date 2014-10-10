@@ -114,6 +114,11 @@ h3.constituent-field-group-label {
 	cursor: pointer;
 }
 
+.wic-legend {
+	color: #333;
+	margin: 0;
+	padding: 0;
+}
 
 .wic-input {
 	background: #f6f6f6;

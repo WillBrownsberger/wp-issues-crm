@@ -115,39 +115,13 @@ class WP_Issues_CRM {
 	}
 	
 	public function show_dashboard() {
-		// $store_value = serialize($_POST, true);
-		echo ' store_value :';
-		$phones = $_POST['phone'];
-		// var_dump($phones);
-		$stringtest = serialize( $phones );
-		// echo 'wtfwillyourock' . $stringtest;
-		echo '<br /> -- this shit is cool' . strpos($stringtest, 'wtfxa');		
+
+		
 		echo '<div id = "dashboard-area" class = "constituent-field-group wic-group-odd">';
 		echo '<h1>Dashboard under development</h1>' . 
 		'<h2>"New constituent search" only option implemented so far on this screen. </h2>' .
-		'<h2> The search option feeds through to constituent save and update functions, which are fully implemented.</h2>' . 			
-		'<p id = "just a paragraph">Lots of other bullshit. <button id="destroy-button" onclick="destroyParentElement()" type="button">Destroy</button></p>' .  		
-		'<button id="phone-button" onclick="addNewInputElement()" type="button">Add</button></p>' .'</div>' ;
-?><div id="readroot" style="display: none">
-
-	<input type="button" value="Remove review"
-		onclick="this.parentNode.parentNode.removeChild(this.parentNode);" /><br /><br />
-
-	<input name='phone[0][*]' type='text' value="" />
-	<input name='phone[0][**]' type='text' value="" />
-	<input name='phone[0][***]' type='text' value="" />
-
-</div>
-
-<form method="post" action="/test/">
-	<span id="writeroot"></span>
-	<input type="button" onclick="moreFields()" value="Give me more fields!" />
-	<input type="submit" value="Send form" />
-
-</form>
-<?php
-
-// http://www.quirksmode.org/dom/domform.html
+		'<h2> The search option feeds through to constituent save and update functions, which are fully implemented.</h2>'; 			
+		
 
 	}
 }

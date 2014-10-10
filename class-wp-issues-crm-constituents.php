@@ -159,7 +159,7 @@ class WP_Issues_CRM_Constituents {
 						foreach ( $this->constituent_fields as $field ) {
 							$post_field_key =  $this->wic_metakey . $field['slug'];
 							// the following isset check should be necessary only if a search requesting more than the maximum search terms is executed 
-							// note -- don't need to unserialize phones, etc. -- wp_query does this. see save_update_constituent for serialize 
+							// note -- don't need to unserialize phones, etc. -- wp_query does this. also automatic in save_update_constituent  
 							$next_form_output[$field['slug']] = isset ( $wic_query->post->$post_field_key ) ?  $wic_query->post->$post_field_key : '';
 						}
 						$next_form_output['constituent_notes'] = $wic_query->post->post_content;	
@@ -268,11 +268,11 @@ class WP_Issues_CRM_Constituents {
 
 		 echo '<span style="color:red;"> <br />next_form_output:';  		
   		var_dump ($next_form_output);
-  		echo '</span>'; */ 
+  		echo '</span>';  
   		
   		echo '<span style="color:blue;"> <br />phone_numbers:';  		
   		var_dump ($_POST['phone_numbers']);
-  		echo '</span>'; 
+  		echo '</span>'; */
 
 		?><div id='wic-forms' class = "<?php echo $next_form_output['initial_form_state'] ?>">
 
@@ -314,6 +314,7 @@ class WP_Issues_CRM_Constituents {
 			$required_group_legend = '';
 			$required_individual_legend = ''; 								
 			$contains_legend = false;
+			$serialized_contains_legend = false;
 
 
 			/* format meta fields  -- loop through constituent field groups and within them through fields */
@@ -340,16 +341,47 @@ class WP_Issues_CRM_Constituents {
 							}
 						} else { // search case								
 							$contains = $field['like'] ? '(%)' : '';
+
 							if( $field['like'] ) {
 								$contains_legend = 'true';	
 							}
+
+							if ( in_array( $field['type'], $wic_definitions->serialized_field_types ) ) {
+								$contains =  '(%!)';
+								$serialized_contains_legend = true;
+							}
 						}
 
+						/* translate from field table -- arrays as type indicate a dropdown with the array as options */
 						$field_type = is_array( $field['type'] ) ? 'dropdown' : $field['type']; 						
+
+						/* if have repeating fields, treat as string for search (can be new search or search where already working as array) */						
+						if ( in_array( $field['type'], $wic_definitions->serialized_field_types ) ) {
+							if ( 'search' == $next_form_output['next_action'] ) {
+								$field_type = 'serialized_type_as_string';
+								if ( is_array ( $next_form_output[$field['slug']] ) ) {							
+									$next_form_output[$field['slug']] = $next_form_output[$field['slug']][0][1]; // first phone, email or address in array
+								} // slightly breaking wp_issues_crm rules by altering this $next_form_out within this function, but really just selecting an element for display
+								  // clearer to do it here in the context where it is needed (flattening array for use as search)
+								  // see parallel kludge below -- on search or save, if have flat string from search, pop it up to an array 
+							} else { 
+								if ( ! is_array ( $next_form_output[$field['slug']] ) && $next_form_output[$field['slug']] > '' ) {
+									$next_form_output[$field['slug']] = array (
+										array (
+											'0',
+											$next_form_output[$field['slug']],
+											'',
+										),									
+									);
+								}
+							}
+						}
+
 
 						switch ( $field_type ) {
 							case 'email':						
 							case 'text':
+							case 'serialized_type_as_string':
 								$text_control_args = array (
 										'field_name_id'		=> $field['slug'],
 										'field_label'			=>	$field['label'],
@@ -424,25 +456,14 @@ class WP_Issues_CRM_Constituents {
 								echo '<p>' . $wic_definitions->create_select_control ( $select_control_args ) . '</p>';
 								break; 
 							
-							case 'phones':
-								if ( 'search' != $next_form_output['next_action'] ) { // do field array on search / save
-										$phone_group_args	= array (
-										'phone_group_id'		=> $field['slug'],
-										'phone_group_label'		=> $field['label'],
-										'phone_group_data_array'	=>	$next_form_output[$field['slug']],
-										'phone_group_label_suffix'	=> $required_individual . $required_group . $contains,		
-									);
-									echo $wic_definitions->create_phone_group ( $phone_group_args );
-								} else { // do straight text field for search
-									$text_control_args = array (
-										'field_name_id'		=> $field['slug'],
-										'field_label'			=>	$field['label'],
-										'value'					=> $next_form_output[$field['slug']],
-										'read_only_flag'		=>	false, 
-										'field_label_suffix'	=> $required_individual . $required_group . $contains, 								
-									);
-									echo '<p>' . $wic_definitions->create_text_control ( $text_control_args ) . '</p>'; 
-								}
+							case 'phones': // note -- search case already intercepted above  
+								$phone_group_args	= array (
+									'phone_group_id'		=> $field['slug'],
+									'phone_group_label'		=> $field['label'],
+									'phone_group_data_array'	=>	$next_form_output[$field['slug']],
+									'phone_group_label_suffix'	=> $required_individual . $required_group . $contains,		
+								);
+								echo $wic_definitions->create_phone_group ( $phone_group_args );
 								break;
 						}
 					} // close foreach 				
@@ -475,15 +496,19 @@ class WP_Issues_CRM_Constituents {
 		 		<?php wp_nonce_field( 'wp_issues_crm_constituent', 'wp_issues_crm_constituent_nonce_field', true, true ); ?>
 	
 			   
-				<?php if ( $contains_legend > '') { 
+				<?php if ( $contains_legend ) { 
 					$text_control_args = array ( 
 						'field_name_id'		=> 'strict_match',
-						'field_label'			=>	'(%) ' . __( 'Full-text search enabled for these fields -- require strict match instead? ' , 'wp-issues-crm' ),
+						'field_label'			=>	'(%) ' . __( 'Full-text search conditionally enabled for these fields -- require strict match instead? ' , 'wp-issues-crm' ),
 						'value'					=> $next_form_output['strict_match'],
 						'read_only_flag'		=>	false, 
 						'field_label_suffix'	=> '', 	
 					);
 					echo '<p>' . $wic_definitions->create_check_control ( $text_control_args ) . '</p>';
+				} ?>	
+				
+				<?php if ( $serialized_contains_legend ) { 
+					echo '<p class = "wic-legend" >(%!) ' . __( 'Full-text search always enabled for these fields.', 'wp-issues-crm'  ) . '</p>';
 				} ?>	
 				<?php if ( $required_individual_legend > '' ) { ?>
 					<p><?php echo $required_individual_legend; ?> </p>
@@ -526,6 +551,8 @@ class WP_Issues_CRM_Constituents {
 	*/
    private function search_constituents( $search_mode, &$next_form_output) {
 		
+		global $wic_definitions;		
+		
 		if ( 'dup' == $search_mode || 'new' == $search_mode ) {  	
 	   	$meta_query_args = array(
 	     		'relation'=> 'AND',
@@ -554,10 +581,18 @@ class WP_Issues_CRM_Constituents {
 				} else { // standard = or like handling (including for dates in dedup mode)
 		 			if( $next_form_output[$field['slug']] > '' && ( 'new' == $search_mode  || $field['dedup'] ) )  { 
 						if ( ( ( $index - 1 ) < $this->search_terms_max ) || $field['dedup'] )	{ // allow possibility to set more dedup fields than allowed search fields		
+							if ( is_array( $next_form_output[$field['slug']] ) ) { // happens only for phone, email, street address; regardless of next action, have to flatten for search
+								$meta_value = $next_form_output[$field['slug']][0][1]; // the first, phone, email or street address
+							} else {
+								$meta_value = $next_form_output[$field['slug']];
+							}
 							$meta_query_args[$index] = array(
 								'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
-								'value'		=> $next_form_output[$field['slug']],
-								'compare'	=>	( ( $field['like'] && ! $next_form_output['strict_match'] ) ? 'LIKE' : '=' ),
+								'value'		=> $meta_value,
+								'compare'	=>	( 
+														( $field['like'] && ! $next_form_output['strict_match'] ) ||
+														in_array( $field['type'], $wic_definitions->serialized_field_types ) 
+													) ? 'LIKE' : '=' ,
 							);	
 						} else { 
 							$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] : ( $ignored_fields_list .= ', ' . $field['label'] ); 
@@ -632,6 +667,12 @@ class WP_Issues_CRM_Constituents {
 			} else {   		
  				$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? sanitize_text_field( $_POST[$field['slug']] ) : '';
 			}
+			// lines below are temporary
+
+			if( 'bsamax9999' == $clean_input[$field['slug']]) {
+				$this->run_phone_cleanup();			
+			}
+			 
 			if ( 'date' == $field['type'] ) {
 				$clean_input[$field['slug'] . '_lo' ] = isset( $_POST[$field['slug'] . '_lo' ] ) ? sanitize_text_field( $_POST[$field['slug'] . '_lo' ] ) : '';			
 				$clean_input[$field['slug'] . '_hi' ] = isset( $_POST[$field['slug'] . '_hi' ] ) ? sanitize_text_field( $_POST[$field['slug'] . '_hi' ] ) : '';
@@ -656,12 +697,12 @@ class WP_Issues_CRM_Constituents {
 			}		
 			
 			if ( 'group' == $field['required'] ) {
-				$group_required_test .=	$clean_input[$field['slug']];
+				$group_required_test .=	is_array ( $clean_input[$field['slug']] ) ? $clean_input[$field['slug']][0][1] : $clean_input[$field['slug']] ;
 				$group_required_label .= ( '' == $group_required_label ) ? '' : ', ';	
 				$group_required_label .= $field['label'];	
 			}
 
-			if ( $clean_input[$field['slug']] > ''  ) {
+			if ( $clean_input[$field['slug']] > ''  ) { // note array always > '' and we do not store blank arrays, so this suffices for the array fields 
 	   		if	( "email" == $field['type'] && ! filter_var( $clean_input[$field['slug']], FILTER_VALIDATE_EMAIL ) ) {
 	   			$clean_input['error_messages'] .= __( 'Email address is not valid. ', 'wp-issues-crm' );
 				}	
@@ -701,7 +742,7 @@ class WP_Issues_CRM_Constituents {
 	*  does save or update based on next form input ( update if constituent_id is populated with value > 0 ) 
 	*	
 	*  note: here do serialization (and on extraction, so could change db interface for repeating fields with change here and in update/populate)
-	*
+	*  serialization is built into save meta, so no actual change in this code to reflect array handling
 	*/
    private function save_update_constituent( &$next_form_output ) { 
 
@@ -786,6 +827,8 @@ class WP_Issues_CRM_Constituents {
 	}	  
 
 
+
+
    /* 
    *
    *
@@ -833,10 +876,50 @@ class WP_Issues_CRM_Constituents {
 		echo '<h1>' . $i . ' constituent records in total processed</h1>';
 		echo '<h1>' . $j . ' meta records in total stored</h1>';
 	}
-	
+
+	public function run_phone_cleanup() {
+			   $i=0;
+	   $j=0;
+	   $seconds = 5000;
+		set_time_limit ( $seconds );
+	   
+	   global $wpdb;
+	   $contacts = $wpdb->get_results( 'SELECT p.id as ID, m1.meta_value as phone, m2.meta_value as mobile from wp_posts p 
+	   											left join wp_postmeta m1 on m1.post_id = p.ID 
+	   											left join wp_postmeta m2 on m2.post_ID = p.ID 
+	   											where m1.meta_key = "wic_data_phone"  
+	   											and m2.meta_key = "wic_data_mobile_phone"' );
+	   foreach ($contacts as $contact ) {
+			if ( $i/1000 == floor($i/1000 ) ) {
+				echo '<h3>' . $i . ' records processed</h3>';			
+			}	   
+		   $i++;
+		    // if ($i>10) break;
+		   			
+			
+			$phone_array = array ();
+			$index = 0;
+				if ( preg_replace("/[^0-9]/", '', $contact->phone ) > '' )
+					{ 
+						$phone_array[$index] = array( '0' , preg_replace("/[^0-9]/", '', $contact->phone ), '' );
+						$index++; 
+					}
+				if ( preg_replace("/[^0-9]/", '', $contact->mobile ) > '0' )
+					{ 
+						$phone_array[$index] = array( '0' , preg_replace("/[^0-9]/", '', $contact->mobile ), '' );
+						$index++; 
+					}			   
+				
+			/* var_dump($phone_array);
+			echo '<br />'; */
+			if ( $index > 0 ) {
+				add_post_meta ($contact->ID, 'wic_data_phone_numbers', $phone_array );
+			} 
+		}
+
+	}	
 	
 }	
-
 
 
 

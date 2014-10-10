@@ -48,4 +48,6 @@ wic_data_phone 	43287
 wic_data_email 	9974
 
 
-SELECT * FROm wp_posts p inner join wp_postmeta m1 on m1.post_id = p.ID inner join wp_postmeta m2 on m2.post_ID = p.ID where m1.meta_key = 'wic_data_gender_id' and m1. meta_value = 'm' and post_status = 'private' and m2.meta_key = 'wic_data_city' and m2.meta_value = 'belmont'  
+SELECT * FROm wp_posts p inner join wp_postmeta m1 on m1.post_id = p.ID inner join wp_postmeta m2 on m2.post_ID = p.ID where m1.meta_key = 'wic_data_gender_id' and m1. meta_value = 'm' and post_status = 'private' and m2.meta_key = 'wic_data_city' and m2.meta_value = 'belmont'
+
+SELECT *, serialize () FROm wp_posts p inner join wp_postmeta m1 on m1.post_id = p.ID inner join wp_postmeta m2 on m2.post_ID = p.ID where m1.meta_key = 'wic_data_phone'and post_status = 'private' and m2.meta_key = 'wic_data_mobile_phone' 
