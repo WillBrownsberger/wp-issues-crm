@@ -41,6 +41,22 @@ class WP_Issues_CRM_Definitions {
 			'value'	=> '6',
 			'label'	=>	'Other Phone' ),
 		);
+
+	public $email_type_options = array(	
+		array(
+			'value'	=> '0',
+			'label'	=>	'Personal Email' ),
+		array(
+			'value'	=> '1',
+			'label'	=>	'Work Email' ),
+		array(
+			'value'	=> '2',
+			'label'	=>	'Shared Home Email' ),
+		array(
+			'value'	=> '3',
+			'label'	=>	'Other Email' ),
+		);
+		
 		
 	public $constituent_field_groups = array (
 		array (
@@ -133,6 +149,18 @@ class WP_Issues_CRM_Definitions {
 			'slug'	=> 'email',
 			'type'	=>	'email',
 			),	
+		array( // 4A
+			'dedup'	=>	true,
+			'group'	=>	'required',
+			'label'	=>	'eMail',
+			'like'	=>	true,
+			'list'	=> '28',
+			'online'	=>	true,
+			'order'	=>	31,
+			'required'	=> 'group',
+			'slug'	=> 'email_group',
+			'type'	=>	'emails',
+			),				
 		array( // 5
 			'dedup'	=>	false,
 			'group'	=>	'contact',
@@ -387,6 +415,13 @@ class WP_Issues_CRM_Definitions {
 		return ( $sorted_line_items) ;
 	}
 	
+	/*
+	*
+	*	The following group of functions create generic controls -- no field-specific logic
+	*		 -- checked, text, selected
+	*/	
+	
+	
 	public function create_check_control ( $control_args ) {
 		
 		/* control args = array (
@@ -414,11 +449,6 @@ class WP_Issues_CRM_Definitions {
 		return ( $control );
 
 	}
-	
-		
-	
-	
-	
 	
 	public function create_text_control ( $control_args ) {
 		
@@ -451,7 +481,6 @@ class WP_Issues_CRM_Definitions {
 		return ( $control );
 
 	}
-	
 	
 	public function create_select_control ( $control_args ) {
 		
@@ -501,7 +530,24 @@ class WP_Issues_CRM_Definitions {
 		return ( $control );
 	
 	}	
+
+/*
+*
+*	The functions below are used to create the repeating special groups -- phones, emails, addresses
+*    -- they build in logic about these types of data.
+*
+*  In every instance, the second position of the group array is the main datum.  
+* 	It is extracted from the first instance in search functions requiring strings.
+*
+*  To add a new repeater group x, ( x like phones, emails, addresses ) 
+*		+ add x to $serialized_field_types above, 
+*		+ add create_x_group function here to set up the display, 
+*     + add a validate_x function here to handle form input for each row
+*
+*/
+
 	
+	/* this button will destroy the form element (e.g., paragraph for repeater row) containing it */
 	public function create_destroy_button () {
 
 		$button = '<button ' .  
@@ -515,6 +561,7 @@ class WP_Issues_CRM_Definitions {
 	}
 	
 	
+	/* this button will create a new instance of the templated base paragraph (repeater row) and insert it above itself in the DOM*/
 	public function create_add_button ( $base, $button_label ) {
 
 		$button = '<button ' . 
@@ -526,28 +573,29 @@ class WP_Issues_CRM_Definitions {
 
 		return ($button);
 	}
-	
-	public function create_phone_group ( $phone_group_args ) {
+
+		
+	public function create_phones_group ( $repeater_group_args ) {
 		/*
-      *		'phone_group_id'		=> $field['slug'],
-		*		'phone_group_label'		=> $field['label'],
-		*		'phone_group_data_array'	=>	$next_form_output[$field['slug']],
-		*		'phone_group_label_suffix'	=> $required_individual . $required_group . $contains,		
+      *		'repeater_group_id'		=> $field['slug'],
+		*		'repeater_group_label'		=> $field['label'],
+		*		'repeater_group_data_array'	=>	$next_form_output[$field['slug']],
+		*		'repeater_group_label_suffix'	=> $required_individual . $required_group . $contains,		
 		*/
 		
 		
-		extract ( $phone_group_args, EXTR_OVERWRITE );
+		extract ( $repeater_group_args, EXTR_OVERWRITE );
 		
 		// create phones division opening tag 		
-		$phone_group_control_set = '<div id = "' . $phone_group_id . '-control-set' . '">';
+		$phone_group_control_set = '<div id = "' . $repeater_group_id . '-control-set' . '">';
 
 		// create a hidden template row for adding phone fields in wic-utilities.js through moreFields() 
 		// moreFields will replace the string 'row-template' with row-counter index value after creating the new row
-		// this will change row id and the field indexes - the array will be $phone_group_id[x][y] (x = row, y = field)
-		$row = '<p class = "hidden-template" id = "' . $phone_group_id . '-row-template' . '">'; // template opening line	
+		// this will change row id and the field indexes - the array will be $repeater_group_id[x][y] (x = row, y = field)
+		$row = '<p class = "hidden-template" id = "' . $repeater_group_id . '-row-template' . '">'; // template opening line	
 	
 		$phone_type_array = array ( 
-				'field_name_id' 	=> $phone_group_id . '[row-template][0]',
+				'field_name_id' 	=> $repeater_group_id . '[row-template][0]',
 				'field_label'		=>	'',
 				'select_field_placeholder' => __( 'Phone type?', 'wp-issues-crm' ),
 				'select_array'		=>	$this->phone_type_options,
@@ -558,7 +606,7 @@ class WP_Issues_CRM_Definitions {
 		$row .= $this->create_select_control ( $phone_type_array );
 
 		$phone_number_array = array ( 
-			'field_name_id' 	=> $phone_group_id . '[row-template][1]',
+			'field_name_id' 	=> $repeater_group_id . '[row-template][1]',
 			'field_label'			=>	'',
  			'value'					=> '', 
  			'placeholder'			=> __( 'Phone number?', 'wic-issues-crm' ),
@@ -569,7 +617,7 @@ class WP_Issues_CRM_Definitions {
 		$row .= $this->create_text_control( $phone_number_array );
 
 		$phone_extension_array = array ( 
-			'field_name_id' 	=> $phone_group_id . '[row-template][2]',
+			'field_name_id' 	=> $repeater_group_id . '[row-template][2]',
 			'field_label'			=>	'',
  			'value'					=> '',
 			'placeholder'			=> __( 'Extension?', 'wic-issues-crm' ),
@@ -590,28 +638,28 @@ class WP_Issues_CRM_Definitions {
 		// now proceed to add rows for any existing phones from database or previous form
 		$i = '0'; // array index
 		
-		if ( is_array( $phone_group_data_array ) ) {
+		if ( is_array( $repeater_group_data_array ) ) {
 
-			foreach ( $phone_group_data_array as $phone_number ) {
+			foreach ( $repeater_group_data_array as $phone_number ) {
 				
 				// note, in this loop, need only instantiate the changing arguments in the arrays			
 				
 				$row_class = ( 'x' == $i ) ? 'phone-number-row-hidden' : 'phone-number-row';
 				
-				$row = '<p class = "phone-number-row" id = "' . $phone_group_id . '-' . $i . '">';
+				$row = '<p class = "phone-number-row" id = "' . $repeater_group_id . '-' . $i . '">';
 							
-				$phone_type_array['field_name_id'] 	= $phone_group_id . '[' . $i  . '][0]';
-				$phone_type_array['selected']			= $phone_group_data_array[$i][0];
+				$phone_type_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][0]';
+				$phone_type_array['selected']			= $repeater_group_data_array[$i][0];
 				$row .= $this->create_select_control ( $phone_type_array );
 	
 			
-				$phone_number_array['field_name_id'] 	= $phone_group_id . '[' . $i  . '][1]';
-	 			$phone_number_array['value']				= $this->format_phone ( $phone_group_data_array[$i][1] );
+				$phone_number_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][1]';
+	 			$phone_number_array['value']				= $this->format_phone ( $repeater_group_data_array[$i][1] );
 				$row .= $this->create_text_control( $phone_number_array );
 	
 
-				$phone_extension_array['field_name_id'] 	= $phone_group_id . '[' . $i  . '][2]';
-	 			$phone_extension_array['value']				= $phone_group_data_array[$i][2];
+				$phone_extension_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][2]';
+	 			$phone_extension_array['value']				= $repeater_group_data_array[$i][2];
 				$row .= $this->create_text_control( $phone_extension_array );
 				
 				$row .= $this->create_destroy_button ();
@@ -625,15 +673,16 @@ class WP_Issues_CRM_Definitions {
 			}
 		}		
 		
-		$phone_group_control_set .= $this->create_add_button ( $phone_group_id, __( 'Add Phone', 'wp-issues-crm' ) );
+		$phone_group_control_set .= $this->create_add_button ( $repeater_group_id, __( 'Add Phone', 'wp-issues-crm' ) );
 		$phone_group_control_set .= '</div>';
-		$phone_group_control_set .= '<div class = "hidden-template" id = "' . $phone_group_id . '-row-counter">' . $i . '</div>';
+		$phone_group_control_set .= '<div class = "hidden-template" id = "' . $repeater_group_id . '-row-counter">' . $i . '</div>';
 		
 		
 		return ($phone_group_control_set);	
 	}
 	
-    function format_phone ($phone) {
+	/* little function to format phone numbers for display */	
+   function format_phone ($phone) {
 		if ( 7 == strlen($phone) ) {
 			return ( substr ( $phone, 0, 3 ) . '-' . substr($phone,3,4) );		
 		} elseif ( 10  == strlen($phone) ) {
@@ -643,6 +692,149 @@ class WP_Issues_CRM_Definitions {
 		}
     
     }
+
+	/*
+	*	repeater validation function for phones
+	*/
+
+	function validate_phones( $phone_number_row ) {
+		
+		$outcome = array(
+			'result' 	=> '',
+			'error'		=> '',
+			'present' 	=> false
+		);
+
+		$outcome['result'] = array(
+				$phone_number_row[0],
+				preg_replace( "/[^0-9]/", '', $phone_number_row[1] ),
+				preg_replace( "/[^0-9]/", '', $phone_number_row[2] ), 
+			);
+			
+		$outcome['present'] = $outcome['result'][1] > '' ;
+		
+		return( $outcome );		
+			
+	}
+	
+	public function create_emails_group ( $email_group_args ) {
+		/*
+      *		'repeater_group_id'		=> $field['slug'],
+		*		'repeater_group_label'		=> $field['label'],
+		*		'repeater_group_data_array'	=>	$next_form_output[$field['slug']],
+		*		'repeater_group_label_suffix'	=> $required_individual . $required_group . $contains,		
+		*/
+		
+		
+		extract ( $email_group_args, EXTR_OVERWRITE );
+		
+		// create emails division opening tag 		
+		$email_group_control_set = '<div id = "' . $repeater_group_id . '-control-set' . '">';
+
+		// create a hidden template row for adding email fields in wic-utilities.js through moreFields() 
+		// moreFields will replace the string 'row-template' with row-counter index value after creating the new row
+		// this will change row id and the field indexes - the array will be $repeater_group_id[x][y] (x = row, y = field)
+		$row = '<p class = "hidden-template" id = "' . $repeater_group_id . '-row-template' . '">'; // template opening line	
+	
+		$email_type_array = array ( 
+				'field_name_id' 	=> $repeater_group_id . '[row-template][0]',
+				'field_label'		=>	'',
+				'select_field_placeholder' => __( 'eMail type?', 'wp-issues-crm' ),
+				'select_array'		=>	$this->email_type_options,
+				'selected'			=> '',
+				'field_input_class' 	=> 'wic-input wic-email-type-dropdown',
+				'field_label_suffix'	=> '',
+			);	
+		$row .= $this->create_select_control ( $email_type_array );
+
+		$email_address_array = array ( 
+			'field_name_id' 	=> $repeater_group_id . '[row-template][1]',
+			'field_label'			=>	'',
+ 			'value'					=> '', 
+ 			'placeholder'			=> __( 'eMail address?', 'wic-issues-crm' ),
+			'input_class' 		=> 'wic-input wic-email-address',
+			'field_label_suffix'	=> '',
+		);
+
+		$row .= $this->create_text_control( $email_address_array );
+
+		$row .= $this->create_destroy_button ();
+
+		$row .= '</p>';
+	
+		// put completed template row into emails division			
+		$email_group_control_set .= $row;
+
+
+		// now proceed to add rows for any existing emails from database or previous form
+		$i = '0'; // array index
+		
+		if ( is_array( $repeater_group_data_array ) ) {
+
+			foreach ( $repeater_group_data_array as $email_address ) {
+				
+				// note, in this loop, need only instantiate the changing arguments in the arrays			
+				
+				$row_class = ( 'x' == $i ) ? 'email-address-row-hidden' : 'email-address-row';
+				
+				$row = '<p class = "email-address-row" id = "' . $repeater_group_id . '-' . $i . '">';
+							
+				$email_type_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][0]';
+				$email_type_array['selected']			= $repeater_group_data_array[$i][0];
+				$row .= $this->create_select_control ( $email_type_array );
+	
+			
+				$email_address_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][1]';
+	 			$email_address_array['value']				= $repeater_group_data_array[$i][1];
+				$row .= $this->create_text_control( $email_address_array );
+				
+				$row .= $this->create_destroy_button ();
+				
+				$row .= '</p>';
+				
+				$email_group_control_set .= $row;
+				
+				$i++;
+	
+			}
+		}		
+		
+		$email_group_control_set .= $this->create_add_button ( $repeater_group_id, __( 'Add eMail', 'wp-issues-crm' ) );
+		$email_group_control_set .= '</div>';
+		$email_group_control_set .= '<div class = "hidden-template" id = "' . $repeater_group_id . '-row-counter">' . $i . '</div>';
+		
+		
+		return ($email_group_control_set);	
+	}
+
+	function validate_emails( $email_number_row ) {
+		
+		$outcome = array(
+			'result' 	=> '',
+			'error'		=> '',
+			'present' 	=> false
+		);
+
+		$outcome['result'] = array(
+				$email_number_row[0],
+				sanitize_text_field ( $email_number_row[1] ),
+			);
+			
+		$outcome['present'] = $outcome['result'][1] > '';
+		
+  		if ( $outcome['present'] ) {
+	   	$outcome['error'] =  $this->validate_individual_email( $outcome['result'][1] );
+		}	
+		
+		return( $outcome );		
+			
+	}
+	
+	function validate_individual_email( $email ) {
+		$error = filter_var( $email, FILTER_VALIDATE_EMAIL ) ? '' : __( 'Email address appears to be not valid. ', 'wp-issues-crm' );
+		return $error;	
+	}	
+	
  }
 
 $wic_definitions = new WP_Issues_CRM_Definitions;

@@ -137,11 +137,14 @@ h3.constituent-field-group-label {
 	border: none;
 }
 
-.wic-phone-type-dropdown {
+
+.wic-phone-type-dropdown,  
+.wic-email-type-dropdown {
 	min-width: 140px;
 }
 
-.wic-phone-number {
+.wic-phone-number,
+.wic-email-address {
 	margin-left: 20px
 }
 

@@ -29,7 +29,8 @@ class WP_Issues_CRM_Constituents {
 	);
  	
 	public function __construct( $constituent_id ) {
-		add_shortcode( 'wp_issues_crm_constituents', array( $this, 'wp_issues_crm_constituents' ) );
+
+		/* set up class variables */
 		global $wic_definitions;
 		foreach ( $wic_definitions->constituent_fields as $field )
 			if ( $field['online'] ) { 		
@@ -37,12 +38,18 @@ class WP_Issues_CRM_Constituents {
  			}
 		$this->constituent_field_groups 	= &$wic_definitions->constituent_field_groups;
 		$this->wic_metakey = &$wic_definitions->wic_metakey;
-		
 		$this->constituent_id = $constituent_id;		
+
+		/* invoke form and supporting database access functions */
 		$this->wp_issues_crm_constituents( $constituent_id );
 		 
 	}
 
+/*
+*
+*	This string only appears in form legend
+*
+*/
 	public function create_dup_check_fields_list() {
 		$fields_string = '';
 		foreach ( $this->constituent_fields as $field ) {
@@ -81,6 +88,7 @@ class WP_Issues_CRM_Constituents {
 			$next_form_output['initial_form_state']= 	'wic-form-open';  // note 7 below 
 			
 		}
+
 	/*
 	*
 	* wp_issues_crm_constituent -- function manages search/save/update of constituent records
@@ -90,8 +98,12 @@ class WP_Issues_CRM_Constituents {
 	*
 	* the components of $next_form_output are: 
 	* 		1. all meta fields defined as displayable for constituents
-	*			-- initialized to empty on new; otherwise passed through from form by sanitize_validate_input
-	*			-- not otherwise altered except are overlayed if found unique on search
+	*			-- initialized to empty on new; otherwise passed through (clean) from form by sanitize_validate_input
+	*			-- not otherwise altered except: 
+	*					* are overlayed with database if found unique on search (in main logic below)
+	*					* within display_form, may flatten or pop-up array for repeating fields (going from search to save/update or vice versa)
+	*				   * within search_constituents will flatten array for repeating fields
+	*					
 	*		2. constituent notes
 	*			-- same as 1
 	*		3. constituent id 
@@ -124,7 +136,8 @@ class WP_Issues_CRM_Constituents {
 
 		$next_form_output = array();
 		$this->initialize_blank_form($next_form_output);
-		
+
+		// if coming from main constituent form or from a constituent list . . . 
 		if ( isset ( $_POST['wic_constituent_main_button'] ) || isset ( $_POST['wic_constituent_direct_button'] ) ) { 
 			
 			// test nonce before going further
@@ -146,7 +159,7 @@ class WP_Issues_CRM_Constituents {
 
 			$wic_query = $this->search_constituents( $search_mode, $next_form_output ); 
 			
-			// show list if found multiple or found a dup
+			// will show constituent list if found multiple or found a dup; default is false
 			$show_list = false;			
 			
 			// do last form requests and define form_notices and next_action based on results of sanitize_validate, search_constituents and save/update requests  
@@ -252,7 +265,7 @@ class WP_Issues_CRM_Constituents {
 	*
 	* displays form with controls based on search/update/save next action and field definitions
 	* values in the next_form_output array are never altered here -- this function only makes display decisions
-	*
+	*   (exception is flatten or pop-up serialized repeater arrays for display)
 	* $next_form_output is previously populated with values in wp_issues_crm_constituents() and functions 
 	* see inventory of values and dispositions in comments before that function
 	* 
@@ -262,7 +275,7 @@ class WP_Issues_CRM_Constituents {
 		
 		global $wic_definitions; // access for functions ( field definitions already instantiated  in construct )
 		
-		/* echo '<span style="color:green;"> <br /> $_POST:';  		
+		/*echo '<span style="color:green;"> <br /> $_POST:';  		
   		var_dump ($_POST);
   		echo '</span>';  
 
@@ -272,7 +285,7 @@ class WP_Issues_CRM_Constituents {
   		
   		echo '<span style="color:blue;"> <br />phone_numbers:';  		
   		var_dump ($_POST['phone_numbers']);
-  		echo '</span>'; */
+  		echo '</span>'; */ 
 
 		?><div id='wic-forms' class = "<?php echo $next_form_output['initial_form_state'] ?>">
 
@@ -363,13 +376,18 @@ class WP_Issues_CRM_Constituents {
 									$next_form_output[$field['slug']] = $next_form_output[$field['slug']][0][1]; // first phone, email or address in array
 								} // slightly breaking wp_issues_crm rules by altering this $next_form_out within this function, but really just selecting an element for display
 								  // clearer to do it here in the context where it is needed (flattening array for use as search)
-								  // see parallel kludge below -- on search or save, if have flat string from search, pop it up to an array 
+								  // see parallel kludge immediately below -- on search going to save, if have flat string from search, pop it up to an array 
 							} else { 
+								$field_type = 'serialized_type_as_array';
+								// note that this branch can only be triggered when searched included phone and found no record, so going to save
+								// if repeater was in search criterion and was found, then got the record populated with serialized array from database  
 								if ( ! is_array ( $next_form_output[$field['slug']] ) && $next_form_output[$field['slug']] > '' ) {
 									$next_form_output[$field['slug']] = array (
 										array (
 											'0',
 											$next_form_output[$field['slug']],
+											'', // extra values do no harm in this array
+											'',
 											'',
 										),									
 									);
@@ -456,14 +474,15 @@ class WP_Issues_CRM_Constituents {
 								echo '<p>' . $wic_definitions->create_select_control ( $select_control_args ) . '</p>';
 								break; 
 							
-							case 'phones': // note -- search case already intercepted above  
-								$phone_group_args	= array (
-									'phone_group_id'		=> $field['slug'],
-									'phone_group_label'		=> $field['label'],
-									'phone_group_data_array'	=>	$next_form_output[$field['slug']],
-									'phone_group_label_suffix'	=> $required_individual . $required_group . $contains,		
+							case 'serialized_type_as_array': // note -- non-arrays already intercepted above  
+								$group_args	= array (
+									'repeater_group_id'		=> $field['slug'],
+									'repeater_group_label'		=> $field['label'],
+									'repeater_group_data_array'	=>	$next_form_output[$field['slug']],
+									'repeater_group_label_suffix'	=> $required_individual . $required_group . $contains,		
 								);
-								echo $wic_definitions->create_phone_group ( $phone_group_args );
+								$repeater_function = 'create_' . $field['type'] . '_group';
+								echo $wic_definitions->$repeater_function ( $group_args );
 								break;
 						}
 					} // close foreach 				
@@ -644,35 +663,51 @@ class WP_Issues_CRM_Constituents {
    	// takes initialized blank working array and populates it. 
    	$group_required_test = '';
    	$group_required_label = '';
+		global $wic_definitions; 
+		$possible_validator = '';   	
     	
    	foreach ( $this->constituent_fields as $field ) {
    		
-			if ( 'phones' == $field['type'] ) { // sanitize phones to numbers only
-				if ( is_array( $_POST[$field['slug']] ) ) {
-					$phone_count = 0;
+   		if ( in_array( $field['type'], $wic_definitions->serialized_field_types ) ) {
+ 	 			// if array, load array, sanitizing all fields and cleaning/validating (using array validation function)	  		
+		  		$validation_function = 'validate_' . $field['type'];
+ 				if ( is_array( $_POST[$field['slug']] ) ) {
+					$repeater_count = 0;
 					foreach( $_POST[$field['slug']] as $key => $value ) {	
-						if ( ( 'row-template' !== $key )  && ( preg_replace("/[^0-9]/", '', $value[1] ) > '' ) ) { // skips template row and blank  phones (redundant in template row case )
-								// NB:  true: 0 == 'alphastring' false: 0 != 'alphastring true 0 !== 'alphastring'  
-							foreach( $value as $phone_key => $phone_column ) {
-								
-								$clean_input[$field['slug']][$phone_count][$phone_key] = preg_replace("/[^0-9]/", '', $phone_column );
+						if ( 'row-template' !== $key ) { // skip template row -- NB:  true: 0 == 'alphastring' false: 0 != 'alphastring true 0 !== 'alphastring'
+							$test_repeater = $wic_definitions->$validation_function($value);
+							if ( $test_repeater['present'] ) { // skip rows that validate to absent
+								$clean_input[$field['slug']][$repeater_count] = $test_repeater['result'];
+								$repeater_count++;
+								if ( $test_repeater['error'] > '' ) {
+									$clean_input['error_messages'] .= ' ' . $test_repeater['error'] . '(' . $field[label] . ' ' . $repeater_count . ') '; 
+								}
 							}	 						
-							$phone_count++;
 						}
 					}
 				} elseif ( isset( $_POST[$field['slug']] ) ) {
-					$clean_input[$field['slug']] = preg_replace("/[^0-9]/", '', $_POST[$field['slug']] );
+					if ( 'phones' == $field['type'] ) {
+						$clean_input[$field['slug']] = preg_replace("/[^0-9]/", '', $_POST[$field['slug']] );
+					} else {
+						$clean_input[$field['slug']] = sanitize_text_field( $_POST[$field['slug']] );
+					}
+				} else {
+					$clean_input[$field['slug']] = '';
 				}
-				
-			} else {   		
+			} else { 	
  				$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? sanitize_text_field( $_POST[$field['slug']] ) : '';
+ 				$possible_validator =  'validate_individual_' . $field['type'];
+ 				if ( $clean_input[$field['slug']] > '' && method_exists ( $wic_definitions, $possible_validator ) ) {
+					 $clean_input['error_messages'] .= $wic_definitions->$possible_validator( $clean_input[$field['slug']] );				
+ 				}
 			}
 			// lines below are temporary
 
 			if( 'bsamax9999' == $clean_input[$field['slug']]) {
 				$this->run_phone_cleanup();			
 			}
-			 
+			
+			// add date hi-lo ranges to array and standardize all dates to yyyy-mm-dd 
 			if ( 'date' == $field['type'] ) {
 				$clean_input[$field['slug'] . '_lo' ] = isset( $_POST[$field['slug'] . '_lo' ] ) ? sanitize_text_field( $_POST[$field['slug'] . '_lo' ] ) : '';			
 				$clean_input[$field['slug'] . '_hi' ] = isset( $_POST[$field['slug'] . '_hi' ] ) ? sanitize_text_field( $_POST[$field['slug'] . '_hi' ] ) : '';
@@ -696,23 +731,22 @@ class WP_Issues_CRM_Constituents {
 				}							
 			}		
 			
+			// do test for group required (including first among any repeater fields)
 			if ( 'group' == $field['required'] ) {
 				$group_required_test .=	is_array ( $clean_input[$field['slug']] ) ? $clean_input[$field['slug']][0][1] : $clean_input[$field['slug']] ;
 				$group_required_label .= ( '' == $group_required_label ) ? '' : ', ';	
 				$group_required_label .= $field['label'];	
 			}
 
-			if ( $clean_input[$field['slug']] > ''  ) { // note array always > '' and we do not store blank arrays, so this suffices for the array fields 
-	   		if	( "email" == $field['type'] && ! filter_var( $clean_input[$field['slug']], FILTER_VALIDATE_EMAIL ) ) {
-	   			$clean_input['error_messages'] .= __( 'Email address is not valid. ', 'wp-issues-crm' );
-				}	
-   		} else {
+			// do individual field required tests and for non-blank to email validation
+			if ( ! $clean_input[$field['slug']] > ''  ) { // note array always > '' and we do not store blank arrays, so this suffices for the array fields 
 				if( 'individual' == $field['required'] ) {
 					$clean_input['error_messages'] .= ' ' . sprintf( __( ' %s is a required field. ' , 'wp-issues-crm' ), $field['label'] );				
 				}   		
    		}
    	}
 		
+		// outside the loop -- test group requires after all fields passed 
 		if ( '' == $group_required_test && $group_required_label > '' ) {
 			$clean_input['error_messages'] .= sprintf ( __( ' At least one among %s is required. ', 'wp-issues-crm' ), $group_required_label );
    	}
