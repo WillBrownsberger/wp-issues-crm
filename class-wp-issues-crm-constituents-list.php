@@ -56,7 +56,14 @@ class WP_Issues_CRM_Constituents_List {
 						$key = $wic_definitions->wic_metakey . $field['slug'];
 						$output .= '<li class = "cl-field cl-' . $field['slug'] . ' "> ';
 						if ( isset ( $wic_query->post->$key ) ) {
-							$output .= $wic_query->post->$key;
+							if ( ! is_array ( $wic_query->post->$key ) ) {
+								$output .= $wic_query->post->$key;
+							} else {
+								// NB $wic_query->post->$key)[0][1] gets evaluated to whole ->post array b/c $key[0][1] evaluates to empty; 
+								// cannot fix with parens, so two step this
+								$row_array = $wic_query->post->$key; 
+								$output .= $row_array[0][1];							
+  							}
 						}							
 						$output .= '</li>';			
 					}

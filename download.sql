@@ -50,4 +50,14 @@ wic_data_email 	9974
 
 SELECT * FROm wp_posts p inner join wp_postmeta m1 on m1.post_id = p.ID inner join wp_postmeta m2 on m2.post_ID = p.ID where m1.meta_key = 'wic_data_gender_id' and m1. meta_value = 'm' and post_status = 'private' and m2.meta_key = 'wic_data_city' and m2.meta_value = 'belmont'
 
-SELECT *, serialize () FROm wp_posts p inner join wp_postmeta m1 on m1.post_id = p.ID inner join wp_postmeta m2 on m2.post_ID = p.ID where m1.meta_key = 'wic_data_phone'and post_status = 'private' and m2.meta_key = 'wic_data_mobile_phone' 
+SELECT *, serialize () FROm wp_posts p inner join wp_postmeta m1 on m1.post_id = p.ID inner join wp_postmeta m2 on m2.post_ID = p.ID where m1.meta_key = 'wic_data_phone'and post_status = 'private' and m2.meta_key = 'wic_data_mobile_phone'
+
+
+SELECT city, state_province_id, postal_code,count(id) FROM `civicrm_address` where city > '' and postal_code > '' group by city, state_province_id, postal_code order by count(id) desc 
+
+71358 addresses on table
+220 with city but no postal code
+3 where have zip, but not city -- clearly city is preferred and must allow entry of city only.
+71062 have both city and zip code.  Top 40 account for 70783.
+
+ 

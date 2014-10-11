@@ -51,14 +51,14 @@ class WP_Issues_CRM_Constituents {
 *
 */
 	public function create_dup_check_fields_list() {
-		$fields_string = '';
+	$fields_string = '';
 		foreach ( $this->constituent_fields as $field ) {
 			if( $field['dedup'] ) {
 				$fields_string = ( $fields_string > '' ) ? $fields_string . ', ' : '';
 				$fields_string .= $field['label'];
 			}		
 		}
-		return ( $fields_string );	
+		return ( $fields_string ); 	
 	}
 /*
 *
@@ -333,6 +333,9 @@ class WP_Issues_CRM_Constituents {
 			/* format meta fields  -- loop through constituent field groups and within them through fields */
 			$group_count = 0;
 		   foreach ( $this->constituent_field_groups as $group ) {
+		   	
+
+						   	
 				$filtered_fields = $this->select_key ( $this->constituent_fields, 'group', $group['name'] );
 				$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
 				$group_count++;
@@ -340,6 +343,8 @@ class WP_Issues_CRM_Constituents {
 					'<h3 class = "constituent-field-group-label">' . $group['label'] . '</h3>' .
 					'<p class = "constituent-field-group-legend">' . $group['legend'] . '</p>';
 					foreach ( $filtered_fields as $field ) {	
+
+		   			$field_type = $field['type'];
 
 						/* set flags (toggling for each field) and legends (setting if for any field) */
 						if ( 'update' == $next_form_output['next_action'] || 'save' == $next_form_output['next_action'] ) {
@@ -364,9 +369,6 @@ class WP_Issues_CRM_Constituents {
 								$serialized_contains_legend = true;
 							}
 						}
-
-						/* translate from field table -- arrays as type indicate a dropdown with the array as options */
-						$field_type = is_array( $field['type'] ) ? 'dropdown' : $field['type']; 						
 
 						/* if have repeating fields, treat as string for search (can be new search or search where already working as array) */						
 						if ( in_array( $field['type'], $wic_definitions->serialized_field_types ) ) {
@@ -395,32 +397,35 @@ class WP_Issues_CRM_Constituents {
 							}
 						}
 
+						/* set up arguments consistently passed to control functions */ 
+						$args = array (
+							'field_name_id'		=> $field['slug'],
+							'field_label'			=>	$field['label'],
+							'value'					=> $next_form_output[$field['slug']],
+							'read_only_flag'		=>	false, 
+							'field_label_suffix'	=> $required_individual . $required_group . $contains, 								
+						);
 
+						/* handle cases as additions to and overrides of those basic arguments */
 						switch ( $field_type ) {
 							case 'email':						
 							case 'text':
 							case 'serialized_type_as_string':
-								$text_control_args = array (
-										'field_name_id'		=> $field['slug'],
-										'field_label'			=>	$field['label'],
-										'value'					=> $next_form_output[$field['slug']],
-										'read_only_flag'		=>	false, 
-										'field_label_suffix'	=> $required_individual . $required_group . $contains, 								
-									);
-								echo '<p>' . $wic_definitions->create_text_control ( $text_control_args ) . '</p>'; 
+								echo '<p>' . $wic_definitions->create_text_control ( $args ) . '</p>'; 
 								break;
+
 							case 'date':
 								if ( 'search' == $next_form_output['next_action'] ) { 
-									$text_control_args = array (
+									$args = array (
 										'field_name_id'		=> $field['slug'] . '_lo',
 										'field_label'			=>	$field['label'] . ' >= ' ,
 										'value'					=> $next_form_output[$field['slug'] . '_lo'],
 										'read_only_flag'		=>	false, 
 										'field_label_suffix'	=> '', 								
 									);
-									echo '<p>' . $wic_definitions->create_text_control ( $text_control_args ); 
+									echo '<p>' . $wic_definitions->create_text_control ( $args ); 
 
-									$text_control_args = array (
+									$args = array (
 										'field_name_id'		=> $field['slug'] . '_hi',
 										'field_label'			=>	__( 'and <=', 'wp_issues_crm' ),
 										'label_class'			=> 'wic-label-2',
@@ -428,50 +433,29 @@ class WP_Issues_CRM_Constituents {
 										'read_only_flag'		=>	false, 
 										'field_label_suffix'	=> '', 								
 									);
-									echo $wic_definitions->create_text_control ( $text_control_args ) . '</p>'; 
+									echo $wic_definitions->create_text_control ( $args ) . '</p>'; 
 								}	else {
-									$text_control_args = array (
-										'field_name_id'		=> $field['slug'],
-										'field_label'			=>	$field['label'],
-										'value'					=> $next_form_output[$field['slug']],
-										'read_only_flag'		=>	false, 
-										'field_label_suffix'	=> $required_individual . $required_group,  								
-									);
-									echo '<p>' . $wic_definitions->create_text_control ( $text_control_args ) . '</p>'; 
+									$args['field_label_suffix'] = $required_individual . $required_group;  								
+									echo '<p>' . $wic_definitions->create_text_control ( $args ) . '</p>'; 
 								} 
 								break;
+
 							case 'readonly': 
 								if ( 'save' != $next_form_output['next_action'] ) { // do not display for save
-									$text_control_args = array (
-										'field_name_id'		=> $field['slug'],
-										'field_label'			=>	$field['label'],
-										'value'					=> $next_form_output[$field['slug']],
-										'read_only_flag'		=>	( 'update' == $next_form_output['next_action'] ), // true or false 
-										'field_label_suffix'	=> $required_individual . $required_group . $contains,  								
-									);
-									echo '<p>' . $wic_definitions->create_text_control ( $text_control_args ) . '</p>'; 
+									$args['read_only_flag'] = 	( 'update' == $next_form_output['next_action'] ); // true or false 
+									echo '<p>' . $wic_definitions->create_text_control ( $args ) . '</p>'; 
 								} 
 								break;
+
 							case 'check':
-								$text_control_args = array (  // args same as for text
-									'field_name_id'		=> $field['slug'],
-									'field_label'			=>	$field['label'],
-									'value'					=> $next_form_output[$field['slug']],
-									'read_only_flag'		=>	false, 
-									'field_label_suffix'	=> $required_individual . $required_group . $contains, 								
-								);
-								echo '<p>' . $wic_definitions->create_check_control ( $text_control_args ) . '</p>'; 
+								echo '<p>' . $wic_definitions->create_check_control ( $args ) . '</p>'; 
 								break;
-							case 'dropdown':
-								$select_control_args = array (
-									'field_name_id' 		=> $field['slug'],
-									'field_label'			=>	$field['label'],
-									'selected'				=> $next_form_output[$field['slug']],
-									'select_field_placeholder' => __( 'Select', 'wp-issues-crm' ) . ' ' .$field['label'],
-									'select_array'			=>	$field['type'], 
-									'field_label_suffix'	=> $required_individual . $required_group,								
-								);
-								echo '<p>' . $wic_definitions->create_select_control ( $select_control_args ) . '</p>';
+								
+							case 'select':
+								$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
+								$args['select_array']			=	$field['select_array'];
+								$args['field_label_suffix']	= $required_individual . $required_group;								
+								echo '<p>' . $wic_definitions->create_select_control ( $args ) . '</p>';
 								break; 
 							
 							case 'serialized_type_as_array': // note -- non-arrays already intercepted above  
@@ -668,10 +652,10 @@ class WP_Issues_CRM_Constituents {
     	
    	foreach ( $this->constituent_fields as $field ) {
    		
-   		if ( in_array( $field['type'], $wic_definitions->serialized_field_types ) ) {
+   		if ( in_array( $field['type'], $wic_definitions->serialized_field_types ) && isset( $_POST[$field['slug']] ) ) {
  	 			// if array, load array, sanitizing all fields and cleaning/validating (using array validation function)	  		
-		  		$validation_function = 'validate_' . $field['type'];
  				if ( is_array( $_POST[$field['slug']] ) ) {
+		  			$validation_function = 'validate_' . $field['type'];
 					$repeater_count = 0;
 					foreach( $_POST[$field['slug']] as $key => $value ) {	
 						if ( 'row-template' !== $key ) { // skip template row -- NB:  true: 0 == 'alphastring' false: 0 != 'alphastring true 0 !== 'alphastring'
@@ -685,21 +669,19 @@ class WP_Issues_CRM_Constituents {
 							}	 						
 						}
 					}
-				} elseif ( isset( $_POST[$field['slug']] ) ) {
+				} else { // non array for serialized field is only a search, compress/sanitize, but not validate
 					if ( 'phones' == $field['type'] ) {
 						$clean_input[$field['slug']] = preg_replace("/[^0-9]/", '', $_POST[$field['slug']] );
 					} else {
 						$clean_input[$field['slug']] = sanitize_text_field( $_POST[$field['slug']] );
 					}
-				} else {
-					$clean_input[$field['slug']] = '';
-				}
-			} else { 	
+				} // close non-array for serialized fields
+			} else { // not a serialized field and/or not set	
  				$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? sanitize_text_field( $_POST[$field['slug']] ) : '';
  				$possible_validator =  'validate_individual_' . $field['type'];
- 				if ( $clean_input[$field['slug']] > '' && method_exists ( $wic_definitions, $possible_validator ) ) {
+ 				if ( $clean_input[$field['slug']] > '' && method_exists ( $wic_definitions, $possible_validator )  ) {
 					 $clean_input['error_messages'] .= $wic_definitions->$possible_validator( $clean_input[$field['slug']] );				
- 				}
+ 				} 
 			}
 			// lines below are temporary
 
@@ -784,11 +766,20 @@ class WP_Issues_CRM_Constituents {
 			'post_id'	=> 0,
 		   'notices'	=> '', 
 		);		
-
+		
+		// for title, use group email if have it, otherwise use individual email 
+		$email_for_title = '';
+		if ( isset( $next_form_output['email_group'] ) ) {
+			$email_for_title = isset( $next_form_output['email_group'][0][1] ) ? $next_form_output['email_group'][0][1]  : '';
+		} 
+		if ( '' == $email_for_title ) {
+			$email_for_title = isset( $next_form_output['email'] ) ? $next_form_output['email_group']  : ''; 
+		}
+		
    	// title is ln OR ln,fn OR fn OR email -- one of these is required in validation to be non-blank.	
 		$title = 	isset ( $next_form_output['last_name'] ) ? $next_form_output['last_name'] : '';
 		$title .= 	isset ( $next_form_output['first_name'] ) ? ( $title > '' ? ', ' : '' ) . $next_form_output['first_name'] : '';
-		$title =		( '' == $title ) ? $next_form_output['email'] : $title;
+		$title =		( '' == $title ) ? $email_for_title : $title;
 		
 		$post_args = array(
 		  'post_content'   => $next_form_output['constituent_notes'], 
@@ -816,11 +807,12 @@ class WP_Issues_CRM_Constituents {
 		}				
 		// save or update error return with error
 		if ( 0 == $outcome['post_id'] ) {
-			$outcome['notices'] = __( 'Unknown error. Could not save/update constituent record.  Reset form, search for constituent and check results.', 'wp-issues-crm' );
+			$outcome['notices'] = __( 'Unknown error. Could not save/update constituent record.  Do new constituent search on same constituent to check for partial results.', 'wp-issues-crm' );
 			return ($outcome);					
 		}
 		// otherwise proceed to update metafields
 		 foreach ( $this->constituent_fields as $field ) {
+		 	// note: in the not read only branch, explicitly set meta_return in every case 
 		 	if ( 'readonly' != $field['type'] ) {
 				// note: add/update post meta automatically serializes arrays!				
 				$post_field_key =  $this->wic_metakey . $field['slug'];
@@ -845,14 +837,16 @@ class WP_Issues_CRM_Constituents {
 						
 					}
 				// new constituent record
-				} else {
-					if ( $next_form_output[$field['slug']] > '' ) {
+				} else { 
+					if ( $next_form_output[$field['slug']] > '' ) { 
 						$meta_return = add_post_meta ( $outcome['post_id'], $post_field_key, $next_form_output[$field['slug']] );
+					} else { // for blank field set return to be OK (no action was taken)
+						$meta_return = 1;					
 					}
 				}
 				
 				if ( ! $meta_return ) {
-					$outcome['notices'] = __( 'Unknown error. Could not save/update constituent details.  Reset form, search for constituent and check results.', 'wp-issues-crm' );
+					$outcome['notices'] = sprintf( __( 'Unknown error. Could not save constituent detail -- %1$s.   Do new constituent search on same constituent to check for partial results.', 'wp-issues-crm' ), $field['label'] );
 				}
 			}	
 		} 

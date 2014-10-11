@@ -57,6 +57,120 @@ class WP_Issues_CRM_Definitions {
 			'label'	=>	'Other Email' ),
 		);
 		
+	public $address_type_options	 = array(	
+		array(
+			'value'	=> '0',
+			'label'	=>	'Home Address' ),
+		array(
+			'value'	=> '1',
+			'label'	=>	'Work Address' ),
+		array(
+			'value'	=> '2',
+			'label'	=>	'Mail Address' ),
+		array(
+			'value'	=> '3',
+			'label'	=>	'Other Address' ),
+		);
+		
+	public $address_zip_options = array (
+		array(
+			'value'	=> '02472',
+			'label'	=>	'WATERTOWN (02472)'),
+	
+		array(
+			'value'	=> '02478',
+			'label'	=> 'BELMONT (02478)'),
+		array(
+			'value'	=> '02135',
+			'label'	=> 'BRIGHTON (02135)'),
+		array(
+			'value'	=> '02116',
+			'label'	=> 'BACKBAY (02116)'),
+		array(
+			'value'	=> '02115',
+			'label'	=> 'BOSTON (02115)'),
+		array(
+			'value'	=> '02215',
+			'label'	=> 'FENWAY (02215)'),
+		array(
+			'value'	=> '02134',
+			'label'	=> 'ALLSTON (02134)'),
+		array(
+			'value'	=> '02140',
+			'label'	=> 'NORTH CAMBRIDGE (02140)'),
+		array(
+			'value'	=> '02199',
+			'label'	=> 'BOSTON (02199)'),
+		array(
+			'value'	=> '02474',
+			'label'	=> 'ARLINGTON (02474)'),
+		array(
+			'value'	=> '02138',
+			'label'	=> 'CAMBRIDGE (02138)'),
+		array(
+			'value'	=> '02120',
+			'label'	=> 'BOSTON (02120)'),
+		array(
+			'value'	=> '02467',
+			'label'	=> 'CHESTNUT HILL (02467)'),
+		array(
+			'value'	=> '02118',
+			'label'	=> 'BOSTON (02118)'),
+		array(
+			'value'	=> '02127',
+			'label'	=> 'BOSTON (02127)'),
+		array(
+			'value'	=> '02114',
+			'label'	=> 'BOSTON (02114)'),
+		array(
+			'value'	=> '02476',
+			'label'	=> 'ARLINGTON (02476)'),
+		array(
+			'value'	=> '02108',
+			'label'	=> 'BOSTON (02108)'),
+		array(
+			'value'	=> '02113',
+			'label'	=> 'BOSTON (02113)'),
+		array(
+			'value'	=> '02128',
+			'label'	=> 'BOSTON (02128)'),
+		array(
+			'value'	=> '02210',
+			'label'	=> 'BOSTON (02210)'),
+		array(
+			'value'	=> '02109',
+			'label'	=> 'BOSTON (02109)'),
+		array(
+			'value'	=> '02111',
+			'label'	=> 'BOSTON (02111)'),
+		array(
+			'value'	=> '02471',
+			'label'	=> 'WATERTOWN (02471)'),
+		array(
+			'value'	=> '02445',
+			'label'	=> 'BROOKLINE (02445)'),
+		array(
+			'value'	=> '02139',
+			'label'	=> 'CAMBRIDGE (02139)'),
+		array(
+			'value'	=> '02421',
+			'label'	=> 'LEXINGTON (02421)'),
+		array(
+			'value'	=> '02446',
+			'label'	=> 'BROOKLINE (02446)'),
+		array(
+			'value'	=> '02117',
+			'label'	=> 'BOSTON (02117)'),
+		array(
+			'value'	=> '02124',
+			'label'	=> 'BOSTON (02124)'),
+		array(
+			'value'	=> '02123',
+			'label'	=> 'BOSTON (02123)'),
+		array(
+			'value'	=> '02110',
+			'label'	=> 'BOSTON (02110)'),
+	);		
 		
 	public $constituent_field_groups = array (
 		array (
@@ -87,8 +201,6 @@ class WP_Issues_CRM_Definitions {
 
 	public $constituent_fields = array( 
 	  	/* fields control -- all definitions of fields are in this array (except for native post fields -- content and title)
-	  	*  the only field slug specific logic in the whole class is requirement that one of first_name, last_name and email not be blank
-	  	*  so, fields must include so labeled first_name, last_name, email, otherwise may be replaced freely
 	  	*  -- slug is the no-spaces name of the field
 	  	* 	-- is the front facing name
 	  	*	--	online is whether field should appear at all in online access (may or may not be updateable -- that is determined by type)
@@ -99,6 +211,8 @@ class WP_Issues_CRM_Definitions {
 	  	*	-- order is just for form layout purposes
 	  	*  -- required may be false, group or individual.  If group, at least one in group must be provided.
 	  	*  -- list include in standard constituent lists -- if > 0 value is % width for display -- should sum to 100.
+	  	*  **** the only field slug specific logic in the whole class is expectation that one of first_name, last_name and email not be blank for title def
+	  	*  **** so, fields with group => required must be all or a subset of first_name, last_name, email, or email_group
 	  	*/
 		array( // 1
 			'dedup'	=>	true,	
@@ -108,7 +222,7 @@ class WP_Issues_CRM_Definitions {
 			'list'	=> '14',
 			'online'	=>	true,	
 			'order'	=>	10,
-			'required'	=> 'group',
+			'required'	=> 'group', // see note above
 			'slug'	=> 'first_name', 	
 			'type'	=>	'text', 	
 
@@ -133,7 +247,7 @@ class WP_Issues_CRM_Definitions {
 			'list'	=> '14',
 			'online'	=>	true,
 			'order'	=>	20,
-			'required'	=> 'group',
+			'required'	=> 'group', // see note above
 			'slug'	=> 'last_name',
 			'type'	=>	'text',
 			),	
@@ -142,10 +256,10 @@ class WP_Issues_CRM_Definitions {
 			'group'	=>	'required',
 			'label'	=>	'eMail',
 			'like'	=>	true,
-			'list'	=> '28',
-			'online'	=>	true,
+			'list'	=> '0',
+			'online'	=>	false,
 			'order'	=>	30,
-			'required'	=> 'group',
+			'required'	=> 'group', // see note above -- note, in default installation, this field is not accessible online (use group)
 			'slug'	=> 'email',
 			'type'	=>	'email',
 			),	
@@ -157,7 +271,7 @@ class WP_Issues_CRM_Definitions {
 			'list'	=> '28',
 			'online'	=>	true,
 			'order'	=>	31,
-			'required'	=> 'group',
+			'required'	=> 'group', // see note above -- do not have to include in group required, if want to force to have a fn or ln
 			'slug'	=> 'email_group',
 			'type'	=>	'emails',
 			),				
@@ -199,6 +313,18 @@ class WP_Issues_CRM_Definitions {
 			'type'	=>	'text',
 
 			),
+		array( // 7A
+			'dedup'	=>	true,
+			'group'	=>	'contact',
+			'label'	=>	'Address',
+			'like'	=>	true,
+			'list'	=> '29',
+			'online'	=>	true,
+			'order'	=>	41,
+			'required'	=> '',
+			'slug'	=> 'street_addresses',
+			'type'	=>	'addresses',
+			),	
 		array( // 8
 			'dedup'	=>	false,
 			'group'	=>	'contact',
@@ -269,7 +395,7 @@ class WP_Issues_CRM_Definitions {
 			'order'	=>	85,
 			'required'	=> '',
 			'slug'	=> 'gender_id',
-			'type'	=>	array ( 
+			'select_array'	=>	array ( 
 				array(
 					'value'	=> 'm',
 					'label'	=>	'Male' ),
@@ -277,6 +403,7 @@ class WP_Issues_CRM_Definitions {
 					'value'	=> 'f',
 					'label'	=>	'Female' ),
 				),
+			'type'	=> 'select',
 			),
 		array( // 14
 			'dedup'	=>	false,
@@ -487,19 +614,19 @@ class WP_Issues_CRM_Definitions {
 		/* $control_args = array (
 			'field_name_id' => name/id
 			'field_label'	=>	label for field
-			'select_field_placeholder' => label that will appear in drop down for empty string
-			'selected'		=> initial value 
-			'field_label_class'			=> for css
+			'placeholder' => label that will appear in drop down for empty string
+			'value'		=> initial value 
+			'label_class'			=> for css
 			'field_input_class'			=> for css
 			'select_array'	=>	the options for the selected -- key value array with keys 'value' and 'label' 
 			'field_label_suffix'	=> any string to append to the field label in control (but not in drop down)
 		*/								
 
 		$label_suffix = '';
-		$selected = '';
-		$field_label_class = 'wic-label';
+		$value = '';
+		$label_class = 'wic-label';
 		$field_input_class = 'wic-input';
-		$select_field_placeholder = '';
+		$placeholder = '';
 	
 
 		extract ( $control_args, EXTR_OVERWRITE ); 
@@ -508,18 +635,18 @@ class WP_Issues_CRM_Definitions {
 				
 		$not_selected_option = array (
 			'value' 	=> '',
-			'label'	=> $select_field_placeholder,								
+			'label'	=> $placeholder,								
 		);  
 		$option_array =  $select_array;
 		array_push( $option_array, $not_selected_option );
 		
-		$control = ( $field_label > '' ) ? '<label class="' . $field_label_class . '" for="' . $field_name_id . '">' . $field_label . $field_label_suffix . '</label>' : '';
+		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . $field_label_suffix . '</label>' : '';
 		$control .= '<select class="' . $field_input_class . '" id="' . $field_name_id . '" name="' . $field_name_id . '" >';
 		$p = '';
 		$r = '';
 		foreach ( $option_array as $option ) {
 			$label = $option['label'];
-			if ( $selected == $option['value'] ) { // Make selected first in list
+			if ( $value == $option['value'] ) { // Make selected first in list
 				$p = '<option selected="selected" value="' . $option['value'] . '">' . $label . '</option>';
 			} else {
 				$r .= '<option value="' . $option['value'] . '">' . $label . '</option>';
@@ -597,9 +724,9 @@ class WP_Issues_CRM_Definitions {
 		$phone_type_array = array ( 
 				'field_name_id' 	=> $repeater_group_id . '[row-template][0]',
 				'field_label'		=>	'',
-				'select_field_placeholder' => __( 'Phone type?', 'wp-issues-crm' ),
+				'placeholder' => __( 'Phone type?', 'wp-issues-crm' ),
 				'select_array'		=>	$this->phone_type_options,
-				'selected'			=> '',
+				'value'			=> '',
 				'field_input_class' 	=> 'wic-input wic-phone-type-dropdown',
 				'field_label_suffix'	=> '',
 			);	
@@ -649,7 +776,7 @@ class WP_Issues_CRM_Definitions {
 				$row = '<p class = "phone-number-row" id = "' . $repeater_group_id . '-' . $i . '">';
 							
 				$phone_type_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][0]';
-				$phone_type_array['selected']			= $repeater_group_data_array[$i][0];
+				$phone_type_array['value']			= $repeater_group_data_array[$i][0];
 				$row .= $this->create_select_control ( $phone_type_array );
 	
 			
@@ -739,9 +866,9 @@ class WP_Issues_CRM_Definitions {
 		$email_type_array = array ( 
 				'field_name_id' 	=> $repeater_group_id . '[row-template][0]',
 				'field_label'		=>	'',
-				'select_field_placeholder' => __( 'eMail type?', 'wp-issues-crm' ),
+				'placeholder' => __( 'eMail type?', 'wp-issues-crm' ),
 				'select_array'		=>	$this->email_type_options,
-				'selected'			=> '',
+				'value'			=> '',
 				'field_input_class' 	=> 'wic-input wic-email-type-dropdown',
 				'field_label_suffix'	=> '',
 			);	
@@ -780,7 +907,7 @@ class WP_Issues_CRM_Definitions {
 				$row = '<p class = "email-address-row" id = "' . $repeater_group_id . '-' . $i . '">';
 							
 				$email_type_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][0]';
-				$email_type_array['selected']			= $repeater_group_data_array[$i][0];
+				$email_type_array['value']			= $repeater_group_data_array[$i][0];
 				$row .= $this->create_select_control ( $email_type_array );
 	
 			
@@ -807,7 +934,7 @@ class WP_Issues_CRM_Definitions {
 		return ($email_group_control_set);	
 	}
 
-	function validate_emails( $email_number_row ) {
+	function validate_emails( $email_row ) {
 		
 		$outcome = array(
 			'result' 	=> '',
@@ -816,8 +943,8 @@ class WP_Issues_CRM_Definitions {
 		);
 
 		$outcome['result'] = array(
-				$email_number_row[0],
-				sanitize_text_field ( $email_number_row[1] ),
+				$email_row[0],
+				sanitize_text_field ( $email_row[1] ),
 			);
 			
 		$outcome['present'] = $outcome['result'][1] > '';
@@ -834,6 +961,140 @@ class WP_Issues_CRM_Definitions {
 		$error = filter_var( $email, FILTER_VALIDATE_EMAIL ) ? '' : __( 'Email address appears to be not valid. ', 'wp-issues-crm' );
 		return $error;	
 	}	
+
+/*
+*	function for address groups
+*
+*/
+
+		
+	public function create_addresses_group ( $repeater_group_args ) {
+		/*
+      *		'repeater_group_id'		=> $field['slug'],
+		*		'repeater_group_label'		=> $field['label'],
+		*		'repeater_group_data_array'	=>	$next_form_output[$field['slug']],
+		*		'repeater_group_label_suffix'	=> $required_individual . $required_group . $contains,		
+		*/
+		
+		
+		extract ( $repeater_group_args, EXTR_OVERWRITE );
+		
+		// create addresss division opening tag 		
+		$address_group_control_set = '<div id = "' . $repeater_group_id . '-control-set' . '">';
+
+		// create a hidden template row for adding address fields in wic-utilities.js through moreFields() 
+		// moreFields will replace the string 'row-template' with row-counter index value after creating the new row
+		// this will change row id and the field indexes - the array will be $repeater_group_id[x][y] (x = row, y = field)
+		$row = '<p class = "hidden-template" id = "' . $repeater_group_id . '-row-template' . '">'; // template opening line	
+	
+		$address_type_array = array ( 
+				'field_name_id' 	=> $repeater_group_id . '[row-template][0]',
+				'field_label'		=>	'',
+				'placeholder' => __( 'Address type?', 'wp-issues-crm' ),
+				'select_array'		=>	$this->address_type_options,
+				'value'			=> '',
+				'field_input_class' 	=> 'wic-input wic-address-type-dropdown',
+				'field_label_suffix'	=> '',
+			);	
+		$row .= $this->create_select_control ( $address_type_array );
+
+		$address_street_array = array ( 
+			'field_name_id' 	=> $repeater_group_id . '[row-template][1]',
+			'field_label'			=>	'',
+ 			'value'					=> '', 
+ 			'placeholder'			=> __( 'Street Address?', 'wic-issues-crm' ),
+			'input_class' 	=> 'wic-input wic-address-street',
+			'field_label_suffix'	=> '',
+		);
+
+		$row .= $this->create_text_control( $address_street_array );
+
+		$address_zip_array = array ( 
+			'field_name_id' 	=> $repeater_group_id . '[row-template][2]',
+			'field_label'			=>	'',
+			'placeholder' => __( 'City/Zip?', 'wp-issues-crm' ),
+			'select_array'		=>	$this->address_zip_options,
+			'value'			=> '',
+			'field_input_class' 	=> 'wic-input wic-address-zip',
+			'field_label_suffix'	=> '',
+		);
+
+		$row .= $this->create_select_control( $address_zip_array );
+
+		$row .= $this->create_destroy_button ();
+
+		$row .= '</p>';
+	
+		// put completed template row into addresss division			
+		$address_group_control_set .= $row;
+
+
+		// now proceed to add rows for any existing addresss from database or previous form
+		$i = '0'; // array index
+		
+		if ( is_array( $repeater_group_data_array ) ) {
+
+			foreach ( $repeater_group_data_array as $address_number ) {
+				
+				// note, in this loop, need only instantiate the changing arguments in the arrays			
+				
+				$row_class = ( 'x' == $i ) ? 'address-number-row-hidden' : 'address-number-row';
+				
+				$row = '<p class = "address-number-row" id = "' . $repeater_group_id . '-' . $i . '">';
+							
+				$address_type_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][0]';
+				$address_type_array['value']			= $repeater_group_data_array[$i][0];
+				$row .= $this->create_select_control ( $address_type_array );
+	
+			
+				$address_street_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][1]';
+	 			$address_street_array['value']				= $repeater_group_data_array[$i][1];
+				$row .= $this->create_text_control( $address_street_array );
+	
+
+				$address_zip_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][2]';
+	 			$address_zip_array['value']				= $repeater_group_data_array[$i][2];
+				$row .= $this->create_select_control( $address_zip_array );
+				
+				$row .= $this->create_destroy_button ();
+				
+				$row .= '</p>';
+				
+				$address_group_control_set .= $row;
+				
+				$i++;
+	
+			}
+		}		
+		
+		$address_group_control_set .= $this->create_add_button ( $repeater_group_id, __( 'Add Address', 'wp-issues-crm' ) );
+		$address_group_control_set .= '</div>';
+		$address_group_control_set .= '<div class = "hidden-template" id = "' . $repeater_group_id . '-row-counter">' . $i . '</div>';
+		
+		
+		return ($address_group_control_set);	
+	}
+	function validate_addresses( $address_row ) {
+		
+		$outcome = array(
+			'result' 	=> '',
+			'error'		=> '',
+			'present' 	=> false
+		);
+
+		$outcome['result'] = array(
+				$address_row[0],
+				sanitize_text_field ( $address_row[1] ),
+				$address_row[2],
+			);
+			
+		$outcome['present'] = $outcome['result'][1] > '' || $outcome['result'][2] > '' ;
+		
+   	$outcome['error'] =  '';
+
+		return( $outcome );		
+			
+	}
 	
  }
 
