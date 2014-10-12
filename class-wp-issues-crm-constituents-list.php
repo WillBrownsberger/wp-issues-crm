@@ -61,8 +61,12 @@ class WP_Issues_CRM_Constituents_List {
 							} else {
 								// NB $wic_query->post->$key)[0][1] gets evaluated to whole ->post array b/c $key[0][1] evaluates to empty; 
 								// cannot fix with parens, so two step this
-								$row_array = $wic_query->post->$key; 
-								$output .= $row_array[0][1];							
+								$row_array = $wic_query->post->$key;
+								if ( 'phones' == $field['type'] ) { 
+									$output .= $wic_definitions->format_phone($row_array[0][1]);
+								} else {
+									$output .= $row_array[0][1];								
+								}							
   							}
 						}							
 						$output .= '</li>';			

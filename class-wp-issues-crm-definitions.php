@@ -51,7 +51,7 @@ class WP_Issues_CRM_Definitions {
 			'label'	=>	'Work Email' ),
 		array(
 			'value'	=> '2',
-			'label'	=>	'Shared Home Email' ),
+			'label'	=>	'Shared Email' ),
 		array(
 			'value'	=> '3',
 			'label'	=>	'Other Email' ),
@@ -173,15 +173,15 @@ class WP_Issues_CRM_Definitions {
 	);		
 		
 	public $constituent_field_groups = array (
-		array (
+	/*	array (
 			'name'		=> 'required',
 			'label'		=>	'Identity',
 			'legend'		=>	'',
 			'order'		=>	10,
-		),
+		), */
 		array (
 			'name'		=> 'contact',
-			'label'		=>	'Contact Information',
+			'label'		=>	'Contact',
 			'legend'		=>	'',
 			'order'		=>	20,
 		),
@@ -216,7 +216,7 @@ class WP_Issues_CRM_Definitions {
 	  	*/
 		array( // 1
 			'dedup'	=>	true,	
-			'group'	=>	'required',
+			'group'	=>	'contact',
 			'label'	=>	'First Name',
 			'like'	=>	true,	
 			'list'	=> '14',
@@ -241,7 +241,7 @@ class WP_Issues_CRM_Definitions {
 		),		
 		array( // 3
 			'dedup'	=>	true,
-			'group'	=>	'required',
+			'group'	=>	'contact',
 			'label'	=>	'Last Name',
 			'like'	=>	true,
 			'list'	=> '14',
@@ -251,7 +251,7 @@ class WP_Issues_CRM_Definitions {
 			'slug'	=> 'last_name',
 			'type'	=>	'text',
 			),	
-		array( // 4
+/*		array( // 4
 			'dedup'	=>	true,
 			'group'	=>	'required',
 			'label'	=>	'eMail',
@@ -262,10 +262,10 @@ class WP_Issues_CRM_Definitions {
 			'required'	=> 'group', // see note above -- note, in default installation, this field is not accessible online (use group)
 			'slug'	=> 'email',
 			'type'	=>	'email',
-			),	
+			),	*/
 		array( // 4A
 			'dedup'	=>	true,
-			'group'	=>	'required',
+			'group'	=>	'contact',
 			'label'	=>	'eMail',
 			'like'	=>	true,
 			'list'	=> '28',
@@ -275,24 +275,24 @@ class WP_Issues_CRM_Definitions {
 			'slug'	=> 'email_group',
 			'type'	=>	'emails',
 			),				
-		array( // 5
+/*		array( // 5
 			'dedup'	=>	false,
 			'group'	=>	'contact',
 			'label'	=>	'Land Line',
 			'like'	=>	true,
-			'list'	=> '15',
-			'online'	=>	true,
+			'list'	=> '0',
+			'online'	=>	false,
 			'order'	=>	70,
 			'required'	=> false,
 			'slug'	=> 'phone',
 			'type'	=>	'text',
-			),		
+			), */		
 		array(  // 6
 			'dedup'	=>	true,
 			'group'	=>	'contact',
 			'label'	=>	'Phone',
 			'like'	=>	true,
-			'list'	=> '0',
+			'list'	=> '15',
 			'online'	=>	true,
 			'order'	=>	80,
 			'required'	=> '',
@@ -300,19 +300,19 @@ class WP_Issues_CRM_Definitions {
 			'type'	=>	'phones',
 
 			),
-		array( // 7
+/*		array( // 7
 			'dedup'	=>	true,
 			'group'	=>	'contact',
 			'label'	=>	'Street Address',
 			'like'	=>	true,
-			'list'	=> '29',
+			'list'	=> '0',
 			'online'	=>	true,
 			'order'	=>	40,
 			'required'	=> '',
 			'slug'	=> 'street_address',
 			'type'	=>	'text',
 
-			),
+			), */
 		array( // 7A
 			'dedup'	=>	true,
 			'group'	=>	'contact',
@@ -325,7 +325,7 @@ class WP_Issues_CRM_Definitions {
 			'slug'	=> 'street_addresses',
 			'type'	=>	'addresses',
 			),	
-		array( // 8
+/*		array( // 8
 			'dedup'	=>	false,
 			'group'	=>	'contact',
 			'label'	=>	'City',
@@ -360,7 +360,7 @@ class WP_Issues_CRM_Definitions {
 			'required'	=> '',
 			'slug'	=> 'zip',
 			'type'	=>	'text',
-			),
+			), */
 		array( // 11
 			'dedup'	=>	false,
 			'group'	=>	'personal',
@@ -570,8 +570,8 @@ class WP_Issues_CRM_Definitions {
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
 		 
-		$control = ( $field_label > '' ) ?  '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . ' ' . $field_label_suffix . '</label>' : '';
-		$control .= '<input class="wic-input-checked"  id="' . $field_name_id . ' " name="' . $field_name_id . '" type="checkbox"  value="1"' . checked( $value, 1, false) . $readonly  .'/>';	
+		$control = ( $field_label > '' ) ?  '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . ' ' . '</label>' : '';
+		$control .= '<input class="wic-input-checked"  id="' . $field_name_id . '" name="' . $field_name_id . '" type="checkbox"  value="1"' . checked( $value, 1, false) . $readonly  .'/>' . $field_label_suffix   ;	
 
 		return ( $control );
 
@@ -602,8 +602,8 @@ class WP_Issues_CRM_Definitions {
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
 		 
-		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . ' ' . $field_label_suffix . '</label>' : '' ;
-		$control .= '<input class="' . $input_class . '" id="' . $field_name_id . '" name="' . $field_name_id . '" type="text" placeholder = "' . $placeholder . '" value="' . $value . '" ' . $readonly  . '/>';
+		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . '</label>' : '' ;
+		$control .= '<input class="' . $input_class . '" id="' . $field_name_id . '" name="' . $field_name_id . '" type="text" placeholder = "' . $placeholder . '" value="' . $value . '" ' . $readonly  . '/>' . $field_label_suffix ;
 			
 		return ( $control );
 
@@ -640,8 +640,8 @@ class WP_Issues_CRM_Definitions {
 		$option_array =  $select_array;
 		array_push( $option_array, $not_selected_option );
 		
-		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . $field_label_suffix . '</label>' : '';
-		$control .= '<select class="' . $field_input_class . '" id="' . $field_name_id . '" name="' . $field_name_id . '" >';
+		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . '</label>' : '';
+		$control .= '<select class="' . $field_input_class . '" id="' . $field_name_id . '" name="' . $field_name_id . '" >' . $field_label_suffix;
 		$p = '';
 		$r = '';
 		foreach ( $option_array as $option ) {
@@ -681,6 +681,7 @@ class WP_Issues_CRM_Definitions {
 			' class	="destroy-button"' . 
 			' onclick = {this.parentNode.parentNode.removeChild(this.parentNode);}' .
 			' type 	= "button" ' .
+			' name	= "destroy-button" ' .
 			' title  = ' . __( 'Remove Row', 'wp-issues-crm' ) .
 			' >x</button>';	
 
@@ -771,8 +772,6 @@ class WP_Issues_CRM_Definitions {
 				
 				// note, in this loop, need only instantiate the changing arguments in the arrays			
 				
-				$row_class = ( 'x' == $i ) ? 'phone-number-row-hidden' : 'phone-number-row';
-				
 				$row = '<p class = "phone-number-row" id = "' . $repeater_group_id . '-' . $i . '">';
 							
 				$phone_type_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][0]';
@@ -800,7 +799,7 @@ class WP_Issues_CRM_Definitions {
 			}
 		}		
 		
-		$phone_group_control_set .= $this->create_add_button ( $repeater_group_id, __( 'Add Phone', 'wp-issues-crm' ) );
+		$phone_group_control_set .= $this->create_add_button ( $repeater_group_id, __( 'Add Phone', 'wp-issues-crm' ) . ' ' . $repeater_group_label_suffix ) ;
 		$phone_group_control_set .= '</div>';
 		$phone_group_control_set .= '<div class = "hidden-template" id = "' . $repeater_group_id . '-row-counter">' . $i . '</div>';
 		
@@ -902,8 +901,6 @@ class WP_Issues_CRM_Definitions {
 				
 				// note, in this loop, need only instantiate the changing arguments in the arrays			
 				
-				$row_class = ( 'x' == $i ) ? 'email-address-row-hidden' : 'email-address-row';
-				
 				$row = '<p class = "email-address-row" id = "' . $repeater_group_id . '-' . $i . '">';
 							
 				$email_type_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][0]';
@@ -926,7 +923,7 @@ class WP_Issues_CRM_Definitions {
 			}
 		}		
 		
-		$email_group_control_set .= $this->create_add_button ( $repeater_group_id, __( 'Add eMail', 'wp-issues-crm' ) );
+		$email_group_control_set .= $this->create_add_button ( $repeater_group_id, __( 'Add eMail', 'wp-issues-crm' ) . ' ' . $repeater_group_label_suffix ) ;
 		$email_group_control_set .= '</div>';
 		$email_group_control_set .= '<div class = "hidden-template" id = "' . $repeater_group_id . '-row-counter">' . $i . '</div>';
 		
@@ -1037,9 +1034,7 @@ class WP_Issues_CRM_Definitions {
 			foreach ( $repeater_group_data_array as $address_number ) {
 				
 				// note, in this loop, need only instantiate the changing arguments in the arrays			
-				
-				$row_class = ( 'x' == $i ) ? 'address-number-row-hidden' : 'address-number-row';
-				
+								
 				$row = '<p class = "address-number-row" id = "' . $repeater_group_id . '-' . $i . '">';
 							
 				$address_type_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][0]';
@@ -1067,7 +1062,7 @@ class WP_Issues_CRM_Definitions {
 			}
 		}		
 		
-		$address_group_control_set .= $this->create_add_button ( $repeater_group_id, __( 'Add Address', 'wp-issues-crm' ) );
+		$address_group_control_set .= $this->create_add_button ( $repeater_group_id, __( 'Add Address', 'wp-issues-crm' ) . ' ' . $repeater_group_label_suffix ) ;
 		$address_group_control_set .= '</div>';
 		$address_group_control_set .= '<div class = "hidden-template" id = "' . $repeater_group_id . '-row-counter">' . $i . '</div>';
 		

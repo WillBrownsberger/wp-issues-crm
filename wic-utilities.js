@@ -36,12 +36,8 @@ function moreFields( base ) {
 			var theName = newField[i].name;
 			newField[i].name = theName.replace( 'row-template', counter );
 			var theID = newField[i].id;
-			newField[i].id = theID.replace( 'row-template', counter );
-		} else { /*
-			newField[i].onclick = function () {
-					var destroyButtonParent = this.parentNode;
-					destroyButtonParent.parentNode.removeChild(destroyButtonParent); */ 
-		}
+			newField[i].id = theID.replace( 'row-template', counter ); 
+		} 
 	}		
 	
 	var insertHere = document.getElementById( base + '-add-button' );

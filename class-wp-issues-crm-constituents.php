@@ -139,7 +139,7 @@ class WP_Issues_CRM_Constituents {
 
 		// if coming from main constituent form or from a constituent list . . . 
 		if ( isset ( $_POST['wic_constituent_main_button'] ) || isset ( $_POST['wic_constituent_direct_button'] ) ) { 
-			
+
 			// test nonce before going further
 			if( ! wp_verify_nonce($_POST['wp_issues_crm_constituent_nonce_field'], 'wp_issues_crm_constituent'))	{
 				die ( 'Security check failed.' ); // if not nonce OK, die, otherwise continue  
@@ -664,7 +664,7 @@ class WP_Issues_CRM_Constituents {
 								$clean_input[$field['slug']][$repeater_count] = $test_repeater['result'];
 								$repeater_count++;
 								if ( $test_repeater['error'] > '' ) {
-									$clean_input['error_messages'] .= ' ' . $test_repeater['error'] . '(' . $field[label] . ' ' . $repeater_count . ') '; 
+									$clean_input['error_messages'] .= ' ' . $test_repeater['error'] . ' ' . $field['label'] . ' ' . $repeater_count . '. '; 
 								}
 							}	 						
 						}
@@ -683,12 +683,7 @@ class WP_Issues_CRM_Constituents {
 					 $clean_input['error_messages'] .= $wic_definitions->$possible_validator( $clean_input[$field['slug']] );				
  				} 
 			}
-			// lines below are temporary
 
-			if( 'bsamax9999' == $clean_input[$field['slug']]) {
-				$this->run_phone_cleanup();			
-			}
-			
 			// add date hi-lo ranges to array and standardize all dates to yyyy-mm-dd 
 			if ( 'date' == $field['type'] ) {
 				$clean_input[$field['slug'] . '_lo' ] = isset( $_POST[$field['slug'] . '_lo' ] ) ? sanitize_text_field( $_POST[$field['slug'] . '_lo' ] ) : '';			

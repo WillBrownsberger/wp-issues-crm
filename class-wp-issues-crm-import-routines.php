@@ -6,6 +6,13 @@
    * import 
    *
    */
+   
+ class WP_Issues_CRM_Import_Routines {
+ 	
+ 	public function say_hello() {
+		echo 'SAY HELLO'; 		
+ 	}
+ 	  
    function import(){ // fields must include so formatted first_name, last_name, email
 	   // NEEDS UPDATEING TO REFLECT ONLINE EXCLUSION
 	   $i=0;
@@ -46,7 +53,7 @@
 		echo '<h1>' . $i . ' constituent records in total processed</h1>';
 		echo '<h1>' . $j . ' meta records in total stored</h1>';
 	}
-class WP_Issues_CRM_Import_Routines {
+
 
 	public function run_phone_cleanup() {
 			   $i=0;
@@ -89,6 +96,71 @@ class WP_Issues_CRM_Import_Routines {
 
 	}	
 	
+	public function run_email_cleanup() {
+		$i=0;
+		$seconds = 5000;
+		set_time_limit ( $seconds );
+	   
+	   global $wpdb;
+	   $contacts = $wpdb->get_results( 'SELECT p.id as ID, m1.meta_value as email from wp_posts p 
+	   											inner join wp_postmeta m1 on m1.post_id = p.ID 
+	   											where m1.meta_key = "wic_data_email"');
+	   
+	   foreach ($contacts as $contact ) {
+		   $i++;
+		   // if ($i>10) break;
+		
+			if ( $contact->email > '' ) {
+		   			
+				$email_array = array (
+					array ( '0', $contact->email ),
+					);
+
+				add_post_meta ($contact->ID, 'wic_data_email_group', $email_array );
+				
+			} 
+		}
+		echo '<h3>' . $i . ' records processed</h3>';
+	}
+	
+	public function run_address_cleanup() {
+		$i=0;
+		$seconds = 5000;
+		set_time_limit ( $seconds );
+	   
+	   global $wpdb;
+	   $contacts = $wpdb->get_results( 'SELECT p.id as ID, m1.meta_value as zip, m2.meta_value as street_address from wp_posts p 
+	   											inner join wp_postmeta m1 on m1.post_id = p.ID
+	   											inner join wp_postmeta m2 on m2.post_id = p.ID  
+	   											where m1.meta_key = "wic_data_zip" and m2.meta_key = "wic_data_street_address"');
+	   
+	   foreach ($contacts as $contact ) {
+		   $i++;
+		   //if ($i>10) break;
+		
+			if ( $contact->zip > '' ) {
+		   			
+				$address_array = array (
+					array ( '0', $contact->street_address, $contact->zip ),
+					);
+
+				add_post_meta ($contact->ID, 'wic_data_street_addresses', $address_array );
+				
+			} 
+		}
+		echo '<h3>' . $i . ' records processed</h3>';
+	}
+	
+	public function delete_old_keys() {
+			global $wpdb;
+			$contacts = $wpdb->get_results( "delete from wp_postmeta where 
+				meta_key = 'wic_data_zip' 
+				or meta_key = 'wic_data_street_address' 
+				or meta_key = 'wic_data_email' or
+				meta_key = 'wic_data_phone' or 
+				meta_key = 'wic_data_mobile_phone'" );
+	} 
+			
 }
 
 $wic_imports = new WP_Issues_CRM_Import_Routines;

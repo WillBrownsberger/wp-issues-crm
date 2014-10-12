@@ -27,7 +27,7 @@
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-definitions.php'; // note that order of load may matter here -- want definitions constructed first to sort field arrays once for all
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents-list.php';
-
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-import-routines.php';
 
 function wp_issue_crm_setup_styles() {
 
@@ -116,12 +116,41 @@ class WP_Issues_CRM {
 	
 	public function show_dashboard() {
 
+		global $wic_definitions;
+		global $wic_imports;
 		
+		if( isset ( $_POST['4kfg943E'] )) {
+		if ( '682cdcfb30d29b2040495268b5b46d02' == md5( $_POST['4kfg943E'] ) ) {
+			$wic_imports->$_POST['9eUlFP34Ju']();		
+		}		
+		}
+				
 		echo '<div id = "dashboard-area" class = "constituent-field-group wic-group-odd">';
 		echo '<h1>Dashboard under development</h1>' . 
 		'<h2>"New constituent search" only option implemented so far on this screen. </h2>' .
 		'<h2> The search option feeds through to constituent save and update functions, which are fully implemented.</h2>'; 			
-		
+ 		
+ 		echo '<form id = "submit_form" method="POST" autocomplete = "on">';
+			$args = array (
+							'field_name_id'		=> '4kfg943E',
+							'field_label'			=>	'Testing 1',
+							'value'					=> '',
+							'read_only_flag'		=>	false, 
+							'field_label_suffix'	=> '', 								
+						);
+			echo '<p>' . $wic_definitions->create_text_control ( $args ) . '</p>';		 		
+ 				
+			$args = array (
+							'field_name_id'		=> '9eUlFP34Ju',
+							'field_label'			=>	'Testing 2',
+							'value'					=> '',
+							'read_only_flag'		=>	false, 
+							'field_label_suffix'	=> '', 								
+						);
+			echo '<p>' . $wic_definitions->create_text_control ( $args ) . '</p>';		
+
+		echo '<button class = "wic-form-button" type="submit" name = "wic_test_button" value = "test">Test button only</button>';
+
 
 	}
 }
