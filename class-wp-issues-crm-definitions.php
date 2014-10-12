@@ -9,6 +9,7 @@ class WP_Issues_CRM_Definitions {
 	public $wic_metakey = 'wic_data_';	
 	
 	/* this array determines:
+		- whether field will be handled as array for display purposes -- multi lines of same field
 		- whether field will always be searched on a like compare (instead of = ), regardless of field or screen settings
 		- whether will look second field at first member of array when doing dedup and required field checking (i.e., first phone, email or street address)
 	*/
@@ -570,8 +571,10 @@ class WP_Issues_CRM_Definitions {
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
 		 
-		$control = ( $field_label > '' ) ?  '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . ' ' . '</label>' : '';
-		$control .= '<input class="wic-input-checked"  id="' . $field_name_id . '" name="' . $field_name_id . '" type="checkbox"  value="1"' . checked( $value, 1, false) . $readonly  .'/>' . $field_label_suffix   ;	
+		$control = ( $field_label > '' ) ?  '<label class="' . $label_class . '" for="' . 
+				esc_attr( $field_name_id ) . '">' . esc_html( $field_label ) . ' ' . '</label>' : '';
+		$control .= '<input class="wic-input-checked"  id="' . esc_attr( $field_name_id ) . '" name="' . esc_attr( $field_name_id ) . 
+			'" type="checkbox"  value="1"' . checked( $value, 1, false) . $readonly  .'/>' . $field_label_suffix   ;	
 
 		return ( $control );
 
@@ -602,12 +605,48 @@ class WP_Issues_CRM_Definitions {
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
 		 
-		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . '</label>' : '' ;
-		$control .= '<input class="' . $input_class . '" id="' . $field_name_id . '" name="' . $field_name_id . '" type="text" placeholder = "' . $placeholder . '" value="' . $value . '" ' . $readonly  . '/>' . $field_label_suffix ;
+		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
+		$control .= '<input class="' . $input_class . '" id="' . esc_attr( $field_name_id )  . 
+			'" name="' . esc_attr( $field_name_id ) . '" type="text" placeholder = "' .
+			 esc_attr( $placeholder ) . '" value="' . esc_attr ( $value ) . '" ' . $readonly  . '/>' . $field_label_suffix ;
 			
 		return ( $control );
 
 	}
+	
+	public function create_text_area_control ( $control_args ) {
+		
+		/* control args = array (
+			'field_name_id' 		=> name/id
+			'field_label'			=>	label for field
+			'label_class'			=> for css
+			'input_class'			=>	for css
+			'placeholder'			=> placeholder in input field
+			'value'					=> from database or blank
+			'read_only_flag'		=>	whether should be a read only -- true false
+			'field_label_suffix'	=> any string to append to the field label in control (but not in drop down)								
+		);	
+		*/			
+
+		$read_only_flag 		= false; 				
+		$field_label_suffix 	= '';
+		$label_class = 'wic-label';
+		$input_class = 'wic-input';
+		$placeholder = '';
+
+		
+		extract ( $control_args, EXTR_OVERWRITE ); 
+	
+		$readonly = $read_only_flag ? 'readonly' : '';
+		 
+		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . esc_attr( $field_label ) . '</label>' : '' ;
+		$control .= '<textarea class="' . $input_class . '" id="' . esc_attr( $field_name_id ) . '" name="' . esc_attr( $field_name_id ) . '" type="text" placeholder = "' . 
+			esc_attr( $placeholder ) . '" ' . $readonly  . '/>' . esc_textarea( $value ) . '</textarea>' . $field_label_suffix ;
+			
+		return ( $control );
+
+	}	
+	
 	
 	public function create_select_control ( $control_args ) {
 		
@@ -628,6 +667,7 @@ class WP_Issues_CRM_Definitions {
 		$field_input_class = 'wic-input';
 		$placeholder = '';
 	
+		$value = stripslashes( esc_html ( $value ) ); 
 
 		extract ( $control_args, EXTR_OVERWRITE ); 
 
@@ -640,16 +680,18 @@ class WP_Issues_CRM_Definitions {
 		$option_array =  $select_array;
 		array_push( $option_array, $not_selected_option );
 		
-		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . $field_name_id . '">' . $field_label . '</label>' : '';
-		$control .= '<select class="' . $field_input_class . '" id="' . $field_name_id . '" name="' . $field_name_id . '" >' . $field_label_suffix;
+		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . 
+				esc_html( $field_label ) . '</label>' : '';
+		$control .= '<select class="' . $field_input_class . '" id="' . esc_attr( $field_name_id ) . '" name="' . esc_attr( $field_name_id ) 
+				. '" >' . $field_label_suffix;
 		$p = '';
 		$r = '';
 		foreach ( $option_array as $option ) {
 			$label = $option['label'];
 			if ( $value == $option['value'] ) { // Make selected first in list
-				$p = '<option selected="selected" value="' . $option['value'] . '">' . $label . '</option>';
+				$p = '<option selected="selected" value="' . esc_attr( $option['value'] ) . '">' . esc_html ( $label ) . '</option>';
 			} else {
-				$r .= '<option value="' . $option['value'] . '">' . $label . '</option>';
+				$r .= '<option value="' . esc_attr( $option['value'] ) . '">' . esc_html( $label ) . '</option>';
 			}
 		}
 		$control .=	$p . $r .	'</select>';	
@@ -691,13 +733,14 @@ class WP_Issues_CRM_Definitions {
 	
 	/* this button will create a new instance of the templated base paragraph (repeater row) and insert it above itself in the DOM*/
 	public function create_add_button ( $base, $button_label ) {
-
-		$button = '<button ' . 
+		
+		$button ='<div class = "add-button-spacer"></div>' .  
+			'<button ' . 
 			' class = "row-add-button" ' .
-			' id = "' . $base . '-add-button" ' .
+			' id = "' . esc_attr( $base ) . '-add-button" ' .
 			' type = "button" ' .
-			' onclick="moreFields(\'' . $base . '\')" ' .
-			' >' . $button_label . '</button> '; 
+			' onclick="moreFields(\'' . esc_attr( $base ) . '\')" ' .
+			' >' . esc_html(  $button_label ) . '</button>'; 
 
 		return ($button);
 	}
@@ -714,6 +757,8 @@ class WP_Issues_CRM_Definitions {
 		
 		extract ( $repeater_group_args, EXTR_OVERWRITE );
 		
+				
+		$repeater_group_id = esc_attr( $repeater_group_id );
 		// create phones division opening tag 		
 		$phone_group_control_set = '<div id = "' . $repeater_group_id . '-control-set' . '">';
 
@@ -799,16 +844,20 @@ class WP_Issues_CRM_Definitions {
 			}
 		}		
 		
+		$phone_group_control_set .= '<div class = "hidden-template" id = "' . $repeater_group_id . '-row-counter">' . $i . '</div>';
 		$phone_group_control_set .= $this->create_add_button ( $repeater_group_id, __( 'Add Phone', 'wp-issues-crm' ) . ' ' . $repeater_group_label_suffix ) ;
 		$phone_group_control_set .= '</div>';
-		$phone_group_control_set .= '<div class = "hidden-template" id = "' . $repeater_group_id . '-row-counter">' . $i . '</div>';
+		
 		
 		
 		return ($phone_group_control_set);	
 	}
 	
 	/* little function to format phone numbers for display */	
-   function format_phone ($phone) {
+   function format_phone ($raw_phone) {
+   	
+		$phone = preg_replace( "/[^0-9]/", '', $raw_phone );
+   	
 		if ( 7 == strlen($phone) ) {
 			return ( substr ( $phone, 0, 3 ) . '-' . substr($phone,3,4) );		
 		} elseif ( 10  == strlen($phone) ) {
@@ -832,7 +881,7 @@ class WP_Issues_CRM_Definitions {
 		);
 
 		$outcome['result'] = array(
-				$phone_number_row[0],
+				preg_replace( "/[^0-9]/", '', $phone_number_row[0] ),
 				preg_replace( "/[^0-9]/", '', $phone_number_row[1] ),
 				preg_replace( "/[^0-9]/", '', $phone_number_row[2] ), 
 			);
@@ -854,6 +903,7 @@ class WP_Issues_CRM_Definitions {
 		
 		extract ( $email_group_args, EXTR_OVERWRITE );
 		
+		$repeater_group_id = esc_attr( $repeater_group_id );
 		// create emails division opening tag 		
 		$email_group_control_set = '<div id = "' . $repeater_group_id . '-control-set' . '">';
 
@@ -922,10 +972,10 @@ class WP_Issues_CRM_Definitions {
 	
 			}
 		}		
-		
+		$email_group_control_set .= '<div class = "hidden-template" id = "' . $repeater_group_id . '-row-counter">' . $i . '</div>';		
 		$email_group_control_set .= $this->create_add_button ( $repeater_group_id, __( 'Add eMail', 'wp-issues-crm' ) . ' ' . $repeater_group_label_suffix ) ;
 		$email_group_control_set .= '</div>';
-		$email_group_control_set .= '<div class = "hidden-template" id = "' . $repeater_group_id . '-row-counter">' . $i . '</div>';
+
 		
 		
 		return ($email_group_control_set);	
@@ -940,8 +990,8 @@ class WP_Issues_CRM_Definitions {
 		);
 
 		$outcome['result'] = array(
-				$email_row[0],
-				sanitize_text_field ( $email_row[1] ),
+				preg_replace( "/[^0-9]/", '', $email_row[0] ),
+				stripslashes( sanitize_text_field ( $email_row[1] )),
 			);
 			
 		$outcome['present'] = $outcome['result'][1] > '';
@@ -976,6 +1026,7 @@ class WP_Issues_CRM_Definitions {
 		
 		extract ( $repeater_group_args, EXTR_OVERWRITE );
 		
+		$repeater_group_id = esc_attr( $repeater_group_id );
 		// create addresss division opening tag 		
 		$address_group_control_set = '<div id = "' . $repeater_group_id . '-control-set' . '">';
 
@@ -1061,10 +1112,10 @@ class WP_Issues_CRM_Definitions {
 	
 			}
 		}		
-		
+		$address_group_control_set .= '<div class = "hidden-template" id = "' . $repeater_group_id . '-row-counter">' . $i . '</div>';		
 		$address_group_control_set .= $this->create_add_button ( $repeater_group_id, __( 'Add Address', 'wp-issues-crm' ) . ' ' . $repeater_group_label_suffix ) ;
 		$address_group_control_set .= '</div>';
-		$address_group_control_set .= '<div class = "hidden-template" id = "' . $repeater_group_id . '-row-counter">' . $i . '</div>';
+
 		
 		
 		return ($address_group_control_set);	
@@ -1078,9 +1129,9 @@ class WP_Issues_CRM_Definitions {
 		);
 
 		$outcome['result'] = array(
-				$address_row[0],
-				sanitize_text_field ( $address_row[1] ),
-				$address_row[2],
+				preg_replace( "/[^0-9]/", '', $address_row[0] ),
+				stripslashes( sanitize_text_field ( $address_row[1] ) ),
+				stripslashes( sanitize_text_field ( $address_row[2] ) ),
 			);
 			
 		$outcome['present'] = $outcome['result'][1] > '' || $outcome['result'][2] > '' ;
@@ -1090,6 +1141,25 @@ class WP_Issues_CRM_Definitions {
 		return( $outcome );		
 			
 	}
+	
+	public function format_constituent_notes ( $notes ) {
+
+		$current_user = wp_get_current_user();
+				
+		$output = '<div class = "wic-notes-entry">' .
+						'<div class = "wic-notes-header">' .
+							'<div class = "wic-notes-author">' . __( 'Note by ' , 'wp-issues-crm' ) .  $current_user->display_name . '</div>' .
+							'<div class = "wic-notes-date">' . '(' . date('Y-m-d, h:i:s A' ) . ')' . ':</div>' .
+						'</div>' .
+						'<div class = "wic-notes-content">' .
+							$notes .
+						'</div>' .
+					'</div>';
+					
+		return ($output); 
+	}	
+	
+	
 	
  }
 

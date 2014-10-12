@@ -14,6 +14,21 @@ function toggleConstituentForm() {
 	}
 }
 
+function toggleConstituentFormSection( section ) {
+	alert (section);
+	var constituentForm = document.getElementById ( section );
+	var display = constituentForm.style.display;
+	var toggleButton	= document.getElementById ( section + "-toggle-button" );
+	if ( "block" == display ) {
+		constituentForm.style.display = "none";
+		toggleButton.innerHTML = "Show";
+	} else {
+		constituentForm.style.display = "block";
+		toggleButton.innerHTML = "Hide";
+	}
+}
+
+
 
 function moreFields( base ) {
 
@@ -40,6 +55,6 @@ function moreFields( base ) {
 		} 
 	}		
 	
-	var insertHere = document.getElementById( base + '-add-button' );
+	var insertHere = document.getElementById( base + '-row-counter' );
 	insertHere.parentNode.insertBefore( newFields, insertHere );
 }

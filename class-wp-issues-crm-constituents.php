@@ -11,6 +11,20 @@
 
 class WP_Issues_CRM_Constituents {
 	/*
+	*	Overview of major class functions:
+	*		wp_issues_crm_constituent drives main logic of form handling for constituent search/update/save (no delete function)
+	*		it calls sanitize_validate_input() early which does full sanitization (including strip slashes) on all except notes field
+	*		it then does searches via search_constituents() (either as requested or as dup check for save or update); 
+	*				no additional validation in searching (trust wp -- all access through standard query objects)
+	*		if requested and validation passed, it does save/update via save_update_constituent() -- 
+	*				again, no additional validation or escaping (trust wp)
+	*		finally it redisplays form through display_form() -- form escapes all output and runs balancetags and wp_kses_post on constituent notes
+	*				note -- display_form() relies on display controls from class-wp-issues-crm-definitions which do the escaping  
+	*				with a couple of small noted excepts display form does not alter the array next_form_output. $_POST is never altered.
+	* 
+	*/    	
+	
+	/*
 	*
 	* field definitions for ready reference array 
 	*
@@ -77,10 +91,11 @@ class WP_Issues_CRM_Constituents {
 				}
 			}
 			$next_form_output['constituent_notes']	=	''; 					// note 2 below 
+			$next_form_output['old_constituent_notes']	=	''; 					// note 2 below 			
 			$next_form_output['constituent_id']		=	$this->constituent_id;	// note 3 below
 
 			/*	these values are only for form setup */	
-			$next_form_output['guidance']				=  'Enter values and search for constituents.'; // note 4a below
+			$next_form_output['guidance']				=  'Enter just a little information and do a full text search for constituents.'; // note 4a below
 			$next_form_output['error_messages']		=	'';					// note 4b below
 			$next_form_output['search_notices']		=	'';					// note 4c below
 			$next_form_output['next_action'] 		=	'search';			// note 5 below
@@ -100,12 +115,21 @@ class WP_Issues_CRM_Constituents {
 	* 		1. all meta fields defined as displayable for constituents
 	*			-- initialized to empty on new; otherwise passed through (clean) from form by sanitize_validate_input
 	*			-- not otherwise altered except: 
-	*					* are overlayed with database if found unique on search (in main logic below)
+	*					* are overlayed with database if found unique on search (in main logic below) 
+	*						-- NOTE: no sanitization or validation of db content -- goes straight to form and escaped going out and validated going coming back
 	*					* within display_form, may flatten or pop-up array for repeating fields (going from search to save/update or vice versa)
 	*				   * within search_constituents will flatten array for repeating fields
 	*					
-	*		2. constituent notes
-	*			-- same as 1
+	*		2. constituent notes, old constituent notes
+	*			-- initialized to empty on new
+	*			-- constituent notes behaves like other form elements, except 
+	*					* wiped out on found record ( so don't use for update )
+	*					* wiped out successful save/update (since added to old)
+	*			--	old constituent notes behaves like other form elements except 
+	*					* is displayed as readonly 
+	*					* is refreshed from database after successful save update
+	*					* takes value of constituent notes from data base on found record
+	*			-- update appends constituent_notes to old
 	*		3. constituent id 
 	*			-- initialized to zero on new; otherwise passed through from form by sanitize_validate_input
 	*			-- set if search found unique (then offer update)
@@ -127,6 +151,8 @@ class WP_Issues_CRM_Constituents {
 	*
 	*/
 	public function wp_issues_crm_constituents() {
+		
+		global $wic_definitions;
 		
 		/* first check capabilities -- must be administrative user */
 		if ( ! current_user_can ( 'activate_plugins' ) ) { 
@@ -175,7 +201,8 @@ class WP_Issues_CRM_Constituents {
 							// note -- don't need to unserialize phones, etc. -- wp_query does this. also automatic in save_update_constituent  
 							$next_form_output[$field['slug']] = isset ( $wic_query->post->$post_field_key ) ?  $wic_query->post->$post_field_key : '';
 						}
-						$next_form_output['constituent_notes'] = $wic_query->post->post_content;	
+						$next_form_output['constituent_notes'] = ''; // don't want to bring search notes automatically into update mode 
+						$next_form_output['old_constituent_notes'] = isset ( $wic_query->post->post_content )  ? $wic_query->post->post_content: '';	
 						$next_form_output['constituent_id'] 	= $wic_query->post->ID;	
 						$next_form_output['guidance']	=	__( 'One matching record found. Try an update?', 'wp-issues-crm' );
 						$next_form_output['next_action'] 	=	'update';
@@ -196,8 +223,12 @@ class WP_Issues_CRM_Constituents {
 							if ( $outcome['notices'] > '' )  { 
 								$next_form_output['guidance'] = __( 'Please retry -- there were database errors. ', 'wp-issues-crm' );
 								$next_form_output['error_messages'] = $outcome['notices'];
-							} else {
+							} else { 
 								$next_form_output['guidance'] = __( 'Update successful -- you can further update this record.', 'wp-issues-crm' );								
+								if ( trim( $next_form_output[ 'constituent_notes' ] ) > '' ) { // update to database
+									$next_form_output['old_constituent_notes'] = $wic_definitions->format_constituent_notes( $next_form_output['constituent_notes'] ) . $next_form_output['old_constituent_notes'];
+									$next_form_output['constituent_notes'] = '';
+								}
 							}					
 						}
 					// error if form values match a record other than the original record	
@@ -224,6 +255,10 @@ class WP_Issues_CRM_Constituents {
 								$next_form_output['constituent_id'] = $outcome['post_id'];
 								$next_form_output['guidance']	=	__( 'Record saved -- you can further update this record.', 'wp-issues-crm' );
 								$next_form_output['next_action'] 	=	'update';
+								if ( trim( $next_form_output[ 'constituent_notes' ] )  > '' ) { // parallels update to database
+									$next_form_output['old_constituent_notes'] = $wic_definitions->format_constituent_notes( $next_form_output['constituent_notes'] ) . $next_form_output['old_constituent_notes'];
+									$next_form_output['constituent_notes'] = '';
+								}
 							}					
 						}
 					} else {
@@ -269,20 +304,26 @@ class WP_Issues_CRM_Constituents {
 	* $next_form_output is previously populated with values in wp_issues_crm_constituents() and functions 
 	* see inventory of values and dispositions in comments before that function
 	* 
+	* All output data which is not hardcoded is escaped using one of the following: esc_attr, esc_html, esc_textarea (or absint if known should be integer)
+	*   Note that the only data which not been run through validation previously is anything coming from a find and also constituent_notes -- but, all are escaped.
+	*
+	* Field def data is not considered hardcoded here, since may add interface later, and so is escaped in the same way.	
+	*
+	*
 	*/
 	
 	public function display_form ( &$next_form_output ) {
 		
 		global $wic_definitions; // access for functions ( field definitions already instantiated  in construct )
 		
-		/*echo '<span style="color:green;"> <br /> $_POST:';  		
+		/* echo '<span style="color:green;"> <br /> $_POST:';  		
   		var_dump ($_POST);
   		echo '</span>';  
 
 		 echo '<span style="color:red;"> <br />next_form_output:';  		
   		var_dump ($next_form_output);
-  		echo '</span>';  
-  		
+  		echo '</span>';   
+  		/*
   		echo '<span style="color:blue;"> <br />phone_numbers:';  		
   		var_dump ($_POST['phone_numbers']);
   		echo '</span>'; */ 
@@ -339,9 +380,17 @@ class WP_Issues_CRM_Constituents {
 				$filtered_fields = $this->select_key ( $this->constituent_fields, 'group', $group['name'] );
 				$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
 				$group_count++;
-				echo '<div class = "constituent-field-group ' . $row_class . '" id = "' . $group['name'] . '">' .
-					'<h3 class = "constituent-field-group-label">' . $group['label'] . '</h3>' .
-					'<p class = "constituent-field-group-legend">' . $group['legend'] . '</p>';
+				$show_class = 'hide';
+				echo '<div class = "constituent-field-group ' . $row_class . '" id = "wic-field-group-' . esc_attr( $group['name'] ) . '">' .
+					'<button ' . 
+						' class = "field-group-show-hide-button" ' .
+						' id = "wic-inner-field-group-' . esc_attr( $group['name'] ) . '-toggle-button" ' .
+						' type = "button" ' .
+						' onclick="toggleConstituentFormSection(\'wic-inner-field-group-' . esc_attr( $group['name'] ) . '\')" ' .
+						' >' . $show_class . '</button>'; 
+					'<h3 class = "constituent-field-group-label">' . esc_html ( $group['label'] ) . '</h3>' .
+					'<div id = "wic-inner-field-group-' . esc_attr( $group['name'] ) . '">' .					
+					'<p class = "constituent-field-group-legend">' . esc_html ( $group['legend'] ) . '</p>';
 					foreach ( $filtered_fields as $field ) {	
 
 		   			$field_type = $field['type'];
@@ -389,6 +438,8 @@ class WP_Issues_CRM_Constituents {
 											'0',
 											$next_form_output[$field['slug']],
 											'', // extra values do no harm in this array
+											'',
+											'',
 											'',
 											'',
 										),									
@@ -469,26 +520,63 @@ class WP_Issues_CRM_Constituents {
 								echo $wic_definitions->$repeater_function ( $group_args );
 								break;
 						}
-					} // close foreach 				
-				echo '</div>';		   
-		   }
+					} // close foreach field				
+				echo '</div></div>';		   
+		   } // close foreach group
 		
-			if ( 'search' != $next_form_output['next_action'] ){  
-				$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd"; 
-				$group_count++;
-				echo '<div class = "constituent-field-group ' . $row_class . '" id = "constituent-notes">';?>				
-					<p><label for="constituent_notes"><?php _e( "Constituent Notes", 'wp-issues-crm' ); ?></label></p>
-					<p><textarea class = "wic-input" id="constituent_notes" name="constituent_notes" rows="10" cols="50"><?php echo $next_form_output['constituent_notes']; ?></textarea></p>
-				</div> 
-			<?php } 
+		
+			// constituent notes div
+			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd"; 
+			$group_count++;
+			echo '<div class = "constituent-field-group ' . $row_class . '" id = "constituent-notes">';
+			echo '<h3 class = "constituent-field-group-label">' . __('Constituent Notes', 'wp-issues-crm' ) . '</h3>';
+				$args = array (
+					'field_name_id'		=> 'constituent_notes',
+					'field_label'			=>	__( "New Note", 'wp-issues-crm' ),
+					'value'					=> $next_form_output['constituent_notes'],
+					'read_only_flag'		=>	false, 
+					'field_label_suffix'	=> '(%!)', 								
+					);			
+				// show constituent notes as input for search or as text area for update
+				if ( 'search' == $next_form_output['next_action'] ){
+					echo '<p>' . $wic_definitions->create_text_control ( $args ) . '</p>'; 
+				} else {
+					$args['field_label_suffix']	= '';
+					$args['input_class'] = 'wic-input wic-constituent-notes';
+					echo '<p>' . $wic_definitions->create_text_area_control($args) . '</p>';
+					
+					$args['field_name_id'] = 'old_constituent_notes';
+					$args['read_only_flag']	= true;
+					$args['input_class'] = 'hidden-template';
+					$args['label_class'] = 'hidden-template';
+					$args['value']	= $next_form_output['old_constituent_notes'];
+					echo '<p>' . $wic_definitions->create_text_area_control($args) . '</p>';
+					echo '<div id = "wic-old-constituent-notes">' .  balancetags( wp_kses_post ( $next_form_output['old_constituent_notes'] ), true ) . '</div>';
+				}	
+				/**
+				* options considered for output sanitization of kses_post -- need to be good here, since new notes are just appended to old
+				* with no filtering before this point ( on save/update take display value from prior form values (new appended to old), not database 	
+				*		(1) esc_html not an option since shows html characters instead of using them format 
+				*		(2) sanitize_text_field strips tags entirely
+				*		(3) apply_filters('the_content', -- ) does nothing to address stray quotes or unbalanced tags (and would run shortcodes, etc.)
+				*		(4) wp_kses_post leaves tags unbalanced but handles stray quotes
+				*		(5) balancetags (with force set to true) still gets hurt by stray quotes
+				*		CONCLUSION COMBINE 4 AND 5 -- EXPENSIVE, BUT APPROPRIATE, GIVEN RAW CONTENT BEING SERVED -- 
+				*		NOTE: Wordpress does not bother to clean post_content up in this way (even through the admin interface) -- so conclude not necessary on save
+				*      	-- only do it here for display; assume properly escaped for storage although not clean display
+				*/
+					
+				
+			echo '</div>'; 
 			
+			// final button group div
 			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
 			echo '<div class = "constituent-field-group ' . $row_class . '" id = "bottom-button-group">';?>
 				<?php if ( 'update' == $next_form_output['next_action'] ) { ?>
-					<p><a href="<?php echo( home_url( '/' ) ) . 'wp-admin/post.php?post=' . $next_form_output['constituent_id'] . '&action=edit' ; ?>" class = "back-end-link"><?php printf ( __('Direct edit constituent # %1$s <br/>', 'wp_issues_crm'), $next_form_output['constituent_id'] ); ?></a></p>
+					<p><a href="<?php echo( home_url( '/' ) ) . 'wp-admin/post.php?post=' . absint( $next_form_output['constituent_id'] ) . '&action=edit' ; ?>" class = "wic-back-end-link"><?php printf ( __('Direct edit constituent # %1$s <br/>', 'wp_issues_crm'), absint( $next_form_output['constituent_id'] ) ); ?></a></p>
 				<?php } ?>		
 			
-				<input type = "hidden" id = "constituent_id" name = "constituent_id" value ="<?php echo $next_form_output['constituent_id']; ?>" />					
+				<input type = "hidden" id = "constituent_id" name = "constituent_id" value ="<?php echo absint( $next_form_output['constituent_id'] ) ; ?>" />					
 		  		
 		  		<button  class = "wic-form-button" id="wic_constituent_main_button" name="wic_constituent_main_button" type="submit" value = "<?php echo $next_form_output['next_action']; ?>"><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></button>	  
 	
@@ -551,6 +639,8 @@ class WP_Issues_CRM_Constituents {
 	*		db_check	-- searches based on constituent_id
 	*		dup -- searches based on only dup_check metafields	(this value passed only when user request = 'save' or 'update' )
 	*
+	*  note -- trusts Wordpress to escape strings for query -- they have had slashes and tags stripped in input validation, 
+	*  but might have quotes & reserved words
 	*/
    private function search_constituents( $search_mode, &$next_form_output) {
 		
@@ -592,8 +682,8 @@ class WP_Issues_CRM_Constituents {
 							$meta_query_args[$index] = array(
 								'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
 								'value'		=> $meta_value,
-								'compare'	=>	( 
-														( $field['like'] && ! $next_form_output['strict_match'] ) ||
+								'compare'	=>	(  // do strict match in dedup mode
+														( $field['like'] && ! $next_form_output['strict_match'] && 'new' == $search_mode ) ||
 														in_array( $field['type'], $wic_definitions->serialized_field_types ) 
 													) ? 'LIKE' : '=' ,
 							);	
@@ -615,7 +705,8 @@ class WP_Issues_CRM_Constituents {
 	 			'post_type' 	=>	'wic_constituent',
 	 			'meta_query' 	=> $meta_query_args, 
 	 			'orderby'		=> 'title',
-	 			'order'			=> 'ASC'
+	 			'order'			=> 'ASC',
+	 			's'				=> $next_form_output['constituent_notes'] ,
 	 		);
 	 	} elseif ( 'db_check' == $search_mode ) { 
 			$query_args = array (
@@ -631,13 +722,26 @@ class WP_Issues_CRM_Constituents {
 
 	/*
 	*
-	*	sanitize_validate_input: form sanitization and validation function
+	*	sanitize_validate_input: form sanitization and validation function:
 	*  takes blank array and populates it from $_POST while sanitizing it
 	*   
-	* 		1. all meta fields defined as displayable for constituents
+	* 		1. handles all meta fields defined as displayable for constituents
 	*		2. constituent notes
 	*		3. constituent id
 	*		4. form_notices with validation errors
+	*
+	*	The following sanitization/validation is done:
+	*
+	*	(1) All fields have stripslashes applied
+	*  (2) All fields except constituent notes have sanitize_text_field applied -- "Checks for invalid UTF-8, 
+	*			Convert single < characters to entity, strip all tags, remove line breaks, tabs and extra white space, strip octets."
+	*	(3) Constituent notes is not sanitized or validated other than by stripping slashes (trust Wordpress on search/save)
+	*	(4) All content validation rules are applied 
+	*			- required fields
+	*			- email formatting 
+	*			- date formatting
+	*			- phones compressed to numeric only
+	*			- note select fields are compressed to numeric or slash/textsanitized
 	*	  
 	*	uses php converts DateTime object to recognize date formats and convert to yyyy-mm-dd
 	*  
@@ -669,15 +773,15 @@ class WP_Issues_CRM_Constituents {
 							}	 						
 						}
 					}
-				} else { // non array for serialized field is only a search, compress/sanitize, but not validate
+				} else { // non array for serialized field is only from a search -- compress/sanitize, but not validate
 					if ( 'phones' == $field['type'] ) {
 						$clean_input[$field['slug']] = preg_replace("/[^0-9]/", '', $_POST[$field['slug']] );
 					} else {
-						$clean_input[$field['slug']] = sanitize_text_field( $_POST[$field['slug']] );
+						$clean_input[$field['slug']] = stripslashes( sanitize_text_field( $_POST[$field['slug']] ) );
 					}
 				} // close non-array for serialized fields
-			} else { // not a serialized field and/or not set	
- 				$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? sanitize_text_field( $_POST[$field['slug']] ) : '';
+			} else { // not a serialized field and/or not set	-- do clean and also individual field validators
+ 				$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? stripslashes( sanitize_text_field( $_POST[$field['slug']] ) ) : '';
  				$possible_validator =  'validate_individual_' . $field['type'];
  				if ( $clean_input[$field['slug']] > '' && method_exists ( $wic_definitions, $possible_validator )  ) {
 					 $clean_input['error_messages'] .= $wic_definitions->$possible_validator( $clean_input[$field['slug']] );				
@@ -686,8 +790,8 @@ class WP_Issues_CRM_Constituents {
 
 			// add date hi-lo ranges to array and standardize all dates to yyyy-mm-dd 
 			if ( 'date' == $field['type'] ) {
-				$clean_input[$field['slug'] . '_lo' ] = isset( $_POST[$field['slug'] . '_lo' ] ) ? sanitize_text_field( $_POST[$field['slug'] . '_lo' ] ) : '';			
-				$clean_input[$field['slug'] . '_hi' ] = isset( $_POST[$field['slug'] . '_hi' ] ) ? sanitize_text_field( $_POST[$field['slug'] . '_hi' ] ) : '';
+				$clean_input[$field['slug'] . '_lo' ] = isset( $_POST[$field['slug'] . '_lo' ] ) ? stripslashes( sanitize_text_field( $_POST[$field['slug'] . '_lo' ] ) ) : '';			
+				$clean_input[$field['slug'] . '_hi' ] = isset( $_POST[$field['slug'] . '_hi' ] ) ? stripslashes( sanitize_text_field( $_POST[$field['slug'] . '_hi' ] ) ) : '';
 				if ( $clean_input[$field['slug']] > '' ) {
 					$clean_input[$field['slug']]  = $this->validate_date( $clean_input[$field['slug']] );
 					if ( '' == $clean_input[$field['slug']] ) {
@@ -728,8 +832,9 @@ class WP_Issues_CRM_Constituents {
 			$clean_input['error_messages'] .= sprintf ( __( ' At least one among %s is required. ', 'wp-issues-crm' ), $group_required_label );
    	}
 
-		$clean_input['constituent_notes'] = isset ( $_POST['constituent_notes'] ) ? wp_kses_post ( $_POST['constituent_notes'] ) : '' ;   	
-   	$clean_input['constituent_id'] = $_POST['constituent_id']; // always included in form; 0 if unknown;
+		$clean_input['constituent_notes'] = isset ( $_POST['constituent_notes'] ) ? stripslashes ( ( $_POST['constituent_notes'] ) ) : '' ;
+		$clean_input['old_constituent_notes'] = isset ( $_POST['old_constituent_notes'] ) ? stripslashes ( $_POST['old_constituent_notes'] ) : '' ;
+   	$clean_input['constituent_id'] = absint ( $_POST['constituent_id'] ); // always included in form; 0 if unknown;
 		$clean_input['strict_match']	=	isset( $_POST['strict_match'] ) ? true : false; // only updated on the form; only affects search_constituents
 		$clean_input['initial_form_state'] = 'wic-form-open';		
    } 
@@ -754,8 +859,12 @@ class WP_Issues_CRM_Constituents {
 	*	
 	*  note: here do serialization (and on extraction, so could change db interface for repeating fields with change here and in update/populate)
 	*  serialization is built into save meta, so no actual change in this code to reflect array handling
+	*
+	*	note: trusting wordpress for data escaping on save -- no validation of post_content, except on display -- see comments in display form
 	*/
    private function save_update_constituent( &$next_form_output ) { 
+		
+		global $wic_definitions;
 
 		$outcome = array (
 			'post_id'	=> 0,
@@ -777,7 +886,6 @@ class WP_Issues_CRM_Constituents {
 		$title =		( '' == $title ) ? $email_for_title : $title;
 		
 		$post_args = array(
-		  'post_content'   => $next_form_output['constituent_notes'], 
 		  'post_title'     => $title,
 		  'post_status'    => 'private',
 		  'post_type'      => 'wic_constituent',
@@ -789,12 +897,15 @@ class WP_Issues_CRM_Constituents {
 			if ( ! isset ( $check_on_database->post->ID ) )  {
 				$outcome['notices'] = __( 'Unknown error. Could not find record to update', 'wp-issues-crm' );
 				return ( $outcome );			
-			}
+			} 
 			$post_args['ID'] = $next_form_output['constituent_id'];
-			if ( $next_form_output[ 'constituent_notes' ] != $check_on_database->post->post_content ||
-				$title != $check_on_database->post->post_title ) {
-				$outcome['post_id'] = wp_update_post( $post_args );
+/*			if ( $next_form_output[ 'constituent_notes' ] != $check_on_database->post->post_content ||
+				$title != $check_on_database->post->post_title ) { -- these were replaced by next two lines lines*/
+			if ( trim( $next_form_output[ 'constituent_notes' ] )   > '' || $title != $check_on_database->post->post_title ) {
+				$post_args['post_content'] = $wic_definitions->format_constituent_notes( $next_form_output['constituent_notes'] )  . $check_on_database->post->post_content;
+				$outcome['post_id'] = wp_update_post( $post_args ); 
 			} else {
+				$post_args['post_content'] = $wic_definitions->format_constituent_notes( $next_form_output['constituent_notes'] );
 				$outcome['post_id'] = $next_form_output['constituent_id'];			
 			}
 		} else {

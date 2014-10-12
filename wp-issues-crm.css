@@ -33,10 +33,10 @@
 }
 
 .wic-group-even {
-	background: #f5f0f0;
+	background: #f1f1f1;
 }
 .wic-group-odd {
-	background: #f0f0fa;
+	background: #ececec;
 }
 
 .constituent-field-group {
@@ -49,9 +49,13 @@
 }
 
 h3.constituent-field-group-label {
-	margin-top: 0;
+	margin: 0 0 0 200px;
 }
 
+p.constituent-field-group-legend {
+	color: #777;
+	margin: 0 0 0 200px; 
+}
 
 /* buttons to show hide form */
 .wic-form-button,
@@ -68,6 +72,11 @@ h3.constituent-field-group-label {
 	
 }
 
+#constituent-form .wic-form-button {
+	margin-left: 200px;
+}
+
+
 #form-toggle-button-on-list, 
 #form-toggle-button {
 	margin-left: 20px; 
@@ -82,9 +91,9 @@ h3.constituent-field-group-label {
 
 /* message box and notices */
 #constituent-form-message-box {
-	background: #e0fae0;
+	background: #f6f6f6;
 	margin:  20px 0;
-	padding: 20px;
+	padding: 20px 0 20px 200px;
 }
 
 #constituent-form-message-box.wic-form-errors-found {
@@ -101,7 +110,13 @@ h3.constituent-field-group-label {
 	min-width: 180px;
 	color: #333;
 	text-align: right;
+	vertical-align: top;
 	padding-right: 20px;
+}
+
+.add-button-spacer {
+	min-width: 180px;
+	display: inline-block;
 }
 
 .wic-label-2 {
@@ -133,6 +148,7 @@ h3.constituent-field-group-label {
 .wic-input-checked:hover, 
 .wic-input:hover {
 	background: #fff;
+	border: 1px solid #eee;
 }
 
 .wic-input-checked {
@@ -160,9 +176,6 @@ h3.constituent-field-group-label {
 	
 }
 
-
-
-
 .wic-address-street,
 .wic-phone-number,
 .wic-email-address {
@@ -179,6 +192,54 @@ h3.constituent-field-group-label {
 .wic-email-address {
 	width: 300px; 
 }
+#constituent-notes {
+	 
+}
+.wic-constituent-notes {
+		height: 100px; 
+		width: 600px;
+}
+
+#wic-old-constituent-notes {
+		background: #f6f6f6;
+		margin-left: 200px;
+		width: 600px; 
+}
+
+.wic-notes-entry {
+	padding: 20px 10px 40px 10px;
+} 
+
+.wic-notes-entry:nth-of-type(2n+1){
+	background: #fafafa;
+}
+
+.wic-notes-entry:nth-of-type(2n){
+	background: #f3f3f3;
+}
+
+.wic-notes-header {
+	background: #eee
+	color: #333;
+}
+
+.wic-notes-author,
+.wic-notes-date {
+	display: inline;
+}
+
+.wic-notes-date {
+	padding-left: 4px;
+}
+.wic-notes-content{
+	margin: 20px 0 0 0px;
+}
+
+.wic-back-end-link {
+	margin: 0 0 0 200px; 
+}
+
+
 
 .wic-phone-extension {
 	min-width: 80px;
@@ -208,7 +269,7 @@ h3.constituent-field-group-label {
 	cursor: pointer;
 	display: inline-block;
 	font-size: 0.7em;
-	margin: 0 0 0 -2px;
+	margin: 0 0 0 18px;
 	padding: 0;
 }
 
@@ -237,10 +298,13 @@ h3.constituent-field-group-label {
 .email-address-row,
 .phone-number-row,
 .address-number-row {
-	display: inline-block;
-	margin-top: 0;
+	margin: 0;
 }
-
+#email_group-control-set,
+#street_addresses-control-set,
+#phone_numbers-control-set {
+	margin: 20px 0 0 0;
+}
 
 /* 
 *
