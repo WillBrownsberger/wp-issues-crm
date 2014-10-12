@@ -387,7 +387,7 @@ class WP_Issues_CRM_Constituents {
 						' id = "wic-inner-field-group-' . esc_attr( $group['name'] ) . '-toggle-button" ' .
 						' type = "button" ' .
 						' onclick="toggleConstituentFormSection(\'wic-inner-field-group-' . esc_attr( $group['name'] ) . '\')" ' .
-						' >' . $show_class . '</button>'; 
+						' >' . $show_class . '</button>' .
 					'<h3 class = "constituent-field-group-label">' . esc_html ( $group['label'] ) . '</h3>' .
 					'<div id = "wic-inner-field-group-' . esc_attr( $group['name'] ) . '">' .					
 					'<p class = "constituent-field-group-legend">' . esc_html ( $group['legend'] ) . '</p>';
