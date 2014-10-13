@@ -15,10 +15,9 @@ function toggleConstituentForm() {
 }
 
 function toggleConstituentFormSection( section ) {
-	alert (section);
 	var constituentForm = document.getElementById ( section );
 	var display = constituentForm.style.display;
-	var toggleButton	= document.getElementById ( section + "-toggle-button" );
+	var toggleButton	= document.getElementById ( section + "-show-hide-legend" );
 	if ( "block" == display ) {
 		constituentForm.style.display = "none";
 		toggleButton.innerHTML = "Show";

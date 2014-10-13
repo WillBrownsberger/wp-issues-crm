@@ -5,7 +5,7 @@
 * Description: this class manages the front end constituent search/update/add process -- note that these functions and also deletes can be done through backend 
 * 
 * @package wp-issues-crm
-* 
+* add esc_attr, esc_html
 *
 */ 
 
@@ -57,7 +57,7 @@ class WP_Issues_CRM_Constituents_List {
 						$output .= '<li class = "cl-field cl-' . $field['slug'] . ' "> ';
 						if ( isset ( $wic_query->post->$key ) ) {
 							if ( ! is_array ( $wic_query->post->$key ) ) {
-								$output .= $wic_query->post->$key;
+								$output .= esc_html ( $wic_query->post->$key );
 							} else {
 								// NB $wic_query->post->$key)[0][1] gets evaluated to whole ->post array b/c $key[0][1] evaluates to empty; 
 								// cannot fix with parens, so two step this
@@ -65,7 +65,7 @@ class WP_Issues_CRM_Constituents_List {
 								if ( 'phones' == $field['type'] ) { 
 									$output .= $wic_definitions->format_phone($row_array[0][1]);
 								} else {
-									$output .= $row_array[0][1];								
+									$output .= esc_html ( $row_array[0][1] );								
 								}							
   							}
 						}							

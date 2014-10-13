@@ -185,18 +185,29 @@ class WP_Issues_CRM_Definitions {
 			'label'		=>	'Contact',
 			'legend'		=>	'',
 			'order'		=>	20,
+			'initial-open'	=> true,
+		),
+		array (
+			'name'		=> 'case',
+			'label'		=>	'Case Management',
+			'legend'		=>	'',
+			'order'		=>	25,
+			'initial-open'	=> false,
 		),
 		array (
 			'name'		=> 'personal',
 			'label'		=>	'Personal Information',
 			'legend'		=>	'',
 			'order'		=> 30,
+			'initial-open'	=> false,
 		),
 		array (
 			'name'		=> 'links',
 			'label'		=>	'Identity Codes',
 			'legend'		=>	'These codes can be searched, but cannot be updated online.',
 			'order'		=> 40,
+			'initial-open'	=> false,
+
 		),	
 	);
 
@@ -289,7 +300,7 @@ class WP_Issues_CRM_Definitions {
 			'type'	=>	'text',
 			), */		
 		array(  // 6
-			'dedup'	=>	true,
+			'dedup'	=>	false,
 			'group'	=>	'contact',
 			'label'	=>	'Phone',
 			'like'	=>	true,
@@ -362,6 +373,31 @@ class WP_Issues_CRM_Definitions {
 			'slug'	=> 'zip',
 			'type'	=>	'text',
 			), */
+		array( // 10
+			'dedup'	=>	false,
+			'group'	=>	'case',
+			'label'	=>	'Staff',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	90,
+			'required'	=> '',
+			'slug'	=> 'assigned',
+/*			'user_role' => 'Administrator', */
+			'type'	=>	'user',
+			),
+		array( // 10A
+			'dedup'	=>	false,
+			'group'	=>	'case',
+			'label'	=>	'Review Date',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	91,	
+			'required'	=> '',
+			'slug'	=> 'case_review_date',
+			'type'	=>	'date',
+			),
 		array( // 11
 			'dedup'	=>	false,
 			'group'	=>	'personal',
@@ -570,11 +606,13 @@ class WP_Issues_CRM_Definitions {
 		extract ( $control_args, EXTR_OVERWRITE ); 
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
+		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-constituent-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 		 
 		$control = ( $field_label > '' ) ?  '<label class="' . $label_class . '" for="' . 
 				esc_attr( $field_name_id ) . '">' . esc_html( $field_label ) . ' ' . '</label>' : '';
 		$control .= '<input class="wic-input-checked"  id="' . esc_attr( $field_name_id ) . '" name="' . esc_attr( $field_name_id ) . 
-			'" type="checkbox"  value="1"' . checked( $value, 1, false) . $readonly  .'/>' . $field_label_suffix   ;	
+			'" type="checkbox"  value="1"' . checked( $value, 1, false) . $readonly  .'/>' . 
+			$field_label_suffix_span  ;	
 
 		return ( $control );
 
@@ -600,15 +638,15 @@ class WP_Issues_CRM_Definitions {
 		$input_class = 'wic-input';
 		$placeholder = '';
 
-		
 		extract ( $control_args, EXTR_OVERWRITE ); 
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
+		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-constituent-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 		 
 		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
 		$control .= '<input class="' . $input_class . '" id="' . esc_attr( $field_name_id )  . 
 			'" name="' . esc_attr( $field_name_id ) . '" type="text" placeholder = "' .
-			 esc_attr( $placeholder ) . '" value="' . esc_attr ( $value ) . '" ' . $readonly  . '/>' . $field_label_suffix ;
+			 esc_attr( $placeholder ) . '" value="' . esc_attr ( $value ) . '" ' . $readonly  . '/>' . $field_label_suffix_span; 
 			
 		return ( $control );
 
@@ -638,10 +676,11 @@ class WP_Issues_CRM_Definitions {
 		extract ( $control_args, EXTR_OVERWRITE ); 
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
+		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-constituent-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 		 
 		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . esc_attr( $field_label ) . '</label>' : '' ;
 		$control .= '<textarea class="' . $input_class . '" id="' . esc_attr( $field_name_id ) . '" name="' . esc_attr( $field_name_id ) . '" type="text" placeholder = "' . 
-			esc_attr( $placeholder ) . '" ' . $readonly  . '/>' . esc_textarea( $value ) . '</textarea>' . $field_label_suffix ;
+			esc_attr( $placeholder ) . '" ' . $readonly  . '/>' . esc_textarea( $value ) . '</textarea>' . $field_label_suffix_span;
 			
 		return ( $control );
 
@@ -670,6 +709,8 @@ class WP_Issues_CRM_Definitions {
 		$value = stripslashes( esc_html ( $value ) ); 
 
 		extract ( $control_args, EXTR_OVERWRITE ); 
+		
+		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-constituent-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 
 		$control = '';
 				
@@ -683,7 +724,7 @@ class WP_Issues_CRM_Definitions {
 		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . 
 				esc_html( $field_label ) . '</label>' : '';
 		$control .= '<select class="' . $field_input_class . '" id="' . esc_attr( $field_name_id ) . '" name="' . esc_attr( $field_name_id ) 
-				. '" >' . $field_label_suffix;
+				. '" >' ;
 		$p = '';
 		$r = '';
 		foreach ( $option_array as $option ) {
@@ -694,7 +735,7 @@ class WP_Issues_CRM_Definitions {
 				$r .= '<option value="' . esc_attr( $option['value'] ) . '">' . esc_html( $label ) . '</option>';
 			}
 		}
-		$control .=	$p . $r .	'</select>';	
+		$control .=	$p . $r .	'</select>' . $field_label_suffix_span;	
 	
 		return ( $control );
 	
@@ -744,6 +785,38 @@ class WP_Issues_CRM_Definitions {
 
 		return ($button);
 	}
+
+	/*
+	*
+	*	output show-hide-button
+	*  calls toggleConstituentFormSection in wic-utilities.js
+	*
+	*/
+	public function output_show_hide_toggle_button( $args ) {
+
+		$class 			= 'field-group-show-hide-button';		
+		$name_base 		= 'wic-inner-field-group-'  ;
+		$name_variable = ''; // group['name']
+		$label = ''; // $group['label']
+		$show_initial = true;
+		
+		extract( $args, EXTR_OVERWRITE );
+
+		$show_legend = $show_initial ? __( 'Hide', 'wp-issues-crm' ) : __( 'Show', 'wp-issues-crm' );
+
+		
+		$button =  '<button ' . 
+		' class = "' . $class . '" ' .
+		' id = "' . $name_base . esc_attr( $name_variable ) . '-toggle-button" ' .
+		' type = "button" ' .
+		' onclick="toggleConstituentFormSection(\'' . $name_base . esc_attr( $name_variable ) . '\')" ' .
+		' >' . esc_html ( $label ) . '<span class="show-hide-legend" id="' . $name_base . esc_attr( $name_variable ) .
+		'-show-hide-legend">' . $show_legend . '</span>' . '</button>';
+
+		return ($button);
+}
+
+
 
 		
 	public function create_phones_group ( $repeater_group_args ) {

@@ -13,7 +13,8 @@ class WP_Issues_CRM_Constituents {
 	/*
 	*	Overview of major class functions:
 	*		wp_issues_crm_constituent drives main logic of form handling for constituent search/update/save (no delete function)
-	*		it calls sanitize_validate_input() early which does full sanitization (including strip slashes) on all except notes field
+	*		it calls sanitize_validate_input() early which does full sanitization (sanitize_text_field and stripslashes) on all except notes field
+	*				notes field is sanitized (other than stripslashes) only on output to form (there via wp_kses_post and balancetags -- see notes in display_form)  
 	*		it then does searches via search_constituents() (either as requested or as dup check for save or update); 
 	*				no additional validation in searching (trust wp -- all access through standard query objects)
 	*		if requested and validation passed, it does save/update via save_update_constituent() -- 
@@ -316,7 +317,8 @@ class WP_Issues_CRM_Constituents {
 		
 		global $wic_definitions; // access for functions ( field definitions already instantiated  in construct )
 		
-		/* echo '<span style="color:green;"> <br /> $_POST:';  		
+		
+		 echo '<span style="color:green;"> <br /> $_POST:';  		
   		var_dump ($_POST);
   		echo '</span>';  
 
@@ -326,14 +328,22 @@ class WP_Issues_CRM_Constituents {
   		/*
   		echo '<span style="color:blue;"> <br />phone_numbers:';  		
   		var_dump ($_POST['phone_numbers']);
-  		echo '</span>'; */ 
+  		echo '</span>'; */  
 
 		?><div id='wic-forms' class = "<?php echo $next_form_output['initial_form_state'] ?>">
 
 		<form id = "constituent-form" method="POST" autocomplete = "on">
-			<div class = "constituent-field-group wic-group-odd">
 
-				<h2><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></h2><?php
+			<div class = "constituent-field-group wic-group-odd">
+			
+				<?php if ( 'update' == $next_form_output['next_action'] ) {
+					$form_header = $next_form_output['first_name'] . ' ' . $next_form_output['last_name'];
+					$form_header = ( '' == $form_header ) ? $next_form_output['emails'][0][1] : $form_header;
+				} else {
+					$form_header = __( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm');
+				}
+				echo '<h2>' . $form_header . '</h2>'; 
+				
 				if ( 'wic-form-closed' == $next_form_output['initial_form_state'] ) {
 					echo '<button id = "form-toggle-button" type="button" onclick = "toggleConstituentForm()">' . __( 'Show Search Form', 'wp-issues-crm' ) . '</button>';		
 				} 
@@ -380,17 +390,23 @@ class WP_Issues_CRM_Constituents {
 				$filtered_fields = $this->select_key ( $this->constituent_fields, 'group', $group['name'] );
 				$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
 				$group_count++;
-				$show_class = 'hide';
-				echo '<div class = "constituent-field-group ' . $row_class . '" id = "wic-field-group-' . esc_attr( $group['name'] ) . '">' .
-					'<button ' . 
-						' class = "field-group-show-hide-button" ' .
-						' id = "wic-inner-field-group-' . esc_attr( $group['name'] ) . '-toggle-button" ' .
-						' type = "button" ' .
-						' onclick="toggleConstituentFormSection(\'wic-inner-field-group-' . esc_attr( $group['name'] ) . '\')" ' .
-						' >' . $show_class . '</button>' .
-					'<h3 class = "constituent-field-group-label">' . esc_html ( $group['label'] ) . '</h3>' .
-					'<div id = "wic-inner-field-group-' . esc_attr( $group['name'] ) . '">' .					
-					'<p class = "constituent-field-group-legend">' . esc_html ( $group['legend'] ) . '</p>';
+				
+				echo '<div class = "constituent-field-group ' . $row_class . '" id = "wic-field-group-' . esc_attr( $group['name'] ) . '">';				
+				
+					$button_args = array (
+						'class'			=> 'field-group-show-hide-button',		
+						'name_base'		=> 'wic-inner-field-group-',
+						'name_variable' => $group['name'],
+						'label' 			=> $group['label'],
+						'show_initial' => $group['initial-open'],
+					);
+			
+					echo $wic_definitions->output_show_hide_toggle_button( $button_args );			
+				
+					$show_class = $group['initial-open'] ? 'visible-template' : 'hidden-template';
+					echo '<div class="' . $show_class . '" id = "wic-inner-field-group-' . esc_attr( $group['name'] ) . '">' .					
+					'<p class = "constituent-field-group-legend">' . esc_html ( $group['legend'] )  . '</p>';
+
 					foreach ( $filtered_fields as $field ) {	
 
 		   			$field_type = $field['type'];
@@ -519,6 +535,20 @@ class WP_Issues_CRM_Constituents {
 								$repeater_function = 'create_' . $field['type'] . '_group';
 								echo $wic_definitions->$repeater_function ( $group_args );
 								break;
+								
+							case 'user':
+								echo 'i am here';
+								$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
+								$args['select_array']			=	new WP_User_query ( array (
+																				'role' => $field['user_role'],
+																				'fields' => array ( 'ID', 'display_name'),
+																				)
+																			);
+								$var_dump ($args['select_array']);
+								$args['field_label_suffix']	= $required_individual . $required_group;								
+								echo '<p>' . $wic_definitions->create_select_control ( $args ) . '</p>';
+								break; 
+														
 						}
 					} // close foreach field				
 				echo '</div></div>';		   
@@ -529,7 +559,20 @@ class WP_Issues_CRM_Constituents {
 			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd"; 
 			$group_count++;
 			echo '<div class = "constituent-field-group ' . $row_class . '" id = "constituent-notes">';
-			echo '<h3 class = "constituent-field-group-label">' . __('Constituent Notes', 'wp-issues-crm' ) . '</h3>';
+			
+			$button_args = array (
+				'class'			=> 'field-group-show-hide-button',		
+				'name_base'		=> 'wic-inner-field-group-',
+				'name_variable' => 'constituent-notes',
+				'label' 			=> __('Constituent Notes', 'wp-issues-crm' ),
+				'show_initial' =>  ( "update" == $next_form_output['next_action'] ),
+			);
+			
+			echo $wic_definitions->output_show_hide_toggle_button( $button_args );
+			
+			$show_class = ( "update" == $next_form_output['next_action'] ) ? 'visible-template' : 'hidden-template';
+			echo '<div id = "wic-inner-field-group-constituent-notes" class="' . $show_class .'">';	
+			// echo '<h3 class = "constituent-field-group-label">' . __('Constituent Notes', 'wp-issues-crm' ) . '</h3>';
 				$args = array (
 					'field_name_id'		=> 'constituent_notes',
 					'field_label'			=>	__( "New Note", 'wp-issues-crm' ),
@@ -567,7 +610,7 @@ class WP_Issues_CRM_Constituents {
 				*/
 					
 				
-			echo '</div>'; 
+			echo '</div></div>'; 
 			
 			// final button group div
 			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
@@ -595,18 +638,18 @@ class WP_Issues_CRM_Constituents {
 						'read_only_flag'		=>	false, 
 						'field_label_suffix'	=> '', 	
 					);
-					echo '<p>' . $wic_definitions->create_check_control ( $text_control_args ) . '</p>';
+					echo '<p class = "wic-constituent-form-legend">' . $wic_definitions->create_check_control ( $text_control_args ) . '</p>';
 				} ?>	
 				
 				<?php if ( $serialized_contains_legend ) { 
-					echo '<p class = "wic-legend" >(%!) ' . __( 'Full-text search always enabled for these fields.', 'wp-issues-crm'  ) . '</p>';
+					echo '<p class = "wic-constituent-form-legend" >(%!) ' . __( 'Full-text search always enabled for these fields.', 'wp-issues-crm'  ) . '</p>';
 				} ?>	
 				<?php if ( $required_individual_legend > '' ) { ?>
-					<p><?php echo $required_individual_legend; ?> </p>
+					<p class = "wic-constituent-form-legend"><?php echo $required_individual_legend; ?> </p>
 				<?php } ?> 								
 	
 				<?php if ( $required_group_legend > '' ) { ?>
-					<p><?php echo $required_group_legend; ?> </p>
+					<p class = "wic-constituent-form-legend"><?php echo $required_group_legend; ?> </p>
 				<?php } ?> 
 			</div>								
 
@@ -616,6 +659,7 @@ class WP_Issues_CRM_Constituents {
 		<?php 
 		
 	}
+
 
 	/*
 	*	filter array of arrays by one value of the arrays
