@@ -34,10 +34,10 @@
 }
 
 .wic-group-even {
-	background: #f1f1f1;
+	background: #f7f7f7;
 }
 .wic-group-odd {
-	background: #ececec;
+	background: #f4f4f4;
 }
 
 .constituent-field-group {
@@ -67,6 +67,10 @@ h3.constituent-field-group-label {
 	width: 100%
 }
 
+.field-group-show-hide-button:hover {
+	color: #aaa;
+}
+
 .show-hide-legend {
 	font-size: 0.6em;
 	padding-left: 10px;
@@ -94,6 +98,11 @@ p.constituent-field-group-legend {
 #constituent-form .wic-form-button {
 	margin-left: 200px;
 }
+
+#constituent-form .second-position {
+	margin-left: 10px;
+}
+
 
 
 #form-toggle-button-on-list, 
@@ -159,20 +168,19 @@ p.constituent-field-group-legend {
 }
 
 .wic-input {
-	background: #f6f6f6;
-	border: none;
+	background: #ffffff;
+	border: 1px solid #fefefe;
 	min-width: 200px;
 } 
 
 
 .wic-input-checked:hover, 
 .wic-input:hover {
-	background: #fff;
-	border: 1px solid #eee;
+	border: 1px solid #ccc;
 }
 
 .wic-input-checked {
-	background: #f6f6f6;
+	background: #fcfcfc;
 	border: none;
 }
 

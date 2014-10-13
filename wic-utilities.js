@@ -15,14 +15,17 @@ function toggleConstituentForm() {
 }
 
 function toggleConstituentFormSection( section ) {
-	var constituentForm = document.getElementById ( section );
-	var display = constituentForm.style.display;
+	var constituentFormSection = document.getElementById ( section );
+	var display = constituentFormSection.style.display;
+	if ('' == display) {
+		display = window.getComputedStyle(constituentFormSection, null).getPropertyValue('display');
+	}
 	var toggleButton	= document.getElementById ( section + "-show-hide-legend" );
 	if ( "block" == display ) {
-		constituentForm.style.display = "none";
+		constituentFormSection.style.display = "none";
 		toggleButton.innerHTML = "Show";
 	} else {
-		constituentForm.style.display = "block";
+		constituentFormSection.style.display = "block";
 		toggleButton.innerHTML = "Hide";
 	}
 }

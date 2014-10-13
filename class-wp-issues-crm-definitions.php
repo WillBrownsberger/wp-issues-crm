@@ -188,7 +188,7 @@ class WP_Issues_CRM_Definitions {
 			'initial-open'	=> true,
 		),
 		array (
-			'name'		=> 'case',
+			'name'		=> 'case_management',
 			'label'		=>	'Case Management',
 			'legend'		=>	'',
 			'order'		=>	25,
@@ -225,6 +225,8 @@ class WP_Issues_CRM_Definitions {
 	  	*  -- list include in standard constituent lists -- if > 0 value is % width for display -- should sum to 100.
 	  	*  **** the only field slug specific logic in the whole class is expectation that one of first_name, last_name and email not be blank for title def
 	  	*  **** so, fields with group => required must be all or a subset of first_name, last_name, email, or email_group
+	  	*
+	  	*	NOTE: Order values must be unique or second list will overlay first
 	  	*/
 		array( // 1
 			'dedup'	=>	true,	
@@ -246,7 +248,7 @@ class WP_Issues_CRM_Definitions {
 	 		'like'	=>	false,
 			'list'	=> '0',
 	 		'online'	=>	false,
-	 		'order'	=>	100,	
+	 		'order'	=>	15,	
 			'required'	=> false,
 			'slug'	=> 'middle_name',
 	 		'type'	=>	'text',
@@ -263,42 +265,18 @@ class WP_Issues_CRM_Definitions {
 			'slug'	=> 'last_name',
 			'type'	=>	'text',
 			),	
-/*		array( // 4
-			'dedup'	=>	true,
-			'group'	=>	'required',
-			'label'	=>	'eMail',
-			'like'	=>	true,
-			'list'	=> '0',
-			'online'	=>	false,
-			'order'	=>	30,
-			'required'	=> 'group', // see note above -- note, in default installation, this field is not accessible online (use group)
-			'slug'	=> 'email',
-			'type'	=>	'email',
-			),	*/
-		array( // 4A
+		array( // 4
 			'dedup'	=>	true,
 			'group'	=>	'contact',
 			'label'	=>	'eMail',
 			'like'	=>	true,
 			'list'	=> '28',
 			'online'	=>	true,
-			'order'	=>	31,
+			'order'	=>	40,
 			'required'	=> 'group', // see note above -- do not have to include in group required, if want to force to have a fn or ln
 			'slug'	=> 'email_group',
 			'type'	=>	'emails',
 			),				
-/*		array( // 5
-			'dedup'	=>	false,
-			'group'	=>	'contact',
-			'label'	=>	'Land Line',
-			'like'	=>	true,
-			'list'	=> '0',
-			'online'	=>	false,
-			'order'	=>	70,
-			'required'	=> false,
-			'slug'	=> 'phone',
-			'type'	=>	'text',
-			), */		
 		array(  // 6
 			'dedup'	=>	false,
 			'group'	=>	'contact',
@@ -306,97 +284,67 @@ class WP_Issues_CRM_Definitions {
 			'like'	=>	true,
 			'list'	=> '15',
 			'online'	=>	true,
-			'order'	=>	80,
+			'order'	=>	35,
 			'required'	=> '',
 			'slug'	=> 'phone_numbers',
 			'type'	=>	'phones',
-
 			),
-/*		array( // 7
-			'dedup'	=>	true,
-			'group'	=>	'contact',
-			'label'	=>	'Street Address',
-			'like'	=>	true,
-			'list'	=> '0',
-			'online'	=>	true,
-			'order'	=>	40,
-			'required'	=> '',
-			'slug'	=> 'street_address',
-			'type'	=>	'text',
-
-			), */
-		array( // 7A
+	array( // 7A
 			'dedup'	=>	true,
 			'group'	=>	'contact',
 			'label'	=>	'Address',
 			'like'	=>	true,
 			'list'	=> '29',
 			'online'	=>	true,
-			'order'	=>	41,
+			'order'	=>	30,
 			'required'	=> '',
 			'slug'	=> 'street_addresses',
 			'type'	=>	'addresses',
 			),	
-/*		array( // 8
+		array( // 10
 			'dedup'	=>	false,
-			'group'	=>	'contact',
-			'label'	=>	'City',
+			'group'	=>	'case_management',
+			'label'	=>	'Staff',
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
 			'order'	=>	50,
 			'required'	=> '',
-			'slug'	=> 'city',
-			'type'	=>	'text',
-			),
-		array( // 9
-			'dedup'	=>	false,
-			'group'	=>	'contact',
-			'label'	=>	'State',
-			'like'	=>	false,
-			'list'	=> '0',
-			'online'	=>	true,
-			'order'	=>	60,
-			'required'	=> false,
-			'slug'	=> 'state',
-			'type'	=>	'text',
-			),
-		array( // 10
-			'dedup'	=>	false,
-			'group'	=>	'contact',
-			'label'	=>	'Zip Code',
-			'like'	=>	false,
-			'list'	=> '0',
-			'online'	=>	true,
-			'order'	=>	65,
-			'required'	=> '',
-			'slug'	=> 'zip',
-			'type'	=>	'text',
-			), */
-		array( // 10
-			'dedup'	=>	false,
-			'group'	=>	'case',
-			'label'	=>	'Staff',
-			'like'	=>	false,
-			'list'	=> '0',
-			'online'	=>	true,
-			'order'	=>	90,
-			'required'	=> '',
 			'slug'	=> 'assigned',
-/*			'user_role' => 'Administrator', */
+			'user_role' => 'Administrator', 
 			'type'	=>	'user',
-			),
+			), 
 		array( // 10A
 			'dedup'	=>	false,
-			'group'	=>	'case',
+			'group'	=>	'case_management',
 			'label'	=>	'Review Date',
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
-			'order'	=>	91,	
+			'order'	=>	60,	
 			'required'	=> '',
 			'slug'	=> 'case_review_date',
 			'type'	=>	'date',
+			),
+		array( // 10A
+			'dedup'	=>	false,
+			'group'	=>	'case_management',
+			'label'	=>	'Case Status',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	55,	
+			'required'	=> '',
+			'slug'	=> 'case_status',
+			'select_array'	=>	array ( 
+				array(
+					'value'	=> '0',
+					'label'	=>	'Closed' ),
+				array(
+					'value'	=> '1',
+					'label'	=>	'Open' ),
+				),
+			'type'	=> 'select',
 			),
 		array( // 11
 			'dedup'	=>	false,
@@ -405,7 +353,7 @@ class WP_Issues_CRM_Definitions {
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
-			'order'	=>	90,
+			'order'	=>	80,
 			'required'	=> '',
 			'slug'	=> 'job_title',
 			'type'	=>	'text',
@@ -417,7 +365,7 @@ class WP_Issues_CRM_Definitions {
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
-			'order'	=>	95,
+			'order'	=>	85,
 			'required'	=> '',
 			'slug'	=> 'organization_name',
 			'type'	=>	'text',
@@ -429,7 +377,7 @@ class WP_Issues_CRM_Definitions {
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
-			'order'	=>	85,
+			'order'	=>	75,
 			'required'	=> '',
 			'slug'	=> 'gender_id',
 			'select_array'	=>	array ( 
@@ -449,7 +397,7 @@ class WP_Issues_CRM_Definitions {
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
-			'order'	=>	84,	
+			'order'	=>	70,	
 			'required'	=> false,
 			'slug'	=> 'birth_date',
 			'type'	=>	'date',
@@ -461,10 +409,22 @@ class WP_Issues_CRM_Definitions {
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
-			'order'	=>	97,
+			'order'	=>	90,
 			'required'	=> '',
 			'slug'	=> 'is_deceased',
 			'type'	=>	'check',
+			),
+		array( // 14
+			'dedup'	=>	false,
+			'group'	=>	'personal',
+			'label'	=>	'Date Deceased',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	95,	
+			'required'	=> false,
+			'slug'	=> 'deceased_date',
+			'type'	=>	'date',
 			),
 		array( // 16
 			'dedup'	=>	false,
@@ -472,7 +432,7 @@ class WP_Issues_CRM_Definitions {
 			'label'	=>	'CiviCRM ID',
 			'like'	=>	false,
 			'online'	=>	true,
-			'order'	=>	1,
+			'order'	=>	100,
 			'required'	=> '',
 			'slug'	=> 'civicrm_id',
 			'type'	=>	'readonly',
@@ -485,7 +445,7 @@ class WP_Issues_CRM_Definitions {
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
-			'order'	=>	3,
+			'order'	=>	110,
 			'required'	=> '',
 			'slug'	=> 'ss_id',
 			'type'	=>	'readonly',
@@ -497,7 +457,7 @@ class WP_Issues_CRM_Definitions {
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
-			'order'	=>	5,
+			'order'	=>	120,
 			'required'	=> false,
 			'slug'	=> 'VAN_id',
 			'type'	=>	'readonly',
@@ -568,6 +528,7 @@ class WP_Issues_CRM_Definitions {
 	*/		
 	public function multi_array_key_sort ( $multi_array, $key )	{
 		$temp = array();
+		
 		foreach ( $multi_array as $line_item ) {
 			 $temp[$line_item[$key]] = $line_item;
 		}
@@ -706,7 +667,7 @@ class WP_Issues_CRM_Definitions {
 		$field_input_class = 'wic-input';
 		$placeholder = '';
 	
-		$value = stripslashes( esc_html ( $value ) ); 
+		$value = esc_html ( $value ); 
 
 		extract ( $control_args, EXTR_OVERWRITE ); 
 		
@@ -1222,7 +1183,7 @@ class WP_Issues_CRM_Definitions {
 		$output = '<div class = "wic-notes-entry">' .
 						'<div class = "wic-notes-header">' .
 							'<div class = "wic-notes-author">' . __( 'Note by ' , 'wp-issues-crm' ) .  $current_user->display_name . '</div>' .
-							'<div class = "wic-notes-date">' . '(' . date('Y-m-d, h:i:s A' ) . ')' . ':</div>' .
+							'<div class = "wic-notes-date">' . '(' . current_time('Y-m-d, h:i:s A' ) . ')' . ':</div>' .
 						'</div>' .
 						'<div class = "wic-notes-content">' .
 							$notes .

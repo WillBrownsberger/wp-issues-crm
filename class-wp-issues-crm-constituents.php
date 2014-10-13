@@ -84,7 +84,7 @@ class WP_Issues_CRM_Constituents {
 	private function initialize_blank_form(&$next_form_output)	{ 
 	
 			/* these values may later go into database */			
-			foreach ( $this->constituent_fields as $field ) { 				// note 1 below
+			foreach ( $this->constituent_fields as $field ) { // note 1 below 
 				$next_form_output[$field['slug']] =	'';
 				if ( 'date' == $field['type'] ) {
 					$next_form_output[$field['slug'] . '_lo'] = '';				
@@ -102,6 +102,7 @@ class WP_Issues_CRM_Constituents {
 			$next_form_output['next_action'] 		=	'search';			// note 5 below
 			$next_form_output['strict_match']		=	false;				// note 6 below
 			$next_form_output['initial_form_state']= 	'wic-form-open';  // note 7 below 
+			$next_form_output['initial_sections_open'] = array();			// note 8 below
 			
 		}
 
@@ -149,6 +150,7 @@ class WP_Issues_CRM_Constituents {
 	*			-- set by main logic in this function 
 	*		6.	strict match check box -- passed through from form
 	*		7. initial form state (show/hide) --- set by main logic in this function
+	*		8. field groups that have changes are pushed onto this array in search and update functions so that will show these sections open again 
 	*
 	*/
 	public function wp_issues_crm_constituents() {
@@ -316,8 +318,8 @@ class WP_Issues_CRM_Constituents {
 	public function display_form ( &$next_form_output ) {
 		
 		global $wic_definitions; // access for functions ( field definitions already instantiated  in construct )
-		
-		
+		/* var_dump( $next_form_output['initial_sections_open'] );
+
 		 echo '<span style="color:green;"> <br /> $_POST:';  		
   		var_dump ($_POST);
   		echo '</span>';  
@@ -365,7 +367,7 @@ class WP_Issues_CRM_Constituents {
 		  		?><button class = "wic-form-button" name="wic_constituent_main_button" type="submit" value = "<?php echo $next_form_output['next_action']; ?>"><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></button>	  
 	
 				<?php if ( 'save' == $next_form_output['next_action'] ) {  // show this on save, but not update -- on update, have too much data in form, need to reset ?>  
-					<button  class = "wic-form-button" name="wic_constituent_main_button" type="submit" value = "search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
+					<button  class = "wic-form-button second-position" name="wic_constituent_main_button" type="submit" value = "search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
 				<?php } ?>		 		
 
 			</div>   
@@ -393,17 +395,19 @@ class WP_Issues_CRM_Constituents {
 				
 				echo '<div class = "constituent-field-group ' . $row_class . '" id = "wic-field-group-' . esc_attr( $group['name'] ) . '">';				
 				
+					$section_open = in_array( $group['name'], $next_form_output['initial_sections_open'] ) ? true : $group['initial-open'];				
+				
 					$button_args = array (
 						'class'			=> 'field-group-show-hide-button',		
 						'name_base'		=> 'wic-inner-field-group-',
 						'name_variable' => $group['name'],
 						'label' 			=> $group['label'],
-						'show_initial' => $group['initial-open'],
+						'show_initial' => $section_open,
 					);
 			
 					echo $wic_definitions->output_show_hide_toggle_button( $button_args );			
 				
-					$show_class = $group['initial-open'] ? 'visible-template' : 'hidden-template';
+					$show_class = $section_open ? 'visible-template' : 'hidden-template';
 					echo '<div class="' . $show_class . '" id = "wic-inner-field-group-' . esc_attr( $group['name'] ) . '">' .					
 					'<p class = "constituent-field-group-legend">' . esc_html ( $group['legend'] )  . '</p>';
 
@@ -537,14 +541,24 @@ class WP_Issues_CRM_Constituents {
 								break;
 								
 							case 'user':
-								echo 'i am here';
+								/* query users with specified role (s) */
+								$user_query_args = 	array (
+									'role' => $field['user_role'],
+									'fields' => array ( 'ID', 'display_name'),
+								);						
+								$user_list = new WP_User_query ( $user_query_args );
+
+								$user_select_array = array();
+								foreach ( $user_list->results as $user ) {
+									$temp_array = array (
+										'value' => $user->ID,
+										'label'	=> $user->display_name,									
+									);
+									array_push ( $user_select_array, $temp_array );								
+								} 
+							
 								$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
-								$args['select_array']			=	new WP_User_query ( array (
-																				'role' => $field['user_role'],
-																				'fields' => array ( 'ID', 'display_name'),
-																				)
-																			);
-								$var_dump ($args['select_array']);
+								$args['select_array']			=	$user_select_array; 
 								$args['field_label_suffix']	= $required_individual . $required_group;								
 								echo '<p>' . $wic_definitions->create_select_control ( $args ) . '</p>';
 								break; 
@@ -560,22 +574,26 @@ class WP_Issues_CRM_Constituents {
 			$group_count++;
 			echo '<div class = "constituent-field-group ' . $row_class . '" id = "constituent-notes">';
 			
+			$show_initial = ( "update" == $next_form_output['next_action'] ); // show notes on update next			
+			$show_initial = in_array( 'constituent_notes', $next_form_output['initial_sections_open'] ) ? true : $show_initial; // also were searched or updated 
+			
 			$button_args = array (
 				'class'			=> 'field-group-show-hide-button',		
 				'name_base'		=> 'wic-inner-field-group-',
 				'name_variable' => 'constituent-notes',
 				'label' 			=> __('Constituent Notes', 'wp-issues-crm' ),
-				'show_initial' =>  ( "update" == $next_form_output['next_action'] ),
+				'show_initial' =>  ( $show_initial ),
 			);
 			
 			echo $wic_definitions->output_show_hide_toggle_button( $button_args );
 			
-			$show_class = ( "update" == $next_form_output['next_action'] ) ? 'visible-template' : 'hidden-template';
+			$show_class = $show_initial ? 'visible-template' : 'hidden-template';
+						
 			echo '<div id = "wic-inner-field-group-constituent-notes" class="' . $show_class .'">';	
 			// echo '<h3 class = "constituent-field-group-label">' . __('Constituent Notes', 'wp-issues-crm' ) . '</h3>';
 				$args = array (
 					'field_name_id'		=> 'constituent_notes',
-					'field_label'			=>	__( "New Note", 'wp-issues-crm' ),
+					'field_label'			=>	__( "Note Text", 'wp-issues-crm' ),
 					'value'					=> $next_form_output['constituent_notes'],
 					'read_only_flag'		=>	false, 
 					'field_label_suffix'	=> '(%!)', 								
@@ -624,7 +642,7 @@ class WP_Issues_CRM_Constituents {
 		  		<button  class = "wic-form-button" id="wic_constituent_main_button" name="wic_constituent_main_button" type="submit" value = "<?php echo $next_form_output['next_action']; ?>"><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></button>	  
 	
 				<?php if ( 'save' == $next_form_output['next_action'] ) { ?>
-					<button  class = "wic-form-button" id="redo_search_button" name="wic_constituent_main_button" type="submit" value = "search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
+					<button  class = "wic-form-button second-position" id="redo_search_button" name="wic_constituent_main_button" type="submit" value = "search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
 				<?php } ?>		 		
 		
 		 		<?php wp_nonce_field( 'wp_issues_crm_constituent', 'wp_issues_crm_constituent_nonce_field', true, true ); ?>
@@ -700,23 +718,35 @@ class WP_Issues_CRM_Constituents {
 	 		foreach ( $this->constituent_fields as $field ) {
 				if ( 'date' == $field['type'] && 'new' == $search_mode ) { // handle date as range in new searches 
 					if ( $next_form_output[$field['slug'] . '_lo'] > '' || $next_form_output[$field['slug'] . '_hi'] > '' ) {
-						if ( ( $index - 1 ) < $this->search_terms_max )	{
-							$date_range = array ( 
-								$next_form_output[$field['slug'] . '_lo'],
-								$next_form_output[$field['slug'] . '_hi'],						
-								); 	
-							$meta_query_args[$index] = array(
-								'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
-								'value'		=> $date_range,
-								'compare'	=>	'between',
-							);	
-						} else { 
-							$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] : ( $ignored_fields_list .= ', ' . $field['label'] ); 
+					array_push( $next_form_output['initial_sections_open'], $field['group'] ); // show field's section open in next form
+						if ( $next_form_output[$field['slug'] . '_lo'] > '' ) { 
+							if ( ( $index - 1 ) < $this->search_terms_max )	{ 	
+								$meta_query_args[$index] = array(
+									'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
+									'value'		=> $next_form_output[$field['slug'] . '_lo'],
+									'compare'	=>	'>=',
+								);	
+							} else { 
+								$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] . ' (low) '  : ( $ignored_fields_list .= ', ' . $field['label'] . ' (low) ' ); 
+							}
+							$index++;
+						}	
+						if ( $next_form_output[$field['slug'] . '_hi'] > '' ) {
+							if ( ( $index - 1 ) < $this->search_terms_max )	{		
+								$meta_query_args[$index] = array(
+									'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
+									'value'		=> $next_form_output[$field['slug'] . '_hi'],
+									'compare'	=>	'<=',
+								);	
+							} else { 
+								$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] . ' (high) ' : ( $ignored_fields_list .= ', ' . $field['label'] . ' (high) ' ); 
+							}
+							$index++;
 						}					
-					
 					}	
 				} else { // standard = or like handling (including for dates in dedup mode)
 		 			if( $next_form_output[$field['slug']] > '' && ( 'new' == $search_mode  || $field['dedup'] ) )  { 
+		 				array_push( $next_form_output['initial_sections_open'], $field['group'] ); // show field's section open in next form
 						if ( ( ( $index - 1 ) < $this->search_terms_max ) || $field['dedup'] )	{ // allow possibility to set more dedup fields than allowed search fields		
 							if ( is_array( $next_form_output[$field['slug']] ) ) { // happens only for phone, email, street address; regardless of next action, have to flatten for search
 								$meta_value = $next_form_output[$field['slug']][0][1]; // the first, phone, email or street address
@@ -752,6 +782,11 @@ class WP_Issues_CRM_Constituents {
 	 			'order'			=> 'ASC',
 	 			's'				=> $next_form_output['constituent_notes'] ,
 	 		);
+	 		
+	 		if ( $next_form_output['constituent_notes']  > '' ) {
+				array_push( $next_form_output['initial_sections_open'], 'constituent-notes' ); // show field's section open in next form
+			}	 		
+	 		
 	 	} elseif ( 'db_check' == $search_mode ) { 
 			$query_args = array (
 				'p' => $next_form_output['constituent_id'],
@@ -946,6 +981,7 @@ class WP_Issues_CRM_Constituents {
 /*			if ( $next_form_output[ 'constituent_notes' ] != $check_on_database->post->post_content ||
 				$title != $check_on_database->post->post_title ) { -- these were replaced by next two lines lines*/
 			if ( trim( $next_form_output[ 'constituent_notes' ] )   > '' || $title != $check_on_database->post->post_title ) {
+				array_push( $next_form_output['initial_sections_open'], 'constituent_notes' ); // show field's section open in next form
 				$post_args['post_content'] = $wic_definitions->format_constituent_notes( $next_form_output['constituent_notes'] )  . $check_on_database->post->post_content;
 				$outcome['post_id'] = wp_update_post( $post_args ); 
 			} else {
@@ -971,15 +1007,18 @@ class WP_Issues_CRM_Constituents {
 					if ( $next_form_output[$field['slug']] > '' ) { 
 						if ( isset ( $check_on_database->post->$post_field_key ) ) {
 							if( $next_form_output[$field['slug']] != $check_on_database->post->$post_field_key ) {
+								array_push( $next_form_output['initial_sections_open'], $field['group'] ); // show field's section open in next form
 								$meta_return = update_post_meta ( $next_form_output['constituent_id'], $post_field_key, $next_form_output[$field['slug']] );
 							} else {
 								$meta_return = 1; // no action if field value already on db correctly
 							} 
 						} else { // no value yet on database 
+							array_push( $next_form_output['initial_sections_open'], $field['group'] ); // show field's section open in next form
 							$meta_return = add_post_meta ( $next_form_output['constituent_id'], $post_field_key, $next_form_output[$field['slug']] );							
 						}
 					} else { // have empty field value
 						if ( isset ( $check_on_database->post->$post_field_key ) ) {
+							array_push( $next_form_output['initial_sections_open'], $field['group'] ); // show field's section open in next form
 							$meta_return = delete_post_meta( $next_form_output['constituent_id'], $post_field_key );					
 						} else {
 							$meta_return = 1; // no action of field is blank and meta record not exist					
