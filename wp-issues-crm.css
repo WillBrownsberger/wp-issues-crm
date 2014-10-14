@@ -34,10 +34,10 @@
 }
 
 .wic-group-even {
-	background: #f7f7f7;
+	background: #f8f8f8;
 }
 .wic-group-odd {
-	background: #f4f4f4;
+	background: #f8f8f8;
 }
 
 .constituent-field-group {
@@ -119,7 +119,7 @@ p.constituent-field-group-legend {
 
 /* message box and notices */
 #constituent-form-message-box {
-	background: #f6f6f6;
+	background: #f8f8f8;
 	color: #777;
 	margin:  20px 0;
 	padding: 20px 0 20px 200px;
@@ -169,7 +169,7 @@ p.constituent-field-group-legend {
 
 .wic-input {
 	background: #ffffff;
-	border: 1px solid #fefefe;
+	border: 1px solid #f0f0f0;
 	min-width: 200px;
 } 
 

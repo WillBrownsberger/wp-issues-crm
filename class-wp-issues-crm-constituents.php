@@ -46,13 +46,13 @@ class WP_Issues_CRM_Constituents {
 	public function __construct( $constituent_id ) {
 
 		/* set up class variables */
-		global $wic_definitions;
-		foreach ( $wic_definitions->constituent_fields as $field )
+		global $wic_constituent_definitions;
+		foreach ( $wic_constituent_definitions->constituent_fields as $field )
 			if ( $field['online'] ) { 		
  				 array_push( $this->constituent_fields, $field );
  			}
-		$this->constituent_field_groups 	= &$wic_definitions->constituent_field_groups;
-		$this->wic_metakey = &$wic_definitions->wic_metakey;
+		$this->constituent_field_groups 	= &$wic_constituent_definitions->constituent_field_groups;
+		$this->wic_metakey = &$wic_constituent_definitions->wic_metakey;
 		$this->constituent_id = $constituent_id;		
 
 		/* invoke form and supporting database access functions */
@@ -82,7 +82,7 @@ class WP_Issues_CRM_Constituents {
 *
 */
 	private function initialize_blank_form(&$next_form_output)	{ 
-	
+
 			/* these values may later go into database */			
 			foreach ( $this->constituent_fields as $field ) { // note 1 below 
 				$next_form_output[$field['slug']] =	'';
@@ -155,7 +155,8 @@ class WP_Issues_CRM_Constituents {
 	*/
 	public function wp_issues_crm_constituents() {
 		
-		global $wic_definitions;
+		global $wic_constituent_definitions;
+		global $wic_form_utilities;
 		
 		/* first check capabilities -- must be administrative user */
 		if ( ! current_user_can ( 'activate_plugins' ) ) { 
@@ -229,7 +230,7 @@ class WP_Issues_CRM_Constituents {
 							} else { 
 								$next_form_output['guidance'] = __( 'Update successful -- you can further update this record.', 'wp-issues-crm' );								
 								if ( trim( $next_form_output[ 'constituent_notes' ] ) > '' ) { // update to database
-									$next_form_output['old_constituent_notes'] = $wic_definitions->format_constituent_notes( $next_form_output['constituent_notes'] ) . $next_form_output['old_constituent_notes'];
+									$next_form_output['old_constituent_notes'] = $wic_form_utilities->format_constituent_notes( $next_form_output['constituent_notes'] ) . $next_form_output['old_constituent_notes'];
 									$next_form_output['constituent_notes'] = '';
 								}
 							}					
@@ -259,7 +260,7 @@ class WP_Issues_CRM_Constituents {
 								$next_form_output['guidance']	=	__( 'Record saved -- you can further update this record.', 'wp-issues-crm' );
 								$next_form_output['next_action'] 	=	'update';
 								if ( trim( $next_form_output[ 'constituent_notes' ] )  > '' ) { // parallels update to database
-									$next_form_output['old_constituent_notes'] = $wic_definitions->format_constituent_notes( $next_form_output['constituent_notes'] ) . $next_form_output['old_constituent_notes'];
+									$next_form_output['old_constituent_notes'] = $wic_form_utilities->format_constituent_notes( $next_form_output['constituent_notes'] ) . $next_form_output['old_constituent_notes'];
 									$next_form_output['constituent_notes'] = '';
 								}
 							}					
@@ -317,7 +318,8 @@ class WP_Issues_CRM_Constituents {
 	
 	public function display_form ( &$next_form_output ) {
 		
-		global $wic_definitions; // access for functions ( field definitions already instantiated  in construct )
+		global $wic_constituent_definitions;
+		global $wic_form_utilities; // access for functions ( field definitions already instantiated  in construct )
 		/* var_dump( $next_form_output['initial_sections_open'] );
 
 		 echo '<span style="color:green;"> <br /> $_POST:';  		
@@ -405,7 +407,7 @@ class WP_Issues_CRM_Constituents {
 						'show_initial' => $section_open,
 					);
 			
-					echo $wic_definitions->output_show_hide_toggle_button( $button_args );			
+					echo $wic_form_utilities->output_show_hide_toggle_button( $button_args );			
 				
 					$show_class = $section_open ? 'visible-template' : 'hidden-template';
 					echo '<div class="' . $show_class . '" id = "wic-inner-field-group-' . esc_attr( $group['name'] ) . '">' .					
@@ -433,14 +435,14 @@ class WP_Issues_CRM_Constituents {
 								$contains_legend = 'true';	
 							}
 
-							if ( in_array( $field['type'], $wic_definitions->serialized_field_types ) ) {
+							if ( in_array( $field['type'], $wic_constituent_definitions->serialized_field_types ) ) {
 								$contains =  '(%!)';
 								$serialized_contains_legend = true;
 							}
 						}
 
 						/* if have repeating fields, treat as string for search (can be new search or search where already working as array) */						
-						if ( in_array( $field['type'], $wic_definitions->serialized_field_types ) ) {
+						if ( in_array( $field['type'], $wic_constituent_definitions->serialized_field_types ) ) {
 							if ( 'search' == $next_form_output['next_action'] ) {
 								$field_type = 'serialized_type_as_string';
 								if ( is_array ( $next_form_output[$field['slug']] ) ) {							
@@ -482,7 +484,7 @@ class WP_Issues_CRM_Constituents {
 							case 'email':						
 							case 'text':
 							case 'serialized_type_as_string':
-								echo '<p>' . $wic_definitions->create_text_control ( $args ) . '</p>'; 
+								echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>'; 
 								break;
 
 							case 'date':
@@ -494,7 +496,7 @@ class WP_Issues_CRM_Constituents {
 										'read_only_flag'		=>	false, 
 										'field_label_suffix'	=> '', 								
 									);
-									echo '<p>' . $wic_definitions->create_text_control ( $args ); 
+									echo '<p>' . $wic_form_utilities->create_text_control ( $args ); 
 
 									$args = array (
 										'field_name_id'		=> $field['slug'] . '_hi',
@@ -504,29 +506,29 @@ class WP_Issues_CRM_Constituents {
 										'read_only_flag'		=>	false, 
 										'field_label_suffix'	=> '', 								
 									);
-									echo $wic_definitions->create_text_control ( $args ) . '</p>'; 
+									echo $wic_form_utilities->create_text_control ( $args ) . '</p>'; 
 								}	else {
 									$args['field_label_suffix'] = $required_individual . $required_group;  								
-									echo '<p>' . $wic_definitions->create_text_control ( $args ) . '</p>'; 
+									echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>'; 
 								} 
 								break;
 
 							case 'readonly': 
 								if ( 'save' != $next_form_output['next_action'] ) { // do not display for save
 									$args['read_only_flag'] = 	( 'update' == $next_form_output['next_action'] ); // true or false 
-									echo '<p>' . $wic_definitions->create_text_control ( $args ) . '</p>'; 
+									echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>'; 
 								} 
 								break;
 
 							case 'check':
-								echo '<p>' . $wic_definitions->create_check_control ( $args ) . '</p>'; 
+								echo '<p>' . $wic_form_utilities->create_check_control ( $args ) . '</p>'; 
 								break;
 								
 							case 'select':
 								$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
 								$args['select_array']			=	$field['select_array'];
 								$args['field_label_suffix']	= $required_individual . $required_group;								
-								echo '<p>' . $wic_definitions->create_select_control ( $args ) . '</p>';
+								echo '<p>' . $wic_form_utilities->create_select_control ( $args ) . '</p>';
 								break; 
 							
 							case 'serialized_type_as_array': // note -- non-arrays already intercepted above  
@@ -537,7 +539,7 @@ class WP_Issues_CRM_Constituents {
 									'repeater_group_label_suffix'	=> $required_individual . $required_group . $contains,		
 								);
 								$repeater_function = 'create_' . $field['type'] . '_group';
-								echo $wic_definitions->$repeater_function ( $group_args );
+								echo $wic_form_utilities->$repeater_function ( $group_args );
 								break;
 								
 							case 'user':
@@ -560,7 +562,7 @@ class WP_Issues_CRM_Constituents {
 								$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
 								$args['select_array']			=	$user_select_array; 
 								$args['field_label_suffix']	= $required_individual . $required_group;								
-								echo '<p>' . $wic_definitions->create_select_control ( $args ) . '</p>';
+								echo '<p>' . $wic_form_utilities->create_select_control ( $args ) . '</p>';
 								break; 
 														
 						}
@@ -585,7 +587,7 @@ class WP_Issues_CRM_Constituents {
 				'show_initial' =>  ( $show_initial ),
 			);
 			
-			echo $wic_definitions->output_show_hide_toggle_button( $button_args );
+			echo $wic_form_utilities->output_show_hide_toggle_button( $button_args );
 			
 			$show_class = $show_initial ? 'visible-template' : 'hidden-template';
 						
@@ -600,18 +602,18 @@ class WP_Issues_CRM_Constituents {
 					);			
 				// show constituent notes as input for search or as text area for update
 				if ( 'search' == $next_form_output['next_action'] ){
-					echo '<p>' . $wic_definitions->create_text_control ( $args ) . '</p>'; 
+					echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>'; 
 				} else {
 					$args['field_label_suffix']	= '';
 					$args['input_class'] = 'wic-input wic-constituent-notes';
-					echo '<p>' . $wic_definitions->create_text_area_control($args) . '</p>';
+					echo '<p>' . $wic_form_utilities->create_text_area_control($args) . '</p>';
 					
 					$args['field_name_id'] = 'old_constituent_notes';
 					$args['read_only_flag']	= true;
 					$args['input_class'] = 'hidden-template';
 					$args['label_class'] = 'hidden-template';
 					$args['value']	= $next_form_output['old_constituent_notes'];
-					echo '<p>' . $wic_definitions->create_text_area_control($args) . '</p>';
+					echo '<p>' . $wic_form_utilities->create_text_area_control($args) . '</p>';
 					echo '<div id = "wic-old-constituent-notes">' .  balancetags( wp_kses_post ( $next_form_output['old_constituent_notes'] ), true ) . '</div>';
 				}	
 				/**
@@ -626,10 +628,9 @@ class WP_Issues_CRM_Constituents {
 				*		NOTE: Wordpress does not bother to clean post_content up in this way (even through the admin interface) -- so conclude not necessary on save
 				*      	-- only do it here for display; assume properly escaped for storage although not clean display
 				*/
-					
 				
 			echo '</div></div>'; 
-			
+						
 			// final button group div
 			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
 			echo '<div class = "constituent-field-group ' . $row_class . '" id = "bottom-button-group">';?>
@@ -646,7 +647,7 @@ class WP_Issues_CRM_Constituents {
 				<?php } ?>		 		
 		
 		 		<?php wp_nonce_field( 'wp_issues_crm_constituent', 'wp_issues_crm_constituent_nonce_field', true, true ); ?>
-	
+
 			   
 				<?php if ( $contains_legend ) { 
 					$text_control_args = array ( 
@@ -656,7 +657,7 @@ class WP_Issues_CRM_Constituents {
 						'read_only_flag'		=>	false, 
 						'field_label_suffix'	=> '', 	
 					);
-					echo '<p class = "wic-constituent-form-legend">' . $wic_definitions->create_check_control ( $text_control_args ) . '</p>';
+					echo '<p class = "wic-constituent-form-legend">' . $wic_form_utilities->create_check_control ( $text_control_args ) . '</p>';
 				} ?>	
 				
 				<?php if ( $serialized_contains_legend ) { 
@@ -706,7 +707,7 @@ class WP_Issues_CRM_Constituents {
 	*/
    private function search_constituents( $search_mode, &$next_form_output) {
 		
-		global $wic_definitions;		
+		global $wic_constituent_definitions;		
 		
 		if ( 'dup' == $search_mode || 'new' == $search_mode ) {  	
 	   	$meta_query_args = array(
@@ -758,7 +759,7 @@ class WP_Issues_CRM_Constituents {
 								'value'		=> $meta_value,
 								'compare'	=>	(  // do strict match in dedup mode
 														( $field['like'] && ! $next_form_output['strict_match'] && 'new' == $search_mode ) ||
-														in_array( $field['type'], $wic_definitions->serialized_field_types ) 
+														in_array( $field['type'], $wic_constituent_definitions->serialized_field_types ) 
 													) ? 'LIKE' : '=' ,
 							);	
 						} else { 
@@ -830,19 +831,20 @@ class WP_Issues_CRM_Constituents {
    	// takes initialized blank working array and populates it. 
    	$group_required_test = '';
    	$group_required_label = '';
-		global $wic_definitions; 
+		global $wic_constituent_definitions;
+		global $wic_form_utilities; 
 		$possible_validator = '';   	
     	
    	foreach ( $this->constituent_fields as $field ) {
    		
-   		if ( in_array( $field['type'], $wic_definitions->serialized_field_types ) && isset( $_POST[$field['slug']] ) ) {
+   		if ( in_array( $field['type'], $wic_constituent_definitions->serialized_field_types ) && isset( $_POST[$field['slug']] ) ) {
  	 			// if array, load array, sanitizing all fields and cleaning/validating (using array validation function)	  		
  				if ( is_array( $_POST[$field['slug']] ) ) {
 		  			$validation_function = 'validate_' . $field['type'];
 					$repeater_count = 0;
 					foreach( $_POST[$field['slug']] as $key => $value ) {	
 						if ( 'row-template' !== $key ) { // skip template row -- NB:  true: 0 == 'alphastring' false: 0 != 'alphastring true 0 !== 'alphastring'
-							$test_repeater = $wic_definitions->$validation_function($value);
+							$test_repeater = $wic_form_utilities->$validation_function($value);
 							if ( $test_repeater['present'] ) { // skip rows that validate to absent
 								$clean_input[$field['slug']][$repeater_count] = $test_repeater['result'];
 								$repeater_count++;
@@ -862,8 +864,8 @@ class WP_Issues_CRM_Constituents {
 			} else { // not a serialized field and/or not set	-- do clean and also individual field validators
  				$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? stripslashes( sanitize_text_field( $_POST[$field['slug']] ) ) : '';
  				$possible_validator =  'validate_individual_' . $field['type'];
- 				if ( $clean_input[$field['slug']] > '' && method_exists ( $wic_definitions, $possible_validator )  ) {
-					 $clean_input['error_messages'] .= $wic_definitions->$possible_validator( $clean_input[$field['slug']] );				
+ 				if ( $clean_input[$field['slug']] > '' && method_exists ( $wic_constituent_definitions, $possible_validator )  ) {
+					 $clean_input['error_messages'] .= $wic_constituent_definitions->$possible_validator( $clean_input[$field['slug']] );				
  				} 
 			}
 
@@ -943,7 +945,8 @@ class WP_Issues_CRM_Constituents {
 	*/
    private function save_update_constituent( &$next_form_output ) { 
 		
-		global $wic_definitions;
+		global $wic_constituent_definitions;
+		global $wic_form_utilities;
 
 		$outcome = array (
 			'post_id'	=> 0,
@@ -982,10 +985,10 @@ class WP_Issues_CRM_Constituents {
 				$title != $check_on_database->post->post_title ) { -- these were replaced by next two lines lines*/
 			if ( trim( $next_form_output[ 'constituent_notes' ] )   > '' || $title != $check_on_database->post->post_title ) {
 				array_push( $next_form_output['initial_sections_open'], 'constituent_notes' ); // show field's section open in next form
-				$post_args['post_content'] = $wic_definitions->format_constituent_notes( $next_form_output['constituent_notes'] )  . $check_on_database->post->post_content;
+				$post_args['post_content'] = $wic_form_utilities->format_constituent_notes( $next_form_output['constituent_notes'] )  . $check_on_database->post->post_content;
 				$outcome['post_id'] = wp_update_post( $post_args ); 
 			} else {
-				$post_args['post_content'] = $wic_definitions->format_constituent_notes( $next_form_output['constituent_notes'] );
+				$post_args['post_content'] = $wic_form_utilities->format_constituent_notes( $next_form_output['constituent_notes'] );
 				$outcome['post_id'] = $next_form_output['constituent_id'];			
 			}
 		} else {

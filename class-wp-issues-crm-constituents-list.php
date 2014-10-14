@@ -21,8 +21,8 @@ class WP_Issues_CRM_Constituents_List {
 	public $constituent_list;
 
 	public function __construct( &$wic_query) {
-		global $wic_definitions;
-		foreach ( $wic_definitions->constituent_fields as $field )
+		global $wic_constituent_definitions;
+		foreach ( $wic_constituent_definitions->constituent_fields as $field )
 			if ( $field['list'] > 0 ) { 		
  				 array_push( $this->constituent_fields, $field );
  			}
@@ -31,7 +31,8 @@ class WP_Issues_CRM_Constituents_List {
 
 
   public function format_constituent_list( &$wic_query) {
- 		global $wic_definitions;
+ 		global $wic_constituent_definitions;
+ 		global $wic_form_utilities;
 		$output = '<div id="wic-constituent-list"><form method="POST">' . 
 			'<div class = "constituent-field-group wic-group-odd">
 				<h2> Found ' . $wic_query->found_posts . ' constituents, showing ' . $wic_query->post_count . '</h2>' . 
@@ -53,7 +54,7 @@ class WP_Issues_CRM_Constituents_List {
 				$output .= '<li><button name="wic_constituent_direct_button" type="submit" class = "constituent-list-button ' . $row_class . '" value =" '.  $wic_query->post->ID . '">';		
 				$output .= '<ul class = "constituent-list-line">';			
 					foreach ( $this->constituent_fields as $field ) {
-						$key = $wic_definitions->wic_metakey . $field['slug'];
+						$key = $wic_constituent_definitions->wic_metakey . $field['slug'];
 						$output .= '<li class = "cl-field cl-' . $field['slug'] . ' "> ';
 						if ( isset ( $wic_query->post->$key ) ) {
 							if ( ! is_array ( $wic_query->post->$key ) ) {
@@ -63,7 +64,7 @@ class WP_Issues_CRM_Constituents_List {
 								// cannot fix with parens, so two step this
 								$row_array = $wic_query->post->$key;
 								if ( 'phones' == $field['type'] ) { 
-									$output .= $wic_definitions->format_phone($row_array[0][1]);
+									$output .= $wic_form_utilities->format_phone($row_array[0][1]);
 								} else {
 									$output .= esc_html ( $row_array[0][1] );								
 								}							

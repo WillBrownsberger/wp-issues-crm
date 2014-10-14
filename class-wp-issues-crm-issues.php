@@ -25,13 +25,13 @@ class WP_Issues_CRM_Constituents {
  	
 	public function __construct( $constituent_id ) {
 		add_shortcode( 'wp_issues_crm_constituents', array( $this, 'wp_issues_crm_constituents' ) );
-		global $wic_definitions;
-		foreach ( $wic_definitions->constituent_fields as $field )
+		global $wic_constituent_definitions;
+		foreach ( $wic_constituent_definitions->constituent_fields as $field )
 			if ( $field['online'] ) { 		
  				 array_push( $this->constituent_fields, $field );
  			}
-		$this->constituent_field_groups 	= &$wic_definitions->constituent_field_groups;
-		$this->wic_metakey = &$wic_definitions->wic_metakey;
+		$this->constituent_field_groups 	= &$wic_constituent_definitions->constituent_field_groups;
+		$this->wic_metakey = &$wic_constituent_definitions->wic_metakey;
 		
 		$this->constituent_id = $constituent_id;		
 		$this->wp_issues_crm_constituents( $constituent_id );

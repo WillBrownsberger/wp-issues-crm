@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Issues CRM
  * Plugin URI: 
- * Description: Constituent Relationship Management for organizations that respond to constituents primarily on issues (e.g., legislators); does support basic case notes as well. 
+ * Description: Constituent Relationship Management for organizations that respond to constituents primarily on issues (e.g., legislators); does support basic case management as well. 
  * Version: 1.0
  * Author: Will Brownsberger
  
@@ -24,10 +24,18 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-definitions.php'; // note that order of load may matter here -- want definitions constructed first to sort field arrays once for all
+/* note: load order matters here -- class construct function cannot reference properties or methods from later constructed classes
+*    ( although earlier classes can call later classes in response to user actions ) 
+*  -- constituent definitions includes multi_array_key_sort function used in later definitions 
+*  -- later files use definitions . . .
+*/
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituent-definitions.php'; 
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-touch-definitions.php'; 
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-form-utilities.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents-list.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-import-routines.php';
+
 
 function wp_issue_crm_setup_styles() {
 
@@ -43,9 +51,9 @@ add_action( 'wp_enqueue_scripts', 'wp_issue_crm_setup_styles');
 
 function wp_issue_crm_list_width_styles() {
 	
-	global $wic_definitions;
+	global $wic_constituent_definitions;
 	$output = '<!-- width styles for wp-issues-crm constituent list --><style>';
-	foreach ( $wic_definitions->constituent_fields as $field ) {
+	foreach ( $wic_constituent_definitions->constituent_fields as $field ) {
 		if ( $field['list'] > 0 ) { 		
  			$output .= '.cl-' . $field['slug'] . '{ width:' . $field['list'] . '%;}'; 
  		}
@@ -116,7 +124,8 @@ class WP_Issues_CRM {
 	
 	public function show_dashboard() {
 
-		global $wic_definitions;
+		global $wic_constituent_definitions;
+		global $wic_form_utilities;
 		global $wic_imports;
 		
 		if( isset ( $_POST['4kfg943E'] )) {
@@ -138,7 +147,7 @@ class WP_Issues_CRM {
 							'read_only_flag'		=>	false, 
 							'field_label_suffix'	=> '', 								
 						);
-			echo '<p>' . $wic_definitions->create_text_control ( $args ) . '</p>';		 		
+			echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';		 		
  				
 			$args = array (
 							'field_name_id'		=> '9eUlFP34Ju',
@@ -147,7 +156,7 @@ class WP_Issues_CRM {
 							'read_only_flag'		=>	false, 
 							'field_label_suffix'	=> '', 								
 						);
-			echo '<p>' . $wic_definitions->create_text_control ( $args ) . '</p>';		
+			echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';		
 
 		echo '<button class = "wic-form-button" type="submit" name = "wic_test_button" value = "test">Test button only</button>';
 
