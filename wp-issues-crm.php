@@ -30,7 +30,8 @@
 *  -- later files use definitions . . .
 */
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituent-definitions.php'; 
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-touch-definitions.php'; 
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-activity-definitions.php'; 
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-issue-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-form-utilities.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents-list.php';
