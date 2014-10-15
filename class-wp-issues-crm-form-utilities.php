@@ -10,6 +10,172 @@ class WP_Issues_CRM_Form_Utilities {
 
 	}
 	
+	/* 
+	*	This function sets up main form variable
+	*
+	*/	
+	public function initialize_blank_form( &$next_form_output, &$fields_array, $post_id )	{ 
+
+		/* these values may later go into database */			
+		foreach ( $fields_array as $field ) { // note 1 below 
+			$next_form_output[$field['slug']] =	'';
+			if ( 'date' == $field['type'] ) {
+				$next_form_output[$field['slug'] . '_lo'] = '';				
+				$next_form_output[$field['slug'] . '_hi'] = '';
+			}
+		}
+		$next_form_output['wic_post_content']	=	''; 					// note 2 below 
+		$next_form_output['old_wic_post_content']	=	''; 					// note 2 below 			
+		$next_form_output['wic_post_id']		=	$post_id;	// note 3 below
+
+		/*	these values are only for form setup */	
+		$next_form_output['guidance']				=  'Enter just a little information and do a full text search for constituents.'; // note 4a below
+		$next_form_output['error_messages']		=	'';					// note 4b below
+		$next_form_output['search_notices']		=	'';					// note 4c below
+		$next_form_output['next_action'] 		=	'search';			// note 5 below
+		$next_form_output['strict_match']		=	false;				// note 6 below
+		$next_form_output['initial_form_state']= 	'wic-form-open';  // note 7 below 
+		$next_form_output['initial_sections_open'] = array();			// note 8 below
+		
+	}
+
+	/*
+	*
+	*	sanitize_validate_input: form sanitization and validation function:
+	*  takes blank array and populates it from $_POST while sanitizing it
+	*   
+	* 		1. handles all meta fields defined as displayable for wic_posts
+	*		2. wic_post_content
+	*		3. wic_post_id
+	*		4. form_notices with validation errors
+	*
+	*	The following sanitization/validation is done:
+	*
+	*	(1) All fields have stripslashes applied
+	*  (2) All fields except wic_post_content have sanitize_text_field applied -- "Checks for invalid UTF-8, 
+	*			Convert single < characters to entity, strip all tags, remove line breaks, tabs and extra white space, strip octets."
+	*	(3) Post content is not sanitized or validated other than by stripping slashes (trust Wordpress on search/save)
+	*	(4) All content validation rules are applied 
+	*			- required fields
+	*			- email formatting 
+	*			- date formatting
+	*			- phones compressed to numeric only
+	*			- note select fields are compressed to numeric or slash/textsanitized
+	*	  
+	*	uses php converts DateTime object to recognize date formats and convert to yyyy-mm-dd
+	*  
+	*/   
+   
+   public function sanitize_validate_input( &$clean_input, &$fields_array ) {
+   	// takes initialized blank working array and populates it.
+   	
+   	global $wic_base_definitions; 
+   	$group_required_test = '';
+   	$group_required_label = '';
+		$possible_validator = '';   	
+    	
+   	foreach ( $fields_array as $field ) { 
+   		
+   		if ( in_array( $field['type'], $wic_base_definitions->serialized_field_types ) && isset( $_POST[$field['slug']] ) ) {
+ 	 			// if array, load array, sanitizing all fields and cleaning/validating (using array validation function)	  		
+ 				if ( is_array( $_POST[$field['slug']] ) ) { 
+		  			$validation_function = 'validate_' . $field['type'];
+					$repeater_count = 0;
+					foreach( $_POST[$field['slug']] as $key => $value ) {	
+						if ( 'row-template' !== $key ) { // skip template row -- NB:  true: 0 == 'alphastring' false: 0 != 'alphastring true 0 !== 'alphastring'
+							$test_repeater = $this->$validation_function($value);
+							if ( $test_repeater['present'] ) { // skip rows that validate to absent
+								$clean_input[$field['slug']][$repeater_count] = $test_repeater['result'];
+								$repeater_count++;
+								if ( $test_repeater['error'] > '' ) {
+									$clean_input['error_messages'] .= ' ' . $test_repeater['error'] . ' ' . $field['label'] . ' ' . $repeater_count . '. '; 
+								}
+							}	 						
+						}
+					}
+				} else { // non array for serialized field is only from a search -- compress/sanitize, but not validate
+					if ( 'phones' == $field['type'] ) {
+						$clean_input[$field['slug']] = preg_replace("/[^0-9]/", '', $_POST[$field['slug']] );
+					} else {
+						$clean_input[$field['slug']] = stripslashes( sanitize_text_field( $_POST[$field['slug']] ) );
+					}
+				} // close non-array for serialized fields
+			} else { // not a serialized field and/or not set	-- do clean and also individual field validators
+ 				$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? stripslashes( sanitize_text_field( $_POST[$field['slug']] ) ) : '';
+ 				$possible_validator =  'validate_individual_' . $field['type'];
+ 				if ( $clean_input[$field['slug']] > '' && method_exists ( $this, $possible_validator )  ) {
+ 					 $clean_input['error_messages'] .= $this->$possible_validator( $clean_input[$field['slug']] );				
+ 				} 
+			}
+
+			// add date hi-lo ranges to array and standardize all dates to yyyy-mm-dd 
+			if ( 'date' == $field['type'] ) {
+				$clean_input[$field['slug'] . '_lo' ] = isset( $_POST[$field['slug'] . '_lo' ] ) ? stripslashes( sanitize_text_field( $_POST[$field['slug'] . '_lo' ] ) ) : '';			
+				$clean_input[$field['slug'] . '_hi' ] = isset( $_POST[$field['slug'] . '_hi' ] ) ? stripslashes( sanitize_text_field( $_POST[$field['slug'] . '_hi' ] ) ) : '';
+				if ( $clean_input[$field['slug']] > '' ) {
+					$clean_input[$field['slug']]  = $this->validate_date( $clean_input[$field['slug']] );
+					if ( '' == $clean_input[$field['slug']] ) {
+						$clean_input['error_messages'] .= $field['label'] .__( ' had unsupported date format -- yyyy-mm-dd will work. ', 'wp-issues-crm' );					
+					}
+				} 
+				if ( $clean_input[$field['slug'] . '_lo' ]  > '' ) {
+					$clean_input[$field['slug'] . '_lo' ]  = $this->validate_date( $clean_input[$field['slug'] . '_lo' ] );
+					if ( '' == $clean_input[$field['slug'] . '_lo' ] ) {
+						$clean_input['search_notices'] .= $field['label'] . ' (low) ' . __( ' had unsupported date format -- yyyy-mm-dd will work. ', 'wp-issues-crm' );					
+					}
+				}				
+				if ( $clean_input[$field['slug'] . '_hi' ]  > '' ) {
+					$clean_input[$field['slug']  . '_hi' ]  = $this->validate_date( $clean_input[$field['slug'] . '_hi' ] );
+					if ( '' == $clean_input[$field['slug'] . '_hi' ] ) {
+						$clean_input['search_notices'] .= $field['label'] . ' (high) ' . __( ' had unsupported date format -- yyyy-mm-dd will work. ', 'wp-issues-crm' );					
+					}
+				}							
+			}		
+			
+			// do test for group required (including first among any repeater fields)
+			if ( 'group' == $field['required'] ) {
+				$group_required_test .=	is_array ( $clean_input[$field['slug']] ) ? $clean_input[$field['slug']][0][1] : $clean_input[$field['slug']] ;
+				$group_required_label .= ( '' == $group_required_label ) ? '' : ', ';	
+				$group_required_label .= $field['label'];	
+			}
+
+			// do individual field required tests and for non-blank to email validation
+			if ( ! $clean_input[$field['slug']] > ''  ) { // note array always > '' and we do not store blank arrays, so this suffices for the array fields 
+				if( 'individual' == $field['required'] ) {
+					$clean_input['error_messages'] .= ' ' . sprintf( __( ' %s is a required field. ' , 'wp-issues-crm' ), $field['label'] );				
+				}   		
+   		}
+   	}
+		
+		// outside the loop -- test group requires after all fields passed 
+		if ( '' == $group_required_test && $group_required_label > '' ) {
+			$clean_input['error_messages'] .= sprintf ( __( ' At least one among %s is required. ', 'wp-issues-crm' ), $group_required_label );
+   	}
+
+		$clean_input['wic_post_content'] = isset ( $_POST['wic_post_content'] ) ? stripslashes ( ( $_POST['wic_post_content'] ) ) : '' ;
+		$clean_input['old_wic_post_content'] = isset ( $_POST['old_wic_post_content'] ) ? stripslashes ( $_POST['old_wic_post_content'] ) : '' ;
+   	$clean_input['wic_post_id'] = absint ( $_POST['wic_post_id'] ); // always included in form; 0 if unknown;
+		$clean_input['strict_match']	=	isset( $_POST['strict_match'] ) ? true : false; // only updated on the form; only affects search_wic_posts
+		$clean_input['initial_form_state'] = 'wic-form-open';		
+   } 
+	/*
+	* date sanitization function
+	*
+	*/   
+	public function validate_date ( $possible_date ) {
+		try {
+			$test = new DateTime( $possible_date );
+		}	catch ( Exception $e ) {
+			return ( '' );
+		}	   			
+ 		return ( date_format( $test, 'Y-m-d' ) );
+	}
+   
+	
+	
+	
+	
+	
 	
 	/*
 	*
@@ -38,7 +204,7 @@ class WP_Issues_CRM_Form_Utilities {
 		extract ( $control_args, EXTR_OVERWRITE ); 
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
-		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-constituent-form-legend-flag">' .$field_label_suffix . '</span>' : '';
+		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 		 
 		$control = ( $field_label > '' ) ?  '<label class="' . $label_class . '" for="' . 
 				esc_attr( $field_name_id ) . '">' . esc_html( $field_label ) . ' ' . '</label>' : '';
@@ -73,7 +239,7 @@ class WP_Issues_CRM_Form_Utilities {
 		extract ( $control_args, EXTR_OVERWRITE ); 
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
-		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-constituent-form-legend-flag">' .$field_label_suffix . '</span>' : '';
+		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 		 
 		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
 		$control .= '<input class="' . $input_class . '" id="' . esc_attr( $field_name_id )  . 
@@ -108,7 +274,7 @@ class WP_Issues_CRM_Form_Utilities {
 		extract ( $control_args, EXTR_OVERWRITE ); 
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
-		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-constituent-form-legend-flag">' .$field_label_suffix . '</span>' : '';
+		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 		 
 		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . esc_attr( $field_label ) . '</label>' : '' ;
 		$control .= '<textarea class="' . $input_class . '" id="' . esc_attr( $field_name_id ) . '" name="' . esc_attr( $field_name_id ) . '" type="text" placeholder = "' . 
@@ -142,7 +308,7 @@ class WP_Issues_CRM_Form_Utilities {
 
 		extract ( $control_args, EXTR_OVERWRITE ); 
 		
-		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-constituent-form-legend-flag">' .$field_label_suffix . '</span>' : '';
+		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 
 		$control = '';
 				
@@ -503,7 +669,7 @@ class WP_Issues_CRM_Form_Utilities {
 			
 		$outcome['present'] = $outcome['result'][1] > '';
 		
-  		if ( $outcome['present'] ) {
+  		if ( $outcome['present'] ) { 
 	   	$outcome['error'] =  $this->validate_individual_email( $outcome['result'][1] );
 		}	
 		
@@ -511,7 +677,7 @@ class WP_Issues_CRM_Form_Utilities {
 			
 	}
 	
-	function validate_individual_email( $email ) {
+	function validate_individual_email( $email ) { 
 		$error = filter_var( $email, FILTER_VALIDATE_EMAIL ) ? '' : __( 'Email address appears to be not valid. ', 'wp-issues-crm' );
 		return $error;	
 	}	
@@ -649,7 +815,7 @@ class WP_Issues_CRM_Form_Utilities {
 			
 	}
 	
-	public function format_constituent_notes ( $notes ) {
+	public function format_wic_post_content ( $notes ) {
 
 		$current_user = wp_get_current_user();
 				

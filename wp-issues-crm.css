@@ -40,16 +40,16 @@
 	background: #f8f8f8;
 }
 
-.constituent-field-group {
+.wic-form-field-group {
 	padding: 16px 8px; 
 	max-width: 100%;
 }
 
-.constituent-field-group h2 {
+.wic-form-field-group h2 {
 	margin: 10px 0 10px 200px;
 }
 
-h3.constituent-field-group-label {
+h3.wic-form-field-group-label {
 	margin: 0 0 0 200px;
 }
 
@@ -75,7 +75,7 @@ h3.constituent-field-group-label {
 	font-size: 0.6em;
 	padding-left: 10px;
 }
-p.constituent-field-group-legend {
+p.wic-form-field-group-legend {
 	color: #777;
 	margin: 0 0 0 200px; 
 }
@@ -118,18 +118,18 @@ p.constituent-field-group-legend {
 }
 
 /* message box and notices */
-#constituent-form-message-box {
+#post-form-message-box {
 	background: #f8f8f8;
 	color: #777;
 	margin:  20px 0;
 	padding: 20px 0 20px 200px;
 }
 
-#constituent-form-message-box.wic-form-errors-found {
+#post-form-message-box.wic-form-errors-found {
 	background: #fae0e0;
 }
 
-#constituent-form-message-box.wic-form-search-notices {
+#post-form-message-box.wic-form-search-notices {
 	background: #fff0aa;
 }
 
@@ -220,15 +220,15 @@ p.constituent-field-group-legend {
 .wic-email-address {
 	width: 300px; 
 }
-#constituent-notes {
+#wic-post-content {
 	 
 }
-.wic-constituent-notes {
+.wic-wic-post-content {
 		height: 100px; 
 		width: 600px;
 }
 
-#wic-old-constituent-notes {
+#wic-old-wic-post-content {
 		background: #f6f6f6;
 		margin-left: 200px;
 		width: 600px; 
@@ -309,20 +309,20 @@ p.constituent-field-group-legend {
 } 
 
 
-.constituent-field-group-label {
+.wic-form-field-group-label {
  	color: #777;
 }
 
-.constituent-field-group-legend {
+.wic-form-field-group-legend {
 	font-size: 0.8em;
 }
 
-.wic-constituent-form-legend-flag,
-.wic-constituent-form-legend {
+.wic-form-legend-flag,
+.wic-form-legend {
 	color: #333;
 	font-size: .8em;
 }
-.wic-constituent-form-legend {
+.wic-form-legend {
 	margin: 10px 0 10px 200px;
 }
 /* styling of field rows */

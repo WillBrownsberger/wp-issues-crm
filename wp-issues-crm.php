@@ -29,10 +29,12 @@
 *  -- constituent definitions includes multi_array_key_sort function used in later definitions 
 *  -- later files use definitions . . .
 */
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-base-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituent-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-activity-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-issue-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-form-utilities.php';
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-database-utilities.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents-list.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-import-routines.php';

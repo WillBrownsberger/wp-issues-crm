@@ -40,19 +40,6 @@ class WP_Issues_CRM_Constituent_Definitions {
 	}
 
 
-	public $wic_metakey = 'wic_data_';	
-	
-	/* this array determines:
-		- whether field will be handled as array for display purposes -- multi lines of same field
-		- whether field will always be searched on a like compare (instead of = ), regardless of field or screen settings
-		- whether will look second field at first member of array when doing dedup and required field checking (i.e., first phone, email or street address)
-	*/
-	public $serialized_field_types = array ( 
-		'phones',
-		'emails',
-		'addresses',
-	);
-	
 	public $constituent_field_groups = array (
 	/*	array (
 			'name'		=> 'required',
@@ -119,7 +106,6 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'required'	=> 'group', // see note above
 			'slug'	=> 'first_name', 	
 			'type'	=>	'text', 	
-
 			),		
 		array( // 2
 	 		'dedup'	=>	false,

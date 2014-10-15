@@ -32,6 +32,7 @@ class WP_Issues_CRM_Constituents_List {
 
   public function format_constituent_list( &$wic_query) {
  		global $wic_constituent_definitions;
+ 		global $wic_base_definitions;
  		global $wic_form_utilities;
 		$output = '<div id="wic-constituent-list"><form method="POST">' . 
 			'<div class = "constituent-field-group wic-group-odd">
@@ -54,7 +55,7 @@ class WP_Issues_CRM_Constituents_List {
 				$output .= '<li><button name="wic_constituent_direct_button" type="submit" class = "constituent-list-button ' . $row_class . '" value =" '.  $wic_query->post->ID . '">';		
 				$output .= '<ul class = "constituent-list-line">';			
 					foreach ( $this->constituent_fields as $field ) {
-						$key = $wic_constituent_definitions->wic_metakey . $field['slug'];
+						$key = $wic_base_definitions->wic_metakey . $field['slug'];
 						$output .= '<li class = "cl-field cl-' . $field['slug'] . ' "> ';
 						if ( isset ( $wic_query->post->$key ) ) {
 							if ( ! is_array ( $wic_query->post->$key ) ) {
@@ -75,7 +76,7 @@ class WP_Issues_CRM_Constituents_List {
 			$output .='</ul></button></li>';
 		}		
 		$output .= '</ul>';
-		$output .= 	wp_nonce_field( 'wp_issues_crm_constituent', 'wp_issues_crm_constituent_nonce_field', true, true ) .
+		$output .= 	wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ) .
 		'</form></div>'; 
 		
 		return $output;
