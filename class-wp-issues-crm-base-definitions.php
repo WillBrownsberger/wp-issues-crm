@@ -17,18 +17,33 @@ class WP_Issues_CRM_Base_Definitions {
 	
 	public $wic_metakey = 'wic_data_';	
 	
+
+	
+	public $wic_post_types = array(
+		'constituent' 	=> array ( 
+			'post_type'	=> 'wic_constituent',
+			'parent_type' => '',
+			'label_singular' => 'Constituent',			
+				),
+		'activity' 		=> array (
+			'post_type'	=> 'wic_activity',
+			'parent_type' => 'constituent',
+			'label_singular' => 'Activity',
+		), 
+		'issue'			=> array (
+			'post_type'	=> 'post',
+			'parent_type' => '',
+			'label_singular' => 'Issue',
+			),
+	);
+	
+	
+	
 	/* this array determines:
 		- whether field will be handled as array for display purposes -- multi lines of same field
 		- whether field will always be searched on a like compare (instead of = ), regardless of field or screen settings
 		- whether will look second field at first member of array when doing dedup and required field checking (i.e., first phone, email or street address)
 	*/
-	
-	public $wic_post_types = array(
-		'constituent' 	=> 'wic_constituent',
-		'activity'		=> 'wic_activity',
-		'issue'			=> 'post',
-	);
-	
 	public $serialized_field_types = array ( 
 		'phones',
 		'emails',

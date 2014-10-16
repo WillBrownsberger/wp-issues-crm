@@ -54,6 +54,7 @@ class WP_Issues_CRM_Main_Form {
 		$this->form_requested 	= $control_array[0];
 		$this->action_requested = $control_array[1];
 		$this->id_requested 		= $control_array[2];
+		$this->referring_parent = $control_array[3];
 		
 		// control array 0 is form_requested -- entity type -- constituent, activity or issue
 		$field_source_string = 'wic_' . $control_array[0] . '_definitions';
@@ -320,6 +321,23 @@ class WP_Issues_CRM_Main_Form {
 				);					
 				echo $wic_form_utilities->create_wic_form_button( $button_args_main );
 
+ 				if ( 'update' == $next_form_output['next_action'] ) { // show this on save, but not update -- on update, have too much data in form, need to reset
+					foreach ( $wic_base_definitions->wic_post_types as $key => $entity_type ) {
+							if ( $this->form_requested == $entity_type['parent_type'] ) {
+							
+							$button_args_child_button = array(
+								'form_requested'			=> $key,
+								'action_requested'		=> 'search',
+								'referring_parent'		=>	$this->referring_parent,
+								'button_label'				=> 'Add New ' . $entity_type['label_singular'],
+								'button_class'				=> 'wic-form-button second-position',
+							);
+							echo $wic_form_utilities->create_wic_form_button( $button_args_child_button );					
+						}					
+					}					
+				}
+				
+				
  				if ( 'save' == $next_form_output['next_action'] ) { // show this on save, but not update -- on update, have too much data in form, need to reset 
 					$button_args_search_again = array(
 						'form_requested'			=> $this->form_requested,
@@ -597,7 +615,14 @@ class WP_Issues_CRM_Main_Form {
 			
 				<input type = "hidden" id = "wic_post_id" name = "wic_post_id" value ="<?php echo absint( $next_form_output['wic_post_id'] ) ; ?>" />					
 		  		
-		  		<?php echo $wic_form_utilities->create_wic_form_button( $button_args_main ); 	  
+		  		<?php echo $wic_form_utilities->create_wic_form_button( $button_args_main ); 	
+		  		
+				if ( 'update' == $next_form_output['next_action'] ) { // show this on save, but not update -- on update, have too much data in form, need to reset
+					if ( isset ( $button_args_child_button ) ) {
+							echo $wic_form_utilities->create_wic_form_button( $button_args_child_button );					
+					}					
+				}
+				  
 				if ( 'save' == $next_form_output['next_action'] ) { 
 					echo $wic_form_utilities->create_wic_form_button( $button_args_search_again );
 				} ?> 		 		

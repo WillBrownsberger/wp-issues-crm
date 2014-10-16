@@ -32,7 +32,7 @@ class WP_Issues_CRM_Database_Utilities {
 		
 		global $wic_base_definitions;	
 		
-		$post_type = $wic_base_definitions->wic_post_types[$wic_post_type];	
+		$post_type = $wic_base_definitions->wic_post_types[$wic_post_type]['post_type'];	
 		
 		if ( 'dup' == $search_mode || 'new' == $search_mode ) {  	
 	   	$meta_query_args = array(

@@ -94,10 +94,7 @@ class WP_Issues_CRM {
 			'form_requested'			=> '',
 			'action_requested'		=> '',
 			'id_requested'				=> '',
-			// next three fields not implemented yet
-			'referring_constituent' => 0,
-			'referring_activity'		=> 0,
-			'referring_issue'			=> 0,
+			'referring_parent' 		=> '',
 		);	
 
 		// use default control array to set up top row of buttons that always shows over dashboard and over main form 

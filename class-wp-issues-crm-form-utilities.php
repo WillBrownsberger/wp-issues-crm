@@ -875,18 +875,16 @@ class WP_Issues_CRM_Form_Utilities {
 	
 		$form_requested			= '';
 		$action_requested			= '';
-		$id_requested				= '';
+		$id_requested				= 0 ;
 		$button_class				= 'wic-form-button';
 		$button_label				= '';
 		$omit_label_and_close_tag = false;
 		// next three fields not implemented yet
-		$referring_constituent 	= 0;
-		$referring_activity		= 0;
-		$referring_issue			= 0;
+		$referring_parent	 		= 0;
 
 		extract ( $control_array_plus_class, EXTR_OVERWRITE );
 
-		$button_value = $form_requested . ',' . $action_requested  . ',' . $id_requested  . ',' . $referring_constituent  . ',' . $referring_activity  . ',' .  $referring_issue;
+		$button_value = $form_requested . ',' . $action_requested  . ',' . $id_requested  . ',' . $referring_parent;
 		$close = $omit_label_and_close_tag ? '' : __( $button_label, 'wp-issues-crm' ) . '</button>';
 
 		$button =  '<button class = "' . $button_class . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . $close;
