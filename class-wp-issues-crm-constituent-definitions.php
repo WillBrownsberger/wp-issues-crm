@@ -17,8 +17,8 @@ class WP_Issues_CRM_Constituent_Definitions {
 	
 	public function __construct() {
 		add_action( 'init', array( $this, 'custom_post_type' ), 0 );
-		$this->constituent_field_groups = $this->multi_array_key_sort ( $this->constituent_field_groups, 'order' );
-		$this->constituent_fields		  = $this->multi_array_key_sort ( $this->constituent_fields, 'order' );
+		$this->wic_post_field_groups = $this->multi_array_key_sort ( $this->wic_post_field_groups, 'order' );
+		$this->wic_post_fields		  = $this->multi_array_key_sort ( $this->wic_post_fields, 'order' );
 	}
 
 	/*
@@ -40,7 +40,7 @@ class WP_Issues_CRM_Constituent_Definitions {
 	}
 
 
-	public $constituent_field_groups = array (
+	public $wic_post_field_groups = array (
 	/*	array (
 			'name'		=> 'required',
 			'label'		=>	'Identity',
@@ -78,7 +78,7 @@ class WP_Issues_CRM_Constituent_Definitions {
 		),	
 	);
 
-	public $constituent_fields = array( 
+	public $wic_post_fields = array( 
 	  	/* fields control -- all definitions of fields are in this array (except for native post fields -- content and title)
 	  	*  -- slug is the no-spaces name of the field
 	  	* 	-- is the front facing name

@@ -6,7 +6,7 @@
 
 /* main form layout */
 
-#full-width-content-wrapper .constituent-list li {
+#full-width-content-wrapper .wic-post-list li {
 	max-width: 100%;
 }
 
@@ -14,7 +14,7 @@
 	max-width: 100%;
 }
 
-#wic-constituent-list {
+#wid-post-list {
 	max-width: 100%;
 }
 
@@ -95,11 +95,11 @@ p.wic-form-field-group-legend {
 	
 }
 
-#constituent-form .wic-form-button {
+#wic-post-form .wic-form-button {
 	margin-left: 200px;
 }
 
-#constituent-form .second-position {
+#wic-post-form .second-position {
 	margin-left: 10px;
 }
 
@@ -353,7 +353,7 @@ p.wic-form-field-group-legend {
 */
 
 /* outer ul for whole list */
-.constituent-list {
+.wic-post-list {
 	list-style: none;
 	margin: 0;
 	padding-left: 0px;
@@ -390,7 +390,7 @@ li.cl-field {
 	display: inline-block;
 	vertical-align: top;	
 }
-button.constituent-list-button
+button.wic-post-list-button
  {
 	border: none;	
 	cursor: pointer;
@@ -400,7 +400,7 @@ button.constituent-list-button
 	width: 100%;
 }
 
-ul.constituent-list-line {
+ul.wic-post-list-line {
  	
 	display: inline-block;
 	-webkit-box-sizing: border-box;

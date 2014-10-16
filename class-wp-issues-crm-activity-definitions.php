@@ -1,7 +1,7 @@
 <?php
 /*
 *
-* class-wp-issues-crm-constituent-contact definitions.php
+* class-wp-issues-crm-activity-definitions.php
 *
 * post-type and field definitions for wp_issues_crm constituent contacts
 *
@@ -20,13 +20,13 @@ class WP_Issues_CRM_Activity_Definitions {
 		global $wic_constituent_definitions;
 		// Hook into the 'init' action
 		add_action( 'init',  array( $this,'wic_activity' ), 0 ) ;
-		$this->activity_field_groups = $wic_constituent_definitions->multi_array_key_sort ( $this->activity_field_groups, 'order' );
-		$this->activity_fields		 = $this->initialize_activity_fields_array();		
-		$this->activity_fields		 = $wic_constituent_definitions->multi_array_key_sort ( $this->activity_fields, 'order' );
+		$this->wic_post_field_groups = $wic_constituent_definitions->multi_array_key_sort ( $this->wic_post_field_groups, 'order' );
+		$this->wic_post_fields		 = $this->initialize_wic_post_fields_array();		
+		$this->wic_post_fields		 = $wic_constituent_definitions->multi_array_key_sort ( $this->wic_post_fields, 'order' );
 		
 	}
 
-	public $activity_field_groups = array (
+	public $wic_post_field_groups = array (
 
 		array (
 			'name'		=> 'activity',
@@ -45,11 +45,11 @@ class WP_Issues_CRM_Activity_Definitions {
 		), */	
 	);
   
-	public $activity_fields = array();
+	public $wic_post_fields = array();
 
 	// to initialize this class property with other class properties, had to do it in a function, not directly.
 
-	public function initialize_activity_fields_array() {
+	public function initialize_wic_post_fields_array() {
  
 		$output = array( 
 		  	/* fields control -- all definitions of fields are in this array (except for native post fields -- content and title)

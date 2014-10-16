@@ -1,25 +1,25 @@
 <?php
 /*
-* File: class-wp-issues-crm-constituents.php
+* File: class-wp-issues-crm-main-form.php
 *
-* Description: this class manages the front end constituent search/update/add process  
+* Description: this class manages the front end search/update/add process for multiple post types  
 * 
 * @package wp-issues-crm
 * 
 *
 */ 
 
-class WP_Issues_CRM_Constituents {
+class WP_Issues_CRM_Main_Form {
 	/*
 	*	Overview of major class functions:
-	*		wp_issues_crm_constituent drives main logic of form handling for constituent search/update/save (no delete function)
-	*		it calls sanitize_validate_input() early which does full sanitization (sanitize_text_field and stripslashes) on all except notes field
+	*		wp_issues_crm_main_form drives main logic of incoming form handling for search/update/save (no delete function)
+	*		it calls $wic_form_utilities->sanitize_validate_input() early which does full sanitization (sanitize_text_field and stripslashes) on all except notes field
 	*				notes field is sanitized (other than stripslashes) only on output to form (there via wp_kses_post and balancetags -- see notes in display_form)  
-	*		it then does searches via search_wic_posts() (either as requested or as dup check for save or update); 
+	*		it then does searches via $wic_database_utlities->search_wic_posts() (either as requested or as dup check for save or update); 
 	*				no additional validation in searching (trust wp -- all access through standard query objects)
 	*		if requested and validation passed, it does save/update via save_update_wic_post() -- 
 	*				again, no additional validation or escaping (trust wp)
-	*		finally it redisplays form through display_form() -- form escapes all output and runs balancetags and wp_kses_post on constituent notes
+	*		finally it redisplays form through $this->display_form() -- form escapes all output and runs balancetags and wp_kses_post on constituent notes
 	*				note -- display_form() relies on display controls from class-wp-issues-crm-definitions which do the escaping  
 	*				with a couple of small noted excepts display form does not alter the array next_form_output. $_POST is never altered.
 	* 
@@ -27,35 +27,46 @@ class WP_Issues_CRM_Constituents {
 	
 	/*
 	*
-	* field definitions for ready reference array 
+	* field definitions for ready reference 
 	*
 	*/
 		
-	private $constituent_fields = array();
-	private $constituent_field_groups = array(); 
-	public $wic_post_id;
+	private $working_post_fields = array();
+	private $working_post_field_groups = array();
+	private $form_requested;
+	private $action_requested;
+	private $id_requested;
+	private $wic_metakey; 
 
 	private $button_actions = array(
-		'save' 	=>	'Save New Constituent Record',
-		'search' => 'Search Constituents',
-		'update' => 'Update Constituent Record',
+		'save' 	=>	'Save New',
+		'search' => 'Search',
+		'update' => 'Update',
 	);
  	
-	public function __construct( $wic_post_id ) {
-
+	public function __construct( $control_array ) {
+		
 		/* set up class variables */
 		global $wic_base_definitions;
 		global $wic_constituent_definitions;
-		foreach ( $wic_constituent_definitions->constituent_fields as $field )
+		global $wic_activity_definitions;
+		
+		$this->form_requested 	= $control_array[0];
+		$this->action_requested = $control_array[1];
+		$this->id_requested 		= $control_array[2];
+		
+		// control array 0 is form_requested -- entity type -- constituent, activity or issue
+		$field_source_string = 'wic_' . $control_array[0] . '_definitions';
+			
+		foreach ( $$field_source_string->wic_post_fields as $field )
 			if ( $field['online'] ) { 		
- 				 array_push( $this->constituent_fields, $field );
+ 				 array_push( $this->working_post_fields, $field );
  			}
-		$this->constituent_field_groups 	= &$wic_constituent_definitions->constituent_field_groups;
+		$this->working_post_field_groups 	= $$field_source_string->wic_post_field_groups;
 		$this->wic_metakey = &$wic_base_definitions->wic_metakey;
-		$this->wic_post_id = $wic_post_id;		
 
 		/* invoke form and supporting database access functions */
-		$this->wp_issues_crm_constituents( $wic_post_id );
+		$this->wp_issues_crm_post_form( $control_array );
 		 
 	}
 
@@ -66,7 +77,7 @@ class WP_Issues_CRM_Constituents {
 */
 	public function create_dup_check_fields_list() {
 	$fields_string = '';
-		foreach ( $this->constituent_fields as $field ) {
+		foreach ( $this->working_post_fields as $field ) {
 			if( $field['dedup'] ) {
 				$fields_string = ( $fields_string > '' ) ? $fields_string . ', ' : '';
 				$fields_string .= $field['label'];
@@ -83,54 +94,15 @@ class WP_Issues_CRM_Constituents {
 
 	/*
 	*
-	* wp_issues_crm_constituent -- function manages search/save/update of constituent records
+	* wp_issues_crm_post_form -- function manages search/save/update of wic entity records (s, activities, issues -- all posts)
 	* 
 	* takes $_POST input and user requested action and applies case logic to do action and populate $next_form_output
 	* calls display_form to do the display 
 	*
-	* the components of $next_form_output are: 
-	* 		1. all meta fields defined as displayable for constituents
-	*			-- initialized to empty on new; otherwise passed through (clean) from form by sanitize_validate_input
-	*			-- not otherwise altered except: 
-	*					* are overlayed with database if found unique on search (in main logic below) 
-	*						-- NOTE: no sanitization or validation of db content -- goes straight to form and escaped going out and validated going coming back
-	*					* within display_form, may flatten or pop-up array for repeating fields (going from search to save/update or vice versa)
-	*				   * within search_wic_posts will flatten array for repeating fields
-	*					
-	*		2. constituent notes, old constituent notes
-	*			-- initialized to empty on new
-	*			-- constituent notes behaves like other form elements, except 
-	*					* wiped out on found record ( so don't use for update )
-	*					* wiped out successful save/update (since added to old)
-	*			--	old constituent notes behaves like other form elements except 
-	*					* is displayed as readonly 
-	*					* is refreshed from database after successful save update
-	*					* takes value of constituent notes from data base on found record
-	*			-- update appends wic_post_content to old
-	*		3. constituent id 
-	*			-- initialized to zero on new; otherwise passed through from form by sanitize_validate_input
-	*			-- set if search found unique (then offer update)
-	* 			-- reset to zero if, on update attempt, found dups for new form values (then send back to search)
-	*			-- set on save successful (then offer update) 
-	*			-- so, is always zero if next_action is search or save and always set if next action is update
-	*			--	can be passed as non-zero on class instantiation
-	*		4a. guidance ( if set, always displayed by form )
-	*			-- generated by main logic in this function to go with context
-	*		4b. error_messages (shown only on save/updates) 
-	*			-- generated by sanitize_validate_input; presence is switch to stop save or update
-	*		4c. search_notices (shown only on searches )
-	*			-- generated by sanitize_validate_input and by search_wic_posts
-	*		Note: if message should be displayed in both searches and save/updates, must be appended to both b and c.		
-	*		5. next_action (search/update/save) 
-	*			-- set by main logic in this function 
-	*		6.	strict match check box -- passed through from form
-	*		7. initial form state (show/hide) --- set by main logic in this function
-	*		8. field groups that have changes are pushed onto this array in search and update functions so that will show these sections open again 
 	*
 	*/
-	public function wp_issues_crm_constituents() {
+	public function wp_issues_crm_post_form( $control_array ) {
 		
-		global $wic_constituent_definitions;
 		global $wic_form_utilities;
 		global $wic_database_utilities;
 		
@@ -141,41 +113,40 @@ class WP_Issues_CRM_Constituents {
 		} 
 
 		$next_form_output = array();
-		$wic_form_utilities->initialize_blank_form( $next_form_output, $this->constituent_fields, $this->wic_post_id );
+		$wic_form_utilities->initialize_blank_form( $next_form_output, $this->working_post_fields );
 
-		// if coming from main constituent form or from a constituent list . . . 
-		if ( isset ( $_POST['wic_constituent_main_button'] ) || isset ( $_POST['wic_constituent_direct_button'] ) ) { 
+		
+		// if new, nothing to process; no nonce to test
+		if ( 'new' != $this->action_requested ) { 
 
 			// test nonce before going further
 			if( ! wp_verify_nonce($_POST['wp_issues_crm_post_form_nonce_field'], 'wp_issues_crm_post'))	{
 				die ( 'Security check failed.' ); // if not nonce OK, die, otherwise continue  
 			}
-			
-			if ( isset( $_POST['wic_constituent_main_button'] ) ) { 
-				$user_request = $_POST['wic_constituent_main_button']; // search, update or save
+	
+			if ( 0 == $this->id_requested ) { 
 				// clean and validate POST input and populate next form output	
-				$wic_form_utilities->sanitize_validate_input( $next_form_output, $this->constituent_fields );
+				$wic_form_utilities->sanitize_validate_input( $next_form_output, $this->working_post_fields );
 				// do search in all submitted cases, but do only on dup check fields if request is a save or update (does not alter next_form_output)
-				$search_mode = ( 'search' == $user_request ) ? 'new' : 'dup';
-			} elseif ( isset( $_POST['wic_constituent_direct_button'] ) ) { // coming in from crm-constituents-list.php
-				$user_request = 'search';
-				$next_form_output['wic_post_id']	= $_POST['wic_constituent_direct_button'];
-				$search_mode = 'db_check';		
+				$search_mode = ( 'search' == $this->action_requested ) ? 'new' : 'dup';
+			} else { 
+				$search_mode = 'db_check';
+				$next_form_output['wic_post_id']	= $this->id_requested;	
 			}
 
-			$wic_query = $wic_database_utilities->search_wic_posts( $search_mode, $next_form_output, $this->constituent_fields, 'constituent' ); 
+			$wic_query = $wic_database_utilities->search_wic_posts( $search_mode, $next_form_output, $this->working_post_fields, $this->form_requested ); 
 			
-			// will show constituent list if found multiple or found a dup; default is false
+			// will show post list if found multiple or found a dup; default is false
 			$show_list = false;			
 			
 			// do last form requests and define form_notices and next_action based on results of sanitize_validate, search_wic_posts and save/update requests  
-			switch ( $user_request ) {	
+			switch ( $this->action_requested ) {	
 				case 'search':
 					if ( 0 == $wic_query->found_posts ) {
 						$next_form_output['guidance']	=	__( 'No matching record found. Try a save? ', 'wp-issues-crm' );
 						$next_form_output['next_action'] 	=	'save';
 					} elseif ( 1 == $wic_query->found_posts ) { // overwrite form with that unique record's  values
-						foreach ( $this->constituent_fields as $field ) {
+						foreach ( $this->working_post_fields as $field ) {
 							$post_field_key =  $this->wic_metakey . $field['slug'];
 							// the following isset check should be necessary only if a search requesting more than the maximum search terms is executed 
 							// note -- don't need to unserialize phones, etc. -- wp_query does this. also automatic in save_update_wic_post  
@@ -199,7 +170,7 @@ class WP_Issues_CRM_Constituents {
 						if ( $next_form_output['error_messages'] > '' ) { // validation errors from sanitize_validate_input which is always called above (and, unlikely, any search errors)
 							$next_form_output['guidance']	=	__( 'Please correct form errors: ', 'wp-issues-crm' );	
 						} else {
-							$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->constituent_fields );
+							$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->working_post_fields );
 							if ( $outcome['notices'] > '' )  { 
 								$next_form_output['guidance'] = __( 'Please retry -- there were database errors. ', 'wp-issues-crm' );
 								$next_form_output['error_messages'] = $outcome['notices'];
@@ -226,7 +197,7 @@ class WP_Issues_CRM_Constituents {
 							$next_form_output['guidance']	=	__( 'Please correct form errors: ', 'wp-issues-crm' );
 							$next_form_output['next_action'] 	=	'save';
 						} else {
-							$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->constituent_fields );
+							$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->working_post_fields );
 							if ( $outcome['notices'] > ''  ) { // alpha return_post_id is error string
 								$next_form_output['guidance']	=	__( 'Please retry -- there were database errors: ', 'wp-issues-crm' );
 								$next_form_output['error_messages'] = $outcome['notices'];
@@ -250,14 +221,14 @@ class WP_Issues_CRM_Constituents {
 					break;
 			} // closes switch statement	
 
-			// prepare to show list of constituents if found more than one
+			// prepare to show list of posts if found more than one
 			if ( $show_list ) {
-				$wic_list_constituents = new WP_Issues_CRM_Constituents_List ($wic_query);			
-				$constituent_list = $wic_list_constituents->constituent_list;
-				if ( 'search' == $user_request  && '' == $next_form_output['search_notices'] ) // always show form unless was a search and no search notices
+				$wic_list_posts = new WP_Issues_CRM_Posts_List ( $wic_query, $this->working_post_fields, $this->form_requested );			
+				$post_list = $wic_list_posts->post_list;
+				if ( 'search' == $this->action_requested  && '' == $next_form_output['search_notices'] ) // always show form unless was a search and no search notices
 					$next_form_output['initial_form_state'] = 'wic-form-closed';
 			} else {
-				$constituent_list = '';			
+				$post_list = '';			
 			}
 
 			// done with query
@@ -268,8 +239,8 @@ class WP_Issues_CRM_Constituents {
  		// deliver the results (blank if new form)
  		ob_start();
  		$this->display_form( $next_form_output );
- 		if ( isset ( $constituent_list ) ) {
-			echo $constituent_list; 		
+ 		if ( isset ( $post_list ) ) {
+			echo $post_list; 		
  		}
  		ob_end_flush();
 
@@ -281,7 +252,7 @@ class WP_Issues_CRM_Constituents {
 	* displays form with controls based on search/update/save next action and field definitions
 	* values in the next_form_output array are never altered here -- this function only makes display decisions
 	*   (exception is flatten or pop-up serialized repeater arrays for display)
-	* $next_form_output is previously populated with values in wp_issues_crm_constituents() and functions 
+	* $next_form_output is previously populated with values in wp_issues_crm_post_form() and functions 
 	* see inventory of values and dispositions in comments before that function
 	* 
 	* All output data which is not hardcoded is escaped using one of the following: esc_attr, esc_html, esc_textarea (or absint if known should be integer)
@@ -295,7 +266,6 @@ class WP_Issues_CRM_Constituents {
 	public function display_form ( &$next_form_output ) {
 		
 		global $wic_base_definitions;
-		global $wic_constituent_definitions;
 		global $wic_form_utilities; // access for functions ( field definitions already instantiated  in construct )
 		/* var_dump( $next_form_output['initial_sections_open'] );
 
@@ -313,7 +283,7 @@ class WP_Issues_CRM_Constituents {
 
 		?><div id='wic-forms' class = "<?php echo $next_form_output['initial_form_state'] ?>">
 
-		<form id = "constituent-form" method="POST" autocomplete = "on">
+		<form id = "wic-post-form" method="POST" autocomplete = "on">
 
 			<div class = "wic-form-field-group wic-group-odd">
 			
@@ -326,7 +296,7 @@ class WP_Issues_CRM_Constituents {
 				echo '<h2>' . $form_header . '</h2>'; 
 				
 				if ( 'wic-form-closed' == $next_form_output['initial_form_state'] ) {
-					echo '<button id = "form-toggle-button" type="button" onclick = "toggleConstituentForm()">' . __( 'Show Search Form', 'wp-issues-crm' ) . '</button>';		
+					echo '<button id = "form-toggle-button" type="button" onclick = "togglePostForm()">' . __( 'Show Search Form', 'wp-issues-crm' ) . '</button>';		
 				} 
 		
 				/* notices section */
@@ -342,16 +312,27 @@ class WP_Issues_CRM_Constituents {
 			   	<div id="post-form-message-box" class = "<?php echo $notice_class; ?>" ><?php echo $message; ?></div>
 			   <?php }
 			   
-				/* first instance of buttons */		   
-		  		?><button class = "wic-form-button" name="wic_constituent_main_button" type="submit" value = "<?php echo $next_form_output['next_action']; ?>"><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></button>	  
-	
-				<?php if ( 'save' == $next_form_output['next_action'] ) {  // show this on save, but not update -- on update, have too much data in form, need to reset ?>  
-					<button  class = "wic-form-button second-position" name="wic_constituent_main_button" type="submit" value = "search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
-				<?php } ?>		 		
+				/* first instance of buttons */	
+				$button_args_main = array(
+					'form_requested'			=> $this->form_requested,
+					'action_requested'		=> $next_form_output['next_action'],
+					'button_label'				=> $this->button_actions[$next_form_output['next_action']],
+				);					
+				echo $wic_form_utilities->create_wic_form_button( $button_args_main );
 
-			</div>   
+ 				if ( 'save' == $next_form_output['next_action'] ) { // show this on save, but not update -- on update, have too much data in form, need to reset 
+					$button_args_search_again = array(
+						'form_requested'			=> $this->form_requested,
+						'action_requested'		=> 'search',
+						'button_label'				=> 'Search Again',
+						'button_class'				=> 'wic-form-button second-position'
+					);					
+					echo $wic_form_utilities->create_wic_form_button( $button_args_search_again );
+				}
+
+			echo '</div>';   
 		
-			<?php
+		
 			/* initialize field footnotes and footnote legends */
 			$required_individual = '';
 			$required_group = '';
@@ -364,11 +345,11 @@ class WP_Issues_CRM_Constituents {
 
 			/* format meta fields  -- loop through field groups and within them through fields */
 			$group_count = 0;
-		   foreach ( $this->constituent_field_groups as $group ) {
+		   foreach ( $this->working_post_field_groups as $group ) {
 		   	
 
 						   	
-				$filtered_fields = $this->select_key ( $this->constituent_fields, 'group', $group['name'] );
+				$filtered_fields = $this->select_key ( $this->working_post_fields, 'group', $group['name'] );
 				$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
 				$group_count++;
 				
@@ -611,16 +592,15 @@ class WP_Issues_CRM_Constituents {
 			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
 			echo '<div class = "wic-form-field-group ' . $row_class . '" id = "bottom-button-group">';?>
 				<?php if ( 'update' == $next_form_output['next_action'] ) { ?>
-					<p><a href="<?php echo( home_url( '/' ) ) . 'wp-admin/post.php?post=' . absint( $next_form_output['wic_post_id'] ) . '&action=edit' ; ?>" class = "wic-back-end-link"><?php printf ( __('Direct edit constituent # %1$s <br/>', 'wp_issues_crm'), absint( $next_form_output['wic_post_id'] ) ); ?></a></p>
+					<p><a href="<?php echo( home_url( '/' ) ) . 'wp-admin/post.php?post=' . absint( $next_form_output['wic_post_id'] ) . '&action=edit' ; ?>" class = "wic-back-end-link"><?php printf ( __('Direct edit %2$s # %1$s <br/>', 'wp_issues_crm'), absint( $next_form_output['wic_post_id'] ) , $this->form_requested  ); ?></a></p>
 				<?php } ?>		
 			
 				<input type = "hidden" id = "wic_post_id" name = "wic_post_id" value ="<?php echo absint( $next_form_output['wic_post_id'] ) ; ?>" />					
 		  		
-		  		<button  class = "wic-form-button" id="wic_constituent_main_button" name="wic_constituent_main_button" type="submit" value = "<?php echo $next_form_output['next_action']; ?>"><?php _e( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm'); ?></button>	  
-	
-				<?php if ( 'save' == $next_form_output['next_action'] ) { ?>
-					<button  class = "wic-form-button second-position" id="redo_search_button" name="wic_constituent_main_button" type="submit" value = "search"><?php _e( 'Search Again', 'wp_issues_crm'); ?></button>
-				<?php } ?>		 		
+		  		<?php echo $wic_form_utilities->create_wic_form_button( $button_args_main ); 	  
+				if ( 'save' == $next_form_output['next_action'] ) { 
+					echo $wic_form_utilities->create_wic_form_button( $button_args_search_again );
+				} ?> 		 		
 		
 		 		<?php wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); ?>
 

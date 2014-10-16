@@ -1,4 +1,4 @@
-function toggleConstituentForm() {
+function togglePostForm() {
 	var constituentForm = document.getElementById ( "wic-forms" );
 	var display = constituentForm.style.display;
 	var toggleButton	= document.getElementById ( "form-toggle-button" );
@@ -14,7 +14,7 @@ function toggleConstituentForm() {
 	}
 }
 
-function toggleConstituentFormSection( section ) {
+function togglePostFormSection( section ) {
 	var constituentFormSection = document.getElementById ( section );
 	var display = constituentFormSection.style.display;
 	if ('' == display) {

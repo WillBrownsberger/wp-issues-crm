@@ -35,8 +35,8 @@ include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-activity-definitions.
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-issue-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-form-utilities.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-database-utilities.php';
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents.php';
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituents-list.php';
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-main-form.php';
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-posts-list.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-import-routines.php';
 
 
@@ -56,7 +56,7 @@ function wp_issue_crm_list_width_styles() {
 	
 	global $wic_constituent_definitions;
 	$output = '<!-- width styles for wp-issues-crm constituent list --><style>';
-	foreach ( $wic_constituent_definitions->constituent_fields as $field ) {
+	foreach ( $wic_constituent_definitions->wic_post_fields as $field ) {
 		if ( $field['list'] > 0 ) { 		
  			$output .= '.cl-' . $field['slug'] . '{ width:' . $field['list'] . '%;}'; 
  		}
@@ -89,45 +89,59 @@ class WP_Issues_CRM {
 	public function wp_issues_crm() {
 
 		// here declare as global all the  classes that implement forms
-		global $wp_issues_crm_constituents;
-		 
-		// here run list of forms to buttons 
+
+		$control_array = array(
+			'form_requested'			=> '',
+			'action_requested'		=> '',
+			'id_requested'				=> '',
+			// next three fields not implemented yet
+			'referring_constituent' => 0,
+			'referring_activity'		=> 0,
+			'referring_issue'			=> 0,
+		);	
+
+		// use default control array to set up top row of buttons that always shows over dashboard and over main form 
 		echo '<form id = "top-level-form" method="POST" autocomplete = "on">';
-		echo '<button class = "wic-form-button" type="submit" name = "wic_top_menu_button" value = "dashboard">' . __( 'Dashboard (not built yet)', 'wp-issues-crm' ) . '</button>';
-		echo '<button class = "wic-form-button" type="submit" name = "wic_top_menu_button" value = "constituents">' . __( 'New Constituent Search', 'wp-issues-crm' ) . '</button>';
-		echo '<button class = "wic-form-button" type="submit" name = "wic_top_menu_button" value = "issues">' . __( 'New Issue (not built yet)', 'wp-issues-crm' ) . '</button>';
+		
+		$button_value = implode( ',' , $control_array );
+		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'Dashboard (not built yet)', 'wp-issues-crm' ) . '</button>';
+		
+		$control_array['form_requested'] = 'constituent';
+		$control_array['action_requested'] = 'new';
+		$button_value = implode ( ',' , $control_array );		
+		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New Constituent Search', 'wp-issues-crm' ) . '</button>';
+	
+		$control_array['form_requested'] = 'issue';
+		$button_value = implode ( ',' , $control_array );		
+		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New Issue Search (not built yet)', 'wp-issues-crm' ) . '</button>';
+
+	
+		$control_array['form_requested'] = 'activity';
+		$button_value = implode ( ',' , $control_array );
+		$control_array['action_requested'] = 'new';		
+		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New cool Search (not built yet)', 'wp-issues-crm' ) . '</button>';
+
+
+
 		echo '</form>';		
 
-		// list all button names for subsidiary forms and the top menu button		
-		if ( // default is show dashboard
-				! isset ( $_POST['wic_constituent_main_button'] ) &&
-				! isset ( $_POST['wic_constituent_direct_button'] ) && 
-				! isset ( $_POST['wic_top_menu_button'] )
-
-				) 
-		{
-			$this->show_dashboard();
-		} elseif ( isset ( $_POST['wic_top_menu_button'] ) ) { // act on buttons
-			switch ( $_POST['wic_top_menu_button'] ) {
-				case 'dashboard':
-					$this->show_dashboard();
-					break;
-				case 'constituents':
-					$wp_issues_crm_constituents = new WP_Issues_CRM_Constituents( 0 );
-					break;
+		// now populate control value with any submitted button
+		if ( isset ( $_POST['wic_form_button'] ) ) {
+			 $control_array = explode( ',', $_POST['wic_form_button'] ); 
+			if ( '' == $control_array[0] ) {
+				$this->show_dashboard();		
+			} else {
+				$wic_main_form = new WP_Issues_CRM_Main_Form ( $control_array );		
 			}
-		} else { // route second level buttons from classes	
-			if ( isset ( $_POST['wic_constituent_main_button'] ) 
-			 ||  isset ( $_POST['wic_constituent_direct_button'] ) )	{ 
-				$wp_issues_crm_constituents = new WP_Issues_CRM_Constituents( 0 ); 
-		 	}
-		 	// invoke each subsidiary form's button names  
-		} 
+		} else {
+			$this->show_dashboard();
+		}		
+
+
 	}
 	
 	public function show_dashboard() {
 
-		global $wic_constituent_definitions;
 		global $wic_form_utilities;
 		global $wic_imports;
 		
@@ -137,7 +151,7 @@ class WP_Issues_CRM {
 		}		
 		}
 				
-		echo '<div id = "dashboard-area" class = "constituent-field-group wic-group-odd">';
+		echo '<div id = "dashboard-area" class = "wic-post-field-group wic-group-odd">';
 		echo '<h1>Dashboard under development</h1>' . 
 		'<h2>"New constituent search" only option implemented so far on this screen. </h2>' .
 		'<h2> The search option feeds through to constituent save and update functions, which are fully implemented.</h2>'; 			
