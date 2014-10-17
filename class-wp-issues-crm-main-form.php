@@ -19,7 +19,7 @@ class WP_Issues_CRM_Main_Form {
 	*				no additional validation in searching (trust wp -- all access through standard query objects)
 	*		if requested and validation passed, it does save/update via save_update_wic_post() -- 
 	*				again, no additional validation or escaping (trust wp)
-	*		finally it redisplays form through $this->display_form() -- form escapes all output and runs balancetags and wp_kses_post on constituent notes
+	*		finally it redisplays form through $this->display_form() -- form escapes all output and runs balancetags and wp_kses_post on post_content (notes)
 	*				note -- display_form() relies on display controls from class-wp-issues-crm-definitions which do the escaping  
 	*				with a couple of small noted excepts display form does not alter the array next_form_output. $_POST is never altered.
 	* 
@@ -30,13 +30,8 @@ class WP_Issues_CRM_Main_Form {
 	* field definitions for ready reference 
 	*
 	*/
-		
-	private $working_post_fields = array();
-	private $working_post_field_groups = array();
-	private $form_requested;
-	private $action_requested;
-	private $id_requested;
-	private $wic_metakey; 
+	
+
 
 	private $button_actions = array(
 		'save' 	=>	'Save New',
@@ -46,27 +41,39 @@ class WP_Issues_CRM_Main_Form {
  	
 	public function __construct( $control_array ) {
 		
-		/* set up class variables */
+		// set up class globals 
 		global $wic_base_definitions;
-		global $wic_constituent_definitions;
-		global $wic_activity_definitions;
+		foreach ( $wic_base_definitions->wic_post_types as $key => $value ) {
+			global ${ 'wic_' . $key . '_definitions' };		
+		}		
 		
+		// set up control properties 
 		$this->form_requested 	= $control_array[0];
 		$this->action_requested = $control_array[1];
 		$this->id_requested 		= $control_array[2];
 		$this->referring_parent = $control_array[3];
 		
-		// control array 0 is form_requested -- entity type -- constituent, activity or issue
-		$field_source_string = 'wic_' . $control_array[0] . '_definitions';
-			
-		foreach ( $$field_source_string->wic_post_fields as $field )
+		// assemble name for form post type's definitions class
+		$field_source_string = 'wic_' . $this->form_requested . '_definitions';
+
+		// get defined fields for current post type	
+		$this->working_post_fields = array();	
+		foreach ( $$field_source_string->wic_post_fields as $field ) {
 			if ( $field['online'] ) { 		
  				 array_push( $this->working_post_fields, $field );
  			}
-		$this->working_post_field_groups 	= $$field_source_string->wic_post_field_groups;
+ 		}
+
+		// identify parent type (may be empty string)
+		$this->parent_type = $wic_base_definitions->wic_post_types[$this->form_requested]['parent_type']; 	
+ 		
+ 		// get field groups for current post type 
+		$this->working_post_field_groups = $$field_source_string->wic_post_field_groups;
+		
+		// get label for 
 		$this->wic_metakey = &$wic_base_definitions->wic_metakey;
 
-		/* invoke form and supporting database access functions */
+		// invoke form and supporting database access functions 
 		$this->wp_issues_crm_post_form( $control_array );
 		 
 	}
@@ -86,12 +93,6 @@ class WP_Issues_CRM_Main_Form {
 		}
 		return ( $fields_string ); 	
 	}
-/*
-*
-*	Initializes blank form -- all form values and display switches set
-*  	see inventory below
-*
-*/
 
 	/*
 	*
@@ -113,9 +114,10 @@ class WP_Issues_CRM_Main_Form {
 			return;
 		} 
 
+		/* see notes on this variable in class WP_Issues_CRM_Form_Utilities.  this variable structures the form. */		
 		$next_form_output = array();
 		$wic_form_utilities->initialize_blank_form( $next_form_output, $this->working_post_fields );
-
+		
 		
 		// if new, nothing to process; no nonce to test
 		if ( 'new' != $this->action_requested ) { 
@@ -124,104 +126,117 @@ class WP_Issues_CRM_Main_Form {
 			if( ! wp_verify_nonce($_POST['wp_issues_crm_post_form_nonce_field'], 'wp_issues_crm_post'))	{
 				die ( 'Security check failed.' ); // if not nonce OK, die, otherwise continue  
 			}
-	
-			if ( 0 == $this->id_requested ) { 
-				// clean and validate POST input and populate next form output	
-				$wic_form_utilities->sanitize_validate_input( $next_form_output, $this->working_post_fields );
-				// do search in all submitted cases, but do only on dup check fields if request is a save or update (does not alter next_form_output)
-				$search_mode = ( 'search' == $this->action_requested ) ? 'new' : 'dup';
-			} else { 
-				$search_mode = 'db_check';
-				$next_form_output['wic_post_id']	= $this->id_requested;	
-			}
 
-			$wic_query = $wic_database_utilities->search_wic_posts( $search_mode, $next_form_output, $this->working_post_fields, $this->form_requested ); 
-			
+			$show_list = false;
 			// will show post list if found multiple or found a dup; default is false
-			$show_list = false;			
-			
-			// do last form requests and define form_notices and next_action based on results of sanitize_validate, search_wic_posts and save/update requests  
-			switch ( $this->action_requested ) {	
-				case 'search':
-					if ( 0 == $wic_query->found_posts ) {
-						$next_form_output['guidance']	=	__( 'No matching record found. Try a save? ', 'wp-issues-crm' );
-						$next_form_output['next_action'] 	=	'save';
-					} elseif ( 1 == $wic_query->found_posts ) { // overwrite form with that unique record's  values
-						foreach ( $this->working_post_fields as $field ) {
-							$post_field_key =  $this->wic_metakey . $field['slug'];
-							// the following isset check should be necessary only if a search requesting more than the maximum search terms is executed 
-							// note -- don't need to unserialize phones, etc. -- wp_query does this. also automatic in save_update_wic_post  
-							$next_form_output[$field['slug']] = isset ( $wic_query->post->$post_field_key ) ?  $wic_query->post->$post_field_key : '';
-						}
-						$next_form_output['wic_post_content'] = ''; // don't want to bring search notes automatically into update mode 
-						$next_form_output['old_wic_post_content'] = isset ( $wic_query->post->post_content )  ? $wic_query->post->post_content: '';	
-						$next_form_output['wic_post_id'] 	= $wic_query->post->ID;	
-						$next_form_output['guidance']	=	__( 'One matching record found. Try an update?', 'wp-issues-crm' );
-						$next_form_output['next_action'] 	=	'update';
-					} else {
-						$next_form_output['guidance']	=	__( 'Multiple records found (results below). ', 'wp-issues-crm' );
-						$next_form_output['next_action'] 	=	'search';
-						$show_list = true;
-					}						
-					break;
-				case 'update':
-					// after dup_check search, if updated values do not match any record or match the original record, proceed to update 							
-					if ( 0 == $wic_query->found_posts || ( 1 == $wic_query->found_posts && $wic_query->post->ID == $next_form_output['wic_post_id'] ) ) {
-						$next_form_output['next_action'] 	=	'update'; // always proceed to further update after an update whether or not successful (unless poss dup)
-						if ( $next_form_output['error_messages'] > '' ) { // validation errors from sanitize_validate_input which is always called above (and, unlikely, any search errors)
-							$next_form_output['guidance']	=	__( 'Please correct form errors: ', 'wp-issues-crm' );	
-						} else {
-							$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->working_post_fields );
-							if ( $outcome['notices'] > '' )  { 
-								$next_form_output['guidance'] = __( 'Please retry -- there were database errors. ', 'wp-issues-crm' );
-								$next_form_output['error_messages'] = $outcome['notices'];
-							} else { 
-								$next_form_output['guidance'] = __( 'Update successful -- you can further update this record.', 'wp-issues-crm' );								
-								if ( trim( $next_form_output[ 'wic_post_content' ] ) > '' ) { // update to database
-									$next_form_output['old_wic_post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] ) . $next_form_output['old_wic_post_content'];
-									$next_form_output['wic_post_content'] = '';
-								}
-							}					
-						}
-					// error if form values match a record other than the original record	
-					} else { 
-						$next_form_output['guidance'] = '';						
-						$next_form_output['wic_post_id'] = 0; // reset so search does not bring back the original record
-						$next_form_output['search_notices']	=	sprintf ( __( 'Record not updated -- other records match the new combination of %s. View matches below.', 'wp-issues-crm' ), $this->create_dup_check_fields_list());
-						$next_form_output['next_action'] 	=	'search';
-						$show_list = true;
-					}						
-					break;				
-				case 'save':	
-					if ( 0 == $wic_query->found_posts ) {
-						if ( $next_form_output['error_messages'] > '' ) {
-							$next_form_output['guidance']	=	__( 'Please correct form errors: ', 'wp-issues-crm' );
+
+			if ( $this->referring_parent > 0 ) {
+				$wic_form_utilities->sanitize_validate_input( $next_form_output, $this->working_post_fields );
+				$next_form_output['wic_post_parent'] = $this->referring_parent;
+				$next_form_output['guidance']	=	sprintf( __( 'Save a new %1$s.', 'wp-issues-crm' ), $this->form_requested );
+				$next_form_output['next_action'] 	=	'save';	
+					
+			} else {	
+				if ( 0 == $this->id_requested ) { 
+					// clean and validate POST input and populate next form output	
+					$wic_form_utilities->sanitize_validate_input( $next_form_output, $this->working_post_fields );
+					// do search in all submitted cases, but do only on dup check fields if request is a save or update (does not alter next_form_output)
+					$search_mode = ( 'search' == $this->action_requested ) ? 'new' : 'dup';
+				} else { 
+					$search_mode = 'db_check';
+					$next_form_output['wic_post_id']	= $this->id_requested;	
+				}
+				$wic_query = $wic_database_utilities->search_wic_posts( $search_mode, $next_form_output, $this->working_post_fields, $this->form_requested ); 
+	
+				// do last form requests and define form_notices and next_action based on results of sanitize_validate, search_wic_posts and save/update requests  
+				switch ( $this->action_requested ) {	
+					case 'search':
+						if ( 0 == $wic_query->found_posts ) {
+							$next_form_output['guidance']	=	__( 'No matching record found. Try a save? ', 'wp-issues-crm' );
 							$next_form_output['next_action'] 	=	'save';
+						} elseif ( 1 == $wic_query->found_posts ) { // overwrite form with that unique record's  values
+							foreach ( $this->working_post_fields as $field ) {
+								$post_field_key =  $this->wic_metakey . $field['slug'];
+								// the following isset check should be necessary only if a search requesting more than the maximum search terms is executed 
+								// note -- don't need to unserialize phones, etc. -- wp_query does this. also automatic in save_update_wic_post  
+								$next_form_output[$field['slug']] = isset ( $wic_query->post->$post_field_key ) ?  $wic_query->post->$post_field_key : '';
+							}
+							$next_form_output['wic_post_content'] = ''; // don't want to bring search notes automatically into update mode 
+							$next_form_output['old_wic_post_content'] = isset ( $wic_query->post->post_content )  ? $wic_query->post->post_content: '';	
+							$next_form_output['wic_post_id'] 	= $wic_query->post->ID;	
+							$next_form_output['guidance']	=	__( 'One matching record found. Try an update?', 'wp-issues-crm' );
+							$next_form_output['next_action'] 	=	'update';
 						} else {
-							$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->working_post_fields );
-							if ( $outcome['notices'] > ''  ) { // alpha return_post_id is error string
-								$next_form_output['guidance']	=	__( 'Please retry -- there were database errors: ', 'wp-issues-crm' );
-								$next_form_output['error_messages'] = $outcome['notices'];
+							$next_form_output['guidance']	=	__( 'Multiple records found (results below). ', 'wp-issues-crm' );
+							$next_form_output['next_action'] 	=	'search';
+							$show_list = true;
+						}						
+						break;
+					case 'update':
+						// in this branch after a dup_check search on an updated record -- next action will be update iff any of three possibilities  . . .
+							// updated to non-dup dupcheck values (OK to do update) OR							
+						if ( 0 == $wic_query->found_posts || 
+							// updated but dupcheck values not changed (OK to do update) OR					
+							( 1 == $wic_query->found_posts && $wic_query->post->ID == $next_form_output['wic_post_id'] ) ||
+							// there are form errors (must correct and resubmit update)  
+							$next_form_output['error_messages'] > '' ) { 
+							// always proceed to further update after an update whether or not successful (unless poss dup)						
+							$next_form_output['next_action'] 	=	'update'; 
+							if ( $next_form_output['error_messages'] > '' ) { 
+								$next_form_output['guidance']	=	__( 'Please correct form errors: ', 'wp-issues-crm' );	
+							} else {
+								$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->working_post_fields );
+								if ( $outcome['notices'] > '' )  { 
+									$next_form_output['guidance'] = __( 'Please retry -- there were database errors. ', 'wp-issues-crm' );
+									$next_form_output['error_messages'] = $outcome['notices'];
+								} else { 
+									$next_form_output['guidance'] = __( 'Update successful -- you can further update this record.', 'wp-issues-crm' );								
+									if ( trim( $next_form_output[ 'wic_post_content' ] ) > '' ) { // update to database
+										$next_form_output['old_wic_post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] ) . $next_form_output['old_wic_post_content'];
+										$next_form_output['wic_post_content'] = '';
+									}
+								}					
+							}
+						// error if form values match a record other than the original record	
+						} else { 
+							$next_form_output['guidance'] = '';						
+							$next_form_output['wic_post_id'] = 0; // reset so search does not bring back the original record
+							$next_form_output['search_notices']	=	sprintf ( __( 'Record not updated -- other records match the new combination of %s. View matches below.', 'wp-issues-crm' ), $this->create_dup_check_fields_list());
+							$next_form_output['next_action'] 	=	'search';
+							$show_list = true;
+						}						
+						break;				
+					case 'save':	
+						if ( 0 == $wic_query->found_posts || $next_form_output['error_messages'] > '' ) {
+							if ( $next_form_output['error_messages'] > '' ) {
+								$next_form_output['guidance']	=	__( 'Please correct form errors: ', 'wp-issues-crm' );
 								$next_form_output['next_action'] 	=	'save';
 							} else {
-								$next_form_output['wic_post_id'] = $outcome['post_id'];
-								$next_form_output['guidance']	=	__( 'Record saved -- you can further update this record.', 'wp-issues-crm' );
-								$next_form_output['next_action'] 	=	'update';
-								if ( trim( $next_form_output[ 'wic_post_content' ] )  > '' ) { // parallels update to database
-									$next_form_output['old_wic_post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] ) . $next_form_output['old_wic_post_content'];
-									$next_form_output['wic_post_content'] = '';
-								}
-							}					
-						}
-					} else {
-						$next_form_output['guidance'] = '';
-						$next_form_output['search_notices']	=	sprintf ( __( 'Record not saved -- other records match the new combination of %s. View matches below.', 'wp-issues-crm' ), $this->create_dup_check_fields_list());
-						$next_form_output['next_action'] 	=	'search';
-						$show_list = true;
-					}						
-					break;
-			} // closes switch statement	
-
+								$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->working_post_fields );
+								if ( $outcome['notices'] > ''  ) { // alpha return_post_id is error string
+									$next_form_output['guidance']	=	__( 'Please retry -- there were database errors: ', 'wp-issues-crm' );
+									$next_form_output['error_messages'] = $outcome['notices'];
+									$next_form_output['next_action'] 	=	'save';
+								} else {
+									$next_form_output['wic_post_id'] = $outcome['post_id'];
+									$next_form_output['guidance']	=	__( 'Record saved -- you can further update this record.', 'wp-issues-crm' );
+									$next_form_output['next_action'] 	=	'update';
+									if ( trim( $next_form_output[ 'wic_post_content' ] )  > '' ) { // parallels update to database
+										$next_form_output['old_wic_post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] ) . $next_form_output['old_wic_post_content'];
+										$next_form_output['wic_post_content'] = '';
+									}
+								}					
+							}
+						} else {
+							$next_form_output['guidance'] = '';
+							$next_form_output['search_notices']	=	sprintf ( __( 'Record not saved -- other records match the new combination of %s. View matches below.', 'wp-issues-crm' ), $this->create_dup_check_fields_list());
+							$next_form_output['next_action'] 	=	'search';
+							$show_list = true;
+						}						
+						break;
+				} // closes switch statement	
+			} // closes handling of cases other than simple referring parent case
+			 
 			// prepare to show list of posts if found more than one
 			if ( $show_list ) {
 				$wic_list_posts = new WP_Issues_CRM_Posts_List ( $wic_query, $this->working_post_fields, $this->form_requested );			
@@ -323,12 +338,12 @@ class WP_Issues_CRM_Main_Form {
 
  				if ( 'update' == $next_form_output['next_action'] ) { // show this on save, but not update -- on update, have too much data in form, need to reset
 					foreach ( $wic_base_definitions->wic_post_types as $key => $entity_type ) {
-							if ( $this->form_requested == $entity_type['parent_type'] ) {
-							
+						if ( $this->form_requested == $entity_type['parent_type'] ) {
 							$button_args_child_button = array(
 								'form_requested'			=> $key,
 								'action_requested'		=> 'search',
-								'referring_parent'		=>	$this->referring_parent,
+								'id_requested'				=> 0,
+								'referring_parent'		=>	$next_form_output['wic_post_id'], // always isset if doing update
 								'button_label'				=> 'Add New ' . $entity_type['label_singular'],
 								'button_class'				=> 'wic-form-button second-position',
 							);

@@ -79,7 +79,6 @@ class WP_Issues_CRM_Activity_Definitions {
 				'required'	=> 'individual', // but always supplied
 				'slug'	=> 'activity_constituent_id', 	
 				'type'	=>	'text', 	
-	
 				),		
 			array( // 2
 		 		'dedup'	=>	false,
@@ -123,7 +122,7 @@ class WP_Issues_CRM_Activity_Definitions {
 			array( // 5
 		 		'dedup'	=>	false,
 		 		'group'	=>	'activity',
-		 		'label'	=>	'Touch Type',
+		 		'label'	=>	'Activity Type',
 		 		'like'	=>	false,
 				'list'	=> '0',
 		 		'online'	=>	true,
@@ -190,17 +189,17 @@ class WP_Issues_CRM_Activity_Definitions {
 function wic_activity() {
 
 	$labels = array(
-		'name'                => _x( 'Touches', 'Post Type General Name', 'wp-issues-crm' ),
-		'singular_name'       => _x( 'Touch', 'Post Type Singular Name', 'wp-issues-crm' ),
-		'menu_name'           => __( 'Touches', 'wp-issues-crm' ),
+		'name'                => _x( 'Activities', 'Post Type General Name', 'wp-issues-crm' ),
+		'singular_name'       => _x( 'Activity', 'Post Type Singular Name', 'wp-issues-crm' ),
+		'menu_name'           => __( 'Activities', 'wp-issues-crm' ),
 		'parent_item_colon'   => __( 'Parent Item:', 'wp-issues-crm' ),
-		'all_items'           => __( 'All Constituent Touches', 'wp-issues-crm' ),
-		'view_item'           => __( 'View Touch', 'wp-issues-crm' ),
-		'add_new_item'        => __( 'Add New Touch', 'wp-issues-crm' ),
+		'all_items'           => __( 'All Constituent Activities', 'wp-issues-crm' ),
+		'view_item'           => __( 'View Activity', 'wp-issues-crm' ),
+		'add_new_item'        => __( 'Add New Activity', 'wp-issues-crm' ),
 		'add_new'             => __( 'Add New', 'wp-issues-crm' ),
-		'edit_item'           => __( 'Edit Constituent Touch', 'wp-issues-crm' ),
-		'update_item'         => __( 'Update Constituent Touch', 'wp-issues-crm' ),
-		'search_items'        => __( 'Search Constituent Touch', 'wp-issues-crm' ),
+		'edit_item'           => __( 'Edit Constituent Activity', 'wp-issues-crm' ),
+		'update_item'         => __( 'Update Constituent Activity', 'wp-issues-crm' ),
+		'search_items'        => __( 'Search Constituent Activity', 'wp-issues-crm' ),
 		'not_found'           => __( 'Not found', 'wp-issues-crm' ),
 		'not_found_in_trash'  => __( 'Not found in Trash', 'wp-issues-crm' ),
 	);

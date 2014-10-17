@@ -121,7 +121,8 @@ class WP_Issues_CRM_Database_Utilities {
 	 	} 
 
  		$wic_query = new WP_Query($query_args);
- 
+ 		var_dump ($query_args);
+ 	
  		return $wic_query;
 	}
 

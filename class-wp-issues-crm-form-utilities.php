@@ -14,7 +14,7 @@ class WP_Issues_CRM_Form_Utilities {
 	*	This function sets up main form variable: $next_form_output
 	* 
 	*  The components of $next_form_output are: 
-	* 		1. all meta fields defined as displayable for constituents
+	* 		1. all meta fields defined as displayable for current post type
 	*			-- initialized to empty on new; otherwise passed through (clean) from form by sanitize_validate_input
 	*			-- not otherwise altered except: 
 	*					* are overlayed with database if found unique on search (in main logic below) 
@@ -22,17 +22,17 @@ class WP_Issues_CRM_Form_Utilities {
 	*					* within display_form, may flatten or pop-up array for repeating fields (going from search to save/update or vice versa)
 	*				   * within search_wic_posts will flatten array for repeating fields
 	*					
-	*		2. constituent notes, old constituent notes
+	*		2. notes, old  notes (content)
 	*			-- initialized to empty on new
-	*			-- constituent notes behaves like other form elements, except 
+	*			-- notes behaves like other form elements, except 
 	*					* wiped out on found record ( so don't use for update )
 	*					* wiped out successful save/update (since added to old)
-	*			--	old constituent notes behaves like other form elements except 
+	*			--	old  notes behaves like other form elements except 
 	*					* is displayed as readonly 
 	*					* is refreshed from database after successful save update
-	*					* takes value of constituent notes from data base on found record
+	*					* takes value of notes from data base on found record
 	*			-- update appends wic_post_content to old
-	*		3. constituent id 
+	*		3. wic_post_id -- post id for current post 
 	*			-- initialized to zero on new; otherwise passed through from form by sanitize_validate_input
 	*			-- set if search found unique (then offer update)
 	* 			-- reset to zero if, on update attempt, found dups for new form values (then send back to search)
@@ -51,6 +51,8 @@ class WP_Issues_CRM_Form_Utilities {
 	*		6.	strict match check box -- passed through from form
 	*		7. initial form state (show/hide) --- set by main logic in this function
 	*		8. field groups that have changes are pushed onto this array in search and update functions so that will show these sections open again 
+	*		9. initialized as zero. Set either from referring parent on first entry into a child type form or carried through from form if repeat updates
+	*			-- this is carried as a meta field on the database, but is not in the main loop of meta fields 
 	*
 	*/	
 	public function initialize_blank_form( &$next_form_output, &$fields_array )	{ 
@@ -63,18 +65,19 @@ class WP_Issues_CRM_Form_Utilities {
 				$next_form_output[$field['slug'] . '_hi'] = '';
 			}
 		}
-		$next_form_output['wic_post_content']	=	''; 					// note 2 
-		$next_form_output['old_wic_post_content']	=	''; 					// note 2 			
-		$next_form_output['wic_post_id']		=	0;	// note 3
+		$next_form_output['wic_post_content']	=	''; 		// note 2 
+		$next_form_output['old_wic_post_content']	=	''; 	// note 2 			
+		$next_form_output['wic_post_id']		=	0;				// note 3
 
 		/*	these values are only for form setup */	
-		$next_form_output['guidance']				=  'Enter just a little information and do a full text search for constituents.'; // note 4a
+		$next_form_output['guidance']				=  'Enter just a little information and do a full text search.'; // note 4a
 		$next_form_output['error_messages']		=	'';					// note 4b
 		$next_form_output['search_notices']		=	'';					// note 4c
 		$next_form_output['next_action'] 		=	'search';			// note 5
 		$next_form_output['strict_match']		=	false;				// note 6
 		$next_form_output['initial_form_state']= 	'wic-form-open';  // note 7 
 		$next_form_output['initial_sections_open'] = array();			// note 8
+		$next_form_output['wic_parent_post'] = array();					   // note 9 (not wp parent_post -- is a meta field, key wic_data_parent_post )
 		
 	}
 
@@ -196,6 +199,7 @@ class WP_Issues_CRM_Form_Utilities {
    	$clean_input['wic_post_id'] = absint ( $_POST['wic_post_id'] ); // always included in form; 0 if unknown;
 		$clean_input['strict_match']	=	isset( $_POST['strict_match'] ) ? true : false; // only updated on the form; only affects search_wic_posts
 		$clean_input['initial_form_state'] = 'wic-form-open';		
+		$clean_input['wic_parent_post'] = isset($_POST['wic_parent_post']) ? $_POST['wic_parent_post'] : 0; 
    } 
 	/*
 	* date sanitization function
@@ -876,6 +880,7 @@ class WP_Issues_CRM_Form_Utilities {
 		$form_requested			= '';
 		$action_requested			= '';
 		$id_requested				= 0 ;
+		$referring_parent			= 0 ;
 		$button_class				= 'wic-form-button';
 		$button_label				= '';
 		$omit_label_and_close_tag = false;
