@@ -51,8 +51,10 @@ class WP_Issues_CRM_Form_Utilities {
 	*		6.	strict match check box -- passed through from form
 	*		7. initial form state (show/hide) --- set by main logic in this function
 	*		8. field groups that have changes are pushed onto this array in search and update functions so that will show these sections open again 
-	*		9. initialized as zero. Set either from referring parent on first entry into a child type form or carried through from form if repeat updates
-	*			-- this is carried as a meta field on the database, but is not in the main loop of meta fields 
+	*		
+	* 		note regarding meta value of type parent: initialized in loop below as empty. 
+	*			-- set either from referring parent on first entry into a child type form or carried through from form if repeat updates
+	*			-- only shows as hidden in form
 	*
 	*/	
 	public function initialize_blank_form( &$next_form_output, &$fields_array )	{ 
@@ -77,8 +79,6 @@ class WP_Issues_CRM_Form_Utilities {
 		$next_form_output['strict_match']		=	false;				// note 6
 		$next_form_output['initial_form_state']= 	'wic-form-open';  // note 7 
 		$next_form_output['initial_sections_open'] = array();			// note 8
-		$next_form_output['wic_parent_post'] = array();					   // note 9 (not wp parent_post -- is a meta field, key wic_data_parent_post )
-		
 	}
 
 	/*
@@ -199,7 +199,6 @@ class WP_Issues_CRM_Form_Utilities {
    	$clean_input['wic_post_id'] = absint ( $_POST['wic_post_id'] ); // always included in form; 0 if unknown;
 		$clean_input['strict_match']	=	isset( $_POST['strict_match'] ) ? true : false; // only updated on the form; only affects search_wic_posts
 		$clean_input['initial_form_state'] = 'wic-form-open';		
-		$clean_input['wic_parent_post'] = isset($_POST['wic_parent_post']) ? $_POST['wic_parent_post'] : 0; 
    } 
 	/*
 	* date sanitization function
@@ -214,11 +213,7 @@ class WP_Issues_CRM_Form_Utilities {
  		return ( date_format( $test, 'Y-m-d' ) );
 	}
    
-	
-	
-	
-	
-	
+
 	
 	/*
 	*
@@ -269,11 +264,13 @@ class WP_Issues_CRM_Form_Utilities {
 			'placeholder'			=> placeholder in input field
 			'value'					=> from database or blank
 			'read_only_flag'		=>	whether should be a read only -- true false
+			'hidden_flag			=> whether field should be hidden
 			'field_label_suffix'	=> any string to append to the field label in control (but not in drop down)								
 		);	
 		*/			
 
-		$read_only_flag 		= false; 				
+		$read_only_flag 		= false;
+		$hidden_flag			= false; 				
 		$field_label_suffix 	= '';
 		$label_class = 'wic-label';
 		$input_class = 'wic-input';
@@ -283,10 +280,12 @@ class WP_Issues_CRM_Form_Utilities {
 	
 		$readonly = $read_only_flag ? 'readonly' : '';
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
+		$type = $hidden_flag ? 'hidden' : 'text';
+
 		 
-		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
+		$control = ( $field_label > '' && ! $hidden_flag ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
 		$control .= '<input class="' . $input_class . '" id="' . esc_attr( $field_name_id )  . 
-			'" name="' . esc_attr( $field_name_id ) . '" type="text" placeholder = "' .
+			'" name="' . esc_attr( $field_name_id ) . '" type="' . $type . '" placeholder = "' .
 			 esc_attr( $placeholder ) . '" value="' . esc_attr ( $value ) . '" ' . $readonly  . '/>' . $field_label_suffix_span; 
 			
 		return ( $control );

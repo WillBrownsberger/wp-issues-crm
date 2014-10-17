@@ -40,19 +40,35 @@ class WP_Issues_CRM_Main_Form {
 	);
  	
 	public function __construct( $control_array ) {
-		
-		// set up class globals 
-		global $wic_base_definitions;
-		foreach ( $wic_base_definitions->wic_post_types as $key => $value ) {
-			global ${ 'wic_' . $key . '_definitions' };		
-		}		
-		
+	
 		// set up control properties 
 		$this->form_requested 	= $control_array[0];
 		$this->action_requested = $control_array[1];
-		$this->id_requested 		= $control_array[2];
-		$this->referring_parent = $control_array[3];
+		$this->id_requested 		= $control_array[2]; // numeric, 0 if not set 
+		$this->referring_parent = $control_array[3]; // id of referring_parent post > 0 only on first entry from add new button on parent form 
+		$this->child_types		= array(); // used only to display add new buttons (e.g., add new activity for constituent )
+		$this->parent_pointer_slug = ''; // used as flag to determine child form handling and also as to quickly refer to parent field 
+				
+		// set up class globals, identify any child post_types of the current type, and (if current_type is a child) identify parent pointer field; 
+		global $wic_base_definitions;
+		foreach ( $wic_base_definitions->wic_post_types as $key => $value ) {
+			global ${ 'wic_' . $key . '_definitions' };	
+			//	must exist in valid config:  proper class name and field wic_post_fields within class	
+			foreach ( ${ 'wic_' . $key . '_definitions' }->wic_post_fields as $field ) {
+				if ( $this->form_requested != $key ) { // check to see if types other than current claim current type as parent
+					if ( 'parent' == $field['type'] && $this->form_requested == $field['wic_parent_type'] ) {
+						$this->child_types[] = $key;			
+					}
+				} else {	// check to see if current type claims a parent						
+					if ( 'parent' == $field['type'] ) {
+						$this->parent_pointer_slug = $field['slug'];
+						break; // should only be one field with field type parent in array					
+					}
+				}			
+			}
+		}		
 		
+
 		// assemble name for form post type's definitions class
 		$field_source_string = 'wic_' . $this->form_requested . '_definitions';
 
@@ -130,13 +146,59 @@ class WP_Issues_CRM_Main_Form {
 			$show_list = false;
 			// will show post list if found multiple or found a dup; default is false
 
-			if ( $this->referring_parent > 0 ) {
-				$wic_form_utilities->sanitize_validate_input( $next_form_output, $this->working_post_fields );
-				$next_form_output['wic_post_parent'] = $this->referring_parent;
-				$next_form_output['guidance']	=	sprintf( __( 'Save a new %1$s.', 'wp-issues-crm' ), $this->form_requested );
-				$next_form_output['next_action'] 	=	'save';	
-					
-			} else {	
+			/*
+			*  processing for two major cases: 
+			*		general (possible parent type) 
+			*			start with search and always do dup check searching and branch cases according to what found
+			*
+			*		child type for which no dup checking, since may be many and always come in with 
+			*			(a) parent link (go to save) or 
+			*			(b) post link (unless had errors on save) 
+			*
+			*/
+
+			if ( $this->parent_pointer_slug > '' ) { // logic for child case -- search is not part of pre-processing, since no dupchecking 
+				// do no field sanitization -- just start with the blank form 
+				if ( $this->referring_parent > 0 ) { // if coming from a parent referral, go straight to save or update
+					$next_form_output[$this->parent_pointer_slug] = $this->referring_parent;
+					if ( 'search' == $this->action_requested ) {
+						// set up search variables and go get the record						
+						$search_mode = 'db_check';
+						$next_form_output['wic_post_id']	= $this->id_requested;
+						$wic_query = $wic_database_utilities->search_wic_posts( $search_mode, $next_form_output, $this->working_post_fields, $this->form_requested );
+						$wic_database_utilities->populate_form_from_database ( $next_form_output, $this->working_post_fields, $wic_query );
+						// set up next step in form
+						$next_form_output['guidance']	=	sprintf( __( 'Update %1$s.', 'wp-issues-crm' ), $this->form_requested );
+						$next_form_output['next_action'] 	=	'update';
+					} elseif ( 'save' == $this->action_requested ) {
+						$next_form_output['guidance']	=	sprintf( __( 'Save a new %1$s.', 'wp-issues-crm' ), $this->form_requested );
+						$next_form_output['wic_post_id']	= 0;
+						$next_form_output['next_action'] 	=	'save';
+					}	
+				} else { // previous touch on this form (tried either update or save)
+					$wic_form_utilities->sanitize_validate_input( $next_form_output, $this->working_post_fields );
+					if ( $next_form_output['error_messages'] > '' ) { 
+							$next_form_output['guidance']	=	__( 'Please correct form errors: ', 'wp-issues-crm' );
+							$next_form_output['next_action'] 	=	$this->action_requested;
+					} else {
+						$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->working_post_fields, $this->form_requested );
+						if ( $outcome['notices'] > ''  ) { // alpha return_post_id is error string
+							$next_form_output['guidance']	=	__( 'Please retry -- there were database errors: ', 'wp-issues-crm' );
+							$next_form_output['error_messages'] = $outcome['notices'];
+							$next_form_output['next_action'] 	= $this->action_requested;
+						} else {
+							$next_form_output['wic_post_id'] = $outcome['post_id'];
+							$next_form_output['guidance']	=	__( 'Save/update successful -- you can further update this record.', 'wp-issues-crm' );
+							$next_form_output['next_action'] 	=	'update';
+							if ( trim( $next_form_output[ 'wic_post_content' ] )  > '' ) { // parallels update to database
+								$next_form_output['old_wic_post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] ) . $next_form_output['old_wic_post_content'];
+								$next_form_output['wic_post_content'] = '';
+							}
+						}					
+					}
+				}
+				
+			} else {	// general case (possibly parents, but may be just non-children)
 				if ( 0 == $this->id_requested ) { 
 					// clean and validate POST input and populate next form output	
 					$wic_form_utilities->sanitize_validate_input( $next_form_output, $this->working_post_fields );
@@ -154,16 +216,9 @@ class WP_Issues_CRM_Main_Form {
 						if ( 0 == $wic_query->found_posts ) {
 							$next_form_output['guidance']	=	__( 'No matching record found. Try a save? ', 'wp-issues-crm' );
 							$next_form_output['next_action'] 	=	'save';
-						} elseif ( 1 == $wic_query->found_posts ) { // overwrite form with that unique record's  values
-							foreach ( $this->working_post_fields as $field ) {
-								$post_field_key =  $this->wic_metakey . $field['slug'];
-								// the following isset check should be necessary only if a search requesting more than the maximum search terms is executed 
-								// note -- don't need to unserialize phones, etc. -- wp_query does this. also automatic in save_update_wic_post  
-								$next_form_output[$field['slug']] = isset ( $wic_query->post->$post_field_key ) ?  $wic_query->post->$post_field_key : '';
-							}
-							$next_form_output['wic_post_content'] = ''; // don't want to bring search notes automatically into update mode 
-							$next_form_output['old_wic_post_content'] = isset ( $wic_query->post->post_content )  ? $wic_query->post->post_content: '';	
-							$next_form_output['wic_post_id'] 	= $wic_query->post->ID;	
+						} elseif ( 1 == $wic_query->found_posts ) {
+							// overwrite form with that unique record's  values
+							$wic_database_utilities->populate_form_from_database ( $next_form_output, $this->working_post_fields, $wic_query );
 							$next_form_output['guidance']	=	__( 'One matching record found. Try an update?', 'wp-issues-crm' );
 							$next_form_output['next_action'] 	=	'update';
 						} else {
@@ -185,7 +240,7 @@ class WP_Issues_CRM_Main_Form {
 							if ( $next_form_output['error_messages'] > '' ) { 
 								$next_form_output['guidance']	=	__( 'Please correct form errors: ', 'wp-issues-crm' );	
 							} else {
-								$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->working_post_fields );
+								$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->working_post_fields, $this->form_requested );
 								if ( $outcome['notices'] > '' )  { 
 									$next_form_output['guidance'] = __( 'Please retry -- there were database errors. ', 'wp-issues-crm' );
 									$next_form_output['error_messages'] = $outcome['notices'];
@@ -207,12 +262,12 @@ class WP_Issues_CRM_Main_Form {
 						}						
 						break;				
 					case 'save':	
-						if ( 0 == $wic_query->found_posts || $next_form_output['error_messages'] > '' ) {
-							if ( $next_form_output['error_messages'] > '' ) {
+						if ( 0 == $wic_query->found_posts || $next_form_output['error_messages'] > '' ) { // putting error condition here puts form error checking ahead of dup checking 
+							if ( $next_form_output['error_messages'] > '' ) { 
 								$next_form_output['guidance']	=	__( 'Please correct form errors: ', 'wp-issues-crm' );
 								$next_form_output['next_action'] 	=	'save';
 							} else {
-								$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->working_post_fields );
+								$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->working_post_fields, $this->form_requested );
 								if ( $outcome['notices'] > ''  ) { // alpha return_post_id is error string
 									$next_form_output['guidance']	=	__( 'Please retry -- there were database errors: ', 'wp-issues-crm' );
 									$next_form_output['error_messages'] = $outcome['notices'];
@@ -328,41 +383,43 @@ class WP_Issues_CRM_Main_Form {
 			   	<div id="post-form-message-box" class = "<?php echo $notice_class; ?>" ><?php echo $message; ?></div>
 			   <?php }
 			   
-				/* first instance of buttons */	
+				/* prepare first instance of buttons */	
+				$button_row = ''; // temp variable to be repeated at bottom of form
 				$button_args_main = array(
 					'form_requested'			=> $this->form_requested,
 					'action_requested'		=> $next_form_output['next_action'],
 					'button_label'				=> $this->button_actions[$next_form_output['next_action']],
 				);					
-				echo $wic_form_utilities->create_wic_form_button( $button_args_main );
+				$button_row = $wic_form_utilities->create_wic_form_button( $button_args_main );
 
  				if ( 'update' == $next_form_output['next_action'] ) { // show this on save, but not update -- on update, have too much data in form, need to reset
-					foreach ( $wic_base_definitions->wic_post_types as $key => $entity_type ) {
-						if ( $this->form_requested == $entity_type['parent_type'] ) {
+					foreach ( $this->child_types as $entity_type ) {
 							$button_args_child_button = array(
-								'form_requested'			=> $key,
-								'action_requested'		=> 'search',
+								'form_requested'			=> $entity_type,
+								'action_requested'		=> 'save',
 								'id_requested'				=> 0,
 								'referring_parent'		=>	$next_form_output['wic_post_id'], // always isset if doing update
-								'button_label'				=> 'Add New ' . $entity_type['label_singular'],
+								'button_label'				=> 'Add New ' . $wic_base_definitions->wic_post_types[$entity_type]['label_singular'],
 								'button_class'				=> 'wic-form-button second-position',
 							);
-							echo $wic_form_utilities->create_wic_form_button( $button_args_child_button );					
-						}					
+						$button_row .= $wic_form_utilities->create_wic_form_button( $button_args_child_button );					
 					}					
 				}
 				
 				
- 				if ( 'save' == $next_form_output['next_action'] ) { // show this on save, but not update -- on update, have too much data in form, need to reset 
+ 				if ( 'save' == $next_form_output['next_action'] & $this->referring_parent = 0 ) { 
+ 					// show this on save, but not update -- on update, have too much data in form, need to reset; if referring parent, no search to do 
 					$button_args_search_again = array(
 						'form_requested'			=> $this->form_requested,
 						'action_requested'		=> 'search',
 						'button_label'				=> 'Search Again',
 						'button_class'				=> 'wic-form-button second-position'
 					);					
-					echo $wic_form_utilities->create_wic_form_button( $button_args_search_again );
+					$button_row .= $wic_form_utilities->create_wic_form_button( $button_args_search_again );
 				}
 
+				// output first instance of buttons
+				echo $button_row;
 			echo '</div>';   
 		
 		
@@ -533,6 +590,11 @@ class WP_Issues_CRM_Main_Form {
 								echo $wic_form_utilities->$repeater_function ( $group_args );
 								break;
 								
+							case 'parent';
+								$args['hidden_flag'] = true;
+								echo $wic_form_utilities->create_text_control ( $args ); 
+								break;
+								
 							case 'user':
 								/* query users with specified role (s) */
 								$user_query_args = 	array (
@@ -630,17 +692,8 @@ class WP_Issues_CRM_Main_Form {
 			
 				<input type = "hidden" id = "wic_post_id" name = "wic_post_id" value ="<?php echo absint( $next_form_output['wic_post_id'] ) ; ?>" />					
 		  		
-		  		<?php echo $wic_form_utilities->create_wic_form_button( $button_args_main ); 	
-		  		
-				if ( 'update' == $next_form_output['next_action'] ) { // show this on save, but not update -- on update, have too much data in form, need to reset
-					if ( isset ( $button_args_child_button ) ) {
-							echo $wic_form_utilities->create_wic_form_button( $button_args_child_button );					
-					}					
-				}
-				  
-				if ( 'save' == $next_form_output['next_action'] ) { 
-					echo $wic_form_utilities->create_wic_form_button( $button_args_search_again );
-				} ?> 		 		
+				<?php // output second instance of buttons
+				echo $button_row; ?>		 		
 		
 		 		<?php wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); ?>
 

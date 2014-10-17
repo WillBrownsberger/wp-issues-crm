@@ -93,8 +93,8 @@ class WP_Issues_CRM {
 		$control_array = array(
 			'form_requested'			=> '',
 			'action_requested'		=> '',
-			'id_requested'				=> '',
-			'referring_parent' 		=> '',
+			'id_requested'				=> 0,
+			'referring_parent' 		=> 0,
 		);	
 
 		// use default control array to set up top row of buttons that always shows over dashboard and over main form 
@@ -111,14 +111,6 @@ class WP_Issues_CRM {
 		$control_array['form_requested'] = 'issue';
 		$button_value = implode ( ',' , $control_array );		
 		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New Issue Search (not built yet)', 'wp-issues-crm' ) . '</button>';
-
-	
-		$control_array['form_requested'] = 'activity';
-		$button_value = implode ( ',' , $control_array );
-		$control_array['action_requested'] = 'new';		
-		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New cool Search (not built yet)', 'wp-issues-crm' ) . '</button>';
-
-
 
 		echo '</form>';		
 

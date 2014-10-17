@@ -68,17 +68,18 @@ class WP_Issues_CRM_Activity_Definitions {
 		  	*
 		  	*	NOTE: Order values must be unique or second list will overlay first
 		  	*/
-			array( // 1
-				'dedup'	=>	false,	
-				'group'	=>	'activity',
-				'label'	=>	'Constituent',
+			array( // the parent field -- is not displayed (in the form, but hidden) but is stored as a meta value.
+				'dedup'	=>	false,	// is not involved in dup checking
+				'group'	=>	'activity',	// must be placed in a valid group to be displayed, even though hidden
+				'label'	=>	'Constituent', 
 				'like'	=>	false,	
 				'list'	=> '0',
-				'online'	=>	true,	
-				'order'	=>	10,
-				'required'	=> 'individual', // but always supplied
-				'slug'	=> 'activity_constituent_id', 	
-				'type'	=>	'text', 	
+				'online'	=>	true,		// does matter
+				'order'	=>	10, 		// does not matter
+				'required'	=> '', // required, but is automatically supplied supplied
+				'slug'	=> 'activity_constituent_id', 
+				'wic_parent_type' => 'constituent',	
+				'type'	=>	'parent', 	
 				),		
 			array( // 2
 		 		'dedup'	=>	false,

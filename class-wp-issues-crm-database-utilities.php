@@ -12,7 +12,11 @@
 class WP_Issues_CRM_Database_Utilities {
 	
 	public function __construct() {
-
+		// get label for 
+		global $wic_base_definitions;
+		
+		$this->wic_metakey = $wic_base_definitions->wic_metakey;
+		
 	}
 	
 	/*
@@ -48,7 +52,7 @@ class WP_Issues_CRM_Database_Utilities {
 						if ( $next_form_output[$field['slug'] . '_lo'] > '' ) { 
 							if ( ( $index - 1 ) < $this->search_terms_max )	{ 	
 								$meta_query_args[$index] = array(
-									'key' 	=> $wic_base_definitions->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
+									'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
 									'value'		=> $next_form_output[$field['slug'] . '_lo'],
 									'compare'	=>	'>=',
 								);	
@@ -60,7 +64,7 @@ class WP_Issues_CRM_Database_Utilities {
 						if ( $next_form_output[$field['slug'] . '_hi'] > '' ) {
 							if ( ( $index - 1 ) < $this->search_terms_max )	{		
 								$meta_query_args[$index] = array(
-									'key' 	=> $wic_base_definitions->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
+									'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
 									'value'		=> $next_form_output[$field['slug'] . '_hi'],
 									'compare'	=>	'<=',
 								);	
@@ -80,7 +84,7 @@ class WP_Issues_CRM_Database_Utilities {
 								$meta_value = $next_form_output[$field['slug']];
 							}
 							$meta_query_args[$index] = array(
-								'key' 	=> $wic_base_definitions->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
+								'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
 								'value'		=> $meta_value,
 								'compare'	=>	(  // do strict match in dedup mode
 														( $field['like'] && ! $next_form_output['strict_match'] && 'new' == $search_mode ) ||
@@ -121,8 +125,7 @@ class WP_Issues_CRM_Database_Utilities {
 	 	} 
 
  		$wic_query = new WP_Query($query_args);
- 		var_dump ($query_args);
- 	
+
  		return $wic_query;
 	}
 
@@ -138,10 +141,8 @@ class WP_Issues_CRM_Database_Utilities {
 	*
 	*	note: trusting wordpress for data escaping on save -- no validation of post_content, except on display -- see comments in display form
 	*/
-   public function save_update_wic_post( &$next_form_output, $fields_array ) { 
-		
-		global $wic_constituent_definitions;
-		global $wic_base_definitions;
+   public function save_update_wic_post( &$next_form_output, $fields_array, $wic_post_type  ) { 
+
 		global $wic_form_utilities;
 
 		$outcome = array (
@@ -166,12 +167,12 @@ class WP_Issues_CRM_Database_Utilities {
 		$post_args = array(
 		  'post_title'     => $title,
 		  'post_status'    => 'private',
-		  'post_type'      => 'wic_constituent',
+		  'post_type'      => 'wic_' . $wic_post_type,
 		  'comment_status' => 'closed' 
 		); 
 		
-		if ( $next_form_output['wic_post_id'] > 0 ) { // if have constituent ID, do update if notes or title changed
-			$check_on_database = $this->search_wic_posts( 'db_check', $next_form_output, $fields_array, 'constituent' ); // bullet proofing and get values to see if changed
+		if ( $next_form_output['wic_post_id'] > 0 ) { // if have post ID, do update if notes or title changed
+			$check_on_database = $this->search_wic_posts( 'db_check', $next_form_output, $fields_array, $wic_post_type  ); // bullet proofing and get values to see if changed
 			if ( ! isset ( $check_on_database->post->ID ) )  {
 				$outcome['notices'] = __( 'Unknown error. Could not find record to update', 'wp-issues-crm' );
 				return ( $outcome );			
@@ -189,12 +190,12 @@ class WP_Issues_CRM_Database_Utilities {
 				$post_args['post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] );
 				$outcome['post_id'] = $next_form_output['wic_post_id'];			
 			}
-		} else {
+		} else { var_dump ($post_args);
 			$outcome['post_id'] = wp_insert_post( $post_args );		
 		}				
 		// save or update error return with error
 		if ( 0 == $outcome['post_id'] ) {
-			$outcome['notices'] = __( 'Unknown error. Could not save/update constituent record.  Do new constituent search on same constituent to check for partial results.', 'wp-issues-crm' );
+			$outcome['notices'] = sprintf( __( 'Unknown error. Could not save/update %1$s record.  Do new %1$s search on same %1$s to check for partial results.', 'wp-issues-crm' ), $wic_post_type );
 			return ($outcome);					
 		}
 		// otherwise proceed to update metafields
@@ -202,7 +203,7 @@ class WP_Issues_CRM_Database_Utilities {
 		 	// note: in the not read only branch, explicitly set meta_return in every case 
 		 	if ( 'readonly' != $field['type'] ) {
 				// note: add/update post meta automatically serializes arrays!				
-				$post_field_key =  $wic_base_definitions->wic_metakey . $field['slug'];
+				$post_field_key =  $this->wic_metakey . $field['slug'];
 				// first handle existing post meta records already
 				if ( $next_form_output['wic_post_id'] > 0 ) { 
 					if ( $next_form_output[$field['slug']] > '' ) { 
@@ -226,7 +227,7 @@ class WP_Issues_CRM_Database_Utilities {
 						}
 						
 					}
-				// new constituent record
+				// new record
 				} else { 
 					if ( $next_form_output[$field['slug']] > '' ) { 
 						$meta_return = add_post_meta ( $outcome['post_id'], $post_field_key, $next_form_output[$field['slug']] );
@@ -236,7 +237,7 @@ class WP_Issues_CRM_Database_Utilities {
 				}
 				
 				if ( ! $meta_return ) {
-					$outcome['notices'] = sprintf( __( 'Unknown error. Could not save constituent detail -- %1$s.   Do new constituent search on same constituent to check for partial results.', 'wp-issues-crm' ), $field['label'] );
+					$outcome['notices'] = sprintf( __( 'Unknown error. Could not save %2$s detail -- %1$s.   Do new %2$s search on same %2$s to check for partial results.', 'wp-issues-crm' ), $field['label'], $wic_post_type );
 				}
 			}	
 		} 
@@ -245,6 +246,22 @@ class WP_Issues_CRM_Database_Utilities {
 	}	  
 
 
+	/*
+	* populate form from database
+	*
+	*/
+	public function populate_form_from_database ( &$next_form_output, &$fields_array, &$wic_query ) {	
+	
+		foreach ( $fields_array as $field ) {
+			$post_field_key =  $this->wic_metakey . $field['slug'];
+				// the following isset check should be necessary only if a search requesting more than the maximum search terms is executed 
+				// note -- don't need to unserialize phones, etc. -- wp_query does this. also automatic in save_update_wic_post  
+				$next_form_output[$field['slug']] = isset ( $wic_query->post->$post_field_key ) ?  $wic_query->post->$post_field_key : '';
+		}
+		$next_form_output['wic_post_content'] = ''; // don't want to bring search notes automatically into update mode 
+		$next_form_output['old_wic_post_content'] = isset ( $wic_query->post->post_content )  ? $wic_query->post->post_content: '';	
+		$next_form_output['wic_post_id'] 	= $wic_query->post->ID;			
+	}
 
 }
 
