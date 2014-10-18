@@ -75,7 +75,7 @@ class WP_Issues_CRM_Activity_Definitions {
 				'like'	=>	false,	
 				'list'	=> '0',
 				'online'	=>	true,		// does matter
-				'order'	=>	10, 		// does not matter
+				'order'	=>	5, 		// does not matter -- just don't get overlaid
 				'required'	=> '', // required, but is automatically supplied supplied
 				'slug'	=> 'activity_constituent_id', 
 				'wic_parent_type' => 'constituent',	
@@ -101,7 +101,7 @@ class WP_Issues_CRM_Activity_Definitions {
 		 		'like'	=>	false,
 				'list'	=> '0',
 		 		'online'	=>	true,
-		 		'order'	=>	30,	
+		 		'order'	=>	9,	
 				'required'	=> 'individual',
 				'slug'	=> 'activity_date',
 		 		'type'	=>	'date',
@@ -128,7 +128,7 @@ class WP_Issues_CRM_Activity_Definitions {
 		 		'like'	=>	false,
 				'list'	=> '0',
 		 		'online'	=>	true,
-		 		'order'	=>	50,	
+		 		'order'	=>	10,	
 				'required'	=> '',
 				'select_array' => $this->activity_type_options,
 				'slug'	=> 'activity_type',

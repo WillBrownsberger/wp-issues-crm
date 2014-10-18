@@ -49,7 +49,7 @@ class WP_Issues_CRM_Issue_Definitions {
 	{
 	   add_meta_box(
 	       'wic_live_issue_setting_box',
-	       'Issue Live for WP Issues CRM',
+	       __( 'Issue Open/Closed for WP Issues CRM', 'wp-issues-crm' ),
 	       array( $this, 'wic_live_issue_meta_box' ),
 	       'post',
 	       'side',
@@ -62,7 +62,7 @@ class WP_Issues_CRM_Issue_Definitions {
 		
 		global $wic_form_utilities;		
 		
-	   wp_nonce_field(site_url(__FILE__), 'wic_live_issue_metabox_noncename');
+	   wp_nonce_field( site_url(__FILE__), 'wic_live_issue_metabox_noncename' );
 	
       $wic_live_issue_options = array(
 			array(
@@ -83,7 +83,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'value'	=> $value,
 			'read_only_flag'		=>	false, 
 			'field_label_suffix'	=> '',
-			'placeholder'			=> __( 'Open/Closed for WIC?', 'wp-issues-crm' ),
+			'placeholder'			=> __( 'Open/Closed?', 'wp-issues-crm' ),
 			'select_array' =>	$wic_live_issue_options,							
 		);	  
 
