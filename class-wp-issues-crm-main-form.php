@@ -42,11 +42,11 @@ class WP_Issues_CRM_Main_Form {
 	public function __construct( $control_array ) {
 	
 		// set up control properties 
-		$this->form_requested 	= $control_array[0];
-		$this->action_requested = $control_array[1];
+		$this->form_requested 	= $control_array[0]; // constituent, activity, issue . . .
+		$this->action_requested = $control_array[1]; // save, update, search
 		$this->id_requested 		= $control_array[2]; // numeric, 0 if not set 
 		$this->referring_parent = $control_array[3]; // id of referring_parent post > 0 only on first entry from add new button on parent form 
-		$this->child_types		= array(); // used only to display add new buttons (e.g., add new activity for constituent )
+		$this->child_types		= array(); // used only to display child lists and add new buttons (e.g., add activity list and new activity for constituent )
 		$this->parent_pointer_slug = ''; // used as flag to determine child form handling and also as to quickly refer to parent field 
 				
 		// set up class globals, identify any child post_types of the current type, and (if current_type is a child) identify parent pointer field; 
@@ -55,11 +55,11 @@ class WP_Issues_CRM_Main_Form {
 			global ${ 'wic_' . $key . '_definitions' };	
 			//	must exist in valid config:  proper class name and field wic_post_fields within class	
 			foreach ( ${ 'wic_' . $key . '_definitions' }->wic_post_fields as $field ) {
-				if ( $this->form_requested != $key ) { // check to see if types other than current claim current type as parent
+				if ( $this->form_requested != $key ) { // be checking to see if types other than current claim current type as parent
 					if ( 'parent' == $field['type'] && $this->form_requested == $field['wic_parent_type'] ) {
 						$this->child_types[] = $key;			
 					}
-				} else {	// check to see if current type claims a parent						
+				} else {	// be checking to see if current type claims a parent						
 					if ( 'parent' == $field['type'] ) {
 						$this->parent_pointer_slug = $field['slug'];
 						break; // should only be one field with field type parent in array					
@@ -294,7 +294,7 @@ class WP_Issues_CRM_Main_Form {
 			 
 			// prepare to show list of posts if found more than one
 			if ( $show_list ) {
-				$wic_list_posts = new WP_Issues_CRM_Posts_List ( $wic_query, $this->working_post_fields, $this->form_requested );			
+				$wic_list_posts = new WP_Issues_CRM_Posts_List ( $wic_query, $this->working_post_fields, $this->form_requested, true );			
 				$post_list = $wic_list_posts->post_list;
 				if ( 'search' == $this->action_requested  && '' == $next_form_output['search_notices'] ) // always show form unless was a search and no search notices
 					$next_form_output['initial_form_state'] = 'wic-form-closed';
@@ -302,16 +302,29 @@ class WP_Issues_CRM_Main_Form {
 				$post_list = '';			
 			}
 
-			// done with query
+			// prepare to show list of posts if found exactly one
+			$children_list_output = '';
+			if ( $next_form_output['wic_post_id'] > 0 && count( $this->child_types ) > 0 ) {
+				$children_lists = $wic_database_utilities->get_children_lists ( $next_form_output['wic_post_id'], $this->form_requested, $this->child_types );
+				foreach ( $children_lists as $child_list ) {
+					$wic_list_posts = new WP_Issues_CRM_Posts_List ( $child_list['list_query'], $child_list['fields_array'], $child_list['child_type'], false );	
+					$children_list_output = $wic_list_posts->post_list;		
+				}			
+			}
+
+			// done with queries
 			wp_reset_postdata();
 
- 		} // close if returning form button values
+ 		} // close if not just a new query
  		
- 		// deliver the results (blank if new form)
+ 		// deliver the results ( if new form)
  		ob_start();
  		$this->display_form( $next_form_output );
  		if ( isset ( $post_list ) ) {
 			echo $post_list; 		
+ 		}
+ 		if ( isset ( $children_list_output ) ) {
+ 			echo $children_list_output;	
  		}
  		ob_end_flush();
 
@@ -337,7 +350,8 @@ class WP_Issues_CRM_Main_Form {
 	public function display_form ( &$next_form_output ) {
 		
 		global $wic_base_definitions;
-		global $wic_form_utilities; // access for functions ( field definitions already instantiated  in construct )
+		global $wic_form_utilities; 
+		global ${ 'wic_' . $this->form_requested . '_definitions' };
 		/* var_dump( $next_form_output['initial_sections_open'] );
 
 		 echo '<span style="color:green;"> <br /> $_POST:';  		
@@ -358,13 +372,12 @@ class WP_Issues_CRM_Main_Form {
 
 			<div class = "wic-form-field-group wic-group-odd">
 			
-				<?php if ( 'update' == $next_form_output['next_action'] ) {
-					$form_header = $next_form_output['first_name'] . ' ' . $next_form_output['last_name'];
-					$form_header = ( '' == $form_header ) ? $next_form_output['emails'][0][1] : $form_header;
+				<?php if ( 'update' == $next_form_output['next_action'] || $this->referring_parent > 0 ) {
+					$form_header = ${ 'wic_' . $this->form_requested . '_definitions' }->title_callback( $next_form_output );
 				} else {
 					$form_header = __( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm');
 				}
-				echo '<h2>' . $form_header . '</h2>'; 
+				echo '<h2>' . esc_html( $form_header ) . '</h2>'; 
 				
 				if ( 'wic-form-closed' == $next_form_output['initial_form_state'] ) {
 					echo '<button id = "form-toggle-button" type="button" onclick = "togglePostForm()">' . __( 'Show Search Form', 'wp-issues-crm' ) . '</button>';		
@@ -574,11 +587,11 @@ class WP_Issues_CRM_Main_Form {
 								
 							case 'select':
 								$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
-								$args['select_array']			=	$field['select_array'];
+								$args['select_array']			=	is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']();
 								$args['field_label_suffix']	= $required_individual . $required_group;								
 								echo '<p>' . $wic_form_utilities->create_select_control ( $args ) . '</p>';
 								break; 
-							
+														
 							case 'serialized_type_as_array': // note -- non-arrays already intercepted above  
 								$group_args	= array (
 									'repeater_group_id'		=> $field['slug'],

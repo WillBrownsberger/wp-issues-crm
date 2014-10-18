@@ -896,6 +896,22 @@ class WP_Issues_CRM_Form_Utilities {
 		return ( $button );
 	}
 
+	public function drop_down_issues() {
+		$test = array ( 
+		array(
+			'value'	=> '0',
+			'label'	=>	'Pro' ),
+		array(
+			'value'	=> '1',
+			'label'	=>	'Con' ),
+		);
+		
+		return $test;
+	}
+
+
+
+
 }
 
 $wic_form_utilities = new WP_Issues_CRM_Form_Utilities;

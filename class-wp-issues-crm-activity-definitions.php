@@ -91,7 +91,8 @@ class WP_Issues_CRM_Activity_Definitions {
 		 		'order'	=>	20,	
 				'required'	=> 'individual',
 				'slug'	=> 'activity_issue_id',
-		 		'type'	=>	'text',
+				'select_array' => 'drop_down_issues',
+		 		'type'	=>	'select',
 			),		
 			array( // 3 (might be different from date of entry -- leave post_date as record of that, use meta for date of activity)
 		 		'dedup'	=>	false,
@@ -272,29 +273,52 @@ function wic_activity() {
 			'label'	=>	'Letter' ),
 		);
 
-	public $phone_type_options = array(	
-		array(
-			'value'	=> '0',
-			'label'	=>	'Home Landline' ),
-		array(
-			'value'	=> '1',
-			'label'	=>	'Personal Mobile' ),
-		array(
-			'value'	=> '2',
-			'label'	=>	'Work Landline' ),
-		array(
-			'value'	=> '3',
-			'label'	=>	'Work Mobile' ),
-		array(
-			'value'	=> '4',
-			'label'	=>	'Home Fax' ),					
-		array(
-			'value'	=> '5',
-			'label'	=>	'Work Fax' ),
-		array(
-			'value'	=> '6',
-			'label'	=>	'Other Phone' ),
+
+	public function title_callback( &$next_form_output ) {
+			
+		$parent_type = '';
+		foreach ( $this->wic_post_fields as $field )	{
+			if ( 'parent' == $field['type'] ) {
+				$parent_type = $field['wic_parent_type']; // field slugs below assume like constituent with fn/ln &/or email
+				break;			
+			}		
+		}
+		
+		global $wic_database_utilities;
+		global ${ 'wic_' . $parent_type . '_definitions' };
+	
+
+		$next_form_output_parent_partial = array (
+			'wic_post_id' => $next_form_output['activity_constituent_id'],
 		);
+		
+		
+		$parent_field_array =  ${ 'wic_' . $parent_type . '_definitions' }->wic_post_fields;		
+		
+		$parent_query = $wic_database_utilities->search_wic_posts( 'db_check', $next_form_output_parent_partial, $parent_field_array, $parent_type  );
+
+		// this function takes pointers to all values and operates on the output array passed 
+		$wic_database_utilities->populate_form_from_database ( $next_form_output_parent_partial, $parent_field_array, $parent_query );		
+		
+		$email_for_title = '';
+		if ( isset( $next_form_output_parent_partial['email_group'] ) ) {
+			$email_for_title = isset( $next_form_output_parent_partial['email_group'][0][1] ) ? $next_form_output_parent_partial['email_group'][0][1]  : '';
+		} 
+		if ( '' == $email_for_title ) {
+			$email_for_title = isset( $next_form_output_parent_partial['email'] ) ? $next_form_output_parent_partial['email_group']  : ''; 
+		}
+		
+ 
+		$title =  isset ( $next_form_output_parent_partial['first_name'] ) ? $next_form_output_parent_partial['first_name'] : '';
+		$title .= isset ( $next_form_output_parent_partial['last_name'] ) ? ( $title > '' ? ' ' : '' ) . $next_form_output_parent_partial['last_name'] : '';
+		$title .=  ( '' == $title )  ? $email_for_title : ( $email_for_title > '' ? ' (' . $email_for_title  . ')' : '' );
+	
+		$title = 'Activity for ' . $title;	
+	
+		//return  (  $parent_query->post->last_name );
+		return $title;
+	}
+
 
  }
 

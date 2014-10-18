@@ -144,25 +144,14 @@ class WP_Issues_CRM_Database_Utilities {
    public function save_update_wic_post( &$next_form_output, $fields_array, $wic_post_type  ) { 
 
 		global $wic_form_utilities;
+		global ${ 'wic_' . $wic_post_type . '_definitions' };	
 
 		$outcome = array (
 			'post_id'	=> 0,
 		   'notices'	=> '', 
 		);		
 		
-		// for title, use group email if have it, otherwise use individual email 
-		$email_for_title = '';
-		if ( isset( $next_form_output['email_group'] ) ) {
-			$email_for_title = isset( $next_form_output['email_group'][0][1] ) ? $next_form_output['email_group'][0][1]  : '';
-		} 
-		if ( '' == $email_for_title ) {
-			$email_for_title = isset( $next_form_output['email'] ) ? $next_form_output['email_group']  : ''; 
-		}
-		
-   	// title is ln OR ln,fn OR fn OR email -- one of these is required in validation to be non-blank.	
-		$title = 	isset ( $next_form_output['last_name'] ) ? $next_form_output['last_name'] : '';
-		$title .= 	isset ( $next_form_output['first_name'] ) ? ( $title > '' ? ', ' : '' ) . $next_form_output['first_name'] : '';
-		$title =		( '' == $title ) ? $email_for_title : $title;
+		$title =  ${ 'wic_' . $wic_post_type . '_definitions' }->title_callback( $next_form_output );		
 		
 		$post_args = array(
 		  'post_title'     => $title,
@@ -190,7 +179,7 @@ class WP_Issues_CRM_Database_Utilities {
 				$post_args['post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] );
 				$outcome['post_id'] = $next_form_output['wic_post_id'];			
 			}
-		} else { var_dump ($post_args);
+		} else {
 			$outcome['post_id'] = wp_insert_post( $post_args );		
 		}				
 		// save or update error return with error
@@ -251,7 +240,7 @@ class WP_Issues_CRM_Database_Utilities {
 	*
 	*/
 	public function populate_form_from_database ( &$next_form_output, &$fields_array, &$wic_query ) {	
-	
+	   
 		foreach ( $fields_array as $field ) {
 			$post_field_key =  $this->wic_metakey . $field['slug'];
 				// the following isset check should be necessary only if a search requesting more than the maximum search terms is executed 
@@ -261,6 +250,56 @@ class WP_Issues_CRM_Database_Utilities {
 		$next_form_output['wic_post_content'] = ''; // don't want to bring search notes automatically into update mode 
 		$next_form_output['old_wic_post_content'] = isset ( $wic_query->post->post_content )  ? $wic_query->post->post_content: '';	
 		$next_form_output['wic_post_id'] 	= $wic_query->post->ID;			
+	}
+
+	public function get_children_lists ( $wic_post_id, $wic_post_type, $child_types ) {
+		
+		// note, could reconstruct type and child_types with wic_post id, but given calling context, no apparent need to reinvent the wheel		
+
+		$children_lists = array();
+		
+		foreach ( $child_types as $child_type ) {
+
+			$child_list = array();
+
+			global ${ 'wic_' . $child_type . '_definitions' };		
+			$working_list_fields = array();		
+			foreach ( ${ 'wic_' . $child_type . '_definitions' }->wic_post_fields as $field ) {
+	 			if ( 'parent' == $field['type'] ) {
+					$parent_pointer_slug = $field['slug']; // should be only one if db properly configured
+				}
+ 			}
+
+			$meta_query_args = array(
+				array(
+					'key'     => $this->wic_metakey . $parent_pointer_slug,
+					'value'   => $wic_post_id,
+					'compare' => '=',
+				)
+			);
+
+			$list_query_args = array (
+	 			'posts_per_page' => 100,
+	 			'post_type' 	=>	$wic_post_type,
+	 			'meta_query' 	=> $meta_query_args, 
+	 			'order'			=> 'DESC',
+	 		);
+	 					
+			$list_query = new WP_Query ( $list_query_args );
+		
+			$child_list = array(
+				'list_query' 	=> $list_query,
+				'fields_array' => ${ 'wic_' . $child_type . '_definitions' }->wic_post_fields,
+				'child_type'	=> $child_type, 
+			);
+			
+			$children_lists[] = $child_list;
+		}
+		
+		$children_lists = ( count( $children_lists ) > 0 ) ? $children_lists : false;		
+		
+		return (	$children_lists );			
+			
 	}
 
 }

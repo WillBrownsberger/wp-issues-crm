@@ -542,6 +542,27 @@ class WP_Issues_CRM_Constituent_Definitions {
 	);		
 
 
+	public function title_callback( &$next_form_output ) {
+		
+		// for title, use group email if have it, otherwise use individual email 
+		$email_for_title = '';
+		if ( isset( $next_form_output['email_group'] ) ) {
+			$email_for_title = isset( $next_form_output['email_group'][0][1] ) ? $next_form_output['email_group'][0][1]  : '';
+		} 
+		if ( '' == $email_for_title ) {
+			$email_for_title = isset( $next_form_output['email'] ) ? $next_form_output['email_group']  : ''; 
+		}
+		
+   	// title is ln OR ln,fn OR fn OR email -- one of these is required in validation to be non-blank.	
+		$title = 	isset ( $next_form_output['last_name'] ) ? $next_form_output['last_name'] : '';
+		$title .= 	isset ( $next_form_output['first_name'] ) ? ( $title > '' ? ', ' : '' ) . $next_form_output['first_name'] : '';
+		$title =		( '' == $title ) ? $email_for_title : $title;
+	
+		return  ( $title );
+	}
+	
+
+
  }
 
 $wic_constituent_definitions = new WP_Issues_CRM_Constituent_Definitions;

@@ -20,17 +20,17 @@ class WP_Issues_CRM_Posts_List {
 	private $list_fields = array();
 	public $post_list;
 
-	public function __construct( &$wic_query, $fields_array, $entity_type ) {
+	public function __construct( &$wic_query, $fields_array, $entity_type, $show_top_buttons ) {
 	
 		foreach ( $fields_array as $field )
 			if ( $field['list'] > 0 ) { 		
  				 array_push( $this->list_fields, $field );
  			}
-		$this->post_list = $this->format_post_list( $wic_query, $entity_type );
+		$this->post_list = $this->format_post_list( $wic_query, $entity_type, $show_top_buttons );
 	}
 
 
-  public function format_post_list( &$wic_query, $entity_type ) {
+  public function format_post_list( &$wic_query, $entity_type, $show_top_buttons ) {
   	
   	
   		$list_button_args = array(
@@ -47,11 +47,15 @@ class WP_Issues_CRM_Posts_List {
   		global $wic_base_definitions;
  		global $wic_form_utilities;
 		$output = '<div id="wid-post-list"><form method="POST">' . 
-			'<div class = "wic-post-field-group wic-group-odd">
-				<h2> Found ' . $wic_query->found_posts . ' records, showing ' . $wic_query->post_count . '</h2>' . 
+			'<div class = "wic-post-field-group wic-group-odd">';
+			
+		if ( $show_top_buttons ) {	
+			$output .=	'<h2> Found ' . $wic_query->found_posts . ' records, showing ' . $wic_query->post_count . '</h2>' . 
 				'<button id = "form-toggle-button-on-list" type="button" onclick = "togglePostForm()">' . __( 'Show Search', 'wp-issues-crm' ) . '</button>' .
 				'<button id = "post-export-button" class = "wic-form-button" type="button" >' . __( 'Export (not built yet)', 'wp-issues-crm' ) . '</button>' .
 				'</div>';
+		}
+		
 		$line_count = 1;	
 		$output .= '<ul class = "wic-post-list">' .  // out ul for the list
 			'<li class = "cl-odd">' .							// header is a list item with a ul within it
