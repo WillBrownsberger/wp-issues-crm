@@ -54,12 +54,17 @@ add_action( 'wp_enqueue_scripts', 'wp_issue_crm_setup_styles');
 
 function wp_issue_crm_list_width_styles() {
 	
-	global $wic_constituent_definitions;
-	$output = '<!-- width styles for wp-issues-crm constituent list --><style>';
-	foreach ( $wic_constituent_definitions->wic_post_fields as $field ) {
-		if ( $field['list'] > 0 ) { 		
- 			$output .= '.cl-' . $field['slug'] . '{ width:' . $field['list'] . '%;}'; 
- 		}
+	global $wic_base_definitions;
+
+	$output = '<!-- width styles for wp-issues-crm post lists --><style>';
+	foreach ( $wic_base_definitions->wic_post_types as $key => $value ) {
+		global ${ 'wic_' . $key . '_definitions' };	
+		//	must exist in valid config:  proper class name and field wic_post_fields within class	
+		foreach ( ${ 'wic_' . $key . '_definitions' }->wic_post_fields as $field ) {
+			if ( $field['list'] > 0 ) { 		
+	 			$output .= '.pl-' . $key . '-' . $field['slug'] . '{ width:' . $field['list'] . '%;}';  
+	 		}
+		}
 	}
 	$output .= '</style>';
 	echo $output;

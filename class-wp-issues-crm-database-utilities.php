@@ -280,13 +280,13 @@ class WP_Issues_CRM_Database_Utilities {
 
 			$list_query_args = array (
 	 			'posts_per_page' => 100,
-	 			'post_type' 	=>	$wic_post_type,
+	 			'post_type' 	=>	'wic_' . $child_type,
 	 			'meta_query' 	=> $meta_query_args, 
-	 			'order'			=> 'DESC',
+	 			'order'			=> 'ASC',
 	 		);
 	 					
 			$list_query = new WP_Query ( $list_query_args );
-		
+	
 			$child_list = array(
 				'list_query' 	=> $list_query,
 				'fields_array' => ${ 'wic_' . $child_type . '_definitions' }->wic_post_fields,
@@ -327,7 +327,10 @@ class WP_Issues_CRM_Database_Utilities {
 		
 	}
 	
-	
+	public function wic_get_post ( $post_id ) {
+		$wic_post_query = new WP_Query ( 'p=' . $post_id );		
+		return $wic_post_query;	
+	}
 
 
 

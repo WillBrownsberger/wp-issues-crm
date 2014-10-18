@@ -48,6 +48,7 @@ class WP_Issues_CRM_Main_Form {
 		$this->referring_parent = $control_array[3]; // id of referring_parent post > 0 only on first entry from add new button on parent form 
 		$this->child_types		= array(); // used only to display child lists and add new buttons (e.g., add activity list and new activity for constituent )
 		$this->parent_pointer_slug = ''; // used as flag to determine child form handling and also as to quickly refer to parent field 
+		$this->parent_type = '';
 				
 		// set up class globals, identify any child post_types of the current type, and (if current_type is a child) identify parent pointer field; 
 		global $wic_base_definitions;
@@ -62,6 +63,7 @@ class WP_Issues_CRM_Main_Form {
 				} else {	// be checking to see if current type claims a parent						
 					if ( 'parent' == $field['type'] ) {
 						$this->parent_pointer_slug = $field['slug'];
+						$this->parent_pointer_type = $field['wic_parent_type'];
 						break; // should only be one field with field type parent in array					
 					}
 				}			
@@ -304,10 +306,10 @@ class WP_Issues_CRM_Main_Form {
 
 			// prepare to show list of posts if found exactly one
 			$children_list_output = '';
-			if ( $next_form_output['wic_post_id'] > 0 && count( $this->child_types ) > 0 ) {
+			if ( $next_form_output['wic_post_id'] > 0 && count( $this->child_types ) > 0 ) { 
 				$children_lists = $wic_database_utilities->get_children_lists ( $next_form_output['wic_post_id'], $this->form_requested, $this->child_types );
-				foreach ( $children_lists as $child_list ) {
-					$wic_list_posts = new WP_Issues_CRM_Posts_List ( $child_list['list_query'], $child_list['fields_array'], $child_list['child_type'], false );	
+				foreach ( $children_lists as $child_list ) { 
+					$wic_list_posts = new WP_Issues_CRM_Posts_List ( $child_list['list_query'], $child_list['fields_array'], $child_list['child_type'], $next_form_output['wic_post_id'],  false );	
 					$children_list_output = $wic_list_posts->post_list;		
 				}			
 			}
@@ -419,8 +421,7 @@ class WP_Issues_CRM_Main_Form {
 					}					
 				}
 				
-				
- 				if ( 'save' == $next_form_output['next_action'] & $this->referring_parent = 0 ) { 
+ 				if ( 'save' == $next_form_output['next_action'] & 0 == $this->referring_parent ) { 
  					// show this on save, but not update -- on update, have too much data in form, need to reset; if referring parent, no search to do 
 					$button_args_search_again = array(
 						'form_requested'			=> $this->form_requested,
@@ -429,6 +430,18 @@ class WP_Issues_CRM_Main_Form {
 						'button_class'				=> 'wic-form-button second-position'
 					);					
 					$button_row .= $wic_form_utilities->create_wic_form_button( $button_args_search_again );
+				}
+
+				if ( $this->parent_pointer_slug > '' ) {
+					$button_args_parent_button = array(
+						'form_requested'			=> $this->parent_type,
+						'action_requested'		=> 'search',
+						'id_requested'				=> $next_form_output[$this->parent_pointer_slug],
+						'button_label'				=> sprintf( __( 'Back to %1$s', 'wp-issues-crm'), $this->parent_type ), 
+						'button_class'				=> 'wic-form-button second-position'
+					);					
+					$button_row .= $wic_form_utilities->create_wic_form_button( $button_args_parent_button );
+				
 				}
 
 				// output first instance of buttons

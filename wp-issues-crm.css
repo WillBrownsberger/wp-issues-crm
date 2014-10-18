@@ -360,33 +360,33 @@ p.wic-form-field-group-legend {
 }
 
 /* alternating row colors applied to li's in outer list */
-.cl-odd {
+.pl-odd {
 	background: #f1f1f1;
 }
 
-.cl-odd:hover {
+.pl-odd:hover {
 	background: #ececec;
 }
 
-.cl-even {
+.pl-even {
 	background: #f0f0fa;
 }
 
-.cl-even:hover {
+.pl-even:hover {
 	background: #f5f5fa;
 }
 
 
 /* header (horizontal) list styling */
-ul.cl-headers {
+ul.wic-post-list-headers {
 	font-size: 14px;
 	font-weight: 700;
 	list-style: none;
 	padding: 8px 8px;
 }
 
-li.cl-header,
-li.cl-field {
+li.wic-post-list-header,
+li.wic-post-list-field {
 	display: inline-block;
 	vertical-align: top;	
 }
