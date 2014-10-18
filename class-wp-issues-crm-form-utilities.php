@@ -921,12 +921,12 @@ class WP_Issues_CRM_Form_Utilities {
 
 	public function wic_get_post_title( $post_id ) {
 
-		global $wic_database_utilities;	
-
+/*		global $wic_database_utilities;	
 		$post_query = $wic_database_utilities->wic_get_post( $post_id );
 		$title = $post_query->posts[0]->post_title;
 		wp_reset_postdata();
-		
+*/
+		$title = get_the_title ( $post_id ); 
 		return $title;
 					
 	}
