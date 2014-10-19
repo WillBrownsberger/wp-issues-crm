@@ -26,6 +26,11 @@ class WP_Issues_CRM_Activity_Definitions {
 		
 	}
 
+	public $wic_post_type_labels = array (
+		'singular' => 'Activity',
+		'plural'	  => 'Activities'	
+	);
+
 	public $wic_post_field_groups = array (
 
 		array (
@@ -91,6 +96,7 @@ class WP_Issues_CRM_Activity_Definitions {
 		 		'online'	=>	true,
 		 		'order'	=>	20,	
 				'required'	=> 'individual',
+				'select_parameter' => '',
 				'slug'	=> 'activity_issue_id',
 				'select_array' => 'drop_down_issues',
 		 		'type'	=>	'select',
@@ -132,6 +138,7 @@ class WP_Issues_CRM_Activity_Definitions {
 		 		'order'	=>	10,	
 				'required'	=> '',
 				'select_array' => $this->activity_type_options,
+				'select_parameter' => '',
 				'slug'	=> 'activity_type',
 		 		'type'	=>	'select',
 			),

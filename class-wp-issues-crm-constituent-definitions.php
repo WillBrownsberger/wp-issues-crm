@@ -39,6 +39,11 @@ class WP_Issues_CRM_Constituent_Definitions {
 		return ( $sorted_line_items) ;
 	}
 
+	public $wic_post_type_labels = array (
+		'singular' => 'Constituent',
+		'plural'	  => 'Constituents'	
+	);
+
 
 	public $wic_post_field_groups = array (
 		array (

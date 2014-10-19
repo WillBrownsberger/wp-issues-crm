@@ -48,7 +48,7 @@ class WP_Issues_CRM_Main_Form {
 		$this->referring_parent = $control_array[3]; // id of referring_parent post > 0 only on first entry from add new button on parent form 
 		$this->child_types		= array(); // used only to display child lists and add new buttons (e.g., add activity list and new activity for constituent )
 		$this->parent_pointer_slug = ''; // used as flag to determine child form handling and also as to quickly refer to parent field 
-		$this->parent_type = '';
+		$this->parent_type = ''; // type of the parent to current type
 				
 		// set up class globals, identify any child post_types of the current type, and (if current_type is a child) identify parent pointer field; 
 		global $wic_base_definitions;
@@ -63,7 +63,7 @@ class WP_Issues_CRM_Main_Form {
 				} else {	// be checking to see if current type claims a parent						
 					if ( 'parent' == $field['type'] ) {
 						$this->parent_pointer_slug = $field['slug'];
-						$this->parent_pointer_type = $field['wic_parent_type'];
+						$this->parent_type = $field['wic_parent_type'];
 						break; // should only be one field with field type parent in array					
 					}
 				}			
@@ -81,9 +81,6 @@ class WP_Issues_CRM_Main_Form {
  				 array_push( $this->working_post_fields, $field );
  			}
  		}
-
-		// identify parent type (may be empty string)
-		$this->parent_type = $wic_base_definitions->wic_post_types[$this->form_requested]['parent_type']; 	
  		
  		// get field groups for current post type 
 		$this->working_post_field_groups = $$field_source_string->wic_post_field_groups;
@@ -316,6 +313,7 @@ class WP_Issues_CRM_Main_Form {
 
 			// done with queries
 			wp_reset_postdata();
+			wp_reset_query();
 
  		} // close if not just a new query
  		
@@ -356,7 +354,7 @@ class WP_Issues_CRM_Main_Form {
 		global ${ 'wic_' . $this->form_requested . '_definitions' };
 		/* var_dump( $next_form_output['initial_sections_open'] );
 
-		 echo '<span style="color:green;"> <br /> $_POST:';  		
+		/* echo '<span style="color:green;"> <br /> $_POST:';  		
   		var_dump ($_POST);
   		echo '</span>';  
 
@@ -407,14 +405,15 @@ class WP_Issues_CRM_Main_Form {
 				);					
 				$button_row = $wic_form_utilities->create_wic_form_button( $button_args_main );
 
- 				if ( 'update' == $next_form_output['next_action'] ) { // show this on save, but not update -- on update, have too much data in form, need to reset
+ 				if ( 'update' == $next_form_output['next_action'] ) { // show button for new child type(s)
 					foreach ( $this->child_types as $entity_type ) {
+						global ${ 'wic_' . $entity_type . '_definitions' };
 							$button_args_child_button = array(
 								'form_requested'			=> $entity_type,
 								'action_requested'		=> 'save',
 								'id_requested'				=> 0,
 								'referring_parent'		=>	$next_form_output['wic_post_id'], // always isset if doing update
-								'button_label'				=> 'Add New ' . $wic_base_definitions->wic_post_types[$entity_type]['label_singular'],
+								'button_label'				=> 'Add New ' . ${ 'wic_' . $entity_type . '_definitions' }->wic_post_type_labels['singular'],
 								'button_class'				=> 'wic-form-button second-position',
 							);
 						$button_row .= $wic_form_utilities->create_wic_form_button( $button_args_child_button );					
@@ -629,7 +628,7 @@ class WP_Issues_CRM_Main_Form {
 								echo $wic_form_utilities->$repeater_function ( $group_args );
 								break;
 								
-							case 'parent';
+							case 'parent':
 								$args['hidden_flag'] = true;
 								echo $wic_form_utilities->create_text_control ( $args ); 
 								break;
@@ -640,38 +639,35 @@ class WP_Issues_CRM_Main_Form {
 		   } // close foreach group
 		
 		
-			// notes div
-			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd"; 
-			$group_count++;
-			echo '<div class = "wic-form-field-group ' . $row_class . '" id = "wic-post-content">';
-			
-			$show_initial = ( "update" == $next_form_output['next_action'] ); // show notes on update next			
-			$show_initial = in_array( 'wic_post_content', $next_form_output['initial_sections_open'] ) ? true : $show_initial; // also were searched or updated 
-			
-			$button_args = array (
-				'class'			=> 'field-group-show-hide-button',		
-				'name_base'		=> 'wic-inner-field-group-',
-				'name_variable' => 'wic-post-content',
-				'label' 			=> __('Notes', 'wp-issues-crm' ),
-				'show_initial' =>  ( $show_initial ),
-			);
-			
-			echo $wic_form_utilities->output_show_hide_toggle_button( $button_args );
-			
-			$show_class = $show_initial ? 'visible-template' : 'hidden-template';
-						
-			echo '<div id = "wic-inner-field-group-wic-post-content" class="' . $show_class .'">';	
-				$args = array (
-					'field_name_id'		=> 'wic_post_content',
-					'field_label'			=>	__( "Note Text", 'wp-issues-crm' ),
-					'value'					=> $next_form_output['wic_post_content'],
-					'read_only_flag'		=>	false, 
-					'field_label_suffix'	=> '(%!)', 								
-					);			
-				// show notes as input for search or as text area for update
-				if ( 'search' == $next_form_output['next_action'] ){
-					echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>'; 
-				} else {
+			// notes div -- show only on update save -- do full text searching as a post field, since doesn't really pertain to notes only
+			if ( 'search' != $next_form_output['next_action'] ) {
+				$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd"; 
+				$group_count++;
+				echo '<div class = "wic-form-field-group ' . $row_class . '" id = "wic-post-content">';
+				
+				$show_initial = ( "update" == $next_form_output['next_action'] ); // show notes on update next			
+				$show_initial = in_array( 'wic_post_content', $next_form_output['initial_sections_open'] ) ? true : $show_initial; // also were searched or updated 
+				
+				$button_args = array (
+					'class'			=> 'field-group-show-hide-button',		
+					'name_base'		=> 'wic-inner-field-group-',
+					'name_variable' => 'wic-post-content',
+					'label' 			=> __('Notes', 'wp-issues-crm' ),
+					'show_initial' =>  ( $show_initial ),
+				);
+				
+				echo $wic_form_utilities->output_show_hide_toggle_button( $button_args );
+				
+				$show_class = $show_initial ? 'visible-template' : 'hidden-template';
+							
+				echo '<div id = "wic-inner-field-group-wic-post-content" class="' . $show_class .'">';	
+					$args = array (
+						'field_name_id'		=> 'wic_post_content',
+						'field_label'			=>	__( "Note Text", 'wp-issues-crm' ),
+						'value'					=> $next_form_output['wic_post_content'],
+						'read_only_flag'		=>	false, 
+						'field_label_suffix'	=> '(%!)', 								
+						);			
 					$args['field_label_suffix']	= '';
 					$args['input_class'] = 'wic-input wic-wic-post-content';
 					echo '<p>' . $wic_form_utilities->create_text_area_control($args) . '</p>';
@@ -683,21 +679,21 @@ class WP_Issues_CRM_Main_Form {
 					$args['value']	= $next_form_output['old_wic_post_content'];
 					echo '<p>' . $wic_form_utilities->create_text_area_control($args) . '</p>';
 					echo '<div id = "wic-old-wic-post-content">' .  balancetags( wp_kses_post ( $next_form_output['old_wic_post_content'] ), true ) . '</div>';
-				}	
-				/**
-				* options considered for output sanitization of kses_post -- need to be good here, since new notes are just appended to old
-				* with no filtering before this point ( on save/update take display value from prior form values (new appended to old), not database 	
-				*		(1) esc_html not an option since shows html characters instead of using them format 
-				*		(2) sanitize_text_field strips tags entirely
-				*		(3) apply_filters('the_content', -- ) does nothing to address stray quotes or unbalanced tags (and would run shortcodes, etc.)
-				*		(4) wp_kses_post leaves tags unbalanced but handles stray quotes
-				*		(5) balancetags (with force set to true) still gets hurt by stray quotes
-				*		CONCLUSION COMBINE 4 AND 5 -- EXPENSIVE, BUT APPROPRIATE, GIVEN RAW CONTENT BEING SERVED -- 
-				*		NOTE: Wordpress does not bother to clean post_content up in this way (even through the admin interface) -- so conclude not necessary on save
-				*      	-- only do it here for display; assume properly escaped for storage although not clean display
-				*/
-				
-			echo '</div></div>'; 
+					/**
+					* options considered for output sanitization of kses_post -- need to be good here, since new notes are just appended to old
+					* with no filtering before this point ( on save/update take display value from prior form values (new appended to old), not database 	
+					*		(1) esc_html not an option since shows html characters instead of using them format 
+					*		(2) sanitize_text_field strips tags entirely
+					*		(3) apply_filters('the_content', -- ) does nothing to address stray quotes or unbalanced tags (and would run shortcodes, etc.)
+					*		(4) wp_kses_post leaves tags unbalanced but handles stray quotes
+					*		(5) balancetags (with force set to true) still gets hurt by stray quotes
+					*		CONCLUSION COMBINE 4 AND 5 -- EXPENSIVE, BUT APPROPRIATE, GIVEN RAW CONTENT BEING SERVED -- 
+					*		NOTE: Wordpress does not bother to clean post_content up in this way (even through the admin interface) -- so conclude not necessary on save
+					*      	-- only do it here for display; assume properly escaped for storage although not clean display
+					*/
+					
+				echo '</div></div>'; 
+			} 
 						
 			// final button group div
 			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";

@@ -39,80 +39,112 @@ class WP_Issues_CRM_Database_Utilities {
 		$post_type = $wic_base_definitions->wic_post_types[$wic_post_type]['post_type'];	
 		
 		if ( 'dup' == $search_mode || 'new' == $search_mode ) {  	
-	   	$meta_query_args = array(
+
+	 		$query_args = array (
+	 			'posts_per_page' => 100,
+	 			'post_type' 	=>	$post_type,
+	 			'orderby'		=> 'title',
+	 			'order'			=> 'ASC',
+	 			's'				=> $next_form_output['wic_post_content'] ,
+	 		);
+
+	   	$meta_query_args = array( // will be inserted into $query_args below
 	     		'relation'=> 'AND',
 	     	);
 			$index = 1;
-			$ignored_fields_list = '';
+			$ignored_fields_list = '';			
 
 	 		foreach ( $fields_array as $field ) {
-				if ( 'date' == $field['type'] && 'new' == $search_mode ) { // handle date as range in new searches 
-					if ( $next_form_output[$field['slug'] . '_lo'] > '' || $next_form_output[$field['slug'] . '_hi'] > '' ) {
-					array_push( $next_form_output['initial_sections_open'], $field['group'] ); // show field's section open in next form
-						if ( $next_form_output[$field['slug'] . '_lo'] > '' ) { 
-							if ( ( $index - 1 ) < $this->search_terms_max )	{ 	
+	 			$wp_query_parameter = isset ( $field['wp_query_parameter'] ) ? $field['wp_query_parameter'] : ''; 
+	 			if ( '' == $wp_query_parameter ) {
+					if ( 'date' == $field['type'] && 'new' == $search_mode ) { // handle date as range in new searches 
+						if ( $next_form_output[$field['slug'] . '_lo'] > '' || $next_form_output[$field['slug'] . '_hi'] > '' ) {
+						array_push( $next_form_output['initial_sections_open'], $field['group'] ); // show field's section open in next form
+							if ( $next_form_output[$field['slug'] . '_lo'] > '' ) { 
+								if ( ( $index - 1 ) < $this->search_terms_max )	{ 	
+									$meta_query_args[$index] = array(
+										'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
+										'value'		=> $next_form_output[$field['slug'] . '_lo'],
+										'compare'	=>	'>=',
+									);	
+								} else { 
+									$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] . ' (low) '  : ( $ignored_fields_list .= ', ' . $field['label'] . ' (low) ' ); 
+								}
+								$index++;
+							}	
+							if ( $next_form_output[$field['slug'] . '_hi'] > '' ) {
+								if ( ( $index - 1 ) < $this->search_terms_max )	{		
+									$meta_query_args[$index] = array(
+										'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
+										'value'		=> $next_form_output[$field['slug'] . '_hi'],
+										'compare'	=>	'<=',
+									);	
+								} else { 
+									$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] . ' (high) ' : ( $ignored_fields_list .= ', ' . $field['label'] . ' (high) ' ); 
+								}
+								$index++;
+							}					
+						}	
+					} else { // standard = or like handling (including for dates in dedup mode)
+			 			if( $next_form_output[$field['slug']] > '' && ( 'new' == $search_mode  || $field['dedup'] ) )  { 
+			 				array_push( $next_form_output['initial_sections_open'], $field['group'] ); // show field's section open in next form
+							if ( ( ( $index - 1 ) < $this->search_terms_max ) || $field['dedup'] )	{ // allow possibility to set more dedup fields than allowed search fields		
+								if ( is_array( $next_form_output[$field['slug']] ) ) { // happens only for phone, email, street address; regardless of next action, have to flatten for search
+									$meta_value = $next_form_output[$field['slug']][0][1]; // the first, phone, email or street address
+								} else {
+									$meta_value = $next_form_output[$field['slug']];
+								}
 								$meta_query_args[$index] = array(
 									'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
-									'value'		=> $next_form_output[$field['slug'] . '_lo'],
-									'compare'	=>	'>=',
+									'value'		=> $meta_value,
+									'compare'	=>	(  // do strict match in dedup mode
+															( $field['like'] && ! $next_form_output['strict_match'] && 'new' == $search_mode ) ||
+															in_array( $field['type'], $wic_base_definitions->serialized_field_types ) 
+														) ? 'LIKE' : '=' ,
 								);	
 							} else { 
-								$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] . ' (low) '  : ( $ignored_fields_list .= ', ' . $field['label'] . ' (low) ' ); 
+								$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] : ( $ignored_fields_list .= ', ' . $field['label'] ); 
 							}
 							$index++;
 						}	
-						if ( $next_form_output[$field['slug'] . '_hi'] > '' ) {
-							if ( ( $index - 1 ) < $this->search_terms_max )	{		
-								$meta_query_args[$index] = array(
-									'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
-									'value'		=> $next_form_output[$field['slug'] . '_hi'],
-									'compare'	=>	'<=',
-								);	
-							} else { 
-								$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] . ' (high) ' : ( $ignored_fields_list .= ', ' . $field['label'] . ' (high) ' ); 
-							}
-							$index++;
-						}					
-					}	
-				} else { // standard = or like handling (including for dates in dedup mode)
-		 			if( $next_form_output[$field['slug']] > '' && ( 'new' == $search_mode  || $field['dedup'] ) )  { 
-		 				array_push( $next_form_output['initial_sections_open'], $field['group'] ); // show field's section open in next form
-						if ( ( ( $index - 1 ) < $this->search_terms_max ) || $field['dedup'] )	{ // allow possibility to set more dedup fields than allowed search fields		
-							if ( is_array( $next_form_output[$field['slug']] ) ) { // happens only for phone, email, street address; regardless of next action, have to flatten for search
-								$meta_value = $next_form_output[$field['slug']][0][1]; // the first, phone, email or street address
-							} else {
-								$meta_value = $next_form_output[$field['slug']];
-							}
-							$meta_query_args[$index] = array(
-								'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
-								'value'		=> $meta_value,
-								'compare'	=>	(  // do strict match in dedup mode
-														( $field['like'] && ! $next_form_output['strict_match'] && 'new' == $search_mode ) ||
-														in_array( $field['type'], $wic_base_definitions->serialized_field_types ) 
-													) ? 'LIKE' : '=' ,
-							);	
-						} else { 
-							$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] : ( $ignored_fields_list .= ', ' . $field['label'] ); 
-						}
-						$index++;
-					}	
+					}
+				} else {
+					switch ( $field['wp_query_parameter'] ) {
+						case 'author':
+						case 'cat':
+						case 's' :
+							$query_args[$field['wp_query_parameter']] = $next_form_output[$field['slug']];
+							break;
+						case 'post_status':
+							$status_value = ( $next_form_output[$field['slug']] > '' ) ? $next_form_output[$field['slug']] : 'any';
+							$query_args[$field['wp_query_parameter']] = $status_value;
+							break;
+						case 'date':
+							$query_args['date_query'] = array(
+								array(
+									'after'     => $next_form_output[$field['slug'] . '_lo'],
+									'before'    => $next_form_output[$field['slug'] . '_hi'],
+									'inclusive' => true,
+									),
+								);							
+							break;
+						case 'tag': 
+							$query_args['tag_slug__in'] = $next_form_output[$field['slug']];
+							break;
+					
+					}
 				}		
 	 		}
+	 	
+			$query_args['meta_query'] 	= $meta_query_args; 
+	 	
 	 		if ( $ignored_fields_list > '' ) {
 	 			$next_form_output['search_notices'] .= sprintf( __( 'Note: Maximum %1$s search terms allowed to protect performance -- the search was executed, but excess search terms were ignored ( %2$s ).', 'wp-issues-crm' ), 
 	 				$this->search_terms_max, $ignored_fields_list ); 
 				$next_form_output['error_messages'] .= sprintf( __( 'Note: Maximum %1$s search terms allowed to protect performance -- the search was executed, but excess search terms were ignored ( %2$s ).', 'wp-issues-crm' ), 
 	 				$this->search_terms_max, $ignored_fields_list ); 
 	 		} 
-	 		$query_args = array (
-	 			'posts_per_page' => 100,
-	 			'post_type' 	=>	$post_type,
-	 			'meta_query' 	=> $meta_query_args, 
-	 			'orderby'		=> 'title',
-	 			'order'			=> 'ASC',
-	 			's'				=> $next_form_output['wic_post_content'] ,
-	 		);
-	 		
+	
 	 		if ( $next_form_output['wic_post_content']  > '' ) {
 				array_push( $next_form_output['initial_sections_open'], 'wic-post-content' ); // show field's section open in next form
 			}	 		
@@ -144,6 +176,7 @@ class WP_Issues_CRM_Database_Utilities {
    public function save_update_wic_post( &$next_form_output, $fields_array, $wic_post_type  ) { 
 
 		global $wic_form_utilities;
+		global $wic_base_definitions;
 		global ${ 'wic_' . $wic_post_type . '_definitions' };	
 
 		$outcome = array (
@@ -153,13 +186,20 @@ class WP_Issues_CRM_Database_Utilities {
 		
 		$title =  ${ 'wic_' . $wic_post_type . '_definitions' }->title_callback( $next_form_output );		
 		
+		$post_type = $wic_base_definitions->wic_post_types[$wic_post_type]['post_type'];			
+		
 		$post_args = array(
 		  'post_title'     => $title,
 		  'post_status'    => 'private',
-		  'post_type'      => 'wic_' . $wic_post_type,
+		  'post_type'      => $post_type,
 		  'comment_status' => 'closed' 
 		); 
-		
+
+		foreach ( $fields_array as $field ) {
+		 	// note: in the not read only branch, explicitly set meta_return in every case 
+		 	$wp_query_parameter = isset ( $field['wp_query_parameter'] ) ? $field['wp_query_parameter'] : '';
+		} 	
+		 	
 		if ( $next_form_output['wic_post_id'] > 0 ) { // if have post ID, do update if notes or title changed
 			$check_on_database = $this->search_wic_posts( 'db_check', $next_form_output, $fields_array, $wic_post_type  ); // bullet proofing and get values to see if changed
 			if ( ! isset ( $check_on_database->post->ID ) )  {
@@ -184,13 +224,16 @@ class WP_Issues_CRM_Database_Utilities {
 		}				
 		// save or update error return with error
 		if ( 0 == $outcome['post_id'] ) {
-			$outcome['notices'] = sprintf( __( 'Unknown error. Could not save/update %1$s record.  Do new %1$s search on same %1$s to check for partial results.', 'wp-issues-crm' ), $wic_post_type );
+			$outcome['notices'] = sprintf( __( 'Unknown error. Could not save/update %1$s record.  
+				Do new %1$s search on same %1$s to check for partial results.', 'wp-issues-crm' ),
+				${ 'wic_' . $wic_post_type . '_definitions' }->wic_post_type_labels['singular'] );
 			return ($outcome);					
 		}
 		// otherwise proceed to update metafields
 		 foreach ( $fields_array as $field ) {
 		 	// note: in the not read only branch, explicitly set meta_return in every case 
-		 	if ( 'readonly' != $field['type'] ) {
+		 	$wp_query_parameter = isset ( $field['wp_query_parameter'] ) ? $field['wp_query_parameter'] : '';
+		 	if ( 'readonly' != $field['type'] && '' == $wp_query_parameter ) { // don't want to update readonly and have to handle non-meta fields above
 				// note: add/update post meta automatically serializes arrays!				
 				$post_field_key =  $this->wic_metakey . $field['slug'];
 				// first handle existing post meta records already
@@ -226,7 +269,9 @@ class WP_Issues_CRM_Database_Utilities {
 				}
 				
 				if ( ! $meta_return ) {
-					$outcome['notices'] = sprintf( __( 'Unknown error. Could not save %2$s detail -- %1$s.   Do new %2$s search on same %2$s to check for partial results.', 'wp-issues-crm' ), $field['label'], $wic_post_type );
+					$outcome['notices'] = sprintf( __( 'Unknown error. Could not save %2$s detail -- %1$s.   Do new %2$s search 
+						on same %2$s to check for partial results.', 'wp-issues-crm' ),
+					  	$field['label'], ${ 'wic_' . $wic_post_type . '_definitions' }->wic_post_type_labels['singular'] );
 				}
 			}	
 		} 
@@ -255,6 +300,7 @@ class WP_Issues_CRM_Database_Utilities {
 	public function get_children_lists ( $wic_post_id, $wic_post_type, $child_types ) {
 		
 		// note, could reconstruct type and child_types with wic_post id, but given calling context, no apparent need to reinvent the wheel		
+		global $wic_base_definitions;
 
 		$children_lists = array();
 		
@@ -278,9 +324,11 @@ class WP_Issues_CRM_Database_Utilities {
 				)
 			);
 
+			$post_type = $wic_base_definitions->wic_post_types[$child_type]['post_type'];
+
 			$list_query_args = array (
 	 			'posts_per_page' => 100,
-	 			'post_type' 	=>	'wic_' . $child_type,
+	 			'post_type' 	=>	$post_type,
 	 			'meta_query' 	=> $meta_query_args, 
 	 			'order'			=> 'ASC',
 	 		);

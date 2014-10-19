@@ -22,17 +22,14 @@ class WP_Issues_CRM_Base_Definitions {
 	public $wic_post_types = array(
 		'constituent' 	=> array ( 
 			'post_type'	=> 'wic_constituent',
-			'parent_type' => '',
 			'label_singular' => 'Constituent',			
-				),
+			),
 		'activity' 		=> array (
 			'post_type'	=> 'wic_activity',
-			'parent_type' => 'constituent',
 			'label_singular' => 'Activity',
-		), 
+			), 
 		'issue'			=> array (
 			'post_type'	=> 'post',
-			'parent_type' => '',
 			'label_singular' => 'Issue',
 			),
 	);

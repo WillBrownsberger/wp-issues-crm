@@ -24,6 +24,11 @@ class WP_Issues_CRM_Issue_Definitions {
 
 	}
 	
+	public $wic_post_type_labels = array (
+		'singular' => 'Issue',
+		'plural'	  => 'Issues'	
+	);	
+	
 	public $wic_post_field_groups = array (
 		array (
 			'name'		=> 'case_management',
@@ -100,7 +105,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'group'	=>	'post_info',
 			'label'	=>	'Post Author',
 			'like'	=>	false,
-			'list'	=> '0',
+			'list'	=> '20',
 			'online'	=>	true,
 			'order'	=>	40,
 			'required'	=> '',
@@ -116,7 +121,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'group'	=>	'post_info',
 			'label'	=>	'Post Category',
 			'like'	=>	false,
-			'list'	=> '0',
+			'list'	=> '20',
 			'online'	=>	true,
 			'order'	=>	50,
 			'required'	=> '',
@@ -144,11 +149,11 @@ class WP_Issues_CRM_Issue_Definitions {
 			'group'	=>	'post_info',
 			'label'	=>	'Post Created Date',
 			'like'	=>	false,
-			'list'	=> '0',
+			'list'	=> '20',
 			'online'	=>	true,
 			'order'	=>	70,
 			'required'	=> '',
-			'slug'	=> 'tag',
+			'slug'	=> 'post_created_date',
 			'type'	=>	'date',
 			'wp_query_parameter' => 'date',
 			), 								
@@ -161,7 +166,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'online'	=>	true,
 			'order'	=>	80,
 			'required'	=> '',
-			'slug'	=> 'tag',
+			'slug'	=> 'search_term',
 			'readonly_subtype' => 'text',
 			'type'	=>	'readonly',
 			'wp_query_parameter' => 's',
@@ -171,7 +176,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'group'	=>	'post_info',
 			'label'	=>	'Post Visibility',
 			'like'	=>	false,
-			'list'	=> '0',
+			'list'	=> '20',
 			'online'	=>	true,
 			'order'	=>	90,
 			'required'	=> '',
@@ -189,7 +194,7 @@ class WP_Issues_CRM_Issue_Definitions {
 					'value'	=> 'trash',
 					'label'	=>	'Trash' ),
 				),
-			'slug'	=> 'tag',
+			'slug'	=> 'post_status',
 			'readonly_subtype' => 'select',
 			'type'	=>	'readonly',
 			'wp_query_parameter' => 'post_status',
