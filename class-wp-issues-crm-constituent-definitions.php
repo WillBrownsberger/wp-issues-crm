@@ -41,12 +41,6 @@ class WP_Issues_CRM_Constituent_Definitions {
 
 
 	public $wic_post_field_groups = array (
-	/*	array (
-			'name'		=> 'required',
-			'label'		=>	'Identity',
-			'legend'		=>	'',
-			'order'		=>	10,
-		), */
 		array (
 			'name'		=> 'contact',
 			'label'		=>	'Contact',
@@ -80,16 +74,16 @@ class WP_Issues_CRM_Constituent_Definitions {
 
 	public $wic_post_fields = array( 
 	  	/* fields control -- all definitions of fields are in this array (except for native post fields -- content and title)
-	  	*  -- slug is the no-spaces name of the field
-	  	* 	-- is the front facing name
-	  	*	--	online is whether field should appear at all in online access (may or may not be updateable -- that is determined by type)
-	  	*	-- type determines what control is displayed for the field ( may be readonly ) and also validation
-	  	*	-- like indicates whether full text searching is enabled for the field
-	  	*	-- dedup indicates whether field should be on list of fields tested for deduping
+		*	-- dedup indicates whether field should be on list of fields tested for deduping	  	
 	  	*	-- group is just for form layout purposes
+	  	* 	-- label is the front facing name
+	  	*	-- like indicates whether full text searching is enabled for the field	  	
+	  	*  -- list include in standard constituent lists -- if > 0 value is % width for display -- should sum to 100 to keep on one line.
+	  	*	--	online is whether field should appear at all in online access (may or may not be updateable -- that is determined by type)
 	  	*	-- order is just for form layout purposes
 	  	*  -- required may be false, group or individual.  If group, at least one in group must be provided.
-	  	*  -- list include in standard constituent lists -- if > 0 value is % width for display -- should sum to 100.
+		*  -- slug is the no-spaces name of the field
+	  	*	-- type determines what control is displayed for the field ( may be readonly ) and also validation
 	  	*  **** the only field slug specific logic in the whole class is expectation that one of first_name, last_name and email not be blank for title def
 	  	*  **** so, fields with group => required must be all or a subset of first_name, last_name, email, or email_group
 	  	*
@@ -176,9 +170,10 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'online'	=>	true,
 			'order'	=>	50,
 			'required'	=> '',
+			'select_array' => 'wic_get_user_list',
+			'select_parameter' => 'Administrator',
 			'slug'	=> 'assigned',
-			'user_role' => 'Administrator', 
-			'type'	=>	'user',
+			'type'	=>	'select',
 			), 
 		array( // 10A
 			'dedup'	=>	false,
@@ -299,6 +294,7 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'like'	=>	false,
 			'online'	=>	true,
 			'order'	=>	100,
+			'readonly_subtype' => 'text',
 			'required'	=> '',
 			'slug'	=> 'civicrm_id',
 			'type'	=>	'readonly',
@@ -312,6 +308,7 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'list'	=> '0',
 			'online'	=>	true,
 			'order'	=>	110,
+			'readonly_subtype' => 'text',			
 			'required'	=> '',
 			'slug'	=> 'ss_id',
 			'type'	=>	'readonly',
@@ -324,6 +321,7 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'list'	=> '0',
 			'online'	=>	true,
 			'order'	=>	120,
+			'readonly_subtype' => 'text',			
 			'required'	=> false,
 			'slug'	=> 'VAN_id',
 			'type'	=>	'readonly',

@@ -13,38 +13,192 @@ class WP_Issues_CRM_Issue_Definitions {
 
 
 	public function __construct() {
-		$this->wic_post_fields = $this->initialize_post_fields_array (); // more to be done here once code fields - sort.
+		
+		global $wic_constituent_definitions;
+		$this->wic_post_field_groups = $wic_constituent_definitions->multi_array_key_sort ( $this->wic_post_field_groups, 'order' );
+		$this->wic_post_fields		 = $this->initialize_wic_post_fields_array();		
+		$this->wic_post_fields		 = $wic_constituent_definitions->multi_array_key_sort ( $this->wic_post_fields, 'order' );
+		
 		add_action('add_meta_boxes', array ( $this, 'wic_call_live_issue_meta_box' ), 10, 2);
 		add_action('save_post', array ($this, 'wic_save_live_issue_meta_box' ),10,2);
 
 	}
-	/*
-	* add metabox for post width, following 
-	*  http://www.wproots.com/complex-meta-boxes-in-wordpress/
-	*
-	*/
+	
+	public $wic_post_field_groups = array (
+		array (
+			'name'		=> 'case_management',
+			'label'		=>	'Case Management',
+			'legend'		=>	'',
+			'order'		=>	25,
+			'initial-open'	=> false,
+		),
+		array (
+			'name'		=> 'post_info',
+			'label'		=>	'Issue Details',
+			'legend'		=>	'',
+			'order'		=> 20,
+			'initial-open'	=> true,
+		),
+	);
+
+
+
+
 	
 	public $wic_post_fields = array();
 		
-	private function initialize_post_fields_array() { 
+	private function initialize_wic_post_fields_array() { 
 		$output = array(
-					array( // 5
-		 		'dedup'	=>	false,
-		 		'group'	=>	'Case Management',
-		 		'label'	=>	'assigned',
-		 		'like'	=>	false,
+			array( 
+				'dedup'	=>	false,
+				'group'	=>	'case_management',
+				'label'	=>	'Staff',
+				'like'	=>	false,
 				'list'	=> '0',
-		 		'online'	=>	true,
-		 		'order'	=>	50,	
+				'online'	=>	true,
+				'order'	=>	10,
 				'required'	=> '',
-				'select_array' => '',
-				'slug'	=> 'activity_type',
-		 		'type'	=>	'select',
-			),);
+				'select_array' => 'wic_get_user_list',
+				'select_parameter' => 'Administrator',
+				'slug'	=> 'assigned',
+				'type'	=>	'select',
+				), 
+			array( 
+				'dedup'	=>	false,
+				'group'	=>	'case_management',
+				'label'	=>	'Review Date',
+				'like'	=>	false,
+				'list'	=> '0',
+				'online'	=>	true,
+				'order'	=>	20,	
+				'required'	=> '',
+				'slug'	=> 'case_review_date',
+				'type'	=>	'date',
+				),
+			array( 
+				'dedup'	=>	false,
+				'group'	=>	'case_management',
+				'label'	=>	'Case Status',
+				'like'	=>	false,
+				'list'	=> '0',
+				'online'	=>	true,
+				'order'	=>	30,	
+				'required'	=> '',
+				'slug'	=> 'case_status',
+				'select_array'	=>	array ( 
+					array(
+						'value'	=> '0',
+						'label'	=>	'Closed' ),
+					array(
+						'value'	=> '1',
+						'label'	=>	'Open' ),
+					),
+				'type'	=> 'select',
+				),	
+		array( 
+			'dedup'	=>	false,
+			'group'	=>	'post_info',
+			'label'	=>	'Post Author',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	40,
+			'required'	=> '',
+			'readonly_subtype' => 'select',
+			'select_array' => 'wic_get_user_list',
+			'select_parameter' => '',
+			'slug'	=> 'author',
+			'type'	=>	'readonly',
+			'wp_query_parameter' => 'author',
+			), 				
+		array(  
+			'dedup'	=>	false,
+			'group'	=>	'post_info',
+			'label'	=>	'Post Category',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	50,
+			'required'	=> '',
+			'select_array' => 'wic_get_category_list',
+			'select_parameter' => '',
+			'slug'	=> 'cat',
+			'type'	=>	'select',
+			'wp_query_parameter' => 'cat',
+			), 
+		array(  
+			'dedup'	=>	false,
+			'group'	=>	'post_info',
+			'label'	=>	'Post Tags',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	60,
+			'required'	=> '',
+			'slug'	=> 'tag',
+			'type'	=>	'text',
+			'wp_query_parameter' => 'tag',
+			), 								
+		array(  
+			'dedup'	=>	false,
+			'group'	=>	'post_info',
+			'label'	=>	'Post Created Date',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	70,
+			'required'	=> '',
+			'slug'	=> 'tag',
+			'type'	=>	'date',
+			'wp_query_parameter' => 'date',
+			), 								
+		array(  
+			'dedup'	=>	false,
+			'group'	=>	'post_info',
+			'label'	=>	'Search Term',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	80,
+			'required'	=> '',
+			'slug'	=> 'tag',
+			'readonly_subtype' => 'text',
+			'type'	=>	'readonly',
+			'wp_query_parameter' => 's',
+			), 
+		array(  
+			'dedup'	=>	false,
+			'group'	=>	'post_info',
+			'label'	=>	'Post Visibility',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	90,
+			'required'	=> '',
+			'select_array'	=>	array ( 
+				array(
+					'value'	=> 'publish',
+					'label'	=>	'Publicly Published' ),
+				array(
+					'value'	=> 'private',
+					'label'	=>	'Private' ),
+				array(
+					'value'	=> 'draft',
+					'label'	=>	'Draft' ),
+				array(
+					'value'	=> 'trash',
+					'label'	=>	'Trash' ),
+				),
+			'slug'	=> 'tag',
+			'readonly_subtype' => 'select',
+			'type'	=>	'readonly',
+			'wp_query_parameter' => 'post_status',
+			),																		
+		);
 		return $output;
 	}
 	
-	
+	/* following http://www.wproots.com/complex-meta-boxes-in-wordpress/ */	
 	function wic_call_live_issue_meta_box($post_type, $post)
 	{
 	   add_meta_box(

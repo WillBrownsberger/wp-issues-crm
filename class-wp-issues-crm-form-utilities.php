@@ -931,6 +931,52 @@ class WP_Issues_CRM_Form_Utilities {
 					
 	}
 
+	public function wic_get_user_list ( $role ) {
+		/* query users with specified role (s) -- empty string returns all */
+		$user_query_args = 	array (
+			'role' => $role,
+			'fields' => array ( 'ID', 'display_name'),
+		);						
+		$user_list = new WP_User_query ( $user_query_args );
+
+		$user_select_array = array();
+		foreach ( $user_list->results as $user ) {
+			$temp_array = array (
+				'value' => $user->ID,
+				'label'	=> $user->display_name,									
+			);
+			array_push ( $user_select_array, $temp_array );								
+		} 
+
+		return ( $user_select_array );
+
+	}
+
+	public function wic_get_category_list ( ) {
+		
+		$args = array(
+			'orderby'                  => 'term_group',
+			'order'                    => 'ASC',
+			'hide_empty'               => 0,
+			'taxonomy'                 => 'category',
+			'pad_counts'               => true, 
+		); 
+
+		$categories = get_categories( $args );
+		
+		$category_select_array = array();
+		foreach ( $categories as $category ) {
+			$temp_array = array (
+				'value' => $category->term_id,
+				'label' => $category->name,
+			);			
+			$category_select_array[] = $temp_array;
+		}
+		
+		return ( $category_select_array );
+	}
+
+
 
 }
 

@@ -114,8 +114,9 @@ class WP_Issues_CRM {
 		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New Constituent Search', 'wp-issues-crm' ) . '</button>';
 	
 		$control_array['form_requested'] = 'issue';
+		$control_array['action_requested'] = 'new';
 		$button_value = implode ( ',' , $control_array );		
-		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New Issue Search (not built yet)', 'wp-issues-crm' ) . '</button>';
+		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New Issue Search', 'wp-issues-crm' ) . '</button>';
 
 		echo '</form>';		
 

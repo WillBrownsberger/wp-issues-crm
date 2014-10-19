@@ -296,7 +296,7 @@ class WP_Issues_CRM_Main_Form {
 			 
 			// prepare to show list of posts if found more than one
 			if ( $show_list ) {
-				$wic_list_posts = new WP_Issues_CRM_Posts_List ( $wic_query, $this->working_post_fields, $this->form_requested, true );			
+				$wic_list_posts = new WP_Issues_CRM_Posts_List ( $wic_query, $this->working_post_fields, $this->form_requested, 0, true );			
 				$post_list = $wic_list_posts->post_list;
 				if ( 'search' == $this->action_requested  && '' == $next_form_output['search_notices'] ) // always show form unless was a search and no search notices
 					$next_form_output['initial_form_state'] = 'wic-form-closed';
@@ -589,8 +589,21 @@ class WP_Issues_CRM_Main_Form {
 
 							case 'readonly': 
 								if ( 'save' != $next_form_output['next_action'] ) { // do not display for save
-									$args['read_only_flag'] = 	( 'update' == $next_form_output['next_action'] ); // true or false 
-									echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>'; 
+									if ( 'text' == $field['readonly_subtype'] ) {
+										$args['read_only_flag'] = 	( 'update' == $next_form_output['next_action'] ); // true or false 
+										echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';
+									} elseif ( 'select' == $field['readonly_subtype'] ) {
+										if ( 'update' == $next_form_output['next_action'] ) {
+											$args['read_only_flag'] = 	true; 
+											echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';										
+										} else {
+											$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
+											$args['select_array']			=	is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']( $field['select_parameter'] );
+											$args['field_label_suffix']	= $required_individual . $required_group;								
+											echo '<p>' . $wic_form_utilities->create_select_control ( $args ) . '</p>';
+											break;
+										}									
+									}
 								} 
 								break;
 
@@ -600,7 +613,7 @@ class WP_Issues_CRM_Main_Form {
 								
 							case 'select':
 								$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
-								$args['select_array']			=	is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']();
+								$args['select_array']			=	is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']( $field['select_parameter'] );
 								$args['field_label_suffix']	= $required_individual . $required_group;								
 								echo '<p>' . $wic_form_utilities->create_select_control ( $args ) . '</p>';
 								break; 
@@ -620,29 +633,6 @@ class WP_Issues_CRM_Main_Form {
 								$args['hidden_flag'] = true;
 								echo $wic_form_utilities->create_text_control ( $args ); 
 								break;
-								
-							case 'user':
-								/* query users with specified role (s) */
-								$user_query_args = 	array (
-									'role' => $field['user_role'],
-									'fields' => array ( 'ID', 'display_name'),
-								);						
-								$user_list = new WP_User_query ( $user_query_args );
-
-								$user_select_array = array();
-								foreach ( $user_list->results as $user ) {
-									$temp_array = array (
-										'value' => $user->ID,
-										'label'	=> $user->display_name,									
-									);
-									array_push ( $user_select_array, $temp_array );								
-								} 
-							
-								$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
-								$args['select_array']			=	$user_select_array; 
-								$args['field_label_suffix']	= $required_individual . $required_group;								
-								echo '<p>' . $wic_form_utilities->create_select_control ( $args ) . '</p>';
-								break; 
 														
 						}
 					} // close foreach field				

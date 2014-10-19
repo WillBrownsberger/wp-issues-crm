@@ -135,54 +135,6 @@ class WP_Issues_CRM_Activity_Definitions {
 				'slug'	=> 'activity_type',
 		 		'type'	=>	'select',
 			),
-			// don't use "subject" value as a meta -- title will be fixed by details and info that could be in title belongs to the issue
-			// post content is detail . . . attachments?
-			/* the next three fields could be uncommented to allow case management at the activity level
-			array( // 6
-				'dedup'	=>	false,
-				'group'	=>	'case_management',
-				'label'	=>	'Staff',
-				'like'	=>	false,
-				'list'	=> '0',
-				'online'	=>	false,
-				'order'	=>	60,
-				'required'	=> '',
-				'slug'	=> 'activity_assigned',
-				'user_role' => 'Administrator', 
-				'type'	=>	'user',
-				), 
-			array( // 7
-				'dedup'	=>	false,
-				'group'	=>	'case_management',
-				'label'	=>	'Review Date',
-				'like'	=>	false,
-				'list'	=> '0',
-				'online'	=>	false,
-				'order'	=>	70,	
-				'required'	=> '',
-				'slug'	=> 'activity_case_review_date',
-				'type'	=>	'date',
-				),
-			array( // 8
-				'dedup'	=>	false,
-				'group'	=>	'case_management',
-				'label'	=>	'Case Status',
-				'like'	=>	false,
-				'list'	=> '0',
-				'online'	=>	false,
-				'order'	=>	80,	
-				'required'	=> '',
-				'slug'	=> 'activity_case_status',
-				'select_array'	=>	array ( 
-					array(
-						'value'	=> '0',
-						'label'	=>	'Closed' ),
-					array(
-						'value'	=> '1',
-						'label'	=>	'Open' ),
-					),
-				'type'	=> 'select',
-			),		*/
 		);
 	   return($output);
 	}
