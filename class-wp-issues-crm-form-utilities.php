@@ -149,7 +149,6 @@ class WP_Issues_CRM_Form_Utilities {
 							$clean_input[$field['slug']][] = $key; 					
 						}
 					}
-				var_dump($clean_input[$field['slug']]);			
 			} else { // not a serialized field and/or not set	-- do clean and also individual field validators
  				$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? stripslashes( sanitize_text_field( $_POST[$field['slug']] ) ) : '';
  				$possible_validator =  'validate_individual_' . $field['type'];
@@ -299,6 +298,37 @@ class WP_Issues_CRM_Form_Utilities {
 		return ( $control );
 
 	}
+	
+	public function create_date_range_control ( $next_form_output, $field ) {
+
+		$date_range_control = '';
+
+		$args = array (
+			'field_name_id'		=> $field['slug'] . '_lo',
+			'field_label'			=>	$field['label'] . ' >= ' ,
+			'value'					=> $next_form_output[$field['slug'] . '_lo'],
+			'read_only_flag'		=>	false, 
+			'field_label_suffix'	=> '', 								
+		);
+		$date_range_control .=  $this->create_text_control ( $args ); 
+	
+		$args = array (
+			'field_name_id'		=> $field['slug'] . '_hi',
+			'field_label'			=>	__( 'and <=', 'wp_issues_crm' ),
+			'label_class'			=> 'wic-label-2',
+			'value'					=> $next_form_output[$field['slug']. '_hi'],
+			'read_only_flag'		=>	false, 
+			'field_label_suffix'	=> '', 								
+		);
+		$date_range_control .= $this->create_text_control ( $args ); 
+
+		return ( $date_range_control );	
+	
+	}	
+	
+	
+	
+	
 	
 	public function create_text_area_control ( $control_args ) {
 		
@@ -936,15 +966,14 @@ class WP_Issues_CRM_Form_Utilities {
 		$action_requested			= '';
 		$id_requested				= 0 ;
 		$referring_parent			= 0 ;
+		$new_form 					= 'n'; // go straight to a save
 		$button_class				= 'wic-form-button';
 		$button_label				= '';
 		$omit_label_and_close_tag = false;
-		// next three fields not implemented yet
-		$referring_parent	 		= 0;
 
 		extract ( $control_array_plus_class, EXTR_OVERWRITE );
 
-		$button_value = $form_requested . ',' . $action_requested  . ',' . $id_requested  . ',' . $referring_parent;
+		$button_value = $form_requested . ',' . $action_requested  . ',' . $id_requested  . ',' . $referring_parent . ',' . $new_form;
 		$close = $omit_label_and_close_tag ? '' : __( $button_label, 'wp-issues-crm' ) . '</button>';
 
 		$button =  '<button class = "' . $button_class . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . $close;
@@ -1054,6 +1083,18 @@ class WP_Issues_CRM_Form_Utilities {
 		return ( $display_name );
 	}
 
+	public function format_select_array ( $select_array, $format, $select_parameter ) {
+		$select_array = is_array( $select_array ) ? $select_array : $this->$select_array( $select_parameter );
+		if ( 'control' == $format ) {
+			return ( $select_array );		
+		} elseif ( 'lookup' == $format ) {
+			$reformatted_select_array = array();
+			foreach ( $select_array as $pair ) {
+				$reformatted_select_array[$pair['value']] = $pair['label'];
+			} 	
+			return ( $reformatted_select_array );
+		}	
+	}
 
 }
 

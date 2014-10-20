@@ -44,6 +44,12 @@ class WP_Issues_CRM_Constituent_Definitions {
 		'plural'	  => 'Constituents'	
 	);
 
+	public $wic_post_type_sort_order = array (
+		'orderby' => 'title',
+		'order'	  => 'ASC'	
+	);	
+
+	public $wic_post_type_dups_ok = false;
 
 	public $wic_post_field_groups = array (
 		array (

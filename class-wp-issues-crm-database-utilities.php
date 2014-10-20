@@ -35,6 +35,7 @@ class WP_Issues_CRM_Database_Utilities {
    public function search_wic_posts( $search_mode, &$next_form_output, $fields_array, $wic_post_type  ) {
 		
 		global $wic_base_definitions;	
+		global ${ 'wic_' . $wic_post_type . '_definitions' };		
 		
 		$post_type = $wic_base_definitions->wic_post_types[$wic_post_type]['post_type'];	
 		
@@ -43,8 +44,8 @@ class WP_Issues_CRM_Database_Utilities {
 	 		$query_args = array (
 	 			'posts_per_page' => 100,
 	 			'post_type' 	=>	$post_type,
-	 			'orderby'		=> 'title',
-	 			'order'			=> 'ASC',
+	 			'orderby'		=> ${ 'wic_' . $wic_post_type . '_definitions' }->wic_post_type_sort_order['orderby'],
+	 			'order'			=> ${ 'wic_' . $wic_post_type . '_definitions' }->wic_post_type_sort_order['order'],
 	 			's'				=> $next_form_output['wic_post_content'] ,
 	 		);
 
@@ -159,7 +160,7 @@ class WP_Issues_CRM_Database_Utilities {
 	 	} 
 		
  		$wic_query = new WP_Query($query_args);
-		var_dump ($wic_query->query);
+		
  		return $wic_query;
 	}
 
@@ -192,36 +193,27 @@ class WP_Issues_CRM_Database_Utilities {
 		
 		$post_args = array(
 		  'post_title'     => $title,
-		  'post_status'    => 'private',
 		  'post_type'      => $post_type,
-		  'comment_status' => 'closed' 
 		); 
 
 		foreach ( $fields_array as $field ) {
-		 	// note: in the not read only branch, explicitly set meta_return in every case 
+		 	// setting the wp post fields
 		 	$wp_query_parameter = isset ( $field['wp_query_parameter'] ) ? $field['wp_query_parameter'] : '';
 		 	if ( '' < $wp_query_parameter && $field['type'] != 'readonly' && '' != $next_form_output[$field['slug']] ) {
 		 		switch ( $field['wp_query_parameter'] ) {
-					case 'author':
-						$post_args['post_author'] = $next_form_output[$field['slug']];
-						break;
 					case 'cat':
-						echo $next_form_output[$field['slug']]; 
 						$post_args['post_category'] = $next_form_output[$field['slug']];
 						break;
-					case 'post_status':
-						$post_args[ 'post_status'] = $next_form_output[$field['slug']];
-						break;
-					case 'date':
-						$post_args['post_date'] = $next_form_output[$field['slug']];
-						break;
-					case 'tag':
+/*					case 'tag':
 						$temp_tags =  preg_replace( "/[^0-9][^A-Z][^a-z]/,", '', $next_form_output[$field['slug']] );
 						$post_args['tags_input'] = explode ( ',', $temp_tags );
-						break;
+						break; */
 					case 'post_title':	
 						$post_args['post_title'] = $title;
 						break;						
+					// note, as a policy decision, the following fields are treated as always readonly and ignored on update:
+					// author, post_date, post_status -- these can be updated through the backend, but no good reason to update here
+					// ( on save, use wp defaults )
 				}
 		 	} 
 		} 	
@@ -234,29 +226,25 @@ class WP_Issues_CRM_Database_Utilities {
 			} 
 			$post_args['ID'] = $next_form_output['wic_post_id'];
 			
-			// prevent publication of possibly private posts through this interface -- only can update or save to private unless already published
-			if ( 'publish' != $check_on_database->post->post_status && isset ( $post_args['post_status'] ) ) {
-				$post_args['post_status'] = 'private';			
-			}
 			if ( 	trim( $next_form_output[ 'wic_post_content' ] )   > '' || 
 					$post_args['post_title']      != $check_on_database->post->post_title  || 
-					$post_args['post_author']  	!= $check_on_database->post->post_author ||
-					$post_args['post_category'] 	!= $check_on_database->post->post_category ||
-					$post_args['post_status']		!= $check_on_database->post->post_status ||
-					$post_args['post_date'] 		!= $check_on_database->post->post_date ||
-					$post_args['tags_input']		!= $check_on_database->post->post_tags )
+					$post_args['post_category'] 	!= $check_on_database->post->post_category /*||
+					$post_args['tags_input']		!= $check_on_database->post->post_tags */	)
 					{ // conditions for update post
 				if ( trim( $next_form_output[ 'wic_post_content' ] )   > '' ) { // condition for update post content
 					array_push( $next_form_output['initial_sections_open'], 'wic_post_content' ); // show field's section open in next form
 					$post_args['post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] )  . $check_on_database->post->post_content;
 				}
 				$outcome['post_id'] = wp_update_post( $post_args ); 
-			} else {
-				$post_args['post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] );
+			} else { // this is the no update branch -- just maintaining the form
+				// $post_args['post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] );
 				$outcome['post_id'] = $next_form_output['wic_post_id'];			
 			}
 		} else {
-			$outcome['post_id'] = wp_insert_post( $post_args );		
+			/* note, let wp set author and date to defaults; but default all posts created through this interface to status private */
+			$post_args['post_status']  = 'private';
+			$post_args['post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] );
+			$outcome['post_id'] = wp_insert_post( $post_args );
 		}				
 		// save or update error return with error
 		if ( 0 == $outcome['post_id'] ) {

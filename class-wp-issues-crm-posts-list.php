@@ -47,14 +47,10 @@ class WP_Issues_CRM_Posts_List {
 		/* check if have any select fields to decode and assemble array of their arrays */
 		
 		$array_of_select_arrays = array();
-		foreach ( $this->list_fields as $field ) {
+		foreach ( $this->list_fields as $field ) { // doing this just for economy -- running list, don't want to recreate array for each row
 			if ( 'select' == $field['type'] && ! isset ( $field['list_call_back_id'] ) && ! isset( $field['list_call_back_key'] ) ) {
-				$select_array = is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']();
-				$reformatted_select_array = array();
-				foreach ( $select_array as $pair ) {
-					$reformatted_select_array[$pair['value']] = $pair['label'];
-				} 		
-				$array_of_select_arrays[$field['slug']] = $reformatted_select_array;
+				$select_array = $wic_form_utilities->format_select_array( $field['select_array'] , 'lookup', '' );
+				$array_of_select_arrays[$field['slug']] = $select_array;
 			}
 		} 		
 			

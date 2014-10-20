@@ -100,6 +100,7 @@ class WP_Issues_CRM {
 			'action_requested'		=> '',
 			'id_requested'				=> 0,
 			'referring_parent' 		=> 0,
+			'new_form'					=> 'n',
 		);	
 
 		// use default control array to set up top row of buttons that always shows over dashboard and over main form 

@@ -29,20 +29,43 @@ class WP_Issues_CRM_Issue_Definitions {
 		'plural'	  => 'Issues'	
 	);	
 	
+	public $wic_post_type_sort_order = array (
+		'orderby' => 'date',
+		'order'	  => 'DESC'	
+	);		
+	
+	public $wic_post_type_dups_ok = true;
+	
 	public $wic_post_field_groups = array (
 		array (
 			'name'		=> 'case_management',
-			'label'		=>	'Case Management',
+			'label'		=>	'Issue Management',
 			'legend'		=>	'',
-			'order'		=>	25,
+			'order'		=>	30,
 			'initial-open'	=> false,
 		),
 		array (
 			'name'		=> 'post_info',
-			'label'		=>	'Issue Details',
+			'label'		=>	'Issue Content',
+			'legend'		=>	'',
+			'order'		=> 10,
+			'initial-open'	=> true,
+		),
+
+		array (
+			'name'		=> 'post_fixed',
+			'label'		=>	'Issue Creation',
+			'legend'		=>	'These fields can be searched but not changed online',
+			'order'		=> 40,
+			'initial-open'	=> false,
+		),		
+		
+		array (
+			'name'		=> 'post_categories',
+			'label'		=>	'Issue Categories',
 			'legend'		=>	'',
 			'order'		=> 20,
-			'initial-open'	=> true,
+			'initial-open'	=> false,
 		),
 	);
 
@@ -53,7 +76,152 @@ class WP_Issues_CRM_Issue_Definitions {
 	public $wic_post_fields = array();
 		
 	private function initialize_wic_post_fields_array() { 
-		$output = array(
+		
+	$output = array(
+	/*
+	* note regarding author, date and status for posts (issues)
+	*
+	* these three fields are included in the definition array below for form processing and search purposes.
+	* for update purposes, they get special handling -- they are never updated through this interface
+	* for save purposes, they cannot be set by the user through this interface 
+	* these are all updateable through the backend post interface
+	*
+	* note post status is also tested in form to prevent update of public posts in note format
+	*
+	*/
+
+		array( 
+			'dedup'	=>	false,
+			'group'	=>	'post_fixed',
+			'label'	=>	'Created By',
+			'like'	=>	false,
+			'list'	=> '15',
+			'list_call_back_key' => 'wic_get_post_author_display_name',
+			'online'	=>	true,
+			'order'	=>	40,
+			'required'	=> '',
+			'readonly_subtype' => 'select',
+			'select_array' => 'wic_get_user_list',
+			'select_parameter' => 'Administrator',
+			'slug'	=> 'wic_post_author', // note, naming this field merely author triggers some kind of wordpress security, causes odd 404's 
+			'type'	=>	'readonly',
+			'wp_query_parameter' => 'author',
+			), 	
+
+		array(  
+			'dedup'	=>	false,
+			'group'	=>	'post_fixed',
+			'label'	=>	'Created Date',
+			'like'	=>	false,
+			'list'	=> '17',
+			'online'	=>	true,
+			'order'	=>	70,
+			'required'	=> '',
+			'slug'	=> 'post_created_date',
+			'type'	=>	'date',
+			'wp_query_parameter' => 'date',
+			), 								
+		array(  
+			'dedup'	=>	false,
+			'group'	=>	'post_fixed',
+			'label'	=>	'Visibility',
+			'like'	=>	false,
+			'list'	=> '10',
+			'online'	=>	true,
+			'order'	=>	90,
+			'required'	=> '',
+			'select_array'	=>	array ( 
+				array(
+					'value'	=> 'publish',
+					'label'	=>	'Publicly Published' ),
+				array(
+					'value'	=> 'private',
+					'label'	=>	'Private' ),
+				array(
+					'value'	=> 'draft',
+					'label'	=>	'Draft' ),
+				array(
+					'value'	=> 'trash',
+					'label'	=>	'Trash' ),
+				),
+			'slug'	=> 'post_status',
+			'readonly_subtype' => 'select',
+			'type'	=>	'readonly',
+			'wp_query_parameter' => 'post_status',
+			),
+		/*
+		*
+		*	the search term variable hooks to the wordpress full text search
+		* 
+		*/		
+		array(  
+			'dedup'	=>	false,
+			'group'	=>	'post_info',
+			'label'	=>	'Search Term',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	80,
+			'required'	=> '',
+			'slug'	=> 'search_term',
+			'readonly_subtype' => 'text',
+			'type'	=>	'readonly',
+			'wp_query_parameter' => 's',
+			), 
+	/*
+	* post title, category and tag can be modified through this interface, 
+	* post-title must be included as a required field or else generate database errors on blank saves
+	*
+	*
+	*/		
+		array( 
+			'dedup'	=>	false,
+			'group'	=>	'post_info',
+			'label'	=>	'Issue Title',
+			'like'	=>	false,
+			'list'	=> '30',
+			'online'	=>	true,
+			'order'	=>	38,
+			'required'	=> 'individual',
+			'updateonly_subtype' => 'text',
+			'slug'	=> 'post_title',
+			'type'	=>	'updateonly',
+			'wp_query_parameter' => 'post_title',
+			), 
+		array(  
+			'dedup'	=>	false,
+			'group'	=>	'post_categories',
+			'label'	=>	'Post Category',
+			'like'	=>	false,
+			'list'	=> '25',
+			'list_call_back_id' => 'wic_get_post_categories',
+			'online'	=>	true,
+			'order'	=>	50,
+			'required'	=> '',
+			'select_array' => 'wic_get_category_list',
+			'select_parameter' => '',
+			'slug'	=> 'cat',
+			'type'	=>	'multi_select',
+			'wp_query_parameter' => 'cat',
+			), 
+/*		array(  // needs development (see also initialize, sanitize, search, update and list functions)
+			'dedup'	=>	false,
+			'group'	=>	'post_info',
+			'label'	=>	'Post Tags',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	60,
+			'required'	=> '',
+			'slug'	=> 'tag',
+			'type'	=>	'text',
+			'wp_query_parameter' => 'tag',
+			), */ 				
+			
+		/* 
+		* the following block is meta fields and can be modified and extended without any special considerations
+		*
+		*/
 			array( 
 				'dedup'	=>	false,
 				'group'	=>	'case_management',
@@ -83,7 +251,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			array( 
 				'dedup'	=>	false,
 				'group'	=>	'case_management',
-				'label'	=>	'Case Status',
+				'label'	=>	'Issue Status',
 				'like'	=>	false,
 				'list'	=> '0',
 				'online'	=>	true,
@@ -100,122 +268,9 @@ class WP_Issues_CRM_Issue_Definitions {
 					),
 				'type'	=> 'select',
 				),	
-		array( 
-			'dedup'	=>	false,
-			'group'	=>	'post_info',
-			'label'	=>	'Post Title',
-			'like'	=>	false,
-			'list'	=> '30',
-			'online'	=>	true,
-			'order'	=>	38,
-			'required'	=> '',
-			'updateonly_subtype' => 'text',
-			'slug'	=> 'post_title',
-			'type'	=>	'updateonly',
-			'wp_query_parameter' => 'post_title',
-			), 
-		array( 
-			'dedup'	=>	false,
-			'group'	=>	'post_info',
-			'label'	=>	'Post Author',
-			'like'	=>	false,
-			'list'	=> '15',
-			'list_call_back_key' => 'wic_get_post_author_display_name',
-			'online'	=>	true,
-			'order'	=>	40,
-			'required'	=> '',
-			'readonly_subtype' => 'select',
-			'select_array' => 'wic_get_user_list',
-			'select_parameter' => '',
-			'slug'	=> 'wic_post_author', // note, naming this field merely author triggers some kind of wordpress security, causes odd 404's 
-			'type'	=>	'select',
-			'wp_query_parameter' => 'author',
-			), 				
-		array(  
-			'dedup'	=>	false,
-			'group'	=>	'post_info',
-			'label'	=>	'Post Category',
-			'like'	=>	false,
-			'list'	=> '25',
-			'list_call_back_id' => 'wic_get_post_categories',
-			'online'	=>	true,
-			'order'	=>	50,
-			'required'	=> '',
-			'select_array' => 'wic_get_category_list',
-			'select_parameter' => '',
-			'slug'	=> 'cat',
-			'type'	=>	'multi_select',
-			'wp_query_parameter' => 'cat',
-			), 
-		array(  
-			'dedup'	=>	false,
-			'group'	=>	'post_info',
-			'label'	=>	'Post Tags',
-			'like'	=>	false,
-			'list'	=> '0',
-			'online'	=>	true,
-			'order'	=>	60,
-			'required'	=> '',
-			'slug'	=> 'tag',
-			'type'	=>	'text',
-			'wp_query_parameter' => 'tag',
-			), 								
-		array(  
-			'dedup'	=>	false,
-			'group'	=>	'post_info',
-			'label'	=>	'Post Created Date',
-			'like'	=>	false,
-			'list'	=> '17',
-			'online'	=>	true,
-			'order'	=>	70,
-			'required'	=> '',
-			'slug'	=> 'post_created_date',
-			'type'	=>	'date',
-			'wp_query_parameter' => 'date',
-			), 								
-		array(  
-			'dedup'	=>	false,
-			'group'	=>	'post_info',
-			'label'	=>	'Search Term',
-			'like'	=>	false,
-			'list'	=> '0',
-			'online'	=>	true,
-			'order'	=>	80,
-			'required'	=> '',
-			'slug'	=> 'search_term',
-			'readonly_subtype' => 'text',
-			'type'	=>	'readonly',
-			'wp_query_parameter' => 's',
-			), 
-		array(  
-			'dedup'	=>	false,
-			'group'	=>	'post_info',
-			'label'	=>	'Visibility',
-			'like'	=>	false,
-			'list'	=> '10',
-			'online'	=>	true,
-			'order'	=>	90,
-			'required'	=> '',
-			'select_array'	=>	array ( 
-				array(
-					'value'	=> 'publish',
-					'label'	=>	'Publicly Published' ),
-				array(
-					'value'	=> 'private',
-					'label'	=>	'Private' ),
-				array(
-					'value'	=> 'draft',
-					'label'	=>	'Draft' ),
-				array(
-					'value'	=> 'trash',
-					'label'	=>	'Trash' ),
-				),
-			'slug'	=> 'post_status',
-			'readonly_subtype' => 'select',
-			'type'	=>	'readonly',
-			'wp_query_parameter' => 'post_status',
-			),																		
-		);
+			);
+							
+
 		return $output;
 	}
 	

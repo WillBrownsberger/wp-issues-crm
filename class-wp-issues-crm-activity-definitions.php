@@ -31,6 +31,13 @@ class WP_Issues_CRM_Activity_Definitions {
 		'plural'	  => 'Activities'	
 	);
 
+	public $wic_post_type_sort_order = array (
+		'orderby' => 'date',
+		'order'	  => 'DESC'	
+	);	
+
+	public $wic_post_type_dups_ok = true;
+
 	public $wic_post_field_groups = array (
 
 		array (

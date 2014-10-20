@@ -31,14 +31,6 @@ class WP_Issues_CRM_Main_Form {
 	*
 	*/
 	
-
-
-	private $button_actions = array(
-		'save' 	=>	'Save New',
-		'search' => 'Search',
-		'update' => 'Update',
-	);
- 	
 	public function __construct( $control_array ) {
 	
 		// set up control properties 
@@ -46,6 +38,7 @@ class WP_Issues_CRM_Main_Form {
 		$this->action_requested = $control_array[1]; // save, update, search
 		$this->id_requested 		= $control_array[2]; // numeric, 0 if not set 
 		$this->referring_parent = $control_array[3]; // id of referring_parent post > 0 only on first entry from add new button on parent form 
+		$this->new_form			= $control_array[4]; // requesting blank form for save new but no referring parent
 		$this->child_types		= array(); // used only to display child lists and add new buttons (e.g., add activity list and new activity for constituent )
 		$this->parent_pointer_slug = ''; // used as flag to determine child form handling and also as to quickly refer to parent field 
 		$this->parent_type = ''; // type of the parent to current type
@@ -69,7 +62,8 @@ class WP_Issues_CRM_Main_Form {
 				}			
 			}
 		}		
-		
+
+		$this->dups_ok = ${ 'wic_' . $this->form_requested . '_definitions' }->wic_post_type_dups_ok;		
 
 		// assemble name for form post type's definitions class
 		$field_source_string = 'wic_' . $this->form_requested . '_definitions';
@@ -81,6 +75,12 @@ class WP_Issues_CRM_Main_Form {
  				 array_push( $this->working_post_fields, $field );
  			}
  		}
+
+		$this->button_actions = array(
+			'save' 	=>	sprintf( __( 'Save New %1$s', 'wp-issues-crm' ),  ${ 'wic_' . $this->form_requested . '_definitions' }->wic_post_type_labels['singular'] ),
+			'search' => sprintf( __( 'Search %1$s', 'wp-issues-crm' ),  ${ 'wic_' . $this->form_requested . '_definitions' }->wic_post_type_labels['plural'] ),
+			'update' => sprintf( __( 'Update %1$s', 'wp-issues-crm' ), ${ 'wic_' . $this->form_requested . '_definitions' }->wic_post_type_labels['singular'] ),
+		);		 	
  		
  		// get field groups for current post type 
 		$this->working_post_field_groups = $$field_source_string->wic_post_field_groups;
@@ -122,6 +122,7 @@ class WP_Issues_CRM_Main_Form {
 		
 		global $wic_form_utilities;
 		global $wic_database_utilities;
+		global ${ 'wic_' . $this->form_requested . '_definitions' };
 		
 		/* first check capabilities -- must be administrative user */
 		if ( ! current_user_can ( 'activate_plugins' ) ) { 
@@ -146,17 +147,24 @@ class WP_Issues_CRM_Main_Form {
 			// will show post list if found multiple or found a dup; default is false
 
 			/*
-			*  processing for two major cases: 
-			*		general (possible parent type) 
-			*			start with search and always do dup check searching and branch cases according to what found
+			*  processing for three major cases: 
 			*
 			*		child type for which no dup checking, since may be many and always come in with 
 			*			(a) parent link (go to save) or 
-			*			(b) post link (unless had errors on save) 
+			*			(b) id go to update (unless had errors on save) 
+			*			
+			*		non-child with no dup checking
+			*			-- support searches and multiple outcomes ( none, one, many )
+			*			-- do saves/updates without dup check searching and related logic 
 			*
+			*		general (possible parent type) 
+			*			-- start with search always (new, dup or just get by id )  
+			*			-- branch all cases according to search outcome
+			*
+			*		some overlap between case processing, but seems cleanest to leave in three separate cases -- logic for each more transparent
 			*/
 
-			if ( $this->parent_pointer_slug > '' ) { // logic for child case -- search is not part of pre-processing, since no dupchecking 
+			if ( $this->parent_pointer_slug > '' ) { // logic for child case -- search is not part of pre-processing, since no dupchecking AND only parent-based searching
 				// do no field sanitization -- just start with the blank form 
 				if ( $this->referring_parent > 0 ) { // if coming from a parent referral, go straight to save or update
 					$next_form_output[$this->parent_pointer_slug] = $this->referring_parent;
@@ -196,8 +204,61 @@ class WP_Issues_CRM_Main_Form {
 						}					
 					}
 				}
-				
-			} else {	// general case (possibly parents, but may be just non-children)
+			} elseif ( $this->dups_ok ) {	// dups OK logic flow
+				switch ( $this->action_requested ) {	
+					case 'search':				
+						if ( 0 == $this->id_requested ) { 
+							$wic_form_utilities->sanitize_validate_input( $next_form_output, $this->working_post_fields );
+							$search_mode = 'new';
+						} else {
+							$search_mode = 'db_check';
+							$next_form_output['wic_post_id']	= $this->id_requested;						
+						}
+						$wic_query = $wic_database_utilities->search_wic_posts( $search_mode, $next_form_output, $this->working_post_fields, $this->form_requested );
+						if ( 0 == $wic_query->found_posts ) { // same as dup check case from here 
+							$next_form_output['guidance']	=	__( 'No matching record found. Try a save? ', 'wp-issues-crm' );
+							$next_form_output['next_action'] 	=	'save';
+						} elseif ( 1 == $wic_query->found_posts ) {
+							// overwrite form with that unique record's  values
+							$wic_database_utilities->populate_form_from_database ( $next_form_output, $this->working_post_fields, $wic_query );
+							$next_form_output['guidance']	=	__( 'One matching record found. Try an update?', 'wp-issues-crm' );
+							$next_form_output['next_action'] 	=	'update';
+						} else {
+							$next_form_output['guidance']	=	__( 'Multiple records found (results below). ', 'wp-issues-crm' );
+							$next_form_output['next_action'] 	=	'search';
+							$show_list = true;
+						}						
+						break;
+					case 'save':
+							if ( 'y' == $this->new_form ) { 
+								$next_form_output['guidance']	=	sprintf ( __( 'Save a new %1$s', 'wp-issues-crm' ),  ${ 'wic_' . $this->form_requested . '_definitions' }->wic_post_type_labels['singular'] );
+								$next_form_output['next_action'] 	=	'save';
+								break; 
+							}
+					case 'update': // same as child case from here 
+						$wic_form_utilities->sanitize_validate_input( $next_form_output, $this->working_post_fields );
+						if ( $next_form_output['error_messages'] > '' ) { 
+								$next_form_output['guidance']	=	__( 'Please correct form errors: ', 'wp-issues-crm' );
+								$next_form_output['next_action'] 	=	$this->action_requested;
+						} else {
+							$outcome = $wic_database_utilities->save_update_wic_post( $next_form_output, $this->working_post_fields, $this->form_requested );
+							if ( $outcome['notices'] > ''  ) { // alpha return_post_id is error string
+								$next_form_output['guidance']	=	__( 'Please retry -- there were database errors: ', 'wp-issues-crm' );
+								$next_form_output['error_messages'] = $outcome['notices'];
+								$next_form_output['next_action'] 	= $this->action_requested;
+							} else {
+								$next_form_output['wic_post_id'] = $outcome['post_id'];
+								$next_form_output['guidance']	=	__( 'Save/update successful -- you can further update this record.', 'wp-issues-crm' );
+								$next_form_output['next_action'] 	=	'update';
+								if ( trim( $next_form_output[ 'wic_post_content' ] )  > '' ) { // parallels update to database
+									$next_form_output['old_wic_post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] ) . $next_form_output['old_wic_post_content'];
+									$next_form_output['wic_post_content'] = '';
+								}
+							}					
+						}
+						break;
+				}		
+			} else {	// dup checking case
 				if ( 0 == $this->id_requested ) { 
 					// clean and validate POST input and populate next form output	
 					$wic_form_utilities->sanitize_validate_input( $next_form_output, $this->working_post_fields );
@@ -352,19 +413,15 @@ class WP_Issues_CRM_Main_Form {
 		global $wic_base_definitions;
 		global $wic_form_utilities; 
 		global ${ 'wic_' . $this->form_requested . '_definitions' };
-		/* var_dump( $next_form_output['initial_sections_open'] ); */
 
-		echo '<span style="color:green;"> <br /> $_POST:';  		
+		/* echo '<span style="color:green;"> <br /> $_POST:';  		
   		var_dump ($_POST);
   		echo '</span>';  
 
 		 echo '<span style="color:red;"> <br />next_form_output:';  		
   		var_dump ($next_form_output);
   		echo '</span>';   
-  		/*
-  		echo '<span style="color:blue;"> <br />phone_numbers:';  		
-  		var_dump ($_POST['phone_numbers']);
-  		echo '</span>'; */  
+		/* */
 
 		?><div id='wic-forms' class = "<?php echo $next_form_output['initial_form_state'] ?>">
 
@@ -375,7 +432,7 @@ class WP_Issues_CRM_Main_Form {
 				<?php if ( 'update' == $next_form_output['next_action'] || $this->referring_parent > 0 ) {
 					$form_header = ${ 'wic_' . $this->form_requested . '_definitions' }->title_callback( $next_form_output );
 				} else {
-					$form_header = __( $this->button_actions[$next_form_output['next_action']], 'wp_issues_crm');
+					$form_header = $this->button_actions[$next_form_output['next_action']] ;
 				}
 				echo '<h2>' . esc_html( $form_header ) . '</h2>'; 
 				
@@ -405,6 +462,17 @@ class WP_Issues_CRM_Main_Form {
 				);					
 				$button_row = $wic_form_utilities->create_wic_form_button( $button_args_main );
 
+				if ( 'search' == $next_form_output['next_action'] && $this->dups_ok ) { 
+					$button_args_go_direct_to_save_new = array(
+						'form_requested'			=> $this->form_requested,
+						'action_requested'		=> 'save',
+						'button_label'				=> sprintf ( __( 'Add New %1$s', 'wp-issues-crm' ), ${ 'wic_' . $this->form_requested . '_definitions' }->wic_post_type_labels['singular'] ),
+						'button_class'				=> 'wic-form-button second-position',
+						'new_form'					=> 'y',						
+						);	
+					$button_row .= $wic_form_utilities->create_wic_form_button( $button_args_go_direct_to_save_new );
+				}
+
  				if ( 'update' == $next_form_output['next_action'] ) { // show button for new child type(s)
 					foreach ( $this->child_types as $entity_type ) {
 						global ${ 'wic_' . $entity_type . '_definitions' };
@@ -413,7 +481,7 @@ class WP_Issues_CRM_Main_Form {
 								'action_requested'		=> 'save',
 								'id_requested'				=> 0,
 								'referring_parent'		=>	$next_form_output['wic_post_id'], // always isset if doing update
-								'button_label'				=> 'Add New ' . ${ 'wic_' . $entity_type . '_definitions' }->wic_post_type_labels['singular'],
+								'button_label'				=> sprintf ( __( 'Add New %1$s', 'wp-issues-crm' ), ${ 'wic_' . $entity_type . '_definitions' }->wic_post_type_labels['singular'] ),
 								'button_class'				=> 'wic-form-button second-position',
 							);
 						$button_row .= $wic_form_utilities->create_wic_form_button( $button_args_child_button );					
@@ -562,24 +630,7 @@ class WP_Issues_CRM_Main_Form {
 
 							case 'date':
 								if ( 'search' == $next_form_output['next_action'] ) { 
-									$args = array (
-										'field_name_id'		=> $field['slug'] . '_lo',
-										'field_label'			=>	$field['label'] . ' >= ' ,
-										'value'					=> $next_form_output[$field['slug'] . '_lo'],
-										'read_only_flag'		=>	false, 
-										'field_label_suffix'	=> '', 								
-									);
-									echo '<p>' . $wic_form_utilities->create_text_control ( $args ); 
-
-									$args = array (
-										'field_name_id'		=> $field['slug'] . '_hi',
-										'field_label'			=>	__( 'and <=', 'wp_issues_crm' ),
-										'label_class'			=> 'wic-label-2',
-										'value'					=> $next_form_output[$field['slug']. '_hi'],
-										'read_only_flag'		=>	false, 
-										'field_label_suffix'	=> '', 								
-									);
-									echo $wic_form_utilities->create_text_control ( $args ) . '</p>'; 
+									echo '<p>' . $wic_form_utilities->create_date_range_control ( $next_form_output, $field ) . '</p>'; 
 								}	else {
 									$args['field_label_suffix'] = $required_individual . $required_group;  								
 									echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>'; 
@@ -591,10 +642,39 @@ class WP_Issues_CRM_Main_Form {
 									if ( 'text' == $field['readonly_subtype'] ) {
 										$args['read_only_flag'] = 	( 'update' == $next_form_output['next_action'] ); // true or false 
 										echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';
+									} elseif ( 'date' == $field['readonly_subtype'] ) {
+										if ( 'search' == $next_form_output['next_action'] ) {
+											echo '<p>' . $wic_form_utilities->create_date_range_control ( $next_form_output, $field ) . '</p>';
+										} else { 
+											$args['read_only_flag'] = true; 
+											echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';
+										}
 									} elseif ( 'select' == $field['readonly_subtype'] ) {
 										if ( 'update' == $next_form_output['next_action'] ) {
+											if ( ! isset( $field['list_call_back_key'] ) && ! isset( $field['list_call_back_id'] ) ) {
+												$select_parameter =  isset ( $field['select_parameter'] ) ?  $field['select_parameter'] : '' ;
+												$select_array = $wic_form_utilities->format_select_array ( $field['select_array'], 'lookup', $select_parameter );
+												$args['value'] = ( $next_form_output[$field['slug']] > '' ) ? $select_array[$next_form_output[$field['slug']]] : ''; 
+											} elseif ( isset( $field['list_call_back_key'] ) ) {
+											 	$args['value'] = $wic_form_utilities->$field['list_call_back_key']( $next_form_output[$field['slug']] ) ;
+											} elseif ( isset( $field['list_call_back_id'] ) ) { 
+												$args['value'] = $wic_form_utilities->$field['list_call_back_id']( $next_form_output['wic_post_id'] );
+											} else {
+												$args['value'] = __( 'Configuration error', 'wp-issues-crm' );											
+											} 							
 											$args['read_only_flag'] = 	true; 
-											echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';										
+											$args['field_name_id'] = $field['slug'] . '_display_only';
+											echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';	
+											$args = array (
+														'field_name_id'		=> $field['slug'],
+														'field_label'			=>	'',
+														'value'					=> $next_form_output[$field['slug']],
+														'read_only_flag'		=>	false,
+														'input_class'			=>  'hidden-template', 
+														'field_label_suffix'	=> $required_individual . $required_group . $contains, 								
+													);											
+											echo $wic_form_utilities->create_text_control ( $args );
+																				
 										} else {
 											$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
 											$args['select_array']			=	is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']( $field['select_parameter'] );
@@ -611,7 +691,8 @@ class WP_Issues_CRM_Main_Form {
 										echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';
 									} elseif ( 'select' == $field['updateonly_subtype'] ) {
 										$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
-										$args['select_array']			=	is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']( $field['select_parameter'] );
+										$select_parameter =  isset ( $field['select_parameter'] ) ?  $field['select_parameter'] : '' ;
+										$args['select_array'] =	$wic_form_utilities->format_select_array ( $field['select_array'], 'control', $select_parameter );
 										$args['field_label_suffix']	= $required_individual . $required_group;								
 										echo '<p>' . $wic_form_utilities->create_select_control ( $args ) . '</p>';
 										break;
@@ -625,14 +706,16 @@ class WP_Issues_CRM_Main_Form {
 								
 							case 'select':
 								$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
-								$args['select_array']			=	is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']( $field['select_parameter'] );
+								$select_parameter =  isset ( $field['select_parameter'] ) ?  $field['select_parameter'] : '' ;
+								$args['select_array']			=	$wic_form_utilities->format_select_array ( $field['select_array'], 'control', $select_parameter );
 								$args['field_label_suffix']	= $required_individual . $required_group;								
 								echo '<p>' . $wic_form_utilities->create_select_control ( $args ) . '</p>';
 								break; 
 								
 							case 'multi_select':
 								$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
-								$args['select_array']			=	is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']( $field['select_parameter'] );
+								$select_parameter =  isset ( $field['select_parameter'] ) ?  $field['select_parameter'] : '' ;
+								$args['select_array']			=	$wic_form_utilities->format_select_array ( $field['select_array'], 'control', $select_parameter );
 								$args['field_label_suffix']	= $required_individual . $required_group;								
 								echo '<p>' . $wic_form_utilities->create_multi_select_control ( $args ) . '</p>';
 								break; 
@@ -672,7 +755,7 @@ class WP_Issues_CRM_Main_Form {
 					'class'			=> 'field-group-show-hide-button',		
 					'name_base'		=> 'wic-inner-field-group-',
 					'name_variable' => 'wic-post-content',
-					'label' 			=> __('Notes', 'wp-issues-crm' ),
+					'label' 			=> __('Notes (or Post Content) ', 'wp-issues-crm' ),
 					'show_initial' =>  ( $show_initial ),
 				);
 				
@@ -681,23 +764,30 @@ class WP_Issues_CRM_Main_Form {
 				$show_class = $show_initial ? 'visible-template' : 'hidden-template';
 							
 				echo '<div id = "wic-inner-field-group-wic-post-content" class="' . $show_class .'">';	
-					$args = array (
-						'field_name_id'		=> 'wic_post_content',
-						'field_label'			=>	__( "Note Text", 'wp-issues-crm' ),
-						'value'					=> $next_form_output['wic_post_content'],
-						'read_only_flag'		=>	false, 
-						'field_label_suffix'	=> '(%!)', 								
-						);			
-					$args['field_label_suffix']	= '';
-					$args['input_class'] = 'wic-input wic-wic-post-content';
-					echo '<p>' . $wic_form_utilities->create_text_area_control($args) . '</p>';
-					
+
+					$temp_post_status = ( isset ( $next_form_output['post_status'] ) ) ? $next_form_output['post_status'] : 'private' ; 
+					if ( "publish" != $temp_post_status ) { // show add note option only for private  posts
+						$args = array (
+							'field_name_id'		=> 'wic_post_content',
+							'field_label'			=>	__( "Note Text", 'wp-issues-crm' ),
+							'value'					=> $next_form_output['wic_post_content'],
+							'read_only_flag'		=>	false, 
+							'field_label_suffix'	=> '(%!)', 								
+							);			
+						$args['field_label_suffix']	= '';
+						$args['input_class'] = 'wic-input wic-wic-post-content';
+						echo '<p>' . $wic_form_utilities->create_text_area_control($args) . '</p>';
+				
+					}
 					$args['field_name_id'] = 'old_wic_post_content';
 					$args['read_only_flag']	= true;
 					$args['input_class'] = 'hidden-template';
 					$args['label_class'] = 'hidden-template';
 					$args['value']	= $next_form_output['old_wic_post_content'];
 					echo '<p>' . $wic_form_utilities->create_text_area_control($args) . '</p>';
+					
+					
+					
 					echo '<div id = "wic-old-wic-post-content">' .  balancetags( wp_kses_post ( $next_form_output['old_wic_post_content'] ), true ) . '</div>';
 					/**
 					* options considered for output sanitization of kses_post -- need to be good here, since new notes are just appended to old
