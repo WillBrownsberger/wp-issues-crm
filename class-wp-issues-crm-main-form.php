@@ -352,7 +352,7 @@ class WP_Issues_CRM_Main_Form {
 		global $wic_base_definitions;
 		global $wic_form_utilities; 
 		global ${ 'wic_' . $this->form_requested . '_definitions' };
-		/* var_dump( $next_form_output['initial_sections_open'] );
+		/* var_dump( $next_form_output['initial_sections_open'] ); */
 
 		/* echo '<span style="color:green;"> <br /> $_POST:';  		
   		var_dump ($_POST);
@@ -605,6 +605,19 @@ class WP_Issues_CRM_Main_Form {
 									}
 								} 
 								break;
+							case 'updateonly': 
+								if ( 'search' != $next_form_output['next_action'] ) { // do not display for save
+									if ( 'text' == $field['updateonly_subtype'] ) {
+										echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';
+									} elseif ( 'select' == $field['updateonly_subtype'] ) {
+										$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
+										$args['select_array']			=	is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']( $field['select_parameter'] );
+										$args['field_label_suffix']	= $required_individual . $required_group;								
+										echo '<p>' . $wic_form_utilities->create_select_control ( $args ) . '</p>';
+										break;
+									}
+								} 
+								break;								
 
 							case 'check':
 								echo '<p>' . $wic_form_utilities->create_check_control ( $args ) . '</p>'; 
@@ -615,6 +628,13 @@ class WP_Issues_CRM_Main_Form {
 								$args['select_array']			=	is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']( $field['select_parameter'] );
 								$args['field_label_suffix']	= $required_individual . $required_group;								
 								echo '<p>' . $wic_form_utilities->create_select_control ( $args ) . '</p>';
+								break; 
+								
+							case 'multi_select':
+								$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
+								$args['select_array']			=	is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']( $field['select_parameter'] );
+								$args['field_label_suffix']	= $required_individual . $required_group;								
+								echo '<p>' . $wic_form_utilities->create_multi_select_control ( $args ) . '</p>';
 								break; 
 														
 							case 'serialized_type_as_array': // note -- non-arrays already intercepted above  

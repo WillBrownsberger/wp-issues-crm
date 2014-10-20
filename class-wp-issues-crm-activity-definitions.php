@@ -92,7 +92,7 @@ class WP_Issues_CRM_Activity_Definitions {
 		 		'label'	=>	'Issue',
 		 		'like'	=>	false,
 				'list'	=> '61',
-				'list_call_back' => 'wic_get_post_title',
+				'list_call_back_key' => 'wic_get_post_title',
 		 		'online'	=>	true,
 		 		'order'	=>	20,	
 				'required'	=> 'individual',

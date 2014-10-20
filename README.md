@@ -48,6 +48,7 @@ used for that class.  These arrays have the following elemnts built into them.
 			+ select -- select field
 				must add element select_array which be an array or within the definition class or a callback function within the form_utilities class
 				must add element select_parameter, which will be passed to the callback function ( can be empty string, but must be defined )
+				for select arrays, may want also to use a list_call_back property which will translate the selected value in a list context
 			+ email is a text field that gets email validation
 			+ date is a text field that gets date formatting through very flexible php datetime object -- will be displayed as lo/hi range in search
 			+ check is a checkbox field (true false)
@@ -56,6 +57,10 @@ used for that class.  These arrays have the following elemnts built into them.
 				-- showed as readonly on update
 				-- showed as input on search
 				must add element readonly_subtype to determine type of control -- may be text or select
+			+ updateonly is roughly reverse of readonly -- shows only on update screens, not searchable
+				-- not displayed on search
+				-- displayed as updateable on update or save screen
+				must add element updateonly_subtype to determine type of control -- may be text or select
 			! three special types are supported by option arrays within the constituent class and functions in form_utilities class 
 				-- these fields are itemized in the array serialized_field_types in the base_definitions class
 					+ emails -- repeating group of emails with type (arrays in constituent class definition support this)
@@ -76,6 +81,7 @@ used for that class.  These arrays have the following elemnts built into them.
 			+ post_status
 			+ [taxonomy] ( not implemented for a later version)
 			+++  if empty or not defined, the field is handled as a meta field
+			
 
 				
 the definition classes for each entity also include field groups for diplay purposes -- array is named $wic_post_field_groups

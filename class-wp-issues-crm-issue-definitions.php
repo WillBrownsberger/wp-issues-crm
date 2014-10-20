@@ -103,9 +103,24 @@ class WP_Issues_CRM_Issue_Definitions {
 		array( 
 			'dedup'	=>	false,
 			'group'	=>	'post_info',
+			'label'	=>	'Post Title',
+			'like'	=>	false,
+			'list'	=> '30',
+			'online'	=>	true,
+			'order'	=>	38,
+			'required'	=> '',
+			'updateonly_subtype' => 'text',
+			'slug'	=> 'post_title',
+			'type'	=>	'updateonly',
+			'wp_query_parameter' => 'post_title',
+			), 
+		array( 
+			'dedup'	=>	false,
+			'group'	=>	'post_info',
 			'label'	=>	'Post Author',
 			'like'	=>	false,
-			'list'	=> '20',
+			'list'	=> '15',
+			'list_call_back_key' => 'wic_get_post_author_display_name',
 			'online'	=>	true,
 			'order'	=>	40,
 			'required'	=> '',
@@ -113,7 +128,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'select_array' => 'wic_get_user_list',
 			'select_parameter' => '',
 			'slug'	=> 'author',
-			'type'	=>	'readonly',
+			'type'	=>	'select',
 			'wp_query_parameter' => 'author',
 			), 				
 		array(  
@@ -121,14 +136,15 @@ class WP_Issues_CRM_Issue_Definitions {
 			'group'	=>	'post_info',
 			'label'	=>	'Post Category',
 			'like'	=>	false,
-			'list'	=> '20',
+			'list'	=> '25',
+			'list_call_back_id' => 'wic_get_post_categories',
 			'online'	=>	true,
 			'order'	=>	50,
 			'required'	=> '',
 			'select_array' => 'wic_get_category_list',
 			'select_parameter' => '',
 			'slug'	=> 'cat',
-			'type'	=>	'select',
+			'type'	=>	'multi_select',
 			'wp_query_parameter' => 'cat',
 			), 
 		array(  
@@ -149,7 +165,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'group'	=>	'post_info',
 			'label'	=>	'Post Created Date',
 			'like'	=>	false,
-			'list'	=> '20',
+			'list'	=> '17',
 			'online'	=>	true,
 			'order'	=>	70,
 			'required'	=> '',
@@ -174,9 +190,9 @@ class WP_Issues_CRM_Issue_Definitions {
 		array(  
 			'dedup'	=>	false,
 			'group'	=>	'post_info',
-			'label'	=>	'Post Visibility',
+			'label'	=>	'Visibility',
 			'like'	=>	false,
-			'list'	=> '20',
+			'list'	=> '10',
 			'online'	=>	true,
 			'order'	=>	90,
 			'required'	=> '',
@@ -266,6 +282,17 @@ class WP_Issues_CRM_Issue_Definitions {
 	   
 	   return;
 	}
+
+	public function title_callback( &$next_form_output ) {
+		
+		// for title, use group email if have it, otherwise use individual email 
+		$title = isset ( $next_form_output['post_title'] ) ? $next_form_output['post_title'] : 'untitled';  
+		
+		return  ( $title );
+	}
+	
+
+
 
 }
 

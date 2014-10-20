@@ -61,7 +61,7 @@ class WP_Issues_CRM_Form_Utilities {
 
 		/* notes refer to notes in main */			
 		foreach ( $fields_array as $field ) { // note 1 
-			$next_form_output[$field['slug']] =	'';
+			$next_form_output[$field['slug']] =	( 'multi_select' == $field['type'] ) ? array() : '';
 			if ( 'date' == $field['type'] ) {
 				$next_form_output[$field['slug'] . '_lo'] = '';				
 				$next_form_output[$field['slug'] . '_hi'] = '';
@@ -142,6 +142,14 @@ class WP_Issues_CRM_Form_Utilities {
 						$clean_input[$field['slug']] = stripslashes( sanitize_text_field( $_POST[$field['slug']] ) );
 					}
 				} // close non-array for serialized fields
+			} elseif ( 'multi_select' == $field['type'] ) { 
+				$clean_input[$field['slug']] = array();
+					if( isset ( $_POST[$field['slug']] ) ) {
+						foreach ( $_POST[$field['slug']] as $key => $value ) {
+							$clean_input[$field['slug']][] = $key; 					
+						}
+					}
+				var_dump($clean_input[$field['slug']]);			
 			} else { // not a serialized field and/or not set	-- do clean and also individual field validators
  				$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? stripslashes( sanitize_text_field( $_POST[$field['slug']] ) ) : '';
  				$possible_validator =  'validate_individual_' . $field['type'];
@@ -380,6 +388,54 @@ class WP_Issues_CRM_Form_Utilities {
 		return ( $control );
 	
 	}	
+
+	public function create_multi_select_control ( $control_args ) {
+		
+		/* $control_args = array (
+			'field_name_id' => name/id
+			'field_label'	=>	label for field
+			'placeholder' => label that will appear in drop down for empty string
+			'value'		=> initial value 
+			'label_class'			=> for css
+			'field_input_class'			=> for css
+			'select_array'	=>	the options for the selected -- key value array with keys 'value' and 'label' 
+			'field_label_suffix'	=> any string to append to the field label in control (but not in drop down)
+		*/								
+
+		$label_suffix = '';
+		$value = '';
+		$label_class = 'wic-label';
+		$field_input_class = 'wic-input';
+		$placeholder = '';
+		$value = array(); 
+
+		extract ( $control_args, EXTR_OVERWRITE ); 
+		
+		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
+
+		$control = '';
+				
+		foreach ( $select_array as $option ) {
+
+			$args = array(
+				'field_name_id' 		=> $field_name_id . '[' . $option['value'] . ']',
+				'field_label'			=>	$option['label'],
+				'label_class'			=> 'wic-multi-select-label',
+				'value'					=> in_array ( $option['value'], $value, false ),
+				'read_only_flag'		=>	false,
+				'field_label_suffix'	=> '',						
+			);	
+			$control .= $this->create_check_control($args);
+			
+		}
+	
+		return ( $control );
+	
+	}	
+
+
+
+
 
 /*
 *
@@ -976,6 +1032,27 @@ class WP_Issues_CRM_Form_Utilities {
 		return ( $category_select_array );
 	}
 
+	public function wic_get_post_categories ( $post_id ) {
+		 
+		$categories = get_the_category ( $post_id );
+		$return_list = '';
+		foreach ( $categories as $category ) {
+			$return_list .= ( '' == $return_list ) ? $category->cat_name : ', ' . $category->cat_name;		
+				}
+		return ( $return_list ) ;	
+	}
+
+	public function wic_get_post_author_display_name ( $user_id ) {
+		
+		$display_name = '';		
+		if ( isset ( $user_id ) ) { 
+			if ( $user_id > 0 ) {
+				$user =  get_users( array( 'fields' => array( 'display_name' ), 'include' => array ( $user_id ) ) );
+				$display_name = $user[0]->display_name; // best to generate an error here if this is not set on non-zero user_id
+			}
+		}
+		return ( $display_name );
+	}
 
 
 }

@@ -34,8 +34,29 @@ class WP_Issues_CRM_Base_Definitions {
 			),
 	);
 	
-	
-	
+	public $wp_query_parameters = array(
+		'author' 	=> array ( 
+			'update_post_parameter'	=> 'post_author',
+			),
+		'cat' 	=> array ( 
+			'update_post_parameter'	=> 'post_category',
+			),
+		'date' 	=> array ( 
+			'update_post_parameter'	=> 'post_date',
+			),
+		's' 	=> array ( 
+			'update_post_parameter'	=> '',
+			),
+		'tag' 	=> array ( 
+			'update_post_parameter'	=> 'post_tags',
+			),
+		'post_status' 	=> array ( 
+			'update_post_parameter'	=> 'post_status',
+			),
+		'post_title' 	=> array ( 
+			'update_post_parameter'	=> 'post_title',
+			),			
+	);
 	/* this array determines:
 		- whether field will be handled as array for display purposes -- multi lines of same field
 		- whether field will always be searched on a like compare (instead of = ), regardless of field or screen settings

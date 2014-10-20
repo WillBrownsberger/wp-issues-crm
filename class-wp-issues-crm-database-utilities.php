@@ -111,9 +111,11 @@ class WP_Issues_CRM_Database_Utilities {
 				} else {
 					switch ( $field['wp_query_parameter'] ) {
 						case 'author':
-						case 'cat':
 						case 's' :
 							$query_args[$field['wp_query_parameter']] = $next_form_output[$field['slug']];
+							break;
+						case 'cat':
+							$query_args['category__in'] = $next_form_output[$field['slug']];
 							break;
 						case 'post_status':
 							$status_value = ( $next_form_output[$field['slug']] > '' ) ? $next_form_output[$field['slug']] : 'any';
@@ -131,7 +133,7 @@ class WP_Issues_CRM_Database_Utilities {
 						case 'tag': 
 							$query_args['tag_slug__in'] = $next_form_output[$field['slug']];
 							break;
-					
+					   // note: not presenting title as a search option -- captured in full text search; 
 					}
 				}		
 	 		}
@@ -155,9 +157,9 @@ class WP_Issues_CRM_Database_Utilities {
 				'post_type' => $post_type,			
 			);	 	
 	 	} 
-
+		
  		$wic_query = new WP_Query($query_args);
-
+		var_dump ($wic_query->query);
  		return $wic_query;
 	}
 
@@ -198,6 +200,30 @@ class WP_Issues_CRM_Database_Utilities {
 		foreach ( $fields_array as $field ) {
 		 	// note: in the not read only branch, explicitly set meta_return in every case 
 		 	$wp_query_parameter = isset ( $field['wp_query_parameter'] ) ? $field['wp_query_parameter'] : '';
+		 	if ( '' < $wp_query_parameter && $field['type'] != 'readonly' && '' != $next_form_output[$field['slug']] ) {
+		 		switch ( $field['wp_query_parameter'] ) {
+					case 'author':
+						$post_args['post_author'] = $next_form_output[$field['slug']];
+						break;
+					case 'cat':
+						echo $next_form_output[$field['slug']]; 
+						$post_args['post_category'] = $next_form_output[$field['slug']];
+						break;
+					case 'post_status':
+						$post_args[ 'post_status'] = $next_form_output[$field['slug']];
+						break;
+					case 'date':
+						$post_args['post_date'] = $next_form_output[$field['slug']];
+						break;
+					case 'tag':
+						$temp_tags =  preg_replace( "/[^0-9][^A-Z][^a-z]/,", '', $next_form_output[$field['slug']] );
+						$post_args['tags_input'] = explode ( ',', $temp_tags );
+						break;
+					case 'post_title':	
+						$post_args['post_title'] = $title;
+						break;						
+				}
+		 	} 
 		} 	
 		 	
 		if ( $next_form_output['wic_post_id'] > 0 ) { // if have post ID, do update if notes or title changed
@@ -207,9 +233,19 @@ class WP_Issues_CRM_Database_Utilities {
 				return ( $outcome );			
 			} 
 			$post_args['ID'] = $next_form_output['wic_post_id'];
-/*			if ( $next_form_output[ 'wic_post_content' ] != $check_on_database->post->post_content ||
-				$title != $check_on_database->post->post_title ) { -- these were replaced by next two lines lines*/
-			if ( trim( $next_form_output[ 'wic_post_content' ] )   > '' || $title != $check_on_database->post->post_title ) { // conditions for update post
+			
+			// prevent publication of possibly private posts through this interface -- only can update or save to private unless already published
+			if ( 'publish' != $check_on_database->post->post_status && isset ( $post_args['post_status'] ) ) {
+				$post_args['post_status'] = 'private';			
+			}
+			if ( 	trim( $next_form_output[ 'wic_post_content' ] )   > '' || 
+					$post_args['post_title']      != $check_on_database->post->post_title  || 
+					$post_args['post_author']  	!= $check_on_database->post->post_author ||
+					$post_args['post_category'] 	!= $check_on_database->post->post_category ||
+					$post_args['post_status']		!= $check_on_database->post->post_status ||
+					$post_args['post_date'] 		!= $check_on_database->post->post_date ||
+					$post_args['tags_input']		!= $check_on_database->post->post_tags )
+					{ // conditions for update post
 				if ( trim( $next_form_output[ 'wic_post_content' ] )   > '' ) { // condition for update post content
 					array_push( $next_form_output['initial_sections_open'], 'wic_post_content' ); // show field's section open in next form
 					$post_args['post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] )  . $check_on_database->post->post_content;
@@ -287,10 +323,34 @@ class WP_Issues_CRM_Database_Utilities {
 	public function populate_form_from_database ( &$next_form_output, &$fields_array, &$wic_query ) {	
 	   
 		foreach ( $fields_array as $field ) {
-			$post_field_key =  $this->wic_metakey . $field['slug'];
+			$wp_query_parameter = isset ( $field['wp_query_parameter'] ) ? $field['wp_query_parameter'] : '';
+			if ( '' == $wp_query_parameter ) {
+				$post_field_key =  $this->wic_metakey . $field['slug'];
 				// the following isset check should be necessary only if a search requesting more than the maximum search terms is executed 
 				// note -- don't need to unserialize phones, etc. -- wp_query does this. also automatic in save_update_wic_post  
 				$next_form_output[$field['slug']] = isset ( $wic_query->post->$post_field_key ) ?  $wic_query->post->$post_field_key : '';
+			} else {
+				switch ( $wp_query_parameter ) {
+					case 'author':
+						$next_form_output[$field['slug']] = $wic_query->post->post_author;
+						break;
+					case 'cat':
+						$next_form_output[$field['slug']] =  $this->wic_get_post_categories_array ( $wic_query->post->ID );
+						break;
+					case 'post_status':
+						$next_form_output[$field['slug']] =  $wic_query->post->post_status;
+						break;
+					case 'date':
+						$next_form_output[$field['slug']] =  $wic_query->post->post_date;
+						break;
+					case 'tag':
+						$next_form_output[$field['slug']] =  $wic_query->post->tags_input;
+						break;
+					case 'post_title':	
+						$next_form_output[$field['slug']] =  $wic_query->post->post_title;
+						break;						
+				}	
+			}
 		}
 		$next_form_output['wic_post_content'] = ''; // don't want to bring search notes automatically into update mode 
 		$next_form_output['old_wic_post_content'] = isset ( $wic_query->post->post_content )  ? $wic_query->post->post_content: '';	
@@ -378,6 +438,16 @@ class WP_Issues_CRM_Database_Utilities {
 	public function wic_get_post ( $post_id ) {
 		$wic_post_query = new WP_Query ( 'p=' . $post_id );		
 		return $wic_post_query;	
+	}
+
+	public function wic_get_post_categories_array ( $post_id ) {
+
+		$categories = get_the_category ( $post_id );
+		$return_array = array();
+		foreach ( $categories as $category ) {
+			$return_array[] = $category->cat_ID; 		
+		}
+		return ( $return_array ) ;	
 	}
 
 
