@@ -55,7 +55,7 @@ class WP_Issues_CRM_Issue_Definitions {
 		array (
 			'name'		=> 'post_fixed',
 			'label'		=>	'Issue Creation',
-			'legend'		=>	'These fields can be searched but not changed online',
+			'legend'		=>	'These fields can be searched but not changed online.  They are not displayed for new records.',
 			'order'		=> 40,
 			'initial-open'	=> false,
 		),		
@@ -88,6 +88,8 @@ class WP_Issues_CRM_Issue_Definitions {
 	*
 	* note post status is also tested in form to prevent update of public posts in note format
 	*
+	* so named fields are populated after new post save in save_update_posts 
+	*
 	*/
 
 		array( 
@@ -116,9 +118,10 @@ class WP_Issues_CRM_Issue_Definitions {
 			'list'	=> '17',
 			'online'	=>	true,
 			'order'	=>	70,
+			'readonly_subtype' => 'date',
 			'required'	=> '',
 			'slug'	=> 'post_created_date',
-			'type'	=>	'date',
+			'type'	=>	'readonly',
 			'wp_query_parameter' => 'date',
 			), 								
 		array(  
@@ -191,7 +194,7 @@ class WP_Issues_CRM_Issue_Definitions {
 		array(  
 			'dedup'	=>	false,
 			'group'	=>	'post_categories',
-			'label'	=>	'Post Category',
+			'label'	=>	'', // put alone in group and show group label
 			'like'	=>	false,
 			'list'	=> '25',
 			'list_call_back_id' => 'wic_get_post_categories',
@@ -199,7 +202,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'order'	=>	50,
 			'required'	=> '',
 			'select_array' => 'wic_get_category_list',
-			'select_parameter' => '',
+			'select_parameter' => '0',
 			'slug'	=> 'cat',
 			'type'	=>	'multi_select',
 			'wp_query_parameter' => 'cat',

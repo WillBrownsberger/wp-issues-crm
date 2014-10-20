@@ -245,6 +245,12 @@ class WP_Issues_CRM_Database_Utilities {
 			$post_args['post_status']  = 'private';
 			$post_args['post_content'] = $wic_form_utilities->format_wic_post_content( $next_form_output['wic_post_content'] );
 			$outcome['post_id'] = wp_insert_post( $post_args );
+			if ( 0 < $outcome['post_id'] ) { // populate fields that are taking wp defaults on
+				$just_saved = get_post ( $outcome['post_id'], 'ARRAY_A' );
+				$next_form_output['wic_post_author'] = $just_saved['post_author'];
+				$next_form_output['post_created_date'] = $just_saved['post_date'];
+				$next_form_output['post_status'] = $just_saved['post_status'];
+			}
 		}				
 		// save or update error return with error
 		if ( 0 == $outcome['post_id'] ) {

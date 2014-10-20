@@ -155,6 +155,7 @@ p.wic-form-field-group-legend {
 	
 }
 
+.wic-multi-select-label:hover,
 .wic-label-2:hover,
 .wic-label:hover {
 	color: #999;
@@ -170,7 +171,7 @@ p.wic-form-field-group-legend {
 .wic-input {
 	background: #ffffff;
 	border: 1px solid #f0f0f0;
-	min-width: 200px;
+	min-width: 250px;
 } 
 
 
@@ -220,6 +221,75 @@ p.wic-form-field-group-legend {
 .wic-email-address {
 	width: 300px; 
 }
+
+.wic_multi_select {
+	display: inline-block;
+	background: #ffffff;
+	margin: 0 0 0 200px;
+	padding:0;
+}
+
+.wic-multi-select-group-label {
+	display: inline-block;
+	min-width: 180px;
+	color: #333;
+	text-align: right;
+	vertical-align: top;
+}
+
+.wic_multi_select_item {
+	display: block;
+	margin: 0;
+	width: 400px;
+}
+
+.wic-multi-select-checkbox {
+	text-align: right;
+}
+
+.wic-multi-select-label {
+	color: #333;	
+	cursor: pointer;
+	display: inline-block;
+	min-width: 250px;
+	vertical-align: top;
+	padding-left: 20px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+
+}
+
+
+.wic-multi-select-depth-1 {
+	padding-left: 20px;
+}
+
+
+.wic-multi-select-depth-2 {
+	padding-left: 40px;
+}
+
+.wic-multi-select-depth-3 {
+	padding-left: 60px
+}
+
+.wic-multi-select-depth-4 {
+	padding-left: 60px
+}
+
+.wic-multi-select-depth-5 {
+	padding-left: 60px
+}
+
+.wic-multi-select-depth-6 {
+	padding-left: 60px
+}
+
+
+
+
+
 #wic-post-content {
 	 
 }

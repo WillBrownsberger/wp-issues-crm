@@ -717,7 +717,7 @@ class WP_Issues_CRM_Main_Form {
 								$select_parameter =  isset ( $field['select_parameter'] ) ?  $field['select_parameter'] : '' ;
 								$args['select_array']			=	$wic_form_utilities->format_select_array ( $field['select_array'], 'control', $select_parameter );
 								$args['field_label_suffix']	= $required_individual . $required_group;								
-								echo '<p>' . $wic_form_utilities->create_multi_select_control ( $args ) . '</p>';
+								echo $wic_form_utilities->create_multi_select_control ( $args ) ;
 								break; 
 														
 							case 'serialized_type_as_array': // note -- non-arrays already intercepted above  

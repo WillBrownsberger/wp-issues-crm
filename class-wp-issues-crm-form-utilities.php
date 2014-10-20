@@ -244,6 +244,7 @@ class WP_Issues_CRM_Form_Utilities {
 		$read_only_flag 		= false; 				
 		$field_label_suffix 	= '';
 		$label_class = 'wic-label';
+		$input_class = 'wic_input_checked';
 
 		
 		extract ( $control_args, EXTR_OVERWRITE ); 
@@ -253,7 +254,7 @@ class WP_Issues_CRM_Form_Utilities {
 		 
 		$control = ( $field_label > '' ) ?  '<label class="' . $label_class . '" for="' . 
 				esc_attr( $field_name_id ) . '">' . esc_html( $field_label ) . ' ' . '</label>' : '';
-		$control .= '<input class="wic-input-checked"  id="' . esc_attr( $field_name_id ) . '" name="' . esc_attr( $field_name_id ) . 
+		$control .= '<input class="' . $input_class . '"  id="' . esc_attr( $field_name_id ) . '" name="' . esc_attr( $field_name_id ) . 
 			'" type="checkbox"  value="1"' . checked( $value, 1, false) . $readonly  .'/>' . 
 			$field_label_suffix_span  ;	
 
@@ -434,7 +435,7 @@ class WP_Issues_CRM_Form_Utilities {
 
 		$label_suffix = '';
 		$value = '';
-		$label_class = 'wic-label';
+		$label_class = 'wic-multi-select-group-label';
 		$field_input_class = 'wic-input';
 		$placeholder = '';
 		$value = array(); 
@@ -443,27 +444,28 @@ class WP_Issues_CRM_Form_Utilities {
 		
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 
-		$control = '';
+		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . esc_attr( $field_label ) . '</label>wtf' : '' ;
+
+		$control .= '<div class = "wic_multi_select">';
 				
 		foreach ( $select_array as $option ) {
 
 			$args = array(
 				'field_name_id' 		=> $field_name_id . '[' . $option['value'] . ']',
 				'field_label'			=>	$option['label'],
-				'label_class'			=> 'wic-multi-select-label',
+				'label_class'			=> 'wic-multi-select-label '  . $option ['class'],
+				'input_class'			=> 'wic-multi-select-checkbox ', 
 				'value'					=> in_array ( $option['value'], $value, false ),
 				'read_only_flag'		=>	false,
 				'field_label_suffix'	=> '',						
 			);	
-			$control .= $this->create_check_control($args);
+			$control .= '<p class = "wic_multi_select_item" >' . $this->create_check_control($args) . '</p>';
 			
 		}
-	
+		$control .= '</div>';
 		return ( $control );
 	
 	}	
-
-
 
 
 
@@ -1037,29 +1039,40 @@ class WP_Issues_CRM_Form_Utilities {
 
 	}
 
-	public function wic_get_category_list ( ) {
+
+	public $category_select_array = array();
+	private $category_array_depth = 0;
+
+	public function wic_get_category_list ( $parent ) {
+		
+		$this->category_array_depth++;		
 		
 		$args = array(
-			'orderby'                  => 'term_group',
+			'orderby'                  => 'name',
 			'order'                    => 'ASC',
 			'hide_empty'               => 0,
 			'taxonomy'                 => 'category',
 			'pad_counts'               => true, 
+			'parent'							=> $parent,
 		); 
 
 		$categories = get_categories( $args );
-		
-		$category_select_array = array();
-		foreach ( $categories as $category ) {
-			$temp_array = array (
-				'value' => $category->term_id,
-				'label' => $category->name,
-			);			
-			$category_select_array[] = $temp_array;
+		if ( 0 < count ( $categories ) ) {		
+			foreach ( $categories as $category ) {
+				$temp_array = array (
+					'value' => $category->term_id,
+					'label' => $category->name,
+					'class' => 'wic-multi-select-depth-' . $this->category_array_depth,
+				);			
+				$this->category_select_array[] = $temp_array;
+				$this->wic_get_category_list ($category->term_id);	
+			}
 		}
-		
-		return ( $category_select_array );
-	}
+		$this->category_array_depth--;
+		return ( $this->category_select_array );
+	} 
+
+
 
 	public function wic_get_post_categories ( $post_id ) {
 		 
