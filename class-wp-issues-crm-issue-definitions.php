@@ -127,7 +127,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'readonly_subtype' => 'select',
 			'select_array' => 'wic_get_user_list',
 			'select_parameter' => '',
-			'slug'	=> 'author',
+			'slug'	=> 'wic_post_author', // note, naming this field merely author triggers some kind of wordpress security, causes odd 404's 
 			'type'	=>	'select',
 			'wp_query_parameter' => 'author',
 			), 				

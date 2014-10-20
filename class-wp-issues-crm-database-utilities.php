@@ -108,7 +108,7 @@ class WP_Issues_CRM_Database_Utilities {
 							$index++;
 						}	
 					}
-				} else {
+				} else { 
 					switch ( $field['wp_query_parameter'] ) {
 						case 'author':
 						case 's' :

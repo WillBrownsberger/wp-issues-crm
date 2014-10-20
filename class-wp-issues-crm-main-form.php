@@ -354,7 +354,7 @@ class WP_Issues_CRM_Main_Form {
 		global ${ 'wic_' . $this->form_requested . '_definitions' };
 		/* var_dump( $next_form_output['initial_sections_open'] ); */
 
-		/* echo '<span style="color:green;"> <br /> $_POST:';  		
+		echo '<span style="color:green;"> <br /> $_POST:';  		
   		var_dump ($_POST);
   		echo '</span>';  
 
