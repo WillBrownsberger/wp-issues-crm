@@ -649,7 +649,7 @@ class WP_Issues_CRM_Main_Form {
 											$args['read_only_flag'] = true; 
 											echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';
 										}
-									} elseif ( 'select' == $field['readonly_subtype'] ) {
+									} elseif ( 'select' == $field['readonly_subtype'] ) { 
 										if ( 'update' == $next_form_output['next_action'] ) {
 											if ( ! isset( $field['list_call_back_key'] ) && ! isset( $field['list_call_back_id'] ) ) {
 												$select_parameter =  isset ( $field['select_parameter'] ) ?  $field['select_parameter'] : '' ;
@@ -663,9 +663,9 @@ class WP_Issues_CRM_Main_Form {
 												$args['value'] = __( 'Configuration error', 'wp-issues-crm' );											
 											} 							
 											$args['read_only_flag'] = 	true; 
-											$args['field_name_id'] = $field['slug'] . '_display_only';
+											$args['field_name_id'] = $field['slug'] . '_display_only'; 
 											echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';	
-											$args = array (
+											$hidden_args = array (
 														'field_name_id'		=> $field['slug'],
 														'field_label'			=>	'',
 														'value'					=> $next_form_output[$field['slug']],
@@ -673,9 +673,9 @@ class WP_Issues_CRM_Main_Form {
 														'input_class'			=>  'hidden-template', 
 														'field_label_suffix'	=> $required_individual . $required_group . $contains, 								
 													);											
-											echo $wic_form_utilities->create_text_control ( $args );
+											echo $wic_form_utilities->create_text_control ( $hidden_args );
 																				
-										} else {
+										} else {  
 											$args['placeholder'] 			= __( 'Select', 'wp-issues-crm' ) . ' ' . $field['label'];
 											$args['select_array']			=	is_array( $field['select_array'] ) ? $field['select_array'] : $wic_form_utilities->$field['select_array']( $field['select_parameter'] );
 											$args['field_label_suffix']	= $required_individual . $required_group;								
