@@ -58,7 +58,8 @@ class WP_Issues_CRM_Database_Utilities {
 	 		foreach ( $fields_array as $field ) {
 	 			$wp_query_parameter = isset ( $field['wp_query_parameter'] ) ? $field['wp_query_parameter'] : ''; 
 	 			if ( '' == $wp_query_parameter ) {
-					if ( 'date' == $field['type'] && 'new' == $search_mode ) { // handle date as range in new searches 
+	 				$readonly_subtype = isset ( $field['readonly_subtype'] ) ? $field['readonly_subtype'] : '';
+					if ( ( 'date' == $field['type'] || 'date' == $readonly_subtype ) && 'new' == $search_mode ) { // handle date as range in new searches 
 						if ( $next_form_output[$field['slug'] . '_lo'] > '' || $next_form_output[$field['slug'] . '_hi'] > '' ) {
 						array_push( $next_form_output['initial_sections_open'], $field['group'] ); // show field's section open in next form
 							if ( $next_form_output[$field['slug'] . '_lo'] > '' ) { 
@@ -113,6 +114,7 @@ class WP_Issues_CRM_Database_Utilities {
 					switch ( $field['wp_query_parameter'] ) {
 						case 'author':
 						case 's' :
+						case 'tag' :
 							$query_args[$field['wp_query_parameter']] = $next_form_output[$field['slug']];
 							break;
 						case 'cat':
@@ -130,9 +132,6 @@ class WP_Issues_CRM_Database_Utilities {
 									'inclusive' => true,
 									),
 								);							
-							break;
-						case 'tag': 
-							$query_args['tag_slug__in'] = $next_form_output[$field['slug']];
 							break;
 					   // note: not presenting title as a search option -- captured in full text search; 
 					}
@@ -204,10 +203,9 @@ class WP_Issues_CRM_Database_Utilities {
 					case 'cat':
 						$post_args['post_category'] = $next_form_output[$field['slug']];
 						break;
-/*					case 'tag':
-						$temp_tags =  preg_replace( "/[^0-9][^A-Z][^a-z]/,", '', $next_form_output[$field['slug']] );
-						$post_args['tags_input'] = explode ( ',', $temp_tags );
-						break; */
+					case 'tag':
+						$post_args['tags_input'] = $next_form_output[$field['slug']];
+						break; 
 					case 'post_title':	
 						$post_args['post_title'] = $title;
 						break;						
@@ -228,8 +226,8 @@ class WP_Issues_CRM_Database_Utilities {
 			
 			if ( 	trim( $next_form_output[ 'wic_post_content' ] )   > '' || 
 					$post_args['post_title']      != $check_on_database->post->post_title  || 
-					$post_args['post_category'] 	!= $check_on_database->post->post_category /*||
-					$post_args['tags_input']		!= $check_on_database->post->post_tags */	)
+					$post_args['post_category'] 	!= $check_on_database->post->post_category ||
+					$post_args['tags_input']		!= $check_on_database->post->post_tags 	)
 					{ // conditions for update post
 				if ( trim( $next_form_output[ 'wic_post_content' ] )   > '' ) { // condition for update post content
 					array_push( $next_form_output['initial_sections_open'], 'wic_post_content' ); // show field's section open in next form
@@ -338,11 +336,14 @@ class WP_Issues_CRM_Database_Utilities {
 						$next_form_output[$field['slug']] =  $wic_query->post->post_date;
 						break;
 					case 'tag':
-						$next_form_output[$field['slug']] =  $wic_query->post->tags_input;
+						$tags_input = is_array ( $wic_query->post->tags_input ) ? implode( ',', $wic_query->post->tags_input ) : $wic_query->post->tags_input;
+						$next_form_output[$field['slug']] =  $tags_input;
 						break;
 					case 'post_title':	
 						$next_form_output[$field['slug']] =  $wic_query->post->post_title;
-						break;						
+						break;
+						
+												
 				}	
 			}
 		}

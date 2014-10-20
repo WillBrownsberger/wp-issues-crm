@@ -207,7 +207,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'type'	=>	'multi_select',
 			'wp_query_parameter' => 'cat',
 			), 
-/*		array(  // needs development (see also initialize, sanitize, search, update and list functions)
+		array(  
 			'dedup'	=>	false,
 			'group'	=>	'post_info',
 			'label'	=>	'Post Tags',
@@ -217,9 +217,9 @@ class WP_Issues_CRM_Issue_Definitions {
 			'order'	=>	60,
 			'required'	=> '',
 			'slug'	=> 'tag',
-			'type'	=>	'text',
+			'type'	=>	'textcsv',
 			'wp_query_parameter' => 'tag',
-			), */ 				
+			),  				
 			
 		/* 
 		* the following block is meta fields and can be modified and extended without any special considerations

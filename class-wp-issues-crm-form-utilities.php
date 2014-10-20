@@ -62,7 +62,8 @@ class WP_Issues_CRM_Form_Utilities {
 		/* notes refer to notes in main */			
 		foreach ( $fields_array as $field ) { // note 1 
 			$next_form_output[$field['slug']] =	( 'multi_select' == $field['type'] ) ? array() : '';
-			if ( 'date' == $field['type'] ) {
+			$readonly_subtype = isset ( $field['readonly_subtype'] ) ? $field['readonly_subtype'] : '';
+			if ( 'date' == $field['type'] || 'date' == $readonly_subtype ) {
 				$next_form_output[$field['slug'] . '_lo'] = '';				
 				$next_form_output[$field['slug'] . '_hi'] = '';
 			}
@@ -149,16 +150,22 @@ class WP_Issues_CRM_Form_Utilities {
 							$clean_input[$field['slug']][] = $key; 					
 						}
 					}
-			} else { // not a serialized field and/or not set	-- do clean and also individual field validators
+			} else { // not a serialized field and/or not set	-- do clean and also individual field validators/resanitizer
  				$clean_input[$field['slug']] = isset( $_POST[$field['slug']] ) ? stripslashes( sanitize_text_field( $_POST[$field['slug']] ) ) : '';
  				$possible_validator =  'validate_individual_' . $field['type'];
  				if ( $clean_input[$field['slug']] > '' && method_exists ( $this, $possible_validator )  ) {
  					 $clean_input['error_messages'] .= $this->$possible_validator( $clean_input[$field['slug']] );				
  				} 
+				$possible_resanitizor =  'resanitize_individual_' . $field['type']; 				
+ 				if ( $clean_input[$field['slug']] > '' && method_exists ( $this, $possible_resanitizor )  ) {
+ 					 $clean_input[$field['slug']] = $this->$possible_resanitizor( $clean_input[$field['slug']] );				
+ 				}
 			}
+			
 
 			// add date hi-lo ranges to array and standardize all dates to yyyy-mm-dd 
-			if ( 'date' == $field['type'] ) {
+			$readonly_subtype = isset ( $field['readonly_subtype'] ) ? $field['readonly_subtype'] : '';
+			if ( 'date' == $field['type'] || 'date' == $readonly_subtype ) {
 				$clean_input[$field['slug'] . '_lo' ] = isset( $_POST[$field['slug'] . '_lo' ] ) ? stripslashes( sanitize_text_field( $_POST[$field['slug'] . '_lo' ] ) ) : '';			
 				$clean_input[$field['slug'] . '_hi' ] = isset( $_POST[$field['slug'] . '_hi' ] ) ? stripslashes( sanitize_text_field( $_POST[$field['slug'] . '_hi' ] ) ) : '';
 				if ( $clean_input[$field['slug']] > '' ) {
@@ -300,7 +307,7 @@ class WP_Issues_CRM_Form_Utilities {
 
 	}
 	
-	public function create_date_range_control ( $next_form_output, $field ) {
+	public function create_date_range_control ( &$next_form_output, &$field ) {
 
 		$date_range_control = '';
 
@@ -317,7 +324,7 @@ class WP_Issues_CRM_Form_Utilities {
 			'field_name_id'		=> $field['slug'] . '_hi',
 			'field_label'			=>	__( 'and <=', 'wp_issues_crm' ),
 			'label_class'			=> 'wic-label-2',
-			'value'					=> $next_form_output[$field['slug']. '_hi'],
+			'value'					=> $next_form_output[$field['slug'] . '_hi'],
 			'read_only_flag'		=>	false, 
 			'field_label_suffix'	=> '', 								
 		);
@@ -944,6 +951,26 @@ class WP_Issues_CRM_Form_Utilities {
 		return( $outcome );		
 			
 	}
+	
+	/*
+	* convert string with various possible white spaces and commas into comma separated	
+	*/
+	public function resanitize_individual_textcsv ( $textcsv ) {
+		
+		$temp_tags = str_replace ( ',', ' ', $textcsv )	;	
+		$temp_tags = explode ( ' ', $textcsv );
+		
+		$temp_tags2 = array();
+		foreach ( $temp_tags as $tag ) {
+			if ( trim($tag) > '' ) {
+				$temp_tags2[] = trim($tag);
+			}			
+		}
+		$output_textcsv = implode ( ',', $temp_tags); 		
+		return ( $output_textcsv );
+	}	
+	
+	
 	
 	public function format_wic_post_content ( $notes ) {
 

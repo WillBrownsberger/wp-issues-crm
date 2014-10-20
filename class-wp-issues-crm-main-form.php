@@ -134,7 +134,6 @@ class WP_Issues_CRM_Main_Form {
 		$next_form_output = array();
 		$wic_form_utilities->initialize_blank_form( $next_form_output, $this->working_post_fields );
 		
-		
 		// if new, nothing to process; no nonce to test
 		if ( 'new' != $this->action_requested ) { 
 
@@ -624,6 +623,7 @@ class WP_Issues_CRM_Main_Form {
 						switch ( $field_type ) {
 							case 'email':						
 							case 'text':
+							case 'textcsv':
 							case 'serialized_type_as_string':
 								echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>'; 
 								break;
