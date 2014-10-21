@@ -62,7 +62,7 @@ class WP_Issues_CRM_Issue_Definitions {
 		
 		array (
 			'name'		=> 'post_categories',
-			'label'		=>	'Issue Categories',
+			'label'		=>	'Issue Classification',
 			'legend'		=>	'',
 			'order'		=> 20,
 			'initial-open'	=> false,
@@ -194,12 +194,12 @@ class WP_Issues_CRM_Issue_Definitions {
 		array(  
 			'dedup'	=>	false,
 			'group'	=>	'post_categories',
-			'label'	=>	'', // put alone in group and show group label
+			'label'	=>	'Categories', // put alone in group and show group label
 			'like'	=>	false,
 			'list'	=> '17',
 			'list_call_back_id' => 'wic_get_post_categories',
 			'online'	=>	true,
-			'order'	=>	50,
+			'order'	=>	60,
 			'required'	=> '',
 			'select_array' => 'wic_get_category_list',
 			'select_parameter' => '0',
@@ -209,12 +209,12 @@ class WP_Issues_CRM_Issue_Definitions {
 			), 
 		array(  
 			'dedup'	=>	false,
-			'group'	=>	'post_info',
-			'label'	=>	'Post Tags',
+			'group'	=>	'post_categories',
+			'label'	=>	'Tags',
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
-			'order'	=>	60,
+			'order'	=>	50,
 			'required'	=> '',
 			'slug'	=> 'tag',
 			'type'	=>	'textcsv',

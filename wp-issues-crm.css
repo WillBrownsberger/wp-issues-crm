@@ -171,7 +171,7 @@ p.wic-form-field-group-legend {
 .wic-input {
 	background: #ffffff;
 	border: 1px solid #f0f0f0;
-	min-width: 250px;
+	min-width: 300px;
 } 
 
 
@@ -225,7 +225,7 @@ p.wic-form-field-group-legend {
 .wic_multi_select {
 	display: inline-block;
 	background: #ffffff;
-	margin: 0 0 0 200px;
+	margin: 0 0 0 0;
 	padding:0;
 }
 
@@ -240,7 +240,7 @@ p.wic-form-field-group-legend {
 .wic_multi_select_item {
 	display: block;
 	margin: 0;
-	width: 400px;
+	max-width: 600px;
 }
 
 .wic-multi-select-checkbox {
@@ -251,7 +251,7 @@ p.wic-form-field-group-legend {
 	color: #333;	
 	cursor: pointer;
 	display: inline-block;
-	min-width: 250px;
+	width: 250px;
 	vertical-align: top;
 	padding-left: 20px;
 	-webkit-box-sizing: border-box;

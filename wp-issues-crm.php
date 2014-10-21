@@ -93,6 +93,12 @@ class WP_Issues_CRM {
 		
 	public function wp_issues_crm() {
 
+
+		if ( ! current_user_can ( 'activate_plugins' ) ) { 
+			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
+			return;
+		} 
+
 		// here declare as global all the  classes that implement forms
 
 		$control_array = array(
@@ -201,7 +207,7 @@ class WP_Issues_CRM {
 			echo $post_list;
 		} else {
 		
-			echo '<h4>No open' . ${'wic_' . $case_type . '_definitions'}->wic_post_type_labels['plural'] . 'assigned.</h4>';	
+			echo '<p>No open ' . ${'wic_' . $case_type . '_definitions'}->wic_post_type_labels['plural'] . ' assigned.</p>';	
 		}
 
 	}

@@ -41,12 +41,18 @@ class WP_Issues_CRM_Database_Utilities {
 		
 		if ( 'dup' == $search_mode || 'new' == $search_mode ) {  	
 
+			$allowed_statuses = array(
+				'publish',
+				'private',
+			);
+
 	 		$query_args = array (
 	 			'posts_per_page' => 100,
 	 			'post_type' 	=>	$post_type,
 	 			'orderby'		=> ${ 'wic_' . $wic_post_type . '_definitions' }->wic_post_type_sort_order['orderby'],
 	 			'order'			=> ${ 'wic_' . $wic_post_type . '_definitions' }->wic_post_type_sort_order['order'],
 	 			's'				=> $next_form_output['wic_post_content'] ,
+	 			'post_status'	=> $allowed_statuses,
 	 		);
 
 	   	$meta_query_args = array( // will be inserted into $query_args below
@@ -193,7 +199,11 @@ class WP_Issues_CRM_Database_Utilities {
 		$post_args = array(
 		  'post_title'     => $title,
 		  'post_type'      => $post_type,
+		  'post_category'	 => array(),
+		  'tags_input'		 => '',
 		); 
+
+
 
 		foreach ( $fields_array as $field ) {
 		 	// setting the wp post fields
