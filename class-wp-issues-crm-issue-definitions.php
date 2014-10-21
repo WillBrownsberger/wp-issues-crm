@@ -97,7 +97,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'group'	=>	'post_fixed',
 			'label'	=>	'Created By',
 			'like'	=>	false,
-			'list'	=> '15',
+			'list'	=> '',
 			'list_call_back_key' => 'wic_get_post_author_display_name',
 			'online'	=>	true,
 			'order'	=>	40,
@@ -115,7 +115,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'group'	=>	'post_fixed',
 			'label'	=>	'Created Date',
 			'like'	=>	false,
-			'list'	=> '17',
+			'list'	=> '',
 			'online'	=>	true,
 			'order'	=>	70,
 			'readonly_subtype' => 'date',
@@ -129,7 +129,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'group'	=>	'post_fixed',
 			'label'	=>	'Visibility',
 			'like'	=>	false,
-			'list'	=> '10',
+			'list'	=> '8',
 			'online'	=>	true,
 			'order'	=>	90,
 			'required'	=> '',
@@ -182,7 +182,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'group'	=>	'post_info',
 			'label'	=>	'Issue Title',
 			'like'	=>	false,
-			'list'	=> '30',
+			'list'	=> '40',
 			'online'	=>	true,
 			'order'	=>	38,
 			'required'	=> 'individual',
@@ -196,7 +196,7 @@ class WP_Issues_CRM_Issue_Definitions {
 			'group'	=>	'post_categories',
 			'label'	=>	'', // put alone in group and show group label
 			'like'	=>	false,
-			'list'	=> '25',
+			'list'	=> '17',
 			'list_call_back_id' => 'wic_get_post_categories',
 			'online'	=>	true,
 			'order'	=>	50,
@@ -228,9 +228,30 @@ class WP_Issues_CRM_Issue_Definitions {
 			array( 
 				'dedup'	=>	false,
 				'group'	=>	'case_management',
+				'label'	=>	'Comments',
+				'like'	=>	false,
+				'list'	=> '8',
+				'online'	=>	true,
+				'order'	=>	12,
+				'required'	=> '',
+				'select_array' =>array(	
+					array(
+						'value'	=> 'closed',
+						'label'	=>	'Closed' ),
+					array(
+						'value'	=> 'open',
+						'label'	=>	'Open' ),
+				),
+				'select_parameter' => '',
+				'slug'	=> 'wic_live_issue',
+				'type'	=>	'select',
+				),
+			array( 
+				'dedup'	=>	false,
+				'group'	=>	'case_management',
 				'label'	=>	'Staff',
 				'like'	=>	false,
-				'list'	=> '0',
+				'list'	=> '15',
 				'online'	=>	true,
 				'order'	=>	10,
 				'required'	=> '',
@@ -246,7 +267,7 @@ class WP_Issues_CRM_Issue_Definitions {
 				'like'	=>	false,
 				'list'	=> '0',
 				'online'	=>	true,
-				'order'	=>	20,	
+				'order'	=>	30,	
 				'required'	=> '',
 				'slug'	=> 'case_review_date',
 				'type'	=>	'date',
@@ -254,11 +275,11 @@ class WP_Issues_CRM_Issue_Definitions {
 			array( 
 				'dedup'	=>	false,
 				'group'	=>	'case_management',
-				'label'	=>	'Issue Status',
+				'label'	=>	'Follow-up',
 				'like'	=>	false,
-				'list'	=> '0',
+				'list'	=> '10',
 				'online'	=>	true,
-				'order'	=>	30,	
+				'order'	=>	20,	
 				'required'	=> '',
 				'slug'	=> 'case_status',
 				'select_array'	=>	array ( 
@@ -299,19 +320,19 @@ class WP_Issues_CRM_Issue_Definitions {
 	
       $wic_live_issue_options = array(
 			array(
-				'value' =>	'closed',
-				'label' =>  'Closed for WP Issues CRM'
-			),
-			array(
 				'value' =>	'open',
 				'label' =>  'Open for WP Issues CRM' 
 			),
+			array(
+				'value' =>	'closed',
+				'label' =>  'Closed for WP Issues CRM'
+			),
 		);	 
 	   
-		$value = ( null !== get_post_meta($post->ID, 'wic_live_issue', true) ) ? esc_attr( get_post_meta($post->ID, 'wic_live_issue', true)) : '';	   
+		$value = ( null !== get_post_meta($post->ID, 'wic_data_wic_live_issue', true) ) ? esc_attr( get_post_meta($post->ID, 'wic_data_wic_live_issue', true)) : '';	   
 	   
 		$args = array (
-			'field_name_id' => 'wic_live_issue',
+			'field_name_id' => 'wic_data_wic_live_issue',
 			'field_label'	=>	'',
 			'value'	=> $value,
 			'read_only_flag'		=>	false, 
@@ -335,7 +356,7 @@ class WP_Issues_CRM_Issue_Definitions {
 	   if ( isset($_POST['wic_live_issue_metabox_noncename']) && 
 	   		wp_verify_nonce($_POST['wic_live_issue_metabox_noncename'], site_url(__FILE__)) && check_admin_referer(site_url(__FILE__), 'wic_live_issue_metabox_noncename'))   
 	   		{
-	           update_post_meta($post_id, 'wic_live_issue', $_POST['wic_live_issue'] );
+	           update_post_meta($post_id, 'wic_data_wic_live_issue', $_POST['wic_data_wic_live_issue'] );
 			   }
 	   
 	   return;

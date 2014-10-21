@@ -107,7 +107,7 @@ class WP_Issues_CRM {
 		echo '<form id = "top-level-form" method="POST" autocomplete = "on">';
 		
 		$button_value = implode( ',' , $control_array );
-		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'Dashboard (not built yet)', 'wp-issues-crm' ) . '</button>';
+		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'Dashboard', 'wp-issues-crm' ) . '</button>';
 		
 		$control_array['form_requested'] = 'constituent';
 		$control_array['action_requested'] = 'new';
@@ -146,13 +146,15 @@ class WP_Issues_CRM {
 			$wic_imports->$_POST['9eUlFP34Ju']();		
 		}		
 		}
+		
+		$user = wp_get_current_user();		
 				
 		echo '<div id = "dashboard-area" class = "wic-post-field-group wic-group-odd">';
-		echo '<h1>Dashboard under development</h1>' . 
-		'<h2>"New constituent search" only option implemented so far on this screen. </h2>' .
-		'<h2> The search option feeds through to constituent save and update functions, which are fully implemented.</h2>'; 			
- 		
- 		echo '<form id = "submit_form" method="POST" autocomplete = "on">';
+
+		
+		$this->show_open_issues_for_user( $user, 'issue' ); // takes user object returned by wp_get_current_user;
+		$this->show_open_issues_for_user( $user, 'constituent' );
+ 	/*	echo '<form id = "submit_form" method="POST" autocomplete = "on">';
 			$args = array (
 							'field_name_id'		=> '4kfg943E',
 							'field_label'			=>	'Testing 1',
@@ -171,10 +173,39 @@ class WP_Issues_CRM {
 						);
 			echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';		
 
-		echo '<button class = "wic-form-button" type="submit" name = "wic_test_button" value = "test">Test button only</button>';
+		echo '<button class = "wic-form-button" type="submit" name = "wic_test_button" value = "test">Test button only</button>';*/
 
 
 	}
+	
+	public function show_open_issues_for_user ( $user, $case_type ) {
+		global $wic_issue_definitions;
+		global $wic_constituent_definitions;
+		global $wic_database_utilities;	
+		global $wic_form_utilities;		
+		
+		echo '<h4 class = "wic-dashboard-header">' . ${'wic_' . $case_type . '_definitions'}->wic_post_type_labels['plural'] . ' assigned to ' . $user->display_name . '</h4>'; 		
+		
+		
+		$short_input = array();	
+		$wic_form_utilities->initialize_blank_form( $short_input,  ${'wic_' . $case_type . '_definitions'}->wic_post_fields );
+		
+		$short_input['assigned'] = $user->ID;
+		$short_input['case_status'] = 1;
+		// var_dump($short_input);
+		$wic_open_query = $wic_database_utilities->search_wic_posts( 'new', $short_input, ${'wic_' . $case_type . '_definitions'}->wic_post_fields, $case_type );
+		
+		if( $wic_open_query->found_posts > 0 ) {	
+			$wic_list_posts = new WP_Issues_CRM_Posts_List ( $wic_open_query, ${'wic_' . $case_type . '_definitions'}->wic_post_fields, $case_type, 0, false );	
+			$post_list = $wic_list_posts->post_list;
+			echo $post_list;
+		} else {
+		
+			echo '<h4>No open' . ${'wic_' . $case_type . '_definitions'}->wic_post_type_labels['plural'] . 'assigned.</h4>';	
+		}
+
+	}
+
 }
 
 $wp_issues_crm = new WP_Issues_CRM;
