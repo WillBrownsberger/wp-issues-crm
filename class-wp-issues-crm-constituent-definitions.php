@@ -17,27 +17,10 @@ class WP_Issues_CRM_Constituent_Definitions {
 	
 	public function __construct() {
 		add_action( 'init', array( $this, 'custom_post_type' ), 0 );
-		$this->wic_post_field_groups = $this->multi_array_key_sort ( $this->wic_post_field_groups, 'order' );
-		$this->wic_post_fields		  = $this->multi_array_key_sort ( $this->wic_post_fields, 'order' );
+		$this->wic_post_field_groups = multi_array_key_sort ( $this->wic_post_field_groups, 'order' );
+		$this->wic_post_fields		  = multi_array_key_sort ( $this->wic_post_fields, 'order' );
 	}
 
-	/*
-	*	sort array of arrays by one value of the arrays
-	*
-	*/		
-	public function multi_array_key_sort ( $multi_array, $key )	{
-		$temp = array();
-		
-		foreach ( $multi_array as $line_item ) {
-			 $temp[$line_item[$key]] = $line_item;
-		}
-		ksort ($temp);
-		$sorted_line_items = array();
-		foreach ($temp as $key => $value ) {
-			array_push( $sorted_line_items, $value );			
-		}
-		return ( $sorted_line_items) ;
-	}
 
 	public $wic_post_type_labels = array (
 		'singular' => 'Constituent',

@@ -14,10 +14,9 @@ class WP_Issues_CRM_Issue_Definitions {
 
 	public function __construct() {
 		
-		global $wic_constituent_definitions;
-		$this->wic_post_field_groups = $wic_constituent_definitions->multi_array_key_sort ( $this->wic_post_field_groups, 'order' );
+		$this->wic_post_field_groups = multi_array_key_sort ( $this->wic_post_field_groups, 'order' );
 		$this->wic_post_fields		 = $this->initialize_wic_post_fields_array();		
-		$this->wic_post_fields		 = $wic_constituent_definitions->multi_array_key_sort ( $this->wic_post_fields, 'order' );
+		$this->wic_post_fields		 = multi_array_key_sort ( $this->wic_post_fields, 'order' );
 		
 		add_action('add_meta_boxes', array ( $this, 'wic_call_live_issue_meta_box' ), 10, 2);
 		add_action('save_post', array ($this, 'wic_save_live_issue_meta_box' ),10,2);

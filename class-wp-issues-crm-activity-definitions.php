@@ -16,13 +16,12 @@
 class WP_Issues_CRM_Activity_Definitions {
 	
 	public function __construct() {
-
-		global $wic_constituent_definitions;
+ 
 		// Hook into the 'init' action
 		add_action( 'init',  array( $this,'wic_activity' ), 0 ) ;
-		$this->wic_post_field_groups = $wic_constituent_definitions->multi_array_key_sort ( $this->wic_post_field_groups, 'order' );
+		$this->wic_post_field_groups = multi_array_key_sort ( $this->wic_post_field_groups, 'order' );
 		$this->wic_post_fields		 = $this->initialize_wic_post_fields_array();		
-		$this->wic_post_fields		 = $wic_constituent_definitions->multi_array_key_sort ( $this->wic_post_fields, 'order' );
+		$this->wic_post_fields		 = multi_array_key_sort ( $this->wic_post_fields, 'order' );
 		
 	}
 

@@ -32,13 +32,12 @@
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-base-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituent-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-activity-definitions.php'; 
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-issue-definitions.php'; 
+include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-issue-definitions.php';  
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-form-utilities.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-database-utilities.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-main-form.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-posts-list.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-import-routines.php';
-
 
 function wp_issue_crm_setup_styles() {
 
@@ -51,6 +50,20 @@ function wp_issue_crm_setup_styles() {
 }
 
 add_action( 'wp_enqueue_scripts', 'wp_issue_crm_setup_styles');
+
+function multi_array_key_sort ( $multi_array, $key )	{
+		$temp = array();
+		
+		foreach ( $multi_array as $line_item ) {
+			 $temp[$line_item[$key]] = $line_item;
+		}
+		ksort ($temp);
+		$sorted_line_items = array();
+		foreach ($temp as $key => $value ) {
+			array_push( $sorted_line_items, $value );			
+		}
+		return ( $sorted_line_items) ;
+	}
 
 function wp_issue_crm_list_width_styles() {
 	
