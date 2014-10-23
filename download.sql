@@ -60,4 +60,43 @@ SELECT city, state_province_id, postal_code,count(id) FROM `civicrm_address` whe
 3 where have zip, but not city -- clearly city is preferred and must allow entry of city only.
 71062 have both city and zip code.  Top 40 account for 70783.
 
- 
+
+======================
+Import notes:
+
+(1) Watertown File:  Was apparently up to date.  25908 records.
+(2) Drop mailing fields.
+(3) SSID is unique, never null.  Make it an index.  Length is always 12.
+(4) 12 precincts -- mostly active, some blank, some inactive -- so can use a/i as registration of voter indicator.
+
+On Boston: 
+
+(1) Included wards/precincts are correct.
+(2) 125130 records -- one dup ssid?
+(2) Not registered count runs to 88% in 4-10, 83 in 21-2. Over half of Boston precincts have unregistered % over 40.  (Cf. Watertown 10-15%).  Lowest is 26%.
+SELECT ward, precinct, sum(if ( '' = status,1,0)), count(ssid), sum(if ( '' = status,1,0))/count(ssid)  FROM boston_2sm_residents group by ward, precinct order by sum(if ( '' = status,1,0))/count(ssid)  desc
+
+FILE FIELD NAMES:
+last_name
+first_name
+middle_name
+[TITLE]
+dob
+occupation
+gender
+/-- address fields
+street_number
+street_suffix
+street_name
+apartment
+city
+state
+zip
+/-- end address fields
+party
+voter_status
+ward
+precinct
+reg_date
+ssid
+phone

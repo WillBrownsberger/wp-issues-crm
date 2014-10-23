@@ -13,6 +13,110 @@
 		echo 'SAY HELLO'; 		
  	}
  	  
+ 	public  function import_boston() { // fields must include so formatted first_name, last_name, email
+	   // NEEDS UPDATEING TO REFLECT ONLINE EXCLUSION
+	   
+		global $wic_constituent_definitions;
+		global $wic_base_definitions;	
+		global $wic_form_utilities;   
+	   
+	   $i=0;
+	   $j=0;
+	   $seconds = 5000;
+		set_time_limit ( $seconds );
+	   
+	   global $wpdb;
+	   $contacts = $wpdb->get_results( 'select * from boston_2sm_residents' );
+	   foreach ($contacts as $contact ) {
+
+		   if ($i>3) break;
+		   $i++;
+		   			
+			$post_information = array(
+				'post_title' => wp_strip_all_tags ( $contact->last_name . ', ' . $contact->first_name ),
+				'post_type' => 'wic_constituent',
+				'post_status' => 'private',
+				'post_author' => 15,
+				'ping_status' => 'closed',
+			);
+		
+			$post_id = wp_insert_post($post_information);
+			
+			foreach ($wic_constituent_definitions->wic_post_fields as $field) {
+				$value = '';	
+				if ( ! in_array( $field['type'], $wic_base_definitions->serialized_field_types ) )	{ 	
+					if ( isset ( $contact->$field['slug'] ) ) {
+						$value = $contact->$field['slug'];	
+						switch ($field['slug']){
+							case 'gender': 
+								$value = strtolower($value);
+								break;
+							case 'dob':
+							case 'reg_date':
+								$value = $wic_form_utilities->validate_date($value);
+								break;
+							case 'voter_status':
+								$value = strtolower($value);
+								$value = ( '' == $value ) ? 'x' : $value;
+								break;	
+							case 'party':
+								$value = strtolower($value);	
+								if ( $value > '' ) {
+									if ( false === strpos ( 'druljgs', $value ) ) {
+										$value = 'o'; 
+									}
+								}
+							break;
+						}
+						if ($value > '' ) {
+							$stored_record = add_post_meta ($post_id, $wic_base_definitions->wic_metakey . $field['slug'], $value );
+							if ( $stored_record ) {
+								$j++;						
+							}
+						}
+					}
+				} elseif ( 'addresses' == $field['type'] )  {
+						$address_array = array();
+						if ( '' < $contact->zip ) { // requiring zip as component of address -- clean input first by adding zip where missing 
+							$apt = ( $contact->apartment > '' ) ? ', Apt. ' . $contact->apartment : '';
+							$address_array = array( 
+								array(
+									0,
+									$contact->street_number . $contact->street_suffix . ' ' . $contact->street_name . $apt,
+									$contact->city . ', MA  0' . $contact->zip,    						
+								),
+							);
+							$string = serialize($address_array);
+							$stored_record = add_post_meta ($post_id, $wic_base_definitions->wic_metakey . $field['slug'], $address_array );
+							if ( $stored_record ) {
+								$j++;						
+							}
+						}
+				} elseif ( 'phones' == $field['type'] )  {
+					$phone_array = array();
+					if ( '' < preg_replace( "/[^0-9]/", '', $contact->phone ) ) {
+					  $phone_array = array(
+					  		array (
+								0,
+								preg_replace( "/[^0-9]/", '', $contact->phone ),
+								''					  
+						  ),
+					  );
+						$stored_record = add_post_meta ($post_id, $wic_base_definitions->wic_metakey . $field['slug'], $phone_array );
+						if ( $stored_record ) {
+							$j++;						
+						}
+					}
+				}
+			} // close for each field
+
+		} // close for each contact
+ 
+		echo '<h1>' . $i . ' constituent records in total processed</h1>';
+		echo '<h1>' . $j . ' meta records in total stored</h1>'; 
+  
+ 	}  // close function  
+ 	  
    function import(){ // fields must include so formatted first_name, last_name, email
 	   // NEEDS UPDATEING TO REFLECT ONLINE EXCLUSION
 	   $i=0;

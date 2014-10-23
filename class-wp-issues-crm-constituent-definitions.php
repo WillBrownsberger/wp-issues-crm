@@ -73,11 +73,19 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'order'		=> 30,
 			'initial-open'	=> false,
 		),
+		
+		array (
+			'name'		=> 'registration',
+			'label'		=>	'Voter Information',
+			'legend'		=>	'Voter data can be searched, but cannot be updated online.',
+			'order'		=> 40,
+			'initial-open'	=> false,
+		),
 		array (
 			'name'		=> 'links',
-			'label'		=>	'Identity Codes',
+			'label'		=>	'Legacy Codes',
 			'legend'		=>	'These codes can be searched, but cannot be updated online.',
-			'order'		=> 40,
+			'order'		=> 50,
 			'initial-open'	=> false,
 
 		),	
@@ -113,13 +121,13 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'type'	=>	'text', 	
 			),		
 		array( // 2
-	 		'dedup'	=>	false,
-	 		'group'	=>	'personal',
+	 		'dedup'	=>	true,
+	 		'group'	=>	'contact',
 	 		'label'	=>	'Middle Name',
-	 		'like'	=>	false,
+	 		'like'	=>	true,
 			'list'	=> '0',
-	 		'online'	=>	false,
-	 		'order'	=>	15,	
+	 		'online'	=>	true,
+	 		'order'	=>	16,	
 			'required'	=> false,
 			'slug'	=> 'middle_name',
 	 		'type'	=>	'text',
@@ -161,7 +169,7 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'type'	=>	'phones',
 			),
 	array( // 7A
-			'dedup'	=>	true,
+			'dedup'	=>	false,
 			'group'	=>	'contact',
 			'label'	=>	'Address',
 			'like'	=>	true,
@@ -221,13 +229,13 @@ class WP_Issues_CRM_Constituent_Definitions {
 		array( // 11
 			'dedup'	=>	false,
 			'group'	=>	'personal',
-			'label'	=>	'Job Title',
+			'label'	=>	'Occupation',
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
 			'order'	=>	80,
 			'required'	=> '',
-			'slug'	=> 'job_title',
+			'slug'	=> 'occupation',
 			'type'	=>	'text',
 			),
 		array( // 12
@@ -251,7 +259,7 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'online'	=>	true,
 			'order'	=>	75,
 			'required'	=> '',
-			'slug'	=> 'gender_id',
+			'slug'	=> 'gender',
 			'select_array'	=>	array ( 
 				array(
 					'value'	=> 'm',
@@ -262,6 +270,7 @@ class WP_Issues_CRM_Constituent_Definitions {
 				),
 			'type'	=> 'select',
 			),
+
 		array( // 14
 			'dedup'	=>	false,
 			'group'	=>	'personal',
@@ -271,7 +280,7 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'online'	=>	true,
 			'order'	=>	70,	
 			'required'	=> false,
-			'slug'	=> 'birth_date',
+			'slug'	=> 'dob',
 			'type'	=>	'date',
 			),
 		array( // 15
@@ -286,18 +295,6 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'slug'	=> 'is_deceased',
 			'type'	=>	'check',
 			),
-		array( // 14
-			'dedup'	=>	false,
-			'group'	=>	'personal',
-			'label'	=>	'Date Deceased',
-			'like'	=>	false,
-			'list'	=> '0',
-			'online'	=>	true,
-			'order'	=>	95,	
-			'required'	=> false,
-			'slug'	=> 'deceased_date',
-			'type'	=>	'date',
-			),
 		array( // 16
 			'dedup'	=>	false,
 			'group'	=>	'links',
@@ -310,19 +307,6 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'slug'	=> 'civicrm_id',
 			'type'	=>	'readonly',
 			'list'	=> '0',
-			),
-		array( // 17
-			'dedup'	=>	false,
-			'group'	=>	'links',
-			'label'	=>	'Secretary of State ID',
-			'like'	=>	false,
-			'list'	=> '0',
-			'online'	=>	true,
-			'order'	=>	110,
-			'readonly_subtype' => 'text',			
-			'required'	=> '',
-			'slug'	=> 'ss_id',
-			'type'	=>	'readonly',
 			),
 		array( // 18
 			'dedup'	=>	false,
@@ -337,6 +321,126 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'slug'	=> 'VAN_id',
 			'type'	=>	'readonly',
 			),
+			
+		array( // 13
+			'dedup'	=>	false,
+			'group'	=>	'registration',
+			'label'	=>	'Voter Status',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	200,
+			'readonly_subtype' => 'select',
+			'required'	=> '',
+			'slug'	=> 'voter_status',
+			'select_array'	=>	array ( 
+				array(
+					'value'	=> 'a',
+					'label'	=>	'Active' ),
+				array(
+					'value'	=> 'i',
+					'label'	=>	'Inactive' ),
+				array(
+					'value'	=> 'x',
+					'label'	=>	'Not Registered' ),
+				),				
+			'type'	=> 'readonly',
+			),	
+			
+		array( // 13
+			'dedup'	=>	false,
+			'group'	=>	'registration',
+			'label'	=>	'Registration Date',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	205,
+			'readonly_subtype' => 'text',
+			'required'	=> '',
+			'slug'	=> 'reg_date',
+			'type'	=> 'readonly',
+			),			
+		array( // 13
+			'dedup'	=>	false,
+			'group'	=>	'registration',
+			'label'	=>	'Party',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	210,
+			'readonly_subtype' => 'select',
+			'required'	=> '',
+			'slug'	=> 'party',
+			'select_array'	=>	array ( 
+				array(
+					'value'	=> 'd',
+					'label'	=>	'Democrat' ),
+				array(
+					'value'	=> 'r',
+					'label'	=>	'Republican' ),
+				array(
+					'value'	=> 'u',
+					'label'	=>	'Unenrolled' ),
+				array(
+					'value'	=> 'l',
+					'label'	=>	'Libertarian' ),
+				array(
+					'value'	=> 'j',
+					'label'	=>	'Green-Rainbow' ),
+				array(
+					'value'	=> 'g',
+					'label'	=>	'Green Party USA' ),	
+				array(
+					'value'	=> 's',
+					'label'	=>	'Socialist' ),	
+				array(
+					'value'	=> 'o',
+					'label'	=>	'Other' ),						
+				),	
+			'type'	=> 'readonly',
+			),		
+		array( // 18
+			'dedup'	=>	false,
+			'group'	=>	'registration',
+			'label'	=>	'Ward',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	220,
+			'readonly_subtype' => 'text',			
+			'required'	=> false,
+			'slug'	=> 'ward',
+			'type'	=>	'readonly',
+			),
+			
+		array( // 18
+			'dedup'	=>	false,
+			'group'	=>	'registration',
+			'label'	=>	'Precinct',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	240,
+			'readonly_subtype' => 'text',			
+			'required'	=> false,
+			'slug'	=> 'precinct',
+			'type'	=>	'readonly',
+			),	
+			
+		array( // 17
+			'dedup'	=>	false,
+			'group'	=>	'registration',
+			'label'	=>	'Secretary of State ID',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	250,
+			'readonly_subtype' => 'text',			
+			'required'	=> '',
+			'slug'	=> 'ssid',
+			'type'	=>	'readonly',
+			),	
+
 	);
 		
 	// Register Custom Post Type
@@ -452,101 +556,101 @@ class WP_Issues_CRM_Constituent_Definitions {
 		
 	public $address_zip_options = array (
 		array(
-			'value'	=> '02472',
+			'value'	=> 'WATERTOWN, MA  02472',
 			'label'	=>	'WATERTOWN (02472)'),
 	
 		array(
-			'value'	=> '02478',
+			'value'	=> 'BELMONT, MA  02478',
 			'label'	=> 'BELMONT (02478)'),
 		array(
-			'value'	=> '02135',
+			'value'	=> 'BRIGHTON, MA  02135',
 			'label'	=> 'BRIGHTON (02135)'),
 		array(
-			'value'	=> '02116',
+			'value'	=> 'BOSTON, MA  02116',
 			'label'	=> 'BACKBAY (02116)'),
 		array(
-			'value'	=> '02115',
+			'value'	=> 'BOSTON, MA  02115',
 			'label'	=> 'BOSTON (02115)'),
 		array(
-			'value'	=> '02215',
+			'value'	=> 'BOSTON, MA  02215',
 			'label'	=> 'FENWAY (02215)'),
 		array(
-			'value'	=> '02134',
+			'value'	=> 'BOSTON, MA  02134',
 			'label'	=> 'ALLSTON (02134)'),
 		array(
-			'value'	=> '02140',
+			'value'	=> 'CAMBRIDGE, MA  02140',
 			'label'	=> 'NORTH CAMBRIDGE (02140)'),
 		array(
-			'value'	=> '02199',
+			'value'	=> 'BOSTON, MA  02199',
 			'label'	=> 'BOSTON (02199)'),
 		array(
-			'value'	=> '02474',
+			'value'	=> 'ARLINGTON, MA  02474',
 			'label'	=> 'ARLINGTON (02474)'),
 		array(
-			'value'	=> '02138',
+			'value'	=> 'CAMBRIDGE, MA  02138',
 			'label'	=> 'CAMBRIDGE (02138)'),
 		array(
-			'value'	=> '02120',
+			'value'	=> 'BOSTON, MA  02120',
 			'label'	=> 'BOSTON (02120)'),
 		array(
-			'value'	=> '02467',
+			'value'	=> 'CHESTNUT HILL, MA  02467',
 			'label'	=> 'CHESTNUT HILL (02467)'),
 		array(
-			'value'	=> '02118',
+			'value'	=> 'BOSTON, MA  02118',
 			'label'	=> 'BOSTON (02118)'),
 		array(
-			'value'	=> '02127',
+			'value'	=> 'BOSTON, MA  02127',
 			'label'	=> 'BOSTON (02127)'),
 		array(
-			'value'	=> '02114',
+			'value'	=> 'BOSTON, MA  02114',
 			'label'	=> 'BOSTON (02114)'),
 		array(
-			'value'	=> '02476',
+			'value'	=> 'BOSTON, MA  02476',
 			'label'	=> 'ARLINGTON (02476)'),
 		array(
-			'value'	=> '02108',
+			'value'	=> 'BOSTON, MA  02108',
 			'label'	=> 'BOSTON (02108)'),
 		array(
-			'value'	=> '02113',
+			'value'	=> 'BOSTON, MA  02113',
 			'label'	=> 'BOSTON (02113)'),
 		array(
-			'value'	=> '02128',
+			'value'	=> 'BOSTON, MA  02128',
 			'label'	=> 'BOSTON (02128)'),
 		array(
 			'value'	=> '02210',
 			'label'	=> 'BOSTON (02210)'),
 		array(
-			'value'	=> '02109',
+			'value'	=> 'BOSTON, MA  02109',
 			'label'	=> 'BOSTON (02109)'),
 		array(
-			'value'	=> '02111',
+			'value'	=> 'BOSTON, MA  02111',
 			'label'	=> 'BOSTON (02111)'),
 		array(
-			'value'	=> '02471',
+			'value'	=> 'WATERTOWN, MA  02471',
 			'label'	=> 'WATERTOWN (02471)'),
 		array(
-			'value'	=> '02445',
+			'value'	=> 'BROOKLINE, MA  02445',
 			'label'	=> 'BROOKLINE (02445)'),
 		array(
-			'value'	=> '02139',
+			'value'	=> 'CAMBRIDGE, MA  02139',
 			'label'	=> 'CAMBRIDGE (02139)'),
 		array(
-			'value'	=> '02421',
+			'value'	=> 'LEXINGTON, MA  02421',
 			'label'	=> 'LEXINGTON (02421)'),
 		array(
-			'value'	=> '02446',
+			'value'	=> 'BROOKLINE, MA  02446',
 			'label'	=> 'BROOKLINE (02446)'),
 		array(
-			'value'	=> '02117',
+			'value'	=> 'BOSTON, MA  02117',
 			'label'	=> 'BOSTON (02117)'),
 		array(
-			'value'	=> '02124',
+			'value'	=> 'BOSTON, MA  02124',
 			'label'	=> 'BOSTON (02124)'),
 		array(
-			'value'	=> '02123',
+			'value'	=> 'BOSTON, MA  02123',
 			'label'	=> 'BOSTON (02123)'),
 		array(
-			'value'	=> '02110',
+			'value'	=> 'BOSTON, MA  02110',
 			'label'	=> 'BOSTON (02110)'),
 	);		
 

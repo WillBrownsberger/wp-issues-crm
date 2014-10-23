@@ -160,7 +160,7 @@ class WP_Issues_CRM {
 		
 		$this->show_open_issues_for_user( $user, 'issue' ); // takes user object returned by wp_get_current_user;
 		$this->show_open_issues_for_user( $user, 'constituent' );
- 	/*	echo '<form id = "submit_form" method="POST" autocomplete = "on">';
+ 	echo '<form id = "submit_form" method="POST" autocomplete = "on">';
 			$args = array (
 							'field_name_id'		=> '4kfg943E',
 							'field_label'			=>	'Testing 1',
@@ -179,7 +179,7 @@ class WP_Issues_CRM {
 						);
 			echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';		
 
-		echo '<button class = "wic-form-button" type="submit" name = "wic_test_button" value = "test">Test button only</button>';*/
+	echo '<button class = "wic-form-button" type="submit" name = "wic_test_button" value = "test">Test button only</button>';
 
 
 	}
