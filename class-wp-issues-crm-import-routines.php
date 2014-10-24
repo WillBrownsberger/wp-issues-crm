@@ -29,7 +29,7 @@
 	   $contacts = $wpdb->get_results( 'select * from boston_2sm_residents' );
 	   foreach ($contacts as $contact ) {
 
-		   if ($i>3) break;
+		   if ($i>6) break;
 		   $i++;
 		   			
 			$post_information = array(
@@ -53,7 +53,7 @@
 								break;
 							case 'dob':
 							case 'reg_date':
-								$value = $wic_form_utilities->validate_date($value);
+								$value = $value > '' ? $wic_form_utilities->validate_date($value) : '';
 								break;
 							case 'voter_status':
 								$value = strtolower($value);
@@ -66,7 +66,10 @@
 										$value = 'o'; 
 									}
 								}
-							break;
+								break;
+							case 'zip':
+								$value = '0' . $value;
+								break;
 						}
 						if ($value > '' ) {
 							$stored_record = add_post_meta ($post_id, $wic_base_definitions->wic_metakey . $field['slug'], $value );
@@ -76,12 +79,12 @@
 						}
 					}
 				} elseif ( 'addresses' == $field['type'] )  {
-						$address_array = array();
+					/*	$address_array = array();
 						if ( '' < $contact->zip ) { // requiring zip as component of address -- clean input first by adding zip where missing 
 							$apt = ( $contact->apartment > '' ) ? ', Apt. ' . $contact->apartment : '';
 							$address_array = array( 
 								array(
-									0,
+							***	0, is this coming through OK?
 									$contact->street_number . $contact->street_suffix . ' ' . $contact->street_name . $apt,
 									$contact->city . ', MA  0' . $contact->zip,    						
 								),
@@ -91,7 +94,7 @@
 							if ( $stored_record ) {
 								$j++;						
 							}
-						}
+						} */
 				} elseif ( 'phones' == $field['type'] )  {
 					$phone_array = array();
 					if ( '' < preg_replace( "/[^0-9]/", '', $contact->phone ) ) {
