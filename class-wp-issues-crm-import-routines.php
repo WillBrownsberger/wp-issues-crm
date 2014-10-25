@@ -13,7 +13,7 @@
 		echo 'SAY HELLO'; 		
  	}
  	  
- 	public  function import_boston() { // fields must include so formatted first_name, last_name, email
+ 	public  function import_watertown() { // fields must include so formatted first_name, last_name, email
 	   // NEEDS UPDATEING TO REFLECT ONLINE EXCLUSION
 	   
 		global $wic_constituent_definitions;
@@ -26,7 +26,7 @@
 		set_time_limit ( $seconds );
 	   
 	   global $wpdb;
-	   $contacts = $wpdb->get_results( 'select * from boston_2sm_residents' );
+	   $contacts = $wpdb->get_results( 'select * from watertown_residents' );
 	   foreach ($contacts as $contact ) {
 
 		   if ($i>6) break;
@@ -60,12 +60,13 @@
 								$value = ( '' == $value ) ? 'x' : $value;
 								break;	
 							case 'party':
-								$value = strtolower($value);	
+								$value = trim(strtolower($value));
 								if ( $value > '' ) {
 									if ( false === strpos ( 'druljgs', $value ) ) {
 										$value = 'o'; 
 									}
 								}
+								echo $value . 'after: wtf?' ;
 								break;
 							case 'zip':
 								$value = '0' . $value;

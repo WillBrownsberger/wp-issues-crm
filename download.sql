@@ -100,3 +100,7 @@ precinct
 reg_date
 ssid
 phone
+
+
+delete from wp_posts where id > 189935
+delete from wp_postmeta where post_id > 189935

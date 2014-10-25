@@ -28,6 +28,28 @@ class WP_Issues_CRM_Database_Utilities {
 	*
 	*  note -- trusts Wordpress to escape strings for query -- they have had slashes and tags stripped in input validation, 
 	*  but might have quotes & reserved words
+	*
+	*  Note about optimization decisions here	
+	*    (1) Decided to eliminate left wild card in most searches -- saves full table scan
+	*        -- note less than a full scan if find limit worth of posts sooner
+	*			-- a series of tests:  .5 seconds for unusual string like search %, front/back or both 
+	*										  -- same for equal, since doing a table scan anyway with no index
+											  -- like can be shorter, like 0.017 seconds if a common string that will retrieve limit sooner
+											  now, if add index: no change in wild card search with leading %, since still table scanning
+											  -- but with trailing % is using the index -- response = .002 (250 faster)
+											  If do this in wp directly, however, application of Cast function throws off the optimizer and it misses
+											  		the availability of the index.  So, in filter remove_sql_wildcard_prefix below, removed that from the query language
+				-- x250 improvement with rightonly wildcards PLUS index PLUS query modification
+	*										
+	*    (2) Decide to keep the array structure for email and phones -- phone searches are rare and email searches cover a smaller table.
+	*        Since it needs to be a 2 way wildcard, search for these separately.  Have to run a separate search even if break into multiple metakeys
+	*           ( as if did a sidetable), because wp_metaquery does not support OR (for the multiple values) within AND
+	*  			note that do need to have multiple distinct keys to keep parallel arrays (email, email-type) in synch.
+	*        
+	*    (3) The alternative would be to Add a table to WP . . . this shows as faster by a factor of 3 or 4 on my server; not a perfect comparison, but using the meta
+	*        fields is probably not more than one order of magnitude slower all - in. 
+	*
+	*
 	*/	
 	
 	public $search_terms_max = 5; // don't allow searches that will likely degrade performance 	
@@ -58,9 +80,15 @@ class WP_Issues_CRM_Database_Utilities {
 	   	$meta_query_args = array( // will be inserted into $query_args below
 	     		'relation'=> 'AND',
 	     	);
+	     	
+	   	$serialized_meta_query_args = array( // will be handled separately in a pre-query
+	     		'relation'=> 'AND',
+	     	);	     	
+	     	
 			$index = 1;
 			$ignored_fields_list = '';			
-
+			$serialized_field_search_count = 0;
+			
 	 		foreach ( $fields_array as $field ) {
 	 			$wp_query_parameter = isset ( $field['wp_query_parameter'] ) ? $field['wp_query_parameter'] : ''; 
 	 			if ( '' == $wp_query_parameter ) {
@@ -97,19 +125,27 @@ class WP_Issues_CRM_Database_Utilities {
 			 			if( $next_form_output[$field['slug']] > '' && ( 'new' == $search_mode  || $field['dedup'] ) )  { 
 			 				array_push( $next_form_output['initial_sections_open'], $field['group'] ); // show field's section open in next form
 							if ( ( ( $index - 1 ) < $this->search_terms_max ) || $field['dedup'] )	{ // allow possibility to set more dedup fields than allowed search fields		
-								if ( is_array( $next_form_output[$field['slug']] ) ) { // happens only for phone, email, street address; regardless of next action, have to flatten for search
-									$meta_value = $next_form_output[$field['slug']][0][1]; // the first, phone, email or street address
-								} else {
-									$meta_value = $next_form_output[$field['slug']];
-								}
-								$meta_query_args[$index] = array(
-									'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
-									'value'		=> $meta_value,
-									'compare'	=>	(  // do strict match in dedup mode
-															( $field['like'] && ! $next_form_output['strict_match'] && 'new' == $search_mode ) ||
-															in_array( $field['type'], $wic_base_definitions->serialized_field_types ) 
-														) ? 'LIKE' : '=' ,
-								);	
+								if  ( in_array( $field['type'], $wic_base_definitions->serialized_field_types ) ) {								
+									if ( is_array( $next_form_output[$field['slug']] ) ) { // happens only for phone, email, street address; regardless of next action, have to flatten for search
+										$meta_value = $next_form_output[$field['slug']][0][1]; // the first, phone, email or street address
+									} else {
+										$meta_value = $next_form_output[$field['slug']];
+									}
+									$serialized_meta_query_args[$index] = array(
+										'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
+										'value'		=> $meta_value,
+										'compare'	=>	'LIKE',
+									);	
+									$serialized_field_search_count++;
+								}	else {
+									$meta_query_args[$index] = array(
+										'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
+										'value'		=> $next_form_output[$field['slug']],
+										'compare'	=>	(  // do strict match in dedup mode
+																$field['like'] && ! $next_form_output['strict_match'] && 'new' == $search_mode  
+															) ? 'LIKE' : '=' ,
+									);	
+								}		
 							} else { 
 								$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] : ( $ignored_fields_list .= ', ' . $field['label'] ); 
 							}
@@ -144,7 +180,25 @@ class WP_Issues_CRM_Database_Utilities {
 				}		
 	 		}
 	 	
-			$query_args['meta_query'] 	= $meta_query_args; 
+	 		if ( $serialized_field_search_count > 0 ) {  // there were serialized search terms
+	 			$serialized_query_args = array (
+		 			'showposts' => '-1', // deprecated, but the controlling limit when retrieving id's
+		 			'post_type' 	=>	$post_type,
+		 			'post_status'	=> $allowed_statuses,
+		 			'fields'			=> 'ids',
+		 			'meta_query'   => $serialized_meta_query_args,
+		 		);
+	
+				$serialized_query = new WP_Query ( $serialized_query_args );
+				if ( $serialized_query->found_posts > 0 ) {
+					$query_args['post__in']  = $serialized_query->posts; // make this is a limiting set for the rest of the query
+				}  else { 
+					$query_args['p']  = 9999999999; // set up to generate an empty query
+				}
+			}			
+			
+			$query_args['meta_query'] 	= $meta_query_args;
+
 	 	
 	 		if ( $ignored_fields_list > '' ) {
 	 			$next_form_output['search_notices'] .= sprintf( __( 'Note: Maximum %1$s search terms allowed to protect performance -- the search was executed, but excess search terms were ignored ( %2$s ).', 'wp-issues-crm' ), 
@@ -163,8 +217,9 @@ class WP_Issues_CRM_Database_Utilities {
 				'post_type' => $post_type,			
 			);	 	
 	 	} 
-		
+	add_filter('get_meta_sql', array ( $this, 'remove_sql_wildcard_prefix') );	
  		$wic_query = new WP_Query($query_args);
+ 		remove_filter('get_meta_sql', array ( $this, 'remove_sql_wildcard_prefix') );
 		
  		return $wic_query;
 	}
@@ -454,6 +509,23 @@ class WP_Issues_CRM_Database_Utilities {
 		}
 		return ( $return_array ) ;	
 	}
+	
+	// https://core.trac.wordpress.org/ticket/19738 
+	// invoked to improve performance dramatically in larger searches
+	function remove_sql_wildcard_prefix($q)
+	{     //  echo '<br /><br />starting point';
+			//	var_dump($q);
+	        $q['where'] = preg_replace("/(LIKE ')%(.*?%')/", "$1$2", $q['where']);
+			//	echo '<br /><br />change one';	        
+	       // var_dump($q);
+			  $q['where'] = preg_replace("/(CAST\()(.*?)(.meta_value)( AS CHAR\))/", "$2$3", $q['where'] );
+			 // echo '<br /><br />bottom line';
+			 // var_dump($q);
+
+	        return $q;
+
+	}
+
 
 
 

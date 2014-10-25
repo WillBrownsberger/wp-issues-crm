@@ -210,7 +210,7 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'dedup'	=>	false,
 			'group'	=>	'address',
 			'label'	=>	'Apartment',
-			'like'	=>	true,
+			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
 			'order'	=>	325,
