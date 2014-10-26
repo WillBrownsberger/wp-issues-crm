@@ -104,3 +104,205 @@ phone
 
 delete from wp_posts where id > 189935
 delete from wp_postmeta where post_id > 189935
+
+
+
+
+====================TABLE DEF=========================
+-- phpMyAdmin SQL Dump
+-- version 4.0.10deb1
+-- http://www.phpmyadmin.net
+--
+-- Host: localhost
+-- Generation Time: Oct 26, 2014 at 06:33 AM
+-- Server version: 5.5.40-0ubuntu0.14.04.1
+-- PHP Version: 5.5.9-1ubuntu4.4
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
+--
+-- Database: `wordpress_04_24`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `wp_wic_constituents`
+--
+
+CREATE TABLE IF NOT EXISTS `wp_wic_constituents` (
+  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `ssid` varchar(13) CHARACTER SET latin1 NOT NULL,
+  `civicrm_id` bigint(20) unsigned NOT NULL,
+  `VAN_id` bigint(20) unsigned NOT NULL,
+  `last_name` varchar(30) CHARACTER SET latin1 NOT NULL,
+  `first_name` varchar(20) CHARACTER SET latin1 NOT NULL,
+  `middle_name` varchar(20) CHARACTER SET latin1 NOT NULL,
+  `title` varchar(3) CHARACTER SET latin1 NOT NULL,
+  `dob` date NOT NULL,
+  `is_deceased` tinyint(1) NOT NULL,
+  `assigned` int(10) unsigned NOT NULL,
+  `case_review_date` date NOT NULL,
+  `case_status` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `street_number` int(7) unsigned NOT NULL,
+  `street_suffix` varchar(3) CHARACTER SET latin1 NOT NULL,
+  `street_name` varchar(25) CHARACTER SET latin1 NOT NULL,
+  `apartment` varchar(4) CHARACTER SET latin1 NOT NULL,
+  `zip` varchar(10) CHARACTER SET latin1 NOT NULL,
+  `occupation` varchar(20) CHARACTER SET latin1 NOT NULL,
+  `organization_name` varchar(50) CHARACTER SET latin1 NOT NULL,
+  `party` varchar(2) CHARACTER SET latin1 NOT NULL,
+  `gender` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `ward` tinyint(4) NOT NULL,
+  `precinct` tinyint(4) unsigned zerofill NOT NULL,
+  `voter_status` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `reg_date` date NOT NULL,
+  `last_updated_time` datetime NOT NULL,
+  `last_updated_by` int(10) unsigned NOT NULL,
+  `email_address_0` varchar(75) CHARACTER SET latin1 NOT NULL,
+  `email_type_0` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `email_address_1` varchar(75) CHARACTER SET latin1 NOT NULL,
+  `email_type_1` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `email_address_2` varchar(75) CHARACTER SET latin1 NOT NULL,
+  `email_type_2` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `email_address_3` varchar(75) CHARACTER SET latin1 NOT NULL,
+  `email_type_3` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `email_address_4` varchar(75) CHARACTER SET latin1 NOT NULL,
+  `email_type_4` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `phone_0` varchar(15) CHARACTER SET latin1 NOT NULL,
+  `phone_type_0` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `phone_ext_0` varchar(5) CHARACTER SET latin1 NOT NULL,
+  `phone_1` varchar(15) CHARACTER SET latin1 NOT NULL,
+  `phone_type_1` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `phone_ext_1` varchar(5) CHARACTER SET latin1 NOT NULL,
+  `phone_2` varchar(15) CHARACTER SET latin1 NOT NULL,
+  `phone_type_2` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `phone_ext_2` varchar(5) CHARACTER SET latin1 NOT NULL,
+  `phone_3` varchar(15) CHARACTER SET latin1 NOT NULL,
+  `phone_type_3` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `phone_ext_3` varchar(5) CHARACTER SET latin1 NOT NULL,
+  `phone_4` varchar(15) CHARACTER SET latin1 NOT NULL,
+  `phone_type_4` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `phone_ext_4` varchar(5) CHARACTER SET latin1 NOT NULL,
+  `address_type_0` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `street_address_0` varchar(50) CHARACTER SET latin1 NOT NULL,
+  `city_state_zip_0` varchar(50) CHARACTER SET latin1 NOT NULL,
+  `address_type_1` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `street_address_1` varchar(50) CHARACTER SET latin1 NOT NULL,
+  `city_state_zip_1` varchar(50) CHARACTER SET latin1 NOT NULL,
+  `address_type_2` varchar(1) CHARACTER SET latin1 NOT NULL,
+  `street_address_2` varchar(50) CHARACTER SET latin1 NOT NULL,
+  `city_state_zip_2` varchar(50) CHARACTER SET latin1 NOT NULL,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `ssid_2` (`ssid`),
+  KEY `ssid` (`ssid`),
+  KEY `last_name` (`last_name`),
+  KEY `middle_name` (`middle_name`),
+  KEY `title` (`title`),
+  KEY `dob` (`dob`),
+  KEY `street_number` (`street_number`),
+  KEY `street_suffix` (`street_suffix`),
+  KEY `street_name` (`street_name`),
+  KEY `apartment` (`apartment`),
+  KEY `zip` (`zip`),
+  KEY `occupation` (`occupation`),
+  KEY `party` (`party`),
+  KEY `gender` (`gender`),
+  KEY `ward` (`ward`),
+  KEY `precinct` (`precinct`),
+  KEY `voter_status` (`voter_status`),
+  KEY `last_name_2` (`last_name`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=20414 ;
+
+
+insert into wp_wic_constituents 
+( 
+ssid,
+first_name, 
+last_name, 
+middle_name,
+title,
+post_title,
+dob,
+street_address_0, 
+city_state_zip_0,
+occupation,
+party,
+gender,
+voter_status,
+ward,
+precinct,
+last_updated_time,
+last_updated_by,
+reg_date
+)
+
+select 
+ssid,
+first_name, 
+last_name, 
+middle_name,
+title,
+concat(last_name, ', ', first_name ) as post_title,
+dob,
+concat( street_number, street_suffix, ' ', street_name, if( apartment > '', concat( ', APT. ', apartment), '') ) as street_address_0, 
+concat( 'BELMONT', ', ', 'MA', ' 0', zip ) as city_state_zip_0,
+occupation,
+if( party > '', if( instr('zzdruljgs', lower(trim(party))) > 1, lower(party), 'o'), '' ) as party,
+lower(gender) as gender,
+if( voter_status > '', lower(voter_status), 'x' ) as voter_status,
+ward,
+precinct,
+now() as last_updated_time,
+15 as last_updated_by,
+reg_date
+from belmont_residents
+
+BOSTON----------
+insert into wp_wic_constituents 
+( 
+ssid,
+first_name, 
+last_name, 
+middle_name,
+title,
+post_title,
+dob,
+street_address_0, 
+city_state_zip_0,
+phone_0,
+phone_type_0,
+occupation,
+party,
+gender,
+voter_status,
+ward,
+precinct,
+last_updated_time,
+last_updated_by,
+reg_date
+)
+
+select 
+ssid,
+first_name, 
+last_name, 
+middle_name,
+title,
+concat(last_name, ', ', first_name ) as post_title,
+dob,
+concat( street_number, street_suffix, ' ', street_name, if( apartment > '', concat( ', APT. ', apartment), '') ) as street_address_0, 
+concat( city, ', ', state, ' 0', zip ) as city_state_zip_0,
+phone,
+'0',
+occupation,
+if( party > '', if( instr('zzdruljgs', lower(trim(party))) > 1, lower(party), 'o'), '' ) as party,
+lower(gender) as gender,
+if( voter_status > '', lower(voter_status), 'x' ) as voter_status,
+ward,
+precinct,
+now() as last_updated_time,
+15 as last_updated_by,
+reg_date
+from boston_2sm_residents

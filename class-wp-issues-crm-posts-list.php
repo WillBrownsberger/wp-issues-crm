@@ -70,39 +70,39 @@ class WP_Issues_CRM_Posts_List {
 					}
 			$output .= '</ul></li>';
 
-			while ( $wic_query->have_posts() ) {
-				$wic_query->next_post();
+			foreach ( $wic_query->posts as $post ) {
 				
 				$line_count++;
 				$row_class = ( 0 == $line_count % 2 ) ? "pl-even" : "pl-odd";
 				// $control_array['id_requested'] =  $wic_query->post->ID;
 				$list_button_args['button_class'] = 'wic-post-list-button ' . $row_class;
-				$list_button_args['id_requested'] = $wic_query->post->ID;
+				$list_button_args['id_requested'] = $post->ID;
 				$output .= '<li>' . $wic_form_utilities->create_wic_form_button($list_button_args);		
 				$output .= '<ul class = "wic-post-list-line">';			
 					foreach ( $this->list_fields as $field ) {
 						$wp_query_parameter = isset ( $field['wp_query_parameter'] ) ? $field['wp_query_parameter'] : '';							
 						if ( '' == $wp_query_parameter ) {
 							$key = $wic_base_definitions->wic_metakey . $field['slug'];
+							$key =  isset ( $wic_base_definitions->wic_post_types[$wic_post_type]['dedicated_table'] ) ? $field['slug'] : $this->wic_metakey . $field['slug'];
 						} else {
 							$key = $wic_base_definitions->wp_query_parameters[$field['wp_query_parameter']]['update_post_parameter'];						
 						} 
 						$output .= '<li class = "wic-post-list-field pl-' . $entity_type . '-' . $field['slug'] . ' "> ';
-						if ( isset ( $wic_query->post->$key ) ) {
-							if ( ! is_array ( $wic_query->post->$key ) ) { 
+						if ( isset ( $post->$key ) ) {
+							if ( ! is_array ( $post->$key ) ) { 
 								if ( 'select' == $field['type'] && ! isset( $field['list_call_back_key'] ) && ! isset( $field['list_call_back_id'] ) ) {
-									$output .= esc_html ( $array_of_select_arrays[$field['slug']][$wic_query->post->$key] );
+									$output .= esc_html ( $array_of_select_arrays[$field['slug']][$post->$key] );
 								} elseif ( isset( $field['list_call_back_key'] ) ) {
-									$output .= esc_html ( $wic_form_utilities->$field['list_call_back_key']( $wic_query->post->$key ) );
+									$output .= esc_html ( $wic_form_utilities->$field['list_call_back_key']( $post->$key ) );
 								} elseif ( isset( $field['list_call_back_id'] ) ) { 
-									$output .= esc_html ( $wic_form_utilities->$field['list_call_back_id']( $wic_query->post->ID ) );
+									$output .= esc_html ( $wic_form_utilities->$field['list_call_back_id']( $post->ID ) );
 								} else {
-									$output .= esc_html ( $wic_query->post->$key );
+									$output .= esc_html ( $post->$key );
 								}
 							} else {
 								// NB $wic_query->post->$key)[0][1] gets evaluated to whole ->post array b/c $key[0][1] evaluates to empty; 
 								// cannot fix with parens, so two step this
-								$row_array = $wic_query->post->$key;
+								$row_array = $post->$key;
 								if ( 'phones' == $field['type'] ) { 
 									$output .= $wic_form_utilities->format_phone($row_array[0][1]);
 								} else {

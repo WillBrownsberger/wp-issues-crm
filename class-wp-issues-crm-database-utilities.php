@@ -217,10 +217,14 @@ class WP_Issues_CRM_Database_Utilities {
 				'post_type' => $post_type,			
 			);	 	
 	 	} 
-	add_filter('get_meta_sql', array ( $this, 'remove_sql_wildcard_prefix') );	
- 		$wic_query = new WP_Query($query_args);
- 		remove_filter('get_meta_sql', array ( $this, 'remove_sql_wildcard_prefix') );
-		
+	 	
+	 	if ( isset ( $wic_base_definitions->wic_post_types[$wic_post_type]['dedicated_table'] ) ) {
+			$wic_query = new WIC_Query ( $query_args, $wic_post_type );	 	
+	 	} else {
+			add_filter('get_meta_sql', array ( $this, 'remove_sql_wildcard_prefix') );	
+ 			$wic_query = new WP_Query($query_args);
+ 			remove_filter('get_meta_sql', array ( $this, 'remove_sql_wildcard_prefix') );
+		}
  		return $wic_query;
 	}
 
@@ -377,35 +381,38 @@ class WP_Issues_CRM_Database_Utilities {
 	* populate form from database
 	*
 	*/
-	public function populate_form_from_database ( &$next_form_output, &$fields_array, &$wic_query ) {	
+	public function populate_form_from_database ( &$next_form_output, &$fields_array, &$wic_query, $wic_post_type ) {	
+	   
+		global $wic_base_definitions;   
 	   
 		foreach ( $fields_array as $field ) {
 			$wp_query_parameter = isset ( $field['wp_query_parameter'] ) ? $field['wp_query_parameter'] : '';
 			if ( '' == $wp_query_parameter ) {
-				$post_field_key =  $this->wic_metakey . $field['slug'];
+				
+				$post_field_key =  isset ( $wic_base_definitions->wic_post_types[$wic_post_type]['dedicated_table'] ) ? $field['slug'] : $this->wic_metakey . $field['slug'];
 				// the following isset check should be necessary only if a search requesting more than the maximum search terms is executed 
 				// note -- don't need to unserialize phones, etc. -- wp_query does this. also automatic in save_update_wic_post  
-				$next_form_output[$field['slug']] = isset ( $wic_query->post->$post_field_key ) ?  $wic_query->post->$post_field_key : '';
+				$next_form_output[$field['slug']] = isset ( $wic_query->posts[0]->$post_field_key ) ?  $wic_query->posts[0]->$post_field_key : '';
 			} else {
 				switch ( $wp_query_parameter ) {
 					case 'author':
-						$next_form_output[$field['slug']] = $wic_query->post->post_author;
+						$next_form_output[$field['slug']] = $wic_query->posts[0]->post_author;
 						break;
 					case 'cat':
-						$next_form_output[$field['slug']] =  $this->wic_get_post_categories_array ( $wic_query->post->ID );
+						$next_form_output[$field['slug']] =  $this->wic_get_post_categories_array ( $wic_query->posts[0]->ID );
 						break;
 					case 'post_status':
-						$next_form_output[$field['slug']] =  $wic_query->post->post_status;
+						$next_form_output[$field['slug']] =  $wic_query->posts[0]->post_status;
 						break;
 					case 'date':
-						$next_form_output[$field['slug']] =  $wic_query->post->post_date;
+						$next_form_output[$field['slug']] =  $wic_query->posts[0]->post_date;
 						break;
 					case 'tag':
-						$tags_input = is_array ( $wic_query->post->tags_input ) ? implode( ',', $wic_query->post->tags_input ) : $wic_query->post->tags_input;
+						$tags_input = is_array ( $wic_query->posts[0]->tags_input ) ? implode( ',', $wic_query->posts[0]->tags_input ) : $wic_query->posts[0]->tags_input;
 						$next_form_output[$field['slug']] =  $tags_input;
 						break;
 					case 'post_title':	
-						$next_form_output[$field['slug']] =  $wic_query->post->post_title;
+						$next_form_output[$field['slug']] =  $wic_query->posts[0]->post_title;
 						break;
 						
 												
@@ -413,8 +420,9 @@ class WP_Issues_CRM_Database_Utilities {
 			}
 		}
 		$next_form_output['wic_post_content'] = ''; // don't want to bring search notes automatically into update mode 
-		$next_form_output['old_wic_post_content'] = isset ( $wic_query->post->post_content )  ? $wic_query->post->post_content: '';	
-		$next_form_output['wic_post_id'] 	= $wic_query->post->ID;			
+		$next_form_output['old_wic_post_content'] = isset ( $wic_query->posts[0]->post_content )  ? $wic_query->posts[0]->post_content: '';	
+		$next_form_output['wic_post_id'] 	= $wic_query->posts[0]->ID;	
+		var_dump($next_form_output);		
 	}
 
 	public function get_children_lists ( $wic_post_id, $wic_post_type, $child_types ) {
@@ -495,10 +503,10 @@ class WP_Issues_CRM_Database_Utilities {
 		
 	}
 	
-	public function wic_get_post ( $post_id ) {
+/*	public function wic_get_post ( $post_id ) {
 		$wic_post_query = new WP_Query ( 'p=' . $post_id );		
 		return $wic_post_query;	
-	}
+	} */
 
 	public function wic_get_post_categories_array ( $post_id ) {
 

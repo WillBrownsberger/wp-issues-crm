@@ -357,6 +357,18 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'slug'	=> 'is_deceased',
 			'type'	=>	'check',
 			),
+		array( // 15
+			'dedup'	=>	false,
+			'group'	=>	'personal',
+			'label'	=>	'Mark Deleted',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	91,
+			'required'	=> '',
+			'slug'	=> 'is_deleted',
+			'type'	=>	'check',
+			),	
 		array( // 16
 			'dedup'	=>	false,
 			'group'	=>	'links',

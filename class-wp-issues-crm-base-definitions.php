@@ -21,6 +21,7 @@ class WP_Issues_CRM_Base_Definitions {
 	
 	public $wic_post_types = array(
 		'constituent' 	=> array ( 
+	//		'dedicated_table'	=> 'wic_constituents',
 			'post_type'	=> 'wic_constituent',
 			),
 		'activity' 		=> array (

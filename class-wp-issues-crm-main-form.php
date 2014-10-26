@@ -172,7 +172,7 @@ class WP_Issues_CRM_Main_Form {
 						$search_mode = 'db_check';
 						$next_form_output['wic_post_id']	= $this->id_requested;
 						$wic_query = $wic_database_utilities->search_wic_posts( $search_mode, $next_form_output, $this->working_post_fields, $this->form_requested );
-						$wic_database_utilities->populate_form_from_database ( $next_form_output, $this->working_post_fields, $wic_query );
+						$wic_database_utilities->populate_form_from_database ( $next_form_output, $this->working_post_fields, $wic_query, $this->form_requested );
 						// set up next step in form
 						$next_form_output['guidance']	=	sprintf( __( 'Update %1$s.', 'wp-issues-crm' ), $this->form_requested );
 						$next_form_output['next_action'] 	=	'update';
@@ -219,7 +219,7 @@ class WP_Issues_CRM_Main_Form {
 							$next_form_output['next_action'] 	=	'save';
 						} elseif ( 1 == $wic_query->found_posts ) {
 							// overwrite form with that unique record's  values
-							$wic_database_utilities->populate_form_from_database ( $next_form_output, $this->working_post_fields, $wic_query );
+							$wic_database_utilities->populate_form_from_database ( $next_form_output, $this->working_post_fields, $wic_query, $this->form_requested );
 							$next_form_output['guidance']	=	__( 'One matching record found. Try an update?', 'wp-issues-crm' );
 							$next_form_output['next_action'] 	=	'update';
 						} else {
@@ -277,7 +277,7 @@ class WP_Issues_CRM_Main_Form {
 							$next_form_output['next_action'] 	=	'save';
 						} elseif ( 1 == $wic_query->found_posts ) {
 							// overwrite form with that unique record's  values
-							$wic_database_utilities->populate_form_from_database ( $next_form_output, $this->working_post_fields, $wic_query );
+							$wic_database_utilities->populate_form_from_database ( $next_form_output, $this->working_post_fields, $wic_query, $this->form_requested );
 							$next_form_output['guidance']	=	__( 'One matching record found. Try an update?', 'wp-issues-crm' );
 							$next_form_output['next_action'] 	=	'update';
 						} else {
@@ -291,7 +291,7 @@ class WP_Issues_CRM_Main_Form {
 							// updated to non-dup dupcheck values (OK to do update) OR							
 						if ( 0 == $wic_query->found_posts || 
 							// updated but dupcheck values not changed (OK to do update) OR					
-							( 1 == $wic_query->found_posts && $wic_query->post->ID == $next_form_output['wic_post_id'] ) ||
+							( 1 == $wic_query->found_posts && $wic_query->posts[0]->ID == $next_form_output['wic_post_id'] ) ||
 							// there are form errors (must correct and resubmit update)  
 							$next_form_output['error_messages'] > '' ) { 
 							// always proceed to further update after an update whether or not successful (unless poss dup)						
