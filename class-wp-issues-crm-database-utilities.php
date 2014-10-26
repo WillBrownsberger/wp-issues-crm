@@ -54,7 +54,7 @@ class WP_Issues_CRM_Database_Utilities {
 	
 	public $search_terms_max = 5; // don't allow searches that will likely degrade performance 	
 	
-   public function search_wic_posts( $search_mode, &$next_form_output, $fields_array, $wic_post_type  ) {
+   public function search_wic_posts( $search_mode, &$next_form_output, &$fields_array, $wic_post_type  ) {
 		
 		global $wic_base_definitions;	
 		global ${ 'wic_' . $wic_post_type . '_definitions' };		
@@ -81,13 +81,8 @@ class WP_Issues_CRM_Database_Utilities {
 	     		'relation'=> 'AND',
 	     	);
 	     	
-	   	$serialized_meta_query_args = array( // will be handled separately in a pre-query
-	     		'relation'=> 'AND',
-	     	);	     	
-	     	
 			$index = 1;
 			$ignored_fields_list = '';			
-			$serialized_field_search_count = 0;
 			
 	 		foreach ( $fields_array as $field ) {
 	 			$wp_query_parameter = isset ( $field['wp_query_parameter'] ) ? $field['wp_query_parameter'] : ''; 
@@ -125,27 +120,18 @@ class WP_Issues_CRM_Database_Utilities {
 			 			if( $next_form_output[$field['slug']] > '' && ( 'new' == $search_mode  || $field['dedup'] ) )  { 
 			 				array_push( $next_form_output['initial_sections_open'], $field['group'] ); // show field's section open in next form
 							if ( ( ( $index - 1 ) < $this->search_terms_max ) || $field['dedup'] )	{ // allow possibility to set more dedup fields than allowed search fields		
-								if  ( in_array( $field['type'], $wic_base_definitions->serialized_field_types ) ) {								
-									if ( is_array( $next_form_output[$field['slug']] ) ) { // happens only for phone, email, street address; regardless of next action, have to flatten for search
-										$meta_value = $next_form_output[$field['slug']][0][1]; // the first, phone, email or street address
-									} else {
-										$meta_value = $next_form_output[$field['slug']];
-									}
-									$serialized_meta_query_args[$index] = array(
-										'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
-										'value'		=> $meta_value,
-										'compare'	=>	'LIKE',
-									);	
-									$serialized_field_search_count++;
-								}	else {
-									$meta_query_args[$index] = array(
-										'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
-										'value'		=> $next_form_output[$field['slug']],
-										'compare'	=>	(  // do strict match in dedup mode
-																$field['like'] && ! $next_form_output['strict_match'] && 'new' == $search_mode  
-															) ? 'LIKE' : '=' ,
-									);	
-								}		
+								if ( is_array( $next_form_output[$field['slug']] ) ) { // happens only for phone, email, street address; regardless of next action, have to flatten for search
+									$meta_value = $next_form_output[$field['slug']][0][1]; // the first, phone, email or street address
+								} else {
+									$meta_value = $next_form_output[$field['slug']];
+								}
+								$meta_query_args[$index] = array(
+									'key' 	=> $this->wic_metakey . $field['slug'], // wants 'key' as key , not 'meta_key', otherwise searches across all meta_keys 
+									'value'		=> $meta_value,
+									'compare'	=>	(  // do strict match in dedup mode
+															$field['like'] && ! $next_form_output['strict_match'] && 'new' == $search_mode  
+														) ? 'LIKE' : '=' ,
+								);	
 							} else { 
 								$ignored_fields_list = ( $ignored_fields_list == '' ) ? $field['label'] : ( $ignored_fields_list .= ', ' . $field['label'] ); 
 							}
@@ -179,24 +165,7 @@ class WP_Issues_CRM_Database_Utilities {
 					}
 				}		
 	 		}
-	 	
-	 		if ( $serialized_field_search_count > 0 ) {  // there were serialized search terms
-	 			$serialized_query_args = array (
-		 			'showposts' => '-1', // deprecated, but the controlling limit when retrieving id's
-		 			'post_type' 	=>	$post_type,
-		 			'post_status'	=> $allowed_statuses,
-		 			'fields'			=> 'ids',
-		 			'meta_query'   => $serialized_meta_query_args,
-		 		);
-	
-				$serialized_query = new WP_Query ( $serialized_query_args );
-				if ( $serialized_query->found_posts > 0 ) {
-					$query_args['post__in']  = $serialized_query->posts; // make this is a limiting set for the rest of the query
-				}  else { 
-					$query_args['p']  = 9999999999; // set up to generate an empty query
-				}
-			}			
-			
+
 			$query_args['meta_query'] 	= $meta_query_args;
 
 	 	
@@ -391,8 +360,44 @@ class WP_Issues_CRM_Database_Utilities {
 				
 				$post_field_key =  isset ( $wic_base_definitions->wic_post_types[$wic_post_type]['dedicated_table'] ) ? $field['slug'] : $this->wic_metakey . $field['slug'];
 				// the following isset check should be necessary only if a search requesting more than the maximum search terms is executed 
-				// note -- don't need to unserialize phones, etc. -- wp_query does this. also automatic in save_update_wic_post  
-				$next_form_output[$field['slug']] = isset ( $wic_query->posts[0]->$post_field_key ) ?  $wic_query->posts[0]->$post_field_key : '';
+  
+				if  ( 'multivalue' == $field['type'] )  {
+					$next_form_output[$field['slug']] = array();	
+					for ( $i = 0; $i < 5; $i++ ) { 
+						switch ( $field['slug'] ) {					
+							case 'emails':
+								if ( $wic_query->posts[0]->{ 'email_address' . '_' . $i } > ' ' ) {
+									$next_form_output[$field['slug']][] = array(
+										$wic_query->posts[0]->{ 'email_type' . '_' . $i },
+										$wic_query->posts[0]->{ 'email_address' . '_' . $i },
+									); 		
+								} 
+								break;
+							case 'phones':
+								if ( $wic_query->posts[0]->{ 'phone' . '_' . $i } > ' ' ) {
+									$next_form_output[$field['slug']][] = array(
+										 $wic_query->posts[0]->{ 'phone_type' . '_' . $i },
+										 $wic_query->posts[0]->{ 'phone' . '_' . $i },
+										 $wic_query->posts[0]->{ 'phone_ext' . '_' . $i },
+									); 		
+								} 
+								break;					
+							case 'addresses':
+								if ( isset ( $wic_query->posts[0]->{ 'address_type' . '_' . $i }  ) ) { // offering 3 addresses although 5 phones and emails
+									if ( $wic_query->posts[0]->{ 'street_address' . '_' . $i } > ' ' || $wic_query->posts[0]->{ 'city_state_zip' . '_' . $i } > ' ' ) {
+										$next_form_output[$field['slug']][] = array(
+											 $wic_query->posts[0]->{ 'address_type' . '_' . $i },
+											 $wic_query->posts[0]->{ 'street_address' . '_' . $i },
+											 $wic_query->posts[0]->{ 'city_state_zip' . '_' . $i },
+										); 		
+									} 
+								}
+								break;					
+						}
+					}
+				} else {
+					$next_form_output[$field['slug']] = isset ( $wic_query->posts[0]->$post_field_key ) ?  $wic_query->posts[0]->$post_field_key : '';					
+				}
 			} else {
 				switch ( $wp_query_parameter ) {
 					case 'author':
@@ -422,7 +427,7 @@ class WP_Issues_CRM_Database_Utilities {
 		$next_form_output['wic_post_content'] = ''; // don't want to bring search notes automatically into update mode 
 		$next_form_output['old_wic_post_content'] = isset ( $wic_query->posts[0]->post_content )  ? $wic_query->posts[0]->post_content: '';	
 		$next_form_output['wic_post_id'] 	= $wic_query->posts[0]->ID;	
-		var_dump($next_form_output);		
+
 	}
 
 	public function get_children_lists ( $wic_post_id, $wic_post_type, $child_types ) {

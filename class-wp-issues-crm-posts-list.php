@@ -20,6 +20,7 @@ class WP_Issues_CRM_Posts_List {
 
 	public function __construct( &$wic_query, $fields_array, $entity_type, $referring_parent, $show_top_buttons ) {
 		
+		global $wic_base_definitions;
 		$this->wic_metakey = $wic_base_definitions->wic_metakey;		
 		
 		foreach ( $fields_array as $field )

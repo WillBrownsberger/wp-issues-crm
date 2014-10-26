@@ -16,7 +16,6 @@
 class WP_Issues_CRM_Constituent_Definitions {
 	
 	public function __construct() {
-		add_action( 'init', array( $this, 'custom_post_type' ), 0 );
 		$this->wic_post_field_groups = multi_array_key_sort ( $this->wic_post_field_groups, 'order' );
 		$this->wic_post_fields		  = multi_array_key_sort ( $this->wic_post_fields, 'order' );
 	}
@@ -143,8 +142,8 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'online'	=>	true,
 			'order'	=>	40,
 			'required'	=> 'group', // see note above -- do not have to include in group required, if want to force to have a fn or ln
-			'slug'	=> 'email_group',
-			'type'	=>	'emails',
+			'slug'	=> 'emails',
+			'type'	=>	'multivalue',
 			),				
 		array(  // 6
 			'dedup'	=>	false,
@@ -155,13 +154,13 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'online'	=>	true,
 			'order'	=>	35,
 			'required'	=> '',
-			'slug'	=> 'phone_numbers',
-			'type'	=>	'phones',
+			'slug'	=> 'phones',
+			'type'	=>	'multivalue',
 			),
-	array( // 7A
+/*	array( // 7A
 			'dedup'	=>	false,
-			'group'	=>	'address',
-			'label'	=>	'Additional Address',
+			'group'	=>	'contact',
+			'label'	=>	'Address',
 			'like'	=>	true,
 			'list'	=> '0',
 			'online'	=>	true,
@@ -169,7 +168,7 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'required'	=> '',
 			'slug'	=> 'street_addresses',
 			'type'	=>	'addresses',
-			),	
+			), */	
 	array( // 7A
 			'dedup'	=>	false,
 			'group'	=>	'address',
@@ -233,14 +232,130 @@ class WP_Issues_CRM_Constituent_Definitions {
 		array( // 7A
 			'dedup'	=>	false,
 			'group'	=>	'address',
-			'label'	=>	'Zip',
+			'label'	=>	'State',
 			'like'	=>	false,
 			'list'	=> '0',
 			'online'	=>	true,
 			'order'	=>	340,
 			'required'	=> '',
+			'select_array' =>array (
+				array(
+					'value'	=> 'MA',
+					'label'	=>	'MA'),
+				),
+			'slug'	=> 'state',
+			'type'	=>	'select',
+			),					
+		array( // 7A
+			'dedup'	=>	false,
+			'group'	=>	'address',
+			'label'	=>	'Zip',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	345,
+			'required'	=> '',
+			'select_array' => array (
+				array(
+					'value'	=> '02472',
+					'label'	=>	'WATERTOWN (02472)'),
+			
+				array(
+					'value'	=> '02478',
+					'label'	=> 'BELMONT (02478)'),
+				array(
+					'value'	=> '02135',
+					'label'	=> 'BRIGHTON (02135)'),
+				array(
+					'value'	=> '02116',
+					'label'	=> 'BACKBAY (02116)'),
+				array(
+					'value'	=> '02115',
+					'label'	=> 'BOSTON (02115)'),
+				array(
+					'value'	=> '02215',
+					'label'	=> 'FENWAY (02215)'),
+				array(
+					'value'	=> '02134',
+					'label'	=> 'ALLSTON (02134)'),
+				array(
+					'value'	=> '02140',
+					'label'	=> 'NORTH CAMBRIDGE (02140)'),
+				array(
+					'value'	=> '02199',
+					'label'	=> 'BOSTON (02199)'),
+				array(
+					'value'	=> '02474',
+					'label'	=> 'ARLINGTON (02474)'),
+				array(
+					'value'	=> '02138',
+					'label'	=> 'CAMBRIDGE (02138)'),
+				array(
+					'value'	=> '02120',
+					'label'	=> 'BOSTON (02120)'),
+				array(
+					'value'	=> '02467',
+					'label'	=> 'CHESTNUT HILL (02467)'),
+				array(
+					'value'	=> '02118',
+					'label'	=> 'BOSTON (02118)'),
+				array(
+					'value'	=> '02127',
+					'label'	=> 'BOSTON (02127)'),
+				array(
+					'value'	=> '02114',
+					'label'	=> 'BOSTON (02114)'),
+				array(
+					'value'	=> '02476',
+					'label'	=> 'ARLINGTON (02476)'),
+				array(
+					'value'	=> '02108',
+					'label'	=> 'BOSTON (02108)'),
+				array(
+					'value'	=> '02113',
+					'label'	=> 'BOSTON (02113)'),
+				array(
+					'value'	=> '02128',
+					'label'	=> 'BOSTON (02128)'),
+				array(
+					'value'	=> '02210',
+					'label'	=> 'BOSTON (02210)'),
+				array(
+					'value'	=> '02109',
+					'label'	=> 'BOSTON (02109)'),
+				array(
+					'value'	=> '02111',
+					'label'	=> 'BOSTON (02111)'),
+				array(
+					'value'	=> '02471',
+					'label'	=> 'WATERTOWN (02471)'),
+				array(
+					'value'	=> '02445',
+					'label'	=> 'BROOKLINE (02445)'),
+				array(
+					'value'	=> '02139',
+					'label'	=> 'CAMBRIDGE (02139)'),
+				array(
+					'value'	=> '02421',
+					'label'	=> 'LEXINGTON (02421)'),
+				array(
+					'value'	=> '02446',
+					'label'	=> 'BROOKLINE (02446)'),
+				array(
+					'value'	=> '02117',
+					'label'	=> 'BOSTON (02117)'),
+				array(
+					'value'	=> '02124',
+					'label'	=> 'BOSTON (02124)'),
+				array(
+					'value'	=> '02123',
+					'label'	=> 'BOSTON (02123)'),
+				array(
+					'value'	=> '02110',
+					'label'	=> 'BOSTON (02110)'),
+				),	
 			'slug'	=> 'zip',
-			'type'	=>	'text',
+			'type'	=>	'select',
 			),											
 		array( // 10
 			'dedup'	=>	false,
@@ -517,61 +632,10 @@ class WP_Issues_CRM_Constituent_Definitions {
 
 	);
 		
-	// Register Custom Post Type
-	function custom_post_type() {
-	
-		$labels = array(
-			'name'                => _x( 'Constituents', 'Post Type General Name', 'wp-issues-crm' ),
-			'singular_name'       => _x( 'Constituent', 'Post Type Singular Name', 'wp-issues-crm' ),
-			'menu_name'           => __( 'Constituents', 'wp-issues-crm' ),
-			'parent_item_colon'   => __( 'Parent Constituent', 'wp-issues-crm' ),
-			'all_items'           => __( 'All Constituents', 'wp-issues-crm' ),
-			'view_item'           => __( 'View Constituent', 'wp-issues-crm' ),
-			'add_new_item'        => __( 'Add New Constituent', 'wp-issues-crm' ),
-			'add_new'             => __( 'Add New', 'wp-issues-crm' ),
-			'edit_item'           => __( 'Edit Constituent', 'wp-issues-crm' ),
-			'update_item'         => __( 'Update Constituent', 'wp-issues-crm' ),
-			'search_items'        => __( 'Search Constituent', 'wp-issues-crm' ),
-			'not_found'           => __( 'Not found', 'wp-issues-crm' ),
-			'not_found_in_trash'  => __( 'Not found in Trash', 'wp-issues-crm' ),
-		);
-		$capabilities = array(
-			'edit_post'           => 'activate_plugins',
-			'read_post'           => 'activate_plugins',
-			'delete_post'         => 'activate_plugins',
-			'edit_posts'          => 'activate_plugins',
-			'edit_others_posts'   => 'activate_plugins',
-			'publish_posts'       => 'activate_plugins',
-			'read_private_posts'  => 'activate_plugins',
-		);
-		$args = array(
-			'label'               => __( 'constituent', 'wp-issues-crm' ),
-			'description'         => __( 'constituents -- people', 'wp-issues-crm' ),
-			'labels'              => $labels,
-			'supports'            => array( 'title', 'author', 'editor', 'thumbnail', 'revisions', 'custom-fields', ),
-			// comments are not private; labels inappropriate
-			// general editor doesn't make sense
-			// 'taxonomies'          => array( 'category' ),
-			'hierarchical'        => false,
-			'public'              => false, // controls if view link appears in edit menu (but not whether URL is visible on front end)
-			'show_ui'             => true, // exclusively through our front end
-			'show_in_menu'        => true, // exclusively through our front end
-			'show_in_nav_menus'   => false, // not something that one would navigate to
-			'show_in_admin_bar'   => false, // assure that all navigation to constituents goes through the plugin
-			'menu_position'       => 100,    // irrelevant
-			'can_export'          => false, // control export through own security
-			'has_archive'         => false, // no support in general themes
-			'exclude_from_search' => true,  // don't want in queries
-			'publicly_queryable'  => false, // controls if URL to constituent is accessible on front end (independent of log in status) -- false for privacy
-			'capabilities'        => $capabilities,
-		);
-		register_post_type( 'wic_constituent', $args );
-	
-	}
 
 /*
 *
-* Option lists
+* Option lists -- called externally in form utilities
 */
 
 	public $phone_type_options = array(	
@@ -627,108 +691,8 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'value'	=> '3',
 			'label'	=>	'Other Address' ),
 		);
-		
-	public $address_zip_options = array (
-		array(
-			'value'	=> 'WATERTOWN, MA  02472',
-			'label'	=>	'WATERTOWN (02472)'),
 	
-		array(
-			'value'	=> 'BELMONT, MA  02478',
-			'label'	=> 'BELMONT (02478)'),
-		array(
-			'value'	=> 'BRIGHTON, MA  02135',
-			'label'	=> 'BRIGHTON (02135)'),
-		array(
-			'value'	=> 'BOSTON, MA  02116',
-			'label'	=> 'BACKBAY (02116)'),
-		array(
-			'value'	=> 'BOSTON, MA  02115',
-			'label'	=> 'BOSTON (02115)'),
-		array(
-			'value'	=> 'BOSTON, MA  02215',
-			'label'	=> 'FENWAY (02215)'),
-		array(
-			'value'	=> 'BOSTON, MA  02134',
-			'label'	=> 'ALLSTON (02134)'),
-		array(
-			'value'	=> 'CAMBRIDGE, MA  02140',
-			'label'	=> 'NORTH CAMBRIDGE (02140)'),
-		array(
-			'value'	=> 'BOSTON, MA  02199',
-			'label'	=> 'BOSTON (02199)'),
-		array(
-			'value'	=> 'ARLINGTON, MA  02474',
-			'label'	=> 'ARLINGTON (02474)'),
-		array(
-			'value'	=> 'CAMBRIDGE, MA  02138',
-			'label'	=> 'CAMBRIDGE (02138)'),
-		array(
-			'value'	=> 'BOSTON, MA  02120',
-			'label'	=> 'BOSTON (02120)'),
-		array(
-			'value'	=> 'CHESTNUT HILL, MA  02467',
-			'label'	=> 'CHESTNUT HILL (02467)'),
-		array(
-			'value'	=> 'BOSTON, MA  02118',
-			'label'	=> 'BOSTON (02118)'),
-		array(
-			'value'	=> 'BOSTON, MA  02127',
-			'label'	=> 'BOSTON (02127)'),
-		array(
-			'value'	=> 'BOSTON, MA  02114',
-			'label'	=> 'BOSTON (02114)'),
-		array(
-			'value'	=> 'BOSTON, MA  02476',
-			'label'	=> 'ARLINGTON (02476)'),
-		array(
-			'value'	=> 'BOSTON, MA  02108',
-			'label'	=> 'BOSTON (02108)'),
-		array(
-			'value'	=> 'BOSTON, MA  02113',
-			'label'	=> 'BOSTON (02113)'),
-		array(
-			'value'	=> 'BOSTON, MA  02128',
-			'label'	=> 'BOSTON (02128)'),
-		array(
-			'value'	=> '02210',
-			'label'	=> 'BOSTON (02210)'),
-		array(
-			'value'	=> 'BOSTON, MA  02109',
-			'label'	=> 'BOSTON (02109)'),
-		array(
-			'value'	=> 'BOSTON, MA  02111',
-			'label'	=> 'BOSTON (02111)'),
-		array(
-			'value'	=> 'WATERTOWN, MA  02471',
-			'label'	=> 'WATERTOWN (02471)'),
-		array(
-			'value'	=> 'BROOKLINE, MA  02445',
-			'label'	=> 'BROOKLINE (02445)'),
-		array(
-			'value'	=> 'CAMBRIDGE, MA  02139',
-			'label'	=> 'CAMBRIDGE (02139)'),
-		array(
-			'value'	=> 'LEXINGTON, MA  02421',
-			'label'	=> 'LEXINGTON (02421)'),
-		array(
-			'value'	=> 'BROOKLINE, MA  02446',
-			'label'	=> 'BROOKLINE (02446)'),
-		array(
-			'value'	=> 'BOSTON, MA  02117',
-			'label'	=> 'BOSTON (02117)'),
-		array(
-			'value'	=> 'BOSTON, MA  02124',
-			'label'	=> 'BOSTON (02124)'),
-		array(
-			'value'	=> 'BOSTON, MA  02123',
-			'label'	=> 'BOSTON (02123)'),
-		array(
-			'value'	=> 'BOSTON, MA  02110',
-			'label'	=> 'BOSTON (02110)'),
-	);		
-
-
+		
 	public function title_callback( &$next_form_output ) {
 		
 		// for title, use group email if have it, otherwise use individual email 

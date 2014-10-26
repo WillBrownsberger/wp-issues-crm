@@ -119,10 +119,10 @@ class WP_Issues_CRM_Form_Utilities {
     	
    	foreach ( $fields_array as $field ) { 
    		
-   		if ( in_array( $field['type'], $wic_base_definitions->serialized_field_types ) && isset( $_POST[$field['slug']] ) ) {
+   		if ( 'multivalue' == $field['type'] && isset( $_POST[$field['slug']] ) ) { 
  	 			// if array, load array, sanitizing all fields and cleaning/validating (using array validation function)	  		
  				if ( is_array( $_POST[$field['slug']] ) ) { 
-		  			$validation_function = 'validate_' . $field['type'];
+		  			$validation_function = 'validate_' . $field['slug'];
 					$repeater_count = 0;
 					foreach( $_POST[$field['slug']] as $key => $value ) {	
 						if ( 'row-template' !== $key ) { // skip template row -- NB:  true: 0 == 'alphastring' false: 0 != 'alphastring true 0 !== 'alphastring'
@@ -137,7 +137,7 @@ class WP_Issues_CRM_Form_Utilities {
 						}
 					}
 				} else { // non array for serialized field is only from a search -- compress/sanitize, but not validate
-					if ( 'phones' == $field['type'] ) {
+					if ( 'phones' == $field['slug'] ) {
 						$clean_input[$field['slug']] = preg_replace("/[^0-9]/", '', $_POST[$field['slug']] );
 					} else {
 						$clean_input[$field['slug']] = stripslashes( sanitize_text_field( $_POST[$field['slug']] ) );
@@ -212,7 +212,8 @@ class WP_Issues_CRM_Form_Utilities {
 		$clean_input['old_wic_post_content'] = isset ( $_POST['old_wic_post_content'] ) ? stripslashes ( $_POST['old_wic_post_content'] ) : '' ;
    	$clean_input['wic_post_id'] = absint ( $_POST['wic_post_id'] ); // always included in form; 0 if unknown;
 		$clean_input['strict_match']	=	isset( $_POST['strict_match'] ) ? true : false; // only updated on the form; only affects search_wic_posts
-		$clean_input['initial_form_state'] = 'wic-form-open';		
+		$clean_input['initial_form_state'] = 'wic-form-open';	
+		
    } 
 	/*
 	* date sanitization function
@@ -485,7 +486,7 @@ class WP_Issues_CRM_Form_Utilities {
 * 	It is extracted from the first instance in search functions requiring strings.
 *
 *  To add a new repeater group x, ( x like phones, emails, addresses ) 
-*		+ add x to $serialized_field_types above, 
+*		+ add x to $multivalue_field_types above, 
 *		+ add create_x_group function here to set up the display, 
 *     + add a validate_x function here to handle form input for each row
 *
@@ -1124,6 +1125,7 @@ class WP_Issues_CRM_Form_Utilities {
 	}
 
 	public function format_select_array ( $select_array, $format, $select_parameter ) {
+		
 		$select_array = is_array( $select_array ) ? $select_array : $this->$select_array( $select_parameter );
 		if ( 'control' == $format ) {
 			return ( $select_array );		
@@ -1135,7 +1137,7 @@ class WP_Issues_CRM_Form_Utilities {
 			return ( $reformatted_select_array );
 		}	
 	}
-
+	
 }
 
 $wic_form_utilities = new WP_Issues_CRM_Form_Utilities;

@@ -395,7 +395,7 @@ class WP_Issues_CRM_Main_Form {
 	*
 	* displays form with controls based on search/update/save next action and field definitions
 	* values in the next_form_output array are never altered here -- this function only makes display decisions
-	*   (exception is flatten or pop-up serialized repeater arrays for display)
+	*   (exception is flatten or pop-up multivalue arrays for display)
 	* $next_form_output is previously populated with values in wp_issues_crm_post_form() and functions 
 	* see inventory of values and dispositions in comments before that function
 	* 
@@ -522,7 +522,7 @@ class WP_Issues_CRM_Main_Form {
 			$required_group_legend = '';
 			$required_individual_legend = ''; 								
 			$contains_legend = false;
-			$serialized_contains_legend = false;
+
 
 
 			/* format meta fields  -- loop through field groups and within them through fields */
@@ -575,25 +575,21 @@ class WP_Issues_CRM_Main_Form {
 								$contains_legend = 'true';	
 							}
 
-							if ( in_array( $field['type'], $wic_base_definitions->serialized_field_types ) ) {
-								$contains =  '(%!)';
-								$serialized_contains_legend = true;
-							}
 						}
 
 						/* if have repeating fields, treat as string for search (can be new search or search where already working as array) */						
-						if ( in_array( $field['type'], $wic_base_definitions->serialized_field_types ) ) {
+						if ( 'multivalue' == $field['type'] )  {
 							if ( 'search' == $next_form_output['next_action'] ) {
-								$field_type = 'serialized_type_as_string';
+								$field_type = 'multivalue_field_as_string';
 								if ( is_array ( $next_form_output[$field['slug']] ) ) {							
 									$next_form_output[$field['slug']] = $next_form_output[$field['slug']][0][1]; // first phone, email or address in array
 								} // slightly breaking wp_issues_crm rules by altering this $next_form_out within this function, but really just selecting an element for display
 								  // clearer to do it here in the context where it is needed (flattening array for use as search)
 								  // see parallel kludge immediately below -- on search going to save, if have flat string from search, pop it up to an array 
 							} else { 
-								$field_type = 'serialized_type_as_array';
+								$field_type = 'multivalue_field_as_array';
 								// note that this branch can only be triggered when searched included phone and found no record, so going to save
-								// if repeater was in search criterion and was found, then got the record populated with serialized array from database  
+								// if repeater was in search criterion and was found, then got the record populated with array of database fields  
 								if ( ! is_array ( $next_form_output[$field['slug']] ) && $next_form_output[$field['slug']] > '' ) {
 									$next_form_output[$field['slug']] = array (
 										array (
@@ -624,7 +620,7 @@ class WP_Issues_CRM_Main_Form {
 							case 'email':						
 							case 'text':
 							case 'textcsv':
-							case 'serialized_type_as_string':
+							case 'multivalue_field_as_string':
 								echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>'; 
 								break;
 
@@ -720,14 +716,14 @@ class WP_Issues_CRM_Main_Form {
 								echo $wic_form_utilities->create_multi_select_control ( $args ) ;
 								break; 
 														
-							case 'serialized_type_as_array': // note -- non-arrays already intercepted above  
+							case 'multivalue_field_as_array': // note -- non-arrays already intercepted above  
 								$group_args	= array (
 									'repeater_group_id'		=> $field['slug'],
 									'repeater_group_label'		=> $field['label'],
 									'repeater_group_data_array'	=>	$next_form_output[$field['slug']],
 									'repeater_group_label_suffix'	=> $required_individual . $required_group . $contains,		
 								);
-								$repeater_function = 'create_' . $field['type'] . '_group';
+								$repeater_function = 'create_' . $field['slug'] . '_group';
 								echo $wic_form_utilities->$repeater_function ( $group_args );
 								break;
 								
@@ -831,9 +827,6 @@ class WP_Issues_CRM_Main_Form {
 					echo '<p class = "wic-form-legend">' . $wic_form_utilities->create_check_control ( $text_control_args ) . '</p>';
 				} ?>	
 				
-				<?php if ( $serialized_contains_legend ) { 
-					echo '<p class = "wic-form-legend" >(%!) ' . __( 'Full-text search always enabled for these fields.', 'wp-issues-crm'  ) . '</p>';
-				} ?>	
 				<?php if ( $required_individual_legend > '' ) { ?>
 					<p class = "wic-form-legend"><?php echo $required_individual_legend; ?> </p>
 				<?php } ?> 								

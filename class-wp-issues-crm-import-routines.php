@@ -44,7 +44,7 @@
 			
 			foreach ($wic_constituent_definitions->wic_post_fields as $field) {
 				$value = '';	
-				if ( ! in_array( $field['type'], $wic_base_definitions->serialized_field_types ) )	{ 	
+				if ( ! in_array( $field['type'], $wic_base_definitions->multivalue_field_types ) )	{ 	
 					if ( isset ( $contact->$field['slug'] ) ) {
 						$value = $contact->$field['slug'];	
 						switch ($field['slug']){
