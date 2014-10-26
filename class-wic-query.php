@@ -11,15 +11,21 @@
 
 class WIC_Query {
 	
+	
+	
 	public $found_posts = 0;
 	public $post_count = 0;
 	public $posts = array();
 	
 	public function __construct( $args, $wic_post_type ) {
+
+
+		
 		
 		/* expects the following arguments */
 		$wic_post_type = 'constituent';
 		$posts_per_page = 100;		
+
 		
 		extract ( $args, EXTR_OVERWRITE );
 		

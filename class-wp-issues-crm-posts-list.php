@@ -20,6 +20,8 @@ class WP_Issues_CRM_Posts_List {
 
 	public function __construct( &$wic_query, $fields_array, $entity_type, $referring_parent, $show_top_buttons ) {
 		
+		$this->wic_metakey = $wic_base_definitions->wic_metakey;		
+		
 		foreach ( $fields_array as $field )
 			if ( $field['list'] > 0 ) { 		
  				 array_push( $this->list_fields, $field );
@@ -83,7 +85,7 @@ class WP_Issues_CRM_Posts_List {
 						$wp_query_parameter = isset ( $field['wp_query_parameter'] ) ? $field['wp_query_parameter'] : '';							
 						if ( '' == $wp_query_parameter ) {
 							$key = $wic_base_definitions->wic_metakey . $field['slug'];
-							$key =  isset ( $wic_base_definitions->wic_post_types[$wic_post_type]['dedicated_table'] ) ? $field['slug'] : $this->wic_metakey . $field['slug'];
+							$key =  isset ( $wic_base_definitions->wic_post_types[$entity_type]['dedicated_table'] ) ? $field['slug'] : $this->wic_metakey . $field['slug'];
 						} else {
 							$key = $wic_base_definitions->wp_query_parameters[$field['wp_query_parameter']]['update_post_parameter'];						
 						} 
