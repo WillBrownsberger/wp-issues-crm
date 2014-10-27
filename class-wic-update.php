@@ -45,13 +45,11 @@ class WIC_Update {
 					$set_clause
 					",
 				$set['set_values'] ); 	
-			$success = $wpdb->query( $sql );		
+			$success = $wpdb->query( $sql );	
+			$this->outcome['post_id'] = $wpdb->insert_id;		
 		}
 
 		$this->outcome['notices'] = $success ? '' : __( 'Unknown database error in save/update.', 'wp-issues-crm' );
-		
-		$this->outcome['post_id'] = $wpdb->insert_id;		
-		
 	}
 
 	private function create_set_clause ( &$next_form_output, &$fields_array, $wic_post_type ) {
