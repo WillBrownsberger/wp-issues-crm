@@ -804,7 +804,7 @@ class WP_Issues_CRM_Main_Form {
 			// final button group div
 			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
 			echo '<div class = "wic-form-field-group ' . $row_class . '" id = "bottom-button-group">';?>
-				<?php if ( 'update' == $next_form_output['next_action'] ) { ?>
+				<?php if ( 'update' == $next_form_output['next_action'] && ! isset ( $wic_base_definitions->wic_post_types[$this->form_requested]['dedicated_table'] )) { ?>
 					<p><a href="<?php echo( home_url( '/' ) ) . 'wp-admin/post.php?post=' . absint( $next_form_output['wic_post_id'] ) . '&action=edit' ; ?>" class = "wic-back-end-link"><?php printf ( __('Direct edit %2$s # %1$s <br/>', 'wp_issues_crm'), absint( $next_form_output['wic_post_id'] ) , $this->form_requested  ); ?></a></p>
 				<?php } ?>		
 			

@@ -78,6 +78,14 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'initial-open'	=> false,
 
 		),	
+		array (
+			'name'		=> 'audit',
+			'label'		=>	'Update Logging',
+			'legend'		=>	'This information can be searched, but cannot be updated online.',
+			'order'		=> 50,
+			'initial-open'	=> false,
+
+		),	
 	);
 
 	public $wic_post_fields = array( 
@@ -629,7 +637,34 @@ class WP_Issues_CRM_Constituent_Definitions {
 			'slug'	=> 'ssid',
 			'type'	=>	'readonly',
 			),	
-
+		array(
+			'dedup'	=>	false,
+			'group'	=>	'audit',
+			'label'	=>	'Last Updated By',
+			'like'	=>	false,
+			'list'	=> '0',
+			'online'	=>	true,
+			'order'	=>	400,
+			'readonly_subtype' => 'select',	
+			'required'	=> '',
+			'select_array' => 'wic_get_user_list',
+			'select_parameter' => 'Administrator',
+			'slug'	=> 'last_updated_by',
+			'type'	=>	'readonly',
+			), 
+		array( // 16
+			'dedup'	=>	false,
+			'group'	=>	'audit',
+			'label'	=>	'Lasted Updated Time',
+			'like'	=>	true,
+			'online'	=>	true,
+			'order'	=>	410,
+			'readonly_subtype' => 'text',
+			'required'	=> '',
+			'slug'	=> 'last_updated_time',
+			'type'	=>	'readonly',
+			'list'	=> '0',
+			),
 	);
 		
 

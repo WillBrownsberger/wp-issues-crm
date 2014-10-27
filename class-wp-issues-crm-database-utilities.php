@@ -215,6 +215,12 @@ class WP_Issues_CRM_Database_Utilities {
 		global $wic_base_definitions;
 		global ${ 'wic_' . $wic_post_type . '_definitions' };	
 
+		if ( isset ( $wic_base_definitions->wic_post_types[$wic_post_type]['dedicated_table'] ) ) {
+			$wic_update = new WIC_Update ( $next_form_output, $fields_array, $wic_post_type );
+			return ( $wic_update->outcome );		
+		}
+
+
 		$outcome = array (
 			'post_id'	=> 0,
 		   'notices'	=> '', 

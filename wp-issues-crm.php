@@ -34,6 +34,7 @@ include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituent-definitio
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-activity-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-issue-definitions.php';  
 include plugin_dir_path( __FILE__ ) . 'class-wic-query.php';
+include plugin_dir_path( __FILE__ ) . 'class-wic-update.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-form-utilities.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-database-utilities.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-main-form.php';
