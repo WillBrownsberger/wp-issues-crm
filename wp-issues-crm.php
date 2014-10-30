@@ -29,6 +29,7 @@
 *  -- constituent definitions includes multi_array_key_sort function used in later definitions 
 *  -- later files use definitions . . .
 */
+include plugin_dir_path( __FILE__ ) . 'class-wic-table.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-base-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituent-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-activity-definitions.php'; 
