@@ -25,7 +25,7 @@ class WIC_Constituent extends WIC_Table {
 		'order'	  => 'ASC'	
 	);	
 
-	public $wic_post_field_groups = array (
+	public $field_groups = array (
 		array (
 			'name'		=> 'contact',
 			'label'		=>	'Contact',
@@ -90,7 +90,7 @@ class WIC_Constituent extends WIC_Table {
 
  asdfasd must add post content 
 
-	public $wic_post_fields = array( 
+	public $field_definitions( 
 	  	/* fields control -- all definitions of fields are in this array (except for native post fields -- content and title)
 		*	-- dedup indicates whether field should be on list of fields tested for deduping	  	
 	  	*	-- group is just for form layout purposes

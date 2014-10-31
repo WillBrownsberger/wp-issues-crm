@@ -22,29 +22,29 @@
 abstract class WIC_Field {
 		
 	/* name and type are required in field definitions from wic_table class */
-	$name			= ''				// no spaces machine use name
-	$type			= ''				// Initial Caps, since field type will be embedded in class name by WIC_Table __construct 
+	public $name			= ''				// no spaces machine use name
+	private $type			= ''				// Initial Caps, since field type will be embedded in class name by WIC_Table __construct 
 	
 	/* all other properties can default and not all properties are implemented for all field types */
-	$dedup 					= false; 				// whether field should be included in definition of unique record for deduping purposes 
-	$default					= ''						// default value for field in save forms	
-	$group 					= ''; 					// group in form layout
-	$label 					= '';						// front facing label
-	$like	 					= false;					// whether field may be searched in free text mode -- right wild card only, needle% 	
-	$list	 					= '0';					// the css width value for the field in forms and listings, expressed in px
-	$list_call_back	= ''							// function to call to decode (transform from select function )
-	$online 					= true;					// whether the field should be displayed in the online system at all
-	$order					= 0;						// order in form layout (ordered across all groups, but group order is higher sort)
-	$readonly				= false;					// allow search, but not save or update
-	$required 				= '';						// can be '' (not required), 'individual' (required) or  'group' (at least one of group must be supplied)
-	$select_array 			= '';						// hard coded array for short select lists;
-	$select_function 		= '';						// function for creating more complex select lists;
-	$select_parameter 	= '';						// parameter to pass to select function 
-	$wp_query_parameter 	= '';						// used for fields that go back to post records
+	private $dedup 					= false; 				// whether field should be included in definition of unique record for deduping purposes 
+	private $default					= ''						// default value for field in save forms	
+	private $group 					= ''; 					// group in form layout
+	private $label 					= '';						// front facing label
+	private $like	 					= false;					// whether field may be searched in free text mode -- right wild card only, needle% 	
+	private $list	 					= '0';					// the css width value for the field in forms and listings, expressed in px
+	private $list_call_back			= ''						// function to call to decode (transform from select function )
+	private $online 					= true;					// whether the field should be displayed in the online system at all
+	private $order						= 0;						// order in form layout (ordered across all groups, but group order is higher sort)
+	private $readonly					= false;					// allow search, but not save or update
+	private $required 				= '';						// can be '' (not required), 'individual' (required) or  'group' (at least one of group must be supplied)
+	private $select_array 			= '';						// hard coded array for short select lists;
+	private $select_function 		= '';						// function for creating more complex select lists;
+	private $select_parameter 		= '';						// parameter to pass to select function 
+	private $wp_query_parameter 	= '';						// used for fields that go back to post records
 	
 	// value of the field, from form or possibly, after search, from database 
-	$value				= ''; 
-	$formatted_value	= '';
+	private $value				= ''; 
+	private $formatted_value	= '';
 
 	// possible validation errors field	
 	$validation_errors = '';
@@ -159,21 +159,26 @@ abstract class WIC_Field {
 	public function search_control () {
 		$this->control_args['read_only_flag'] = false;
 		$this->control_args['field_label_suffix'] = ( $this->contains ) ? '*' : '';
-		echo  = '<p>' . $this->create_control( $this->control_args ) . '<p>';
+		$control_array = array(
+			'control' 	=> '<p>'. $this->create_control( $this->control_args ) . '</p>',
+			'group'		=>	$this->group,
+			'order'		=>	$this->order,
+			'contains'	=>	$this->contains,
+		);
+		return ( $control_array ) 
 	}
 	
 	public function save_control () {
 		if( ! $this->readonly ) {
-			
-			echo  = '<p>' . $this->create_control	( $this->control_args ) . '</p>';	
+			return  ( '<p>'. $this->create_control( $this->control_args ) . '</p>' );	
 		}
 	}
 	
 	public function update_control () {
-		echo  = '<p>' . $this->create_control	( $this->control_args ) . '</p>';	
+		return ( '<p>'. $this->create_control( $this->control_args ) . '</p>' );	
 	}
 
-	public function create_control ( $control_args ) { // basic create text control
+	protected function create_control ( $control_args ) { // basic create text control
 		
 		extract ( $control_args, EXTR_SKIP ); 
 	
@@ -314,10 +319,10 @@ class WIC_Date_Field extends WIC_Field {
 	}
 	
 	public function search_control () {
-		$this->create_date_range_control ( $this->date_array[1][1], $this->date_array[2][1] );	
+		return ( '<p>' . $this->create_date_range_control ( $this->date_array[1][1], $this->date_array[2][1] ) . '</p>' );	
 	}
 
-	public function create_control ( $low_date, $high_date ) {
+	public function create_date_range_control ( $low_date, $high_date ) {
 
 		$date_range_control = '';
 
