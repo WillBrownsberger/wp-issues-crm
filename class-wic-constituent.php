@@ -71,10 +71,18 @@ class WIC_Constituent extends WIC_Table {
 
 		),	
 		array (
+			'name'		=> 'notes',
+			'label'		=>	'Notes',
+			'legend'		=>	'These notes are a running log -- previous entries cannot be modified.',
+			'order'		=> 55,
+			'initial-open'	=> false,
+
+		),	
+		array (
 			'name'		=> 'audit',
 			'label'		=>	'Update Logging',
 			'legend'		=>	'This information can be searched, but cannot be updated online.',
-			'order'		=> 50,
+			'order'		=> 60,
 			'initial-open'	=> false,
 
 		),	
@@ -99,6 +107,15 @@ class WIC_Constituent extends WIC_Table {
 	  	*
 	  	*	NOTE: Order values must be unique or second list will overlay first
 	  	*/
+	  	
+	  	array( // this field is required for processing to work.
+			'dedup'	=>	false,	
+			'group'	=>	'audit',
+			'label'	=>	'Internal ID',
+			'order'	=>	999,
+			'slug'	=> 'ID', 	
+			'type'	=>	'link', 	
+			),	
 		array( // 1
 			'dedup'	=>	true,	
 			'group'	=>	'contact',
@@ -659,6 +676,19 @@ class WIC_Constituent extends WIC_Table {
 			'type'	=>	'readonly',
 			'list'	=> '0',
 			),
+			
+		array( // 16
+			'group'	=>	'notes',
+			'label'	=>	'Running Log',
+			'like'	=>	true,
+			'online'	=>	true,
+			'order'	=>	500,
+			'slug'	=> 'notes',
+			'type'	=> 'post_content'
+			),
+			
+			
+			
 	);
 		
 

@@ -1,5 +1,5 @@
 <?php
-/**
+/*
 * wic-field.php
 *
 * This file contains WIC_Field base class and child classes with names of the form WIC_{Type}_Field. 
@@ -12,13 +12,13 @@
 * 
 *
 *
-**/
+*/
 
-/**
+/************************************************************************************
 *
 *  WIC Field
 *
-**/
+************************************************************************************/
 abstract class WIC_Field {
 		
 	/* name and type are required in field definitions from wic_table class */
@@ -32,7 +32,7 @@ abstract class WIC_Field {
 	$label 					= '';						// front facing label
 	$like	 					= false;					// whether field may be searched in free text mode -- right wild card only, needle% 	
 	$list	 					= '0';					// the css width value for the field in forms and listings, expressed in px
-	$list_call_back 		= ''						// function to call to decode (transform from select function )
+	$list_call_back	= ''							// function to call to decode (transform from select function )
 	$online 					= true;					// whether the field should be displayed in the online system at all
 	$order					= 0;						// order in form layout (ordered across all groups, but group order is higher sort)
 	$readonly				= false;					// allow search, but not save or update
@@ -65,7 +65,7 @@ abstract class WIC_Field {
 		'type'					=> 'text' 
 	}
 
-	
+	// sanitizes, validates, all basic properties
 	protected function __construct( $args )	{
 
 		// initialize field definition properties from WIC table field definitions
@@ -136,21 +136,10 @@ abstract class WIC_Field {
 
 	}
 
-	protected function set_clauses () {
-		
-		$set_clauses = array(
-			'where' 		= '',
-			'join' 		= '',
-			'values' 	= array(),
-		);
-		
-		if ( '' < $this->value ) {
-			$set_clauses['set']  			=  ", $name = %s "
-			$this->set_values['values'][]	= $this->value;
-		}
-
-		return ( $set_clauses );
-
+	protected function data_array () {
+		$data_array = array();
+		$data_array[$this->name] = $this->value;		
+		return ( $data_array );
 	}
 
 	public function new_control () {
@@ -207,11 +196,11 @@ abstract class WIC_Field {
 
 }
 
-/**
+/************************************************************************************
 *
 *  WIC Checked Field
 *
-**/
+************************************************************************************/
 class WIC_Checked_Field extends WIC_Field {
 	
 	public function create_control ( $control_args ) {
@@ -235,11 +224,11 @@ class WIC_Checked_Field extends WIC_Field {
 
 }	
 
-/**
+/************************************************************************************
 *
 *  WIC Date Field
 *
-**/
+************************************************************************************/
 class WIC_Date_Field extends WIC_Field {
 	
 	$date_values = array(); // 0 is base value, 1, low range, 2 high range
@@ -345,11 +334,11 @@ class WIC_Date_Field extends WIC_Field {
 	
 }	
 	
-/**
+/************************************************************************************
 *
 *  WIC Email Field
 *
-**/
+************************************************************************************/
 class WIC_Email_Field extends WIC_Text_Field {
 	
 	public function __construct() {
@@ -365,11 +354,29 @@ class WIC_Email_Field extends WIC_Text_Field {
 
 }
 
-/**
+/************************************************************************************
+*
+*  WIC Link Field (used for ID or parent; can additionally do ID or parent as readonly,
+*  but if do only as readonly, will not carry through from form -- 
+*  readonly fields are not in $_POST
+*
+************************************************************************************/
+class WIC_Link_Field extends WIC_Text_Field {
+	
+	public function __construct() {
+		parent::__construct();
+		$this->control_args['type'] = 'hidden';
+	}
+
+}
+
+
+
+/************************************************************************************
 *
 *  WIC Phone Field
 *
-**/
+************************************************************************************/
 
 class WIC_Phone_Field extends WIC_Text_Field {
 	
@@ -377,7 +384,7 @@ class WIC_Phone_Field extends WIC_Text_Field {
 		$value = preg_replace( "/[^0-9]/", '', $value)
 	}	
 	
-   public function format ($raw_phone) {
+   public function format ( $raw_phone ) {
    	
 		$phone = preg_replace( "/[^0-9]/", '', $raw_phone );
    	
@@ -393,11 +400,11 @@ class WIC_Phone_Field extends WIC_Text_Field {
 
 }
 
-/**
+/**********************************************************************************
 *
 *  WIC Post Content Field
 *
-**/
+**********************************************************************************/
 
 class WIC_Post_Content_Field extends WIC_Text_Field {
 	
@@ -410,22 +417,125 @@ class WIC_Post_Content_Field extends WIC_Text_Field {
 
 	public function sanitize( $dirty ) {
 		$clean = strip_slashes( $dirty );	
+	}
+
+	public function search_control () {
+		$this->control_args['read_only_flag'] = false;
+		$this->control_args['field_label_suffix'] = ( $this->contains ) ? '*' : '';
+		echo  = '<p>' . parent::create_control( $this->control_args ) . '<p>';
+	}
+	
+	public function save_control () {
+		if( ! $this->readonly ) {
+			echo  = '<p>' . $this->create_control	( $this->control_args ) . '</p>';	
+		}
+	}
+	
+	public function update_control () {
+		echo  = '<p>' . $this->create_control	( $this->control_args ) . '</p>';	
+	}
+	
+	public function create_control ( $control_args ) {
+		
+		$control = '';		
+		
+		if ( ! $control_args['readonly'] ) { // for use with true wp posts
+			$control_args['input_class'] = 'wic-input wic-wic-post-content';		
+			control .= '<p>' . WIC_Textarea_Field::create_control ( $control_args ) . '</p>';
+		}		
+		
+		$control_args['field_name_id'] = 'old_' . $args['name'];
+		$control_args['read_only_flag']	= true;
+		$control_args['input_class'] = 'hidden-template';
+		$control_args['label_class'] = 'hidden-template';
+		$control_args['value']	= $this->old_value;
+		$control .= '<p>' . WIC_Textarea_Field::create_control ( $control_args ) . '</p>';
+		
+		$control.=  '<div id = "wic-old-wic-post-content">' .  balancetags( wp_kses_post ( $this->old_value ), true ) . '</div>'	
+		/**
+		* options considered for output sanitization of kses_post -- need to be good here, since new notes are just appended to old
+		* with no filtering before this point ( on save/update take display value from prior form values (new appended to old), not database 	
+		*		(1) esc_html not an option since shows html characters instead of using them format 
+		*		(2) sanitize_text_field strips tags entirely
+		*		(3) apply_filters('the_content', -- ) does nothing to address stray quotes or unbalanced tags (and would run shortcodes, etc.)
+		*		(4) wp_kses_post leaves tags unbalanced but handles stray quotes
+		*		(5) balancetags (with force set to true) still gets hurt by stray quotes
+		*		CONCLUSION COMBINE 4 AND 5 -- EXPENSIVE, BUT APPROPRIATE, GIVEN RAW CONTENT BEING SERVED -- 
+		*		NOTE: Wordpress does not bother to clean post_content up in this way (even through the admin interface) -- so conclude not necessary on save
+		*      	-- only do it here for display; assume properly escaped for storage although not clean display
+		*/
 	
 	}
 	
+	
+	protected function data_array () {
+		$data = array();
+		if ( '' < $this->value ) {
+			$data[$this->name] =  $this->format_note_content ( $this->value ) . $this->old_value;	
+		}
+		return ( $data );
+	}
+
+	 
+	public function format_note_content ( $notes ) {
+
+		$current_user = wp_get_current_user();
+				
+		$output = '<div class = "wic-notes-entry">' .
+						'<div class = "wic-notes-header">' .
+							'<div class = "wic-notes-author">' . __( 'Note by ' , 'wp-issues-crm' ) .  $current_user->display_name . '</div>' .
+							'<div class = "wic-notes-date">' . '(' . current_time('Y-m-d, h:i:s A' ) . ')' . ':</div>' .
+						'</div>' .
+						'<div class = "wic-notes-content">' .
+							$notes .
+						'</div>' .
+					'</div>';
+					
+		return ($output); 
+	}	
+	
 }
 
-/**
+/*******************************************************************************
 *
 * WIC Select Control
 *
-**/
+********************************************************************************/
 class WIC_Select_Field extends WIC_Text_Field {
+	
+	public function __construct ( $args ) {
+		parent::construct ( $args )
+		if ( isset ( $this->select_array ) ) {
+			$control_args->select_array = $this->select_array 
+		} elseif ( isset ( $this-select_function ) ) {
+			$control_args->select_array = $this->select_function ( $select_parameter )		
+		}
+	}
+
+	public function reformat_select_array ( $select_array ) {
+		$reformatted_select_array = array();
+		foreach ( $select_array as $pair ) {
+			$reformatted_select_array[$pair['value']] = $pair['label'];
+		} 	
+		return ( $reformatted_select_array );
+	}
 
 	public function update_control () {
 		if( ! $this->readonly ) {
 			echo  = '<p>' . $this->create_control	( $this->control_args ) . '</p>';
 		} else {
+			// logic addresses the possibility that the select array may be smaller than the
+			// array of possible values in the database -- as for example, if choices are closed off of the list 
+			if ( ! isset( $this->list_call_back ) ) {
+				if ( isset ( $this->select_array) {
+					$lookup_array = reformat_select_array ( $this->select_array );
+				} else {
+					$lookup_array = reformat_select_array ( $this->select_function ( $this->select_parameter ) );
+				}
+				$this->control_args['value'] = $lookup_array[$this->value];
+			} else  { 
+				$this->control_args['value'] = $this->list_call_back ( $this->value );
+			} 				
 			echo  = '<p>' . parent::create_control	( $this->control_args ) . '</p>';
 		}	
 	}	
@@ -468,20 +578,20 @@ class WIC_Select_Field extends WIC_Text_Field {
 	}	
 }
 
-/**
+/*******************************************************************************
 *
 *  WIC Text Field
 *
-**/
+*******************************************************************************/
 class WIC_Text_Field extends WIC_Field {
 	// named just for consistency
 }
 
-/**
+/*******************************************************************************
 *
 *  WIC Text Area Field
 *
-**/
+*******************************************************************************/
 Class WIC_Textarea_Field extends WIC_field {
 
 	public function create_control ( $control_args ) {
@@ -502,11 +612,11 @@ Class WIC_Textarea_Field extends WIC_field {
 }
 
 
-/**
+/*******************************************************************************
 *
 *  WIC Text CSV Field
 *
-**/
+*******************************************************************************/
 
 class WIC_TextCSV_Field extends WIC_Field {
 
@@ -531,121 +641,17 @@ class WIC_TextCSV_Field extends WIC_Field {
 	}	
 
 }
-	/*
-	*
-	*	sanitize_validate_input: form sanitization and validation function:
-	*  takes blank array and populates it from $_POST while sanitizing it
-	*   
-	* 		1. handles all meta fields defined as displayable for wic_posts
-	*		2. wic_post_content
-	*		3. wic_post_id
-	*		4. form_notices with validation errors
-	*
-	*	The following sanitization/validation is done:
-	*
-	*	(1) All fields have stripslashes applied
-	*  (2) All fields except wic_post_content have sanitize_text_field applied -- "Checks for invalid UTF-8, 
-	*			Convert single < characters to entity, strip all tags, remove line breaks, tabs and extra white space, strip octets."
-	*	(3) Post content is not sanitized or validated other than by stripping slashes (trust Wordpress on search/save)
-	*	(4) All content validation rules are applied 
-	*			- required fields
-	*			- email formatting 
-	*			- date formatting
-	*			- phones compressed to numeric only
-	*			- note select fields are compressed to numeric or slash/textsanitized
-	*	  
-	*	uses php converts DateTime object to recognize date formats and convert to yyyy-mm-dd
-	*  
-	*/   
-  
-  
-  
+ 
   
    
 
     	
-   	foreach ( $fields_array as $field ) { 
-   		
-   		if ( 'multivalue' == $field['type'] && isset( $_POST[$field['slug']] ) ) { 
- 	 			// if array, load array, sanitizing all fields and cleaning/validating (using array validation function)	  		
- 				if ( is_array( $_POST[$field['slug']] ) ) { 
-		  			$validation_function = 'validate_' . $field['slug'];
-					$repeater_count = 0;
-					foreach( $_POST[$field['slug']] as $key => $value ) {	
-						if ( 'row-template' !== $key ) { // skip template row -- NB:  true: 0 == 'alphastring' false: 0 != 'alphastring true 0 !== 'alphastring'
-							$test_repeater = $this->$validation_function($value);
-							if ( $test_repeater['present'] ) { // skip rows that validate to absent
-								$clean_input[$field['slug']][$repeater_count] = $test_repeater['result'];
-								$repeater_count++;
-								if ( $test_repeater['error'] > '' ) {
-									$clean_input['error_messages'] .= ' ' . $test_repeater['error'] . ' ' . $field['label'] . ' ' . $repeater_count . '. '; 
-								}
-							}	 						
-						}
-					}
-				} else { // non array for serialized field is only from a search -- compress/sanitize, but not validate
-					if ( 'phones' == $field['slug'] ) {
-						$clean_input[$field['slug']] = preg_replace("/[^0-9]/", '', $_POST[$field['slug']] );
-					} else {
-						$clean_input[$field['slug']] = stripslashes( sanitize_text_field( $_POST[$field['slug']] ) );
-					}
-				} // close non-array for serialized fields
-			} elseif ( 'multi_select' == $field['type'] ) { 
-				$clean_input[$field['slug']] = array();
-					if( isset ( $_POST[$field['slug']] ) ) {
-						foreach ( $_POST[$field['slug']] as $key => $value ) {
-							$clean_input[$field['slug']][] = $key; 					
-						}
-					}
-			}
-			
-			// do test for group required (including first among any repeater fields)
-			if ( 'group' == $field['required'] ) {
-				$group_required_test .=	is_array ( $clean_input[$field['slug']] ) ? $clean_input[$field['slug']][0][1] : $clean_input[$field['slug']] ;
-				$group_required_label .= ( '' == $group_required_label ) ? '' : ', ';	
-				$group_required_label .= $field['label'];	
-			}
 
-			// do individual field required tests and for non-blank to email validation
-			if ( ! $clean_input[$field['slug']] > ''  ) { // note array always > '' and we do not store blank arrays, so this suffices for the array fields 
-				if( 'individual' == $field['required'] ) {
-					$clean_input['error_messages'] .= ' ' . sprintf( __( ' %s is a required field. ' , 'wp-issues-crm' ), $field['label'] );				
-				}   		
-   		}
-   	}
-		
-		// outside the loop -- test group requires after all fields passed 
-		if ( '' == $group_required_test && $group_required_label > '' ) {
-			$clean_input['error_messages'] .= sprintf ( __( ' At least one among %s is required. ', 'wp-issues-crm' ), $group_required_label );
-   	}
-
-		$clean_input['wic_post_content'] = isset ( $_POST['wic_post_content'] ) ? stripslashes ( ( $_POST['wic_post_content'] ) ) : '' ;
-		$clean_input['old_wic_post_content'] = isset ( $_POST['old_wic_post_content'] ) ? stripslashes ( $_POST['old_wic_post_content'] ) : '' ;
    	$clean_input['wic_post_id'] = absint ( $_POST['wic_post_id'] ); // always included in form; 0 if unknown;
 		$clean_input['strict_match']	=	isset( $_POST['strict_match'] ) ? true : false; // only updated on the form; only affects search_wic_posts
 		$clean_input['initial_form_state'] = 'wic-form-open';	
 		
    } 
-	/*
-	* date sanitization function
-	*
-	*/   
-	public function validate_date ( $possible_date ) {
-		try {
-			$test = new DateTime( $possible_date );
-		}	catch ( Exception $e ) {
-			return ( '' );
-		}	   			
- 		return ( date_format( $test, 'Y-m-d' ) );
-	}
-   
-
-	
-	/*
-	*
-	*	The following group of functions create generic controls -- no field-specific logic
-	*		 -- checked, text, text_area, selected
-	*/	
 	
 
 	
@@ -1168,23 +1174,6 @@ class WIC_TextCSV_Field extends WIC_Field {
 
 	
 	
-	
-	public function format_wic_post_content ( $notes ) {
-
-		$current_user = wp_get_current_user();
-				
-		$output = '<div class = "wic-notes-entry">' .
-						'<div class = "wic-notes-header">' .
-							'<div class = "wic-notes-author">' . __( 'Note by ' , 'wp-issues-crm' ) .  $current_user->display_name . '</div>' .
-							'<div class = "wic-notes-date">' . '(' . current_time('Y-m-d, h:i:s A' ) . ')' . ':</div>' .
-						'</div>' .
-						'<div class = "wic-notes-content">' .
-							$notes .
-						'</div>' .
-					'</div>';
-					
-		return ($output); 
-	}	
 
 	public function create_wic_form_button ( $control_array_plus_class ) { 
 	
@@ -1320,19 +1309,7 @@ class WIC_TextCSV_Field extends WIC_Field {
 		return ( $display_name );
 	}
 
-	public function format_select_array ( $select_array, $format, $select_parameter ) {
-		
-		$select_array = is_array( $select_array ) ? $select_array : $this->$select_array( $select_parameter );
-		if ( 'control' == $format ) {
-			return ( $select_array );		
-		} elseif ( 'lookup' == $format ) {
-			$reformatted_select_array = array();
-			foreach ( $select_array as $pair ) {
-				$reformatted_select_array[$pair['value']] = $pair['label'];
-			} 	
-			return ( $reformatted_select_array );
-		}	
-	}
+
 	
 }
 
