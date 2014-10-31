@@ -101,6 +101,15 @@ abstract class WIC_Field {
 		
 	}
 
+	public function get_value () {
+		return ( $this-value );	
+	}
+	
+	public function set_value( $arg ) {
+		$this->value = $arg;
+		$this->formatted_value = $this->format( $this->value );	
+	}
+
 	// basic sanitization, stripslashes because of magic quotes; sanitize_text_field also applied -- "Checks for invalid UTF-8,
 	// Convert single < characters to entity, strip all tags, remove line breaks, tabs and extra white space, strip octets."
 	protected function sanitize ( $dirty ) {
