@@ -130,23 +130,7 @@ abstract class WIC_Entity {
 
 	/* the major actions that can be requested of the object -- search, save, update */
 
-	protected function search() {
-		$wic_query = $wpdb->get_results( prepare_search_sql ('new') );
-		if ( 0 == $wpdb->num_rows ) {
-			$this->guidance	=	__( 'No matching record found. Try a save? ', 'wp-issues-crm' );
-			$this->next_action 	=	'save';
-		} elseif ( 1 == $wpdb->num_rows ) {
-			// overwrite form with that unique record's  values
-			$this->populate_fields ( $wic_query );
-			$this->guidance	=	__( 'One matching record found. Try an update?', 'wp-issues-crm' );
-			$this->next_action 	=	'update';
-		} else {
-			$this->guidance	=	__( 'Multiple records found (results below). ', 'wp-issues-crm' );
-			$this->next_action 	=	'search';
-			$show_list = true;
-		}						
-	} 
-	
+
 	protected function save() {
 		initialize_fields_post();
 		$wic_query = $wpdb->get_results( prepare_search_sql ('dup') );
@@ -224,37 +208,7 @@ abstract class WIC_Entity {
 	}
 	
 
-	protected function prepare_search_sql( $mode ) {
-	
-		$join = '';
-		$where = '';
-		$values = array();
-		
-		foreach ( $this->fields as $field ) {
-			if ( ( 'dup' == $mode && $field->dedup ) || 'new' == $mode )  {
-				$search_clauses = $field->search_clauses();
-				$join .= $search_clauses['join'];
-				$where .= $search_clauses['where'];
-				// each field will return an array of several values that need to be strung into main values array
-				foreach ( $search_clauses['values'] as $value ) { 
-					$values[] = $value;			
-				}
-			} 		
-		}
-		
-		$sql = $wpdb->prepare( "
-					SELECT 	* 
-					FROM 		$table
-					$join
-					WHERE 1=1 $where
-					ORDER BY $this->sort_order['orderby'] $this->sort_order['order']
-					LIMIT 0, $this->max_records
-					",
-				$values );	
-			
-		return ( $sql );
-	
-	}
+
 
 	protected function prepare_save_update_array() {
 				
