@@ -413,14 +413,14 @@ class WP_Issues_CRM_Main_Form {
 		global $wic_form_utilities; 
 		global ${ 'wic_' . $this->form_requested . '_definitions' };
 
-		/* echo '<span style="color:green;"> <br /> $_POST:';  		
+		echo '<span style="color:green;"> <br /> $_POST:';  		
   		var_dump ($_POST);
   		echo '</span>';  
 
 		 echo '<span style="color:red;"> <br />next_form_output:';  		
   		var_dump ($next_form_output);
   		echo '</span>';   
-		/* */
+		
 
 		?><div id='wic-forms' class = "<?php echo $next_form_output['initial_form_state'] ?>">
 

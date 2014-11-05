@@ -1,7 +1,7 @@
 <?php
 /*
 *
-* class-wic-table.php
+* class-wic-entity.php
 *
 * base class for wic tables/entities
 *
@@ -9,88 +9,66 @@
 * 
 */
 
-abstract class WIC_Table {
+abstract class WIC_Entity {
 	
-	// misc parameters
-	public $labels = array (
-		'singular' => '', 
-		'plural'	  => ''	
-	);
-
-	public $sort_order = array (
-		'orderby' => '', // field_slug
-		'order'	  => '' // ASC or DSC
-	);	
+	private $entity		= ''; // e.g., constituent, activity, issue
+	private $entity_type = ''; // WIC if uses WIC dedicated tables or WP is uses Wordpress tables
+	private $fields = array(); // will be initialized as field_slug => type from wp_wic_data_dictionary
+	private $data_array = array(); 		// will be initialized as field_slug => value from $fields and type classes (may make some values arrays and some strings, but will not add slugs) 
 	
-	public $max_records = 100;
+		
+	abstract protected function set_entity_parms (); // must be included to set entity and entity type 
 
 	/*
-	* main definitions array
-	* see class-wic-fields for associative array keys in individual field definition arrays */
+	*
+	* constructor just initializes minimal blank structure and passes control to named requested
+	*
 	*/
-	public $field_definitions = array( 
-		array( // 1
-			'dedup'	=>	true,	
-			/*  . . . */
-		),		
-		/* . . . */
-	);
+	public function __construct ( $action_requested, $args ) {
+		$this->set_entity_parms();
+		$this->fields = WIC_Data_Dictionary::get_fields( $this->entity );
+		$this->data_array = $this->initialize_data_array();
+		$this->$action_requested( $args );
+		
+	}
 
-	protected $field_groups = array ( // for form display
-		array (
-			'name'		=> '', 
-			'label'		=>	'',  
-			'legend'		=>	'', // fine print below group header in form
-			'order'		=>	0, // numeric 
-			'initial-open'	=> true, // open state on first form display
-		),
-	);
+
+	/*
+	*
+	* initialize_data_array gets all entity field slugs with blank values (string or array according to field type)
+	*
+	*/
+	protected function initialize_data_array() {
+		foreach ( $this->fields as $field_slug => $field_type ) {
+			$class_name = 'WIC_' . $field_type . '_Control';
+			$this->data_array[$field_slug] = $class_name::get_initial_value();		
+		}		
+	}
+
+	/*
+	*
+	* get_values_from_submitted_form just copies values into working array
+	*
+	*/
+	protected function get_values_from_submitted_form() {
+		foreach ( $this->data_array as $field_slug=>$value ) {
+			$value = $_POST[$field_slug];		
+		} 	
+	}	
 	
-	/* will hold array of field objects after __construct */
-	protected $fields = array();
-
-	/* will hold exceptions from __construct */
-	protected $error_messages = '';
-	protected $missing_fields = '';
-	protected $search_notices = '';
-	protected $guidance					=  'Enter just a little information and do a full text search.'; // note 4a
-	protected $search_notices			=	'';					// note 4c
-	protected $next_action				=	'search';			// note 5
-	protected $strict_match				=	false;				// note 6
-	protected $initial_form_state		= 	'wic-form-open';  // note 7 
-	protected $initial_sections_open =   array();			// note 8
-
-
-	protected function __construct ( $action_requested ) {
-
-		/* sort fields for form presentation */
-		$this->field_definitions = multi_array_key_sort ( $this->field_definitions, 'order' );
-		$this->initialize_from_post();
-		$this->$action_requested;
-
+	
+	/*
+	*
+	* form_save-- maintained as separate function from save per se, so that class can later be used with other AJAX/JSON which may not submit full form
+	*
+	*/
+	protected function form_save ( $args ) {	
+		$this->get_values_from_submitted_form();
 	}
 
-	protected function initialize_from_post() {
-		/* for each defined field, instantiate a field object (sanitize and validate post input) */		
-		$group_required_test = '';
-		$group_required_label = '';		
-		foreach ( $this->field_definitions as $args ) {
-			$class_name = 'WIC_' .  $args['type'] . '_Field';
-			${$args['name']} = new $class_name ( $args );
-			$this->fields[] = ${$args['name']};  
-			$this->error_messages .= ${$args['name']}->validation_errors;	
-			if ( '' = ${$args['name']}->present && "individual" == ${$args['name']}->required )
-				$this->missing_fields .= ' ' . sprintf( __( ' %s is a required field. ' , 'wp-issues-crm' ), ${$args['name']}->label );
-			}
-			if  ( "group" == ${$args['name']}->required ) {
- 				$group_required .= ${$args['name']}->present;
- 				$group_required_label .= ( '' == $group_required_label ) ? '' : ', ';	
- 				$group_required_label .= ${$args['name']}->label;
-			}
-		if ( '' == $group_required_test && $group_required_label > '' ) {
-			$this->missing_fields .= sprintf ( __( ' At least one among %s is required. ', 'wp-issues-crm' ), $group_required_label );
-   	}
-	}
+
+
+
 
 /***************THE LOGIC FLOW TO REPLACE *********************
 				if ( 0 == $this->id_requested ) { 
@@ -155,19 +133,14 @@ abstract class WIC_Table {
 
 
 	/* the major actions that can be requested of the object -- search, save, update */
-	
-	protected function new () {
-		
-	
-	}	
-	
+
 	protected function search() {
 		initialize_from_post();
 		$wic_query = $wpdb->get_results( prepare_search_sql ('new') );
-		if ( 0 == $wpdb->num_rows; ) {
+		if ( 0 == $wpdb->num_rows ) {
 			$this->guidance	=	__( 'No matching record found. Try a save? ', 'wp-issues-crm' );
 			$this->next_action 	=	'save';
-		} elseif ( 1 == $wpdb->num_rows; ) {
+		} elseif ( 1 == $wpdb->num_rows ) {
 			// overwrite form with that unique record's  values
 			$this->populate_fields ( $wic_query );
 			$this->guidance	=	__( 'One matching record found. Try an update?', 'wp-issues-crm' );
@@ -188,7 +161,7 @@ abstract class WIC_Table {
 				$this->guidance	=	__( 'Please correct form errors: ', 'wp-issues-crm' );
 				$this->next_action 	=	'save';
 			} else {
-				$success = $wpdb->insert( $table, prepare_save_update_array() )
+				$success = $wpdb->insert( $table, prepare_save_update_array() );
 				if ( ! $success ) { 
 					$this->guidance	=	__( 'Please retry -- there were database errors: ', 'wp-issues-crm' );
 					$this->error_messages = __( 'Unknown database error in save/update.', 'wp-issues-crm' );
@@ -200,8 +173,7 @@ abstract class WIC_Table {
 						/* fix this	if ( trim( $next_form_output[ 'wic_post_content' ] )  > '' ) { // parallels update to database
 						$this->old_wic_post_content = $wic_form_utilities->format_wic_post_content( $this->wic_post_content ) . $this->old_wic_post_content;
 						$this->wic_post_content = ''; */
-					}
-				}					
+				}
 			}
 		} else {
 			$this->guidance = '';
@@ -228,7 +200,7 @@ abstract class WIC_Table {
 			if ( $this->error_messages > '' ) { 
 				$this->guidance	=	__( 'Please correct form errors: ', 'wp-issues-crm' );	
 			} else {
-				$success = $wpdb->insert( $table, prepare_save_update_array(), array ( 'ID' = $this->fields['ID']->value ) ); 
+				$success = '';//FIX LATER;$wpdb->insert( $table, prepare_save_update_array(), array ( 'ID' = $this->fields['ID']->value ) ); 
 				if ( ! $success )  { 
 					$this->guidance = __( 'Please retry -- there were database errors. ', 'wp-issues-crm' );
 					$this->error_messages = __( 'Unknown database error in save/update.', 'wp-issues-crm' );
@@ -237,14 +209,13 @@ abstract class WIC_Table {
 				/* fix this	if ( trim( $next_form_output[ 'wic_post_content' ] ) > '' ) { // update to database
 						$this->old_wic_post_content'] = $wic_form_utilities->format_wic_post_content( $this->wic_post_content'] ) . $this->old_wic_post_content'];
 						$this->wic_post_content'] = ''; */
-					}
 				}					
 			}
 		// error if form values match a record other than the original record	
 		} else { 
 			$this->guidance = '';						
 			$this->fields['ID']->value = 0; // reset so search does not bring back the original record
-			$this->search_notices	=	sprintf ( __( 'Record not updated -- other records match the new combination of %s. View matches below.', 'wp-issues-crm' ), $this->->create_dup_check_fields_list());
+			$this->search_notices	=	sprintf ( __( 'Record not updated -- other records match the new combination of %s. View matches below.', 'wp-issues-crm' ), $this->create_dup_check_fields_list());
 			$this->next_action 	=	'search';
 			$show_list = true;
 		}						
@@ -306,12 +277,6 @@ abstract class WIC_Table {
 	
 	}
 
-	public function prepare_html_form_search_controls () {
-		$controls = array()
-		foreach ( $this->fields as $field ) {
-			$controls[] = $field->search_control;
-		}
-		return ( $controls )
-	}
 
 }
+

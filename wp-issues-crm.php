@@ -29,7 +29,15 @@
 *  -- constituent definitions includes multi_array_key_sort function used in later definitions 
 *  -- later files use definitions . . .
 */
-include plugin_dir_path( __FILE__ ) . 'class-wic-table.php';
+// include plugin_dir_path( __FILE__ ) . 'class-wic-table.php';
+/* new files */
+include plugin_dir_path( __FILE__ ) . 'class-wic-data-dictionary.php';
+include plugin_dir_path( __FILE__ ) . 'class-wic-entity.php';
+include plugin_dir_path( __FILE__ ) . 'class-wic-form.php';
+include plugin_dir_path( __FILE__ ) . 'class-wic-control.php';
+include plugin_dir_path( __FILE__ ) . 'class-wic-constituent.php';
+include plugin_dir_path( __FILE__ ) . 'class-wic-constituent-search-form.php';
+/* old files
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-base-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituent-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-activity-definitions.php'; 
@@ -41,7 +49,7 @@ include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-database-utilities.ph
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-main-form.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-posts-list.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-import-routines.php';
-
+*/
 function wp_issue_crm_setup_styles() {
 
 	wp_register_style(
@@ -52,7 +60,7 @@ function wp_issue_crm_setup_styles() {
 
 }
 
-add_action( 'wp_enqueue_scripts', 'wp_issue_crm_setup_styles');
+ add_action( 'wp_enqueue_scripts', 'wp_issue_crm_setup_styles');
 
 function multi_array_key_sort ( $multi_array, $key )	{
 		$temp = array();
@@ -85,7 +93,13 @@ function wp_issue_crm_list_width_styles() {
 	$output .= '</style>';
 	echo $output;
 }
-add_action( 'wp_head', 'wp_issue_crm_list_width_styles' );
+// add_action( 'wp_head', 'wp_issue_crm_list_width_styles' );
+
+
+function initial_cap ( $string ) {
+	$string[0] = strtoupper ( $string[0] );
+	return ( $string ); 
+}
 
 
 function wic_utilities_script_setup() {
@@ -132,7 +146,7 @@ class WP_Issues_CRM {
 		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'Dashboard', 'wp-issues-crm' ) . '</button>';
 		
 		$control_array['form_requested'] = 'constituent';
-		$control_array['action_requested'] = 'new';
+		$control_array['action_requested'] = 'new_form';
 		$button_value = implode ( ',' , $control_array );		
 		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New Constituent Search', 'wp-issues-crm' ) . '</button>';
 	
@@ -149,7 +163,8 @@ class WP_Issues_CRM {
 			if ( '' == $control_array[0] ) {
 				$this->show_dashboard();		
 			} else {
-				$wic_main_form = new WP_Issues_CRM_Main_Form ( $control_array );		
+				$class_name = 'WIC_' . initial_cap ( $control_array[0] );
+				${ 'wic_'. $control_array[0]} = new $class_name ( $control_array[1], null ) ;		
 			}
 		} else {
 			$this->show_dashboard();
@@ -184,7 +199,7 @@ class WP_Issues_CRM {
 							'read_only_flag'		=>	false, 
 							'field_label_suffix'	=> '', 								
 						);
-			echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';		 		
+//			echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';		 		
  				
 			$args = array (
 							'field_name_id'		=> '9eUlFP34Ju',
@@ -193,7 +208,7 @@ class WP_Issues_CRM {
 							'read_only_flag'		=>	false, 
 							'field_label_suffix'	=> '', 								
 						);
-			echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';		
+//			echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';		
 
 	echo '<button class = "wic-form-button" type="submit" name = "wic_test_button" value = "test">Test button only</button>';
 
@@ -201,6 +216,8 @@ class WP_Issues_CRM {
 	}
 	
 	public function show_open_issues_for_user ( $user, $case_type ) {
+		echo 'need to rebuild open issues!';
+		/*
 		global $wic_issue_definitions;
 		global $wic_constituent_definitions;
 		global $wic_database_utilities;	
@@ -224,7 +241,7 @@ class WP_Issues_CRM {
 		} else {
 		
 			echo '<p>No open ' . ${'wic_' . $case_type . '_definitions'}->wic_post_type_labels['plural'] . ' assigned.</p>';	
-		}
+		}*/
 
 	}
 

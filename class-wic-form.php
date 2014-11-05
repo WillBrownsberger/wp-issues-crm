@@ -1,32 +1,28 @@
 <?php
 /*
 * class-wic-form.php
+* creates a generic form layout for wic entities coupled to field group list
+* entity classes may use different forms
 *
 */
 
 abstract class WIC_Form  {
 
+	abstract protected function get_the_entity();
 	abstract protected function get_the_buttons();
 	abstract protected function get_the_header();
-	abstract protected function get_the_notice_level();
-	abstract protected function get_the_notice();
-	abstract protected function get_the_groups();
-	abstract protected function get_the_controls();
-	abstract protected function get_the_legends()
 	
-	protected $working_groups = array();
-	protected $working_controls = array();
+	abstract protected function the_controls( $fields, &$data_array );
+	abstract protected function get_the_legends();
 	
-	public function __construct () {
-		$this->working_groups = get_the_groups();
-		$this->working_controls = get_the_controls();
-		$this->layout_form();	
-	}	
+	protected function get_the_groups () {
+		$groups = WIC_Data_Dictionary::get_form_field_groups( $this->get_the_entity() );
+		return ($groups );
+	}
+
+	public function layout_form ( $data_array, $message, $message_level ) {
 	
-	
-	public function layout_form () {
-	
-		emit_debugging_information();
+		$this->emit_debugging_information();
 
 		?><div id='wic-forms'>
 
@@ -34,62 +30,54 @@ abstract class WIC_Form  {
 
 			<div class = "wic-form-field-group wic-group-odd">
 			
-				<h2><?php echo esc_html( get_the_title() ) ?></h2> 
+				<h2><?php echo esc_html( $this->get_the_header() ) ?></h2> 
 				
-				<div id="post-form-message-box" class = "<?php echo get_the_notice_level(); ?>" ><?php echo esc_html( get_the_notice() ); ?></div>
+				<div id="post-form-message-box" class = "<?php echo $message_level; ?>" ><?php echo esc_html( $message ); ?></div>
 			   
-			   <?php $buttons = get_the_buttons(); 
+			   <?php $buttons = $this->get_the_buttons(); 
 			   		echo $buttons;	?>			   
 			</div>   
 		
 			<?php
 			
 			$group_count = 0;
-		   foreach ( $this->working_groups as $group ) {
+			$groups = $this->get_the_groups();
+		   foreach ( $groups as $group ) {
 						   	
-				$filtered_controls = $this->select_key ( $this->working_controls, 'group', $group['name'] );
 				$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
 				$group_count++;
 				
-				echo '<div class = "wic-form-field-group ' . $row_class . '" id = "wic-field-group-' . esc_attr( $group['name'] ) . '">';				
+				echo '<div class = "wic-form-field-group ' . $row_class . '" id = "wic-field-group-' . esc_attr( $group->group_slug  ) . '">';				
 				
 					$button_args = array (
-						'class'			=> 'field-group-show-hide-button',		
-						'name_base'		=> 'wic-inner-field-group-',
-						'name_variable' => $group['name'],
-						'label' 			=> $group['label'],
-						'show_initial' => $group['section_open'],
+						'class'			=> 	'field-group-show-hide-button',		
+						'name_base'		=> 	'wic-inner-field-group-',
+						'name_variable' => 	$group->group_slug ,
+						'label' 			=> 	$group->group_label ,
+						'show_initial' => 	$group->initial_open,
 					);
 			
 					echo $this->output_show_hide_toggle_button( $button_args );			
 				
-					$show_class = $group['section_open'] ? 'visible-template' : 'hidden-template';
-					echo '<div class="' . $show_class . '" id = "wic-inner-field-group-' . esc_attr( $group['name'] ) . '">' .					
-					'<p class = "wic-form-field-group-legend">' . esc_html ( $group['legend'] )  . '</p>';
+					$show_class = $group->initial_open ? 'visible-template' : 'hidden-template';
+					echo '<div class="' . $show_class . '" id = "wic-inner-field-group-' . esc_attr( $group->group_slug ) . '">' .					
+					'<p class = "wic-form-field-group-legend">' . esc_html ( $group->group_legend )  . '</p>';
 
-					foreach ( $filtered_controls as $control ) {	
-		   			echo $control['control']; 
-					}																				
+					$group_fields =  WIC_Data_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
+					var_dump ($group_fields);
+					echo '--------------';
+					$this->the_controls ( $group_fields, $data_array );
 						
 				echo '</div></div>';		   
 		   } // close foreach group
 		
-		
-			// notes div -- show only on update save -- do full text searching as a post field, since doesn't really pertain to notes only
-		} 
-						
 			// final button group div
 			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
 			echo '<div class = "wic-form-field-group ' . $row_class . '" id = "bottom-button-group">';?>
-				
-				<?php	echo $buttons; ?>  // output second instance of buttons		 		
-		
+				<?php	echo $buttons; // output second instance of buttons ?>  		 		
 		 		<?php wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); ?>
-			   
-				<?php echo get_the_legends ?>
-				
+				<?php echo $this->get_the_legends(); ?>
 			</div>								
-
 		</form>
 		</div>
 		
@@ -97,32 +85,14 @@ abstract class WIC_Form  {
 		
 	}
 
-
-	/*
-	*	filter array of arrays by one value of the arrays
-	*
-	*/		
-	public function select_key ( $line_item_array, $key, $value )	{
-		$filtered_line_items = array();
-		foreach ( $line_item_array as $line_item ) {
-			if ( $line_item[$key] == $value ) {
-				array_push( $filtered_line_items, $line_item );
-			}			
-		}
-		return ( $filtered_line_items ) ;
-	}
-		
-	private function emit_debugging_information() {
+	protected function emit_debugging_information() {
 		echo '<span style="color:green;"> <br /> $_POST:';  		
   		var_dump ($_POST);
   		echo '</span>';  
 
-		 echo '<span style="color:red;"> <br />next_form_output:';  		
-  		var_dump ($next_form_output);
-  		echo '</span>';   
 	}	
 
-			/*
+	/*
 	*
 	*	output show-hide-button
 	*  calls togglePostFormSection in wic-utilities.js
@@ -151,5 +121,27 @@ abstract class WIC_Form  {
 
 		return ($button);
 	}
+
+	public function create_wic_form_button ( $control_array_plus_class ) { 
+	
+		$form_requested			= '';
+		$action_requested			= '';
+		$id_requested				= 0 ;
+		$referring_parent			= 0 ;
+		$new_form 					= 'n'; // go straight to a save
+		$button_class				= 'wic-form-button';
+		$button_label				= '';
+		$omit_label_and_close_tag = false;
+
+		extract ( $control_array_plus_class, EXTR_OVERWRITE );
+
+		$button_value = $form_requested . ',' . $action_requested  . ',' . $id_requested  . ',' . $referring_parent . ',' . $new_form;
+		$close = $omit_label_and_close_tag ? '' : __( $button_label, 'wp-issues-crm' ) . '</button>';
+
+		$button =  '<button class = "' . $button_class . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . $close;
+
+		return ( $button );
+	}
+
 
 }
