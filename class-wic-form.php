@@ -11,8 +11,7 @@ abstract class WIC_Form  {
 	abstract protected function get_the_entity();
 	abstract protected function get_the_buttons();
 	abstract protected function get_the_header();
-	
-	abstract protected function the_controls( $fields, &$data_array );
+	abstract protected function get_the_control( $control_args );
 	abstract protected function get_the_legends();
 	
 	protected function get_the_groups () {
@@ -20,7 +19,7 @@ abstract class WIC_Form  {
 		return ($groups );
 	}
 
-	public function layout_form ( $data_array, $message, $message_level ) {
+	public function layout_form ( &$data_array, $message, $message_level ) {
 	
 		$this->emit_debugging_information();
 
@@ -64,8 +63,6 @@ abstract class WIC_Form  {
 					'<p class = "wic-form-field-group-legend">' . esc_html ( $group->group_legend )  . '</p>';
 
 					$group_fields =  WIC_Data_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
-					var_dump ($group_fields);
-					echo '--------------';
 					$this->the_controls ( $group_fields, $data_array );
 						
 				echo '</div></div>';		   
@@ -84,6 +81,26 @@ abstract class WIC_Form  {
 		<?php 
 		
 	}
+
+	protected function the_controls ( $fields, &$data_array ) {
+		foreach ( $fields as $field ) {
+			$control_args = array( // for simplicity pass all display relevant data dictionary properties 
+				'field_label' 				=> $field->field_label,
+				'field_slug' 				=> $field->field_slug,
+				'field_type'				=> $field->field_type,
+				'hidden'						=> $field->hidden,
+				'like_search_enabled'	=> $field->like_search_enabled,
+				'readonly' 					=> $field->readonly,
+				'required'					=> $field->required,
+				'value' 						=> $data_array[$field->field_slug],
+			);
+			echo '<p>' . $this->get_the_control ( $control_args ) . '</p>';
+		}	
+
+	}
+
+
+
 
 	protected function emit_debugging_information() {
 		echo '<span style="color:green;"> <br /> $_POST:';  		
@@ -124,7 +141,7 @@ abstract class WIC_Form  {
 
 	public function create_wic_form_button ( $control_array_plus_class ) { 
 	
-		$form_requested			= '';
+		$entity_requested			= '';
 		$action_requested			= '';
 		$id_requested				= 0 ;
 		$referring_parent			= 0 ;
@@ -135,11 +152,10 @@ abstract class WIC_Form  {
 
 		extract ( $control_array_plus_class, EXTR_OVERWRITE );
 
-		$button_value = $form_requested . ',' . $action_requested  . ',' . $id_requested  . ',' . $referring_parent . ',' . $new_form;
+		$button_value = $entity_requested . ',' . $action_requested  . ',' . $id_requested  . ',' . $referring_parent . ',' . $new_form;
 		$close = $omit_label_and_close_tag ? '' : __( $button_label, 'wp-issues-crm' ) . '</button>';
 
 		$button =  '<button class = "' . $button_class . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . $close;
-
 		return ( $button );
 	}
 

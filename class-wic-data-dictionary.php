@@ -18,7 +18,7 @@ class WIC_Data_Dictionary {
 				"				
 				, array ( $entity )
 				)
-			, OBJECT_K );
+			, OBJECT );
 			
 		return ( $fields );
 	}
@@ -68,7 +68,7 @@ class WIC_Data_Dictionary {
 		$groups = $wpdb->get_results( 
 			$wpdb->prepare (
 				"
-				SELECT field_slug, field_type, field_label, like_search_enabled, required
+				SELECT field_label, field_slug, field_type, hidden, like_search_enabled, readonly, required
 				FROM $table 
 				WHERE entity_slug = %s and group_slug = %s
 				ORDER BY field_order
@@ -85,19 +85,18 @@ class WIC_Data_Dictionary {
 		$table1 = $wpdb->prefix . 'wic_data_dictionary';
 		$table2 = $wpdb->prefix . 'wic_form_field_groups';
 		$elements = $wpdb->get_results( 
-			$wpdb->prepare (
+		$wpdb->prepare (
 				"
-				SELECT max ( like_search_enabled ) as like, 
-					max ( if ( required = 'group', 1, 0 ) as required_group , 
-					max( if ( required = 'individual', 1, 0 ) as required_individual
+				SELECT max( like_search_enabled ) as like_search_enabled,
+					max( if ( required = 'group', 1, 0 ) ) as required_group , 
+					max( if ( required = 'individual', 1, 0 ) ) as required_individual
 				FROM $table1 t1 inner join $table2 t2 on t1.entity_slug = t2.entity_slug and t1.group_slug = t2.group_slug
-				WHERE entity_slug = %s and field_group = %s
+				WHERE t1.entity_slug = %s 
 				ORDER BY field_order
 				"				
 				, array ( $entity )
 				)
-			, 'OBJECT_A' );
-			
+			, OBJECT_K );
 		return ( $elements );
 	}
 

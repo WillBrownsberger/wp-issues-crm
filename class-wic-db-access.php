@@ -1,75 +1,108 @@
 <?php
 /*
 *
-* class-db-access.php
+* class-wic-db-access.php
 *		intended as wraparound for wpdb 
 *
 * supports multiple formats for data access to be further implemented in subclasses
 *		WIC_Dedicated_Table_Access
-*		WIC_WP_Post_Acccess
+*		WIC_WP_Post_Access
+*
+* note, that as for wpdb and other wordpress object, this object includes all necessary pre-database sanitization and validation
 *
 * 
 */
 
 interface WIC_DB_Template {
 
-	public function save ( $entity, $data_array );
+	public function save ( $entity, $data_array ); 
 	public function update ( $entity, $data_array );
 	public function search ( $entity, $data_array );
 	public function id_search ( $entity, $data_array );
 	
-	/* all functions should return as follows:
-		$outcome  save/update/search # records found or acted on  or false if error
-		$explanation  reason for outcome 
-		$entity_object_array -- as saved, update or found( possibly multiple )
+	/* $entity is a string; $data_array is as $field_slug => $value 	
+	
+	  all functions should return as follows:
+			$outcome  -- integer save/update/search # records found or acted on  or false if error
+			$explanation  reason for outcome 
+			$entity_object_array -- as saved, update or found( possibly multiple )
 	*/
 
 }
 
-abstract class WIC_DB_Access impements WIC_DB_Template {
+class WIC_DB_Access_Factory {
 
-	protected $entity_rules
+	static private $entity_model_array = array (
+		'constituent' => 'WIC_WIC_DB_Access',	
+		'activity' => 'WIC_WIC_DB_Access',
+		'issue' => 'WIC_WP_DB_Access',
+	);
+
+	public static function make_a_db_access_ojbect ( $entity ) {
+		$right_db_class = self::$entity_model_array[$entity];
+		$new_db_access_object = new $right_db_class ( $entity );
+		return ( $new_db_access_object );	
+	}
+	
+	
+}
+
+
+
+abstract class WIC_DB_Access implements WIC_DB_Template {
+
+	protected $entity_rules;
 		
-	protected function __construct {
-		$this->entity_rules = $this->get_rules_for_entity();
+	public function __construct ( $entity ) { 
+		$this->entity_rules = WIC_Data_Dictionary::get_rules_for_entity( $entity );
+		// var_dump($this->entity_rules);
 	}		
 
-	public function save ( $entity, $data_array) 
+	public function search ( $entity, $data_array) {
 		$this->sanitize_values( $data_array );
-		$errors = $this->validate_values( $data_array )
-		$errors .= $this->do_required_checks( $data_array );
-		if ( '' == $errors ) {
-			$result = $this->db_save($data_array);
-		}
-		return $result
+		$result = $this->db_search( $entity, $data_array );
 	}
 
-	public function search ( $entity, $data_array) 
+	public function id_search ( $entity, $data_array) {
+		$this->sanitize_values( $data_array );
+
+		$result = $this->db_search( $data_array );
+	}
+
+	public function update ( $entity, $data_array) {
 		$this->sanitize_values( $data_array );
 		$result = $this->db_search( $data_array );
 	}
 
+	public function save ( $entity, $data_array) {
+		$this->sanitize_values( $data_array );
+		$errors = $this->validate_values( $data_array );
+		$errors .= $this->do_required_checks( $data_array );
+		if ( '' == $errors ) {
+			$result = $this->db_save($data_array);
+		}
+		return $result;
+	}
 
-
-
-	protected function sanitize_values {
+	protected function sanitize_values( $data_array ) {
+		/* var_dump ($data_array);*/
 		foreach ( $data_array as $field => $value ) {
-			if ( is_array ( $value ) ) {
-				foreach ( $value ) {
-					$value = $this->$this->entity_rules->field_slug->sanitize_callback() ( $value ) )
-				}
-			} else {
-				$value = $this->$this->entity_rules->field_slug->sanitize_callback() ( $value );
-			}
+		   $sanitizor = $this->entity_rules[$field]->sanitize_call_back;
+		   $sanitizor = $sanitizor > '' ? $sanitizor : 'generic_sanitizor';
+			$value = $this->$sanitizor( $value );
 		}
 	}
 
-	protected function validate_values{
+	protected function generic_sanitizor ( $value ) {
+		return sanitize_text_field ( stripslashes ( $value ) );	
+	}
+
+	protected function validate_values() {
 	
 	
 	}
 	
-	protected function check required values () { // REWRITE!!!
+	protected function check_required_values () { // REWRITE!!!
 		/* for each defined field, instantiate a field object (sanitize and validate post input) */		
 		$group_required_test = '';
 		$group_required_label = '';		
@@ -78,7 +111,7 @@ abstract class WIC_DB_Access impements WIC_DB_Template {
 			${$args['name']} = new $class_name ( $args );
 			$this->fields[] = ${$args['name']};  
 			$this->error_messages .= ${$args['name']}->validation_errors;	
-			if ( '' = ${$args['name']}->present && "individual" == ${$args['name']}->required )
+			if ( '' == ${$args['name']}->present && "individual" == ${$args['name']}->required )
 				$this->missing_fields .= ' ' . sprintf( __( ' %s is a required field. ' , 'wp-issues-crm' ), ${$args['name']}->label );
 			}
 			if  ( "group" == ${$args['name']}->required ) {
@@ -91,34 +124,69 @@ abstract class WIC_DB_Access impements WIC_DB_Template {
    	}
 	}
 
-	abstract function db_save {
+	abstract protected function db_save ( $entity, $data_array );
 	
-	}
-	
-	abstract function db_search
+	abstract protected function db_search ( $entity, $data_array );
 	
 }
 
 
 class WIC_WIC_DB_Access Extends WIC_DB_Access {
-	private function db_save() {
+
+	protected function db_save ( $entity, $data_array ) {
+
 	}
-	private function db_search() {
-	}
+
+	protected function db_search( $entity, $data_array ) {
+	
+	
+	}	
+		
+	protected function prepare_search_sql( $mode ) {
+	
+		$join = '';
+		$where = '';
+		$values = array();
+		
+		foreach ( $this->fields as $field ) {
+			$search_clauses = $field->search_clauses();
+			$join .= $search_clauses['join'];
+			$where .= $search_clauses['where'];
+			// each field will return an array of several values that need to be strung into main values array
+			foreach ( $search_clauses['values'] as $value ) { 
+				$values[] = $value;			
+			}
+		}
+		
+		$sql = $wpdb->prepare( "
+					SELECT 	* 
+					FROM 		$table
+					$join
+					WHERE 1=1 $where
+					ORDER BY $this->sort_order['orderby'] $this->sort_order['order']
+					LIMIT 0, $this->max_records
+					",
+				$values );	
+			
+		return ( $sql );
+	}	
 
 }
-
-$wic_wic_db_access = new WIC_WIC_DB_Access;
 
 class WIC_WP_DB_Access Extends WIC_DB_Access {
-	private function db_save() {
-	}
-	private function db_search() {
-	}
 
+	protected function db_save( $entity, $data_array ) {
+		
+	}
+	
+	protected function db_search( $entity, $data_array ) {
+
+	}
+	
 }
 
-$wic_wp_db_access = new WIC_WIC_DB_Access;
+
+/*
 
 
 
@@ -129,11 +197,7 @@ $wic_wp_db_access = new WIC_WIC_DB_Access;
 
 
 
-
-
-
-
-		/* defaults if not supplied */
+		/* defaults if not supplied 
 		$wic_post_type = 'constituent';
 		$posts_per_page = 100;		
 		
@@ -227,4 +291,4 @@ $wic_wp_db_access = new WIC_WIC_DB_Access;
 	
 		return ( $where );	
 	} 
-}
+}*/

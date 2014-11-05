@@ -23,155 +23,68 @@
 abstract class WIC_Control {
 		
 	// parameters for text control creation -- the text control is used by multiple extensions of the class
-	private $control_default_args = array (
-		// first six normally equal field settings in data dictionary, but may vary by save/update/search context
-		'field_name_id' 		=> '',
-		'field_label' 			=> '', 
-		'read_only_flag' 		=> false,
-		'like_search_enabled' => false,
-		'required'				=> '',
-		'value' 					=> '',
-		// these are not derived directly from field settings  -- either they default or are specified by context
-		'input_class' 			=> 'wic-input',
-		'placeholder' 			=> '',
-		'label_class' 			=> 'wic-label',
-		'field_label_suffix' => '',
+	public static $default_control_args = array (
+		// parallel field settings in data dictionary; field settings must be passed explicitly to the control to override them
+		'field_slug' 				=> '',
+		'field_label' 				=> '', 
+		'like_search_enabled' 	=> false,
+		'readonly' 					=> false,
+		'required'					=> '',
+		'hidden'						=> false,
+		// not derived directly from field settings
+		'field_label_suffix' 	=> '',
+		'input_class' 				=> 'wic-input',
+		'label_class' 				=> 'wic-label',
+		'placeholder' 				=> '',
 	);
 
 	public static function get_initial_value () {
 		return ( '' ); 
 	}
-
-	// sanitizes, validates, all basic properties
-/*	protected function __construct( $args )	{
-
-
-
-		
-		// die if name not among properties
-		if ( '' == $this-> name ) { // note that need not check for type, since will die on class not found
-			die ("Field configuration error -- name omitted in field definitions for a field in the requested record type." );		
-		}
-		
-		// initialize field value 
-		$this->value = isset ( $_POST[$args['name'] ) ? $_POST[$args['name'] : '' ;
-			
-		// sanitize if non-blank
-		if ( $this->value > '' ) { 
-			$this->value = $this->sanitize( $this->value );
-		}
-
-		// validate if still non-blank
 	
-		if ( $this->value > '' ) { 
-			$this->validate();
-		}
-		// format for screen output if still non-blank {
-		if ( $this->value > '' ) { 
-			$this->formatted_value = $this->format( $this->value );
-		}
-
-		// args may be overridden, but good starting point for most instances 		
-		$this->grab_control_args_from_class_properties();	
-		
-	}
-*/
-	public function get_value () {
-		return ( $this-value );	
-	}
-	
-	public function set_value( $arg ) {
-		$this->value = $arg;
-		$this->formatted_value = $this->format( $this->value );	
-	}
-
-	// basic sanitization, stripslashes because of magic quotes; sanitize_text_field also applied -- "Checks for invalid UTF-8,
-	// Convert single < characters to entity, strip all tags, remove line breaks, tabs and extra white space, strip octets."
-	protected function sanitize ( $dirty ) {
-		$clean =  stripslashes( sanitize_text_field ( $dirty ) ) ;
-		return( $clean );
-	}	
-
-	// validation template -- may be empty for field type, extended class not required to implement
-	protected function validate() {
-	}
-
-	// validation template -- may be empty for field type, extended class not required to implement
-	protected function format() {
-		$return( $this->value );
-	}
-
-	// in extended classes, the following two database access functions will vary
-
-	protected function search_clauses () {
-		
-		$search_clauses = array(
-			'where' 		=> '',
-			'join' 		=> '',
-			'values' 	=> array(),
-		);
-		
-		if ( '' < $this->value ) {
-			$search_clauses['where']  			=  " AND $name = %s ";
-			$this->search_values['values'][]	= $this->value;
-		}
-
-		return ( $search_clauses );
-
-	}
-
-	protected function data_array () {
-		$data_array = array();
-		$data_array[$this->name] = $this->value;		
-		return ( $data_array );
-	}
-
-	public function new_control () {
+	public static function new_control () {
 		$this->control_args['value'] = '';
 		$this->search_control();
 	}
 
-	public function search_control ( $control_args ) {
-		$final_control_args = array_merge( $this->default_control_args, $control_args );
-		$final_control_args['read_only_flag'] = false;
-		$final_control_args['field_label_suffix'] = ( $final_control_args->like_search_enabled ) ? '*' : '';
-		$control = '<p>'. self::create_control( $this->control_args ) . '</p>';
+	public static function search_control ( $control_args ) {
+		$final_control_args = array_merge( self::$default_control_args, $control_args );
+		$final_control_args['readonly'] = false;
+		$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
+		// note, the use of static keyword here causes the create_control call to point to the child class create_control method 
+		// when the child class search_control method is called statically 
+		// http://php.net/manual/en/language.oop5.late-static-bindings.php
+		$control = '<p>'. static::create_control( $final_control_args ) . '</p>';
 		return ( $control ) ;
 	}
 	
-	public function save_control () {
+	public static function save_control () {
 		if( ! $this->readonly ) {
 			return  ( '<p>'. $this->create_control( $this->control_args ) . '</p>' );	
 		}
 	}
 	
-	public function update_control () {
+	public static function update_control () {
 		return ( '<p>'. $this->create_control( $this->control_args ) . '</p>' );	
 	}
 
-	protected function create_control ( $control_args ) { // basic create text control
+	protected static function create_control ( $control_args ) { // basic create text control
 		
 		extract ( $control_args, EXTR_SKIP ); 
-	
-		$readonly = $read_only_flag ? 'readonly' : '';
+		$readonly = $readonly ? 'readonly' : '';
+		$type = ( 1 == $hidden ) ? 'hidden' : 'text';
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 		 
-		$control = ( $field_label > '' && ! $hidden_flag ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
-		$control .= '<input class="' . $input_class . '" id="' . esc_attr( $field_name_id )  . 
-			'" name="' . esc_attr( $field_name_id ) . '" type="' . $type . '" placeholder = "' .
+		$control = ( $field_label > '' && ! ( 1 == $hidden ) ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
+		$control .= '<input class="' . $input_class . '" id="' . esc_attr( $field_slug )  . 
+			'" name="' . esc_attr( $field_slug ) . '" type="' . $type . '" placeholder = "' .
 			 esc_attr( $placeholder ) . '" value="' . esc_attr ( $value ) . '" ' . $readonly  . '/>' . $field_label_suffix_span; 
 			
 		return ( $control );
 
 	}
 	
-	// these may be overriden in context, but are usual correct, so do this always as a starting point
-	public function grab_control_args_from_field_settings () {
-		$this->control_args['field_name_id']	= $this->name;
-		$this->control_args['field_label'] 		= $this->label; 
-		$this->control_args['read_only_flag'] 	= $this->readonly;
-		$this->control_args['value'] 				= $this->formatted_value;
-	}
+
 
 	public function set_required_values_legend () {
 		$required_individual = ( 'individual' == $this->required ) ? '*' : '';
@@ -189,18 +102,18 @@ abstract class WIC_Control {
 ************************************************************************************/
 class WIC_Checked_Control extends WIC_Control {
 	
-	public function create_control ( $control_args ) {
+	public static function create_control ( $control_args ) {
 		
 		$input_class = 'wic_input_checked';
 
 		extract ( $control_args, EXTR_SKIP ); 
 	
-		$readonly = $read_only_flag ? 'readonly' : '';
+		$readonly = $readonly ? 'readonly' : '';
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 		 
 		$control = ( $field_label > '' ) ?  '<label class="' . $label_class . '" for="' . 
-				esc_attr( $field_name_id ) . '">' . esc_html( $field_label ) . ' ' . '</label>' : '';
-		$control .= '<input class="' . $input_class . '"  id="' . esc_attr( $field_name_id ) . '" name="' . esc_attr( $field_name_id ) . 
+				esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . ' ' . '</label>' : '';
+		$control .= '<input class="' . $input_class . '"  id="' . esc_attr( $field_slug ) . '" name="' . esc_attr( $field_slug ) . 
 			'" type="checkbox"  value="1"' . checked( $value, 1, false) . $readonly  .'/>' . 
 			$field_label_suffix_span  ;	
 
@@ -297,7 +210,7 @@ class WIC_Range_Control extends WIC_Control {
 
 	}
 	
-	public function search_control ( $control_args ) {
+	public static function search_control ( $control_args ) {
 		return ( '<p>' . $this->create_date_range_control ( $this->date_array[1][1], $this->date_array[2][1] ) . '</p>' );	
 	}
 
@@ -306,14 +219,14 @@ class WIC_Range_Control extends WIC_Control {
 		$date_range_control = '';
 
 		$args = array (
-			'field_name_id'		=> $this->name . '_lo',
+			'field_slug'		=> $this->name . '_lo',
 			'field_label'			=>	$this->label . ' >= ' ,
 			'value'					=> $low_date
 		);
 		$date_range_control .=  parent::create_control ( $args ); 
 	
 		$args = array (
-			'field_name_id'		=> $this->name . '_hi',
+			'field_slug'		=> $this->name . '_hi',
 			'field_label'			=>	__( 'and <=', 'wp_issues_crm' ),
 			'label_class'			=> 'wic-label-2',
 			'value'					=> $high_date
@@ -413,7 +326,7 @@ class WIC_Post_Content_Control extends WIC_Text_Control {
 	}
 
 	public function search_control () {
-		$this->control_args['read_only_flag'] = false;
+		$this->control_args['readonly'] = false;
 		$this->control_args['field_label_suffix'] = ( $this->contains ) ? '*' : '';
 		echo  = '<p>' . parent::create_control( $this->control_args ) . '<p>';
 	}
@@ -437,8 +350,8 @@ class WIC_Post_Content_Control extends WIC_Text_Control {
 			control .= '<p>' . WIC_Textarea_Control::create_control ( $control_args ) . '</p>';
 		}		
 		
-		$control_args['field_name_id'] = 'old_' . $args['name'];
-		$control_args['read_only_flag']	= true;
+		$control_args['field_slug'] = 'old_' . $args['name'];
+		$control_args['readonly']	= true;
 		$control_args['input_class'] = 'hidden-template';
 		$control_args['label_class'] = 'hidden-template';
 		$control_args['value']	= $this->old_value;
@@ -550,9 +463,9 @@ class WIC_Select_Control extends WIC_Text_Control {
 		$option_array =  $select_array;
 		array_push( $option_array, $not_selected_option );
 		
-		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . 
+		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . 
 				esc_html( $field_label ) . '</label>' : '';
-		$control .= '<select class="' . $field_input_class . '" id="' . esc_attr( $field_name_id ) . '" name="' . esc_attr( $field_name_id ) 
+		$control .= '<select class="' . $field_input_class . '" id="' . esc_attr( $field_slug ) . '" name="' . esc_attr( $field_slug ) 
 				. '" >' ;
 		$p = '';
 		$r = '';
@@ -587,15 +500,15 @@ class WIC_Text_Control extends WIC_Control {
 *******************************************************************************/
 Class WIC_Textarea_Control extends WIC_Control {
 
-	public function create_control ( $control_args ) {
+	public static function create_control ( $control_args ) {
 		
 		extract ( $control_args, EXTR_SKIP ); 
 	
-		$readonly = $read_only_flag ? 'readonly' : '';
+		$readonly = $readonly ? 'readonly' : '';
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 		 
-		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . esc_attr( $field_label ) . '</label>' : '' ;
-		$control .= '<textarea class="' . $input_class . '" id="' . esc_attr( $field_name_id ) . '" name="' . esc_attr( $field_name_id ) . '" type="text" placeholder = "' . 
+		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . esc_attr( $field_label ) . '</label>' : '' ;
+		$control .= '<textarea class="' . $input_class . '" id="' . esc_attr( $field_slug ) . '" name="' . esc_attr( $field_slug ) . '" type="text" placeholder = "' . 
 			esc_attr( $placeholder ) . '" ' . $readonly  . '/>' . esc_textarea( $value ) . '</textarea>' . $field_label_suffix_span;
 			
 		return ( $control );
@@ -658,7 +571,7 @@ class WIC_TextCSV_Control extends WIC_Control {
 	public function create_multi_select_control ( $control_args ) {
 		
 		/* $control_args = array (
-			'field_name_id' => name/id
+			'field_slug' => name/id
 			'field_label'	=>	label for field
 			'placeholder' => label that will appear in drop down for empty string
 			'value'		=> initial value 
@@ -679,19 +592,19 @@ class WIC_TextCSV_Control extends WIC_Control {
 		
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 
-		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_name_id ) . '">' . esc_attr( $field_label ) . '</label>' : '' ;
+		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . esc_attr( $field_label ) . '</label>' : '' ;
 
 		$control .= '<div class = "wic_multi_select">';
 				
 		foreach ( $select_array as $option ) {
 
 			$args = array(
-				'field_name_id' 		=> $field_name_id . '[' . $option['value'] . ']',
+				'field_slug' 		=> $field_slug . '[' . $option['value'] . ']',
 				'field_label'			=>	$option['label'],
 				'label_class'			=> 'wic-multi-select-label '  . $option ['class'],
 				'input_class'			=> 'wic-multi-select-checkbox ', 
 				'value'					=> in_array ( $option['value'], $value, false ),
-				'read_only_flag'		=>	false,
+				'readonly'		=>	false,
 				'field_label_suffix'	=> '',						
 			);	
 			$control .= '<p class = "wic_multi_select_item" >' . $this->create_check_control($args) . '</p>';
@@ -807,7 +720,7 @@ class WP_Issues_CRM_Form_Utilities {
 		$row = '<p class = "hidden-template" id = "' . $repeater_group_id . '-row-template' . '">'; // template opening line	
 	
 		$phone_type_array = array ( 
-				'field_name_id' 	=> $repeater_group_id . '[row-template][0]',
+				'field_slug' 	=> $repeater_group_id . '[row-template][0]',
 				'field_label'		=>	'',
 				'placeholder' => __( 'Phone type?', 'wp-issues-crm' ),
 				'select_array'		=>	$wic_constituent_definitions->phone_type_options,
@@ -818,7 +731,7 @@ class WP_Issues_CRM_Form_Utilities {
 		$row .= $this->create_select_control ( $phone_type_array );
 
 		$phone_number_array = array ( 
-			'field_name_id' 	=> $repeater_group_id . '[row-template][1]',
+			'field_slug' 	=> $repeater_group_id . '[row-template][1]',
 			'field_label'			=>	'',
  			'value'					=> '', 
  			'placeholder'			=> __( 'Phone number?', 'wic-issues-crm' ),
@@ -829,7 +742,7 @@ class WP_Issues_CRM_Form_Utilities {
 		$row .= $this->create_text_control( $phone_number_array );
 
 		$phone_extension_array = array ( 
-			'field_name_id' 	=> $repeater_group_id . '[row-template][2]',
+			'field_slug' 	=> $repeater_group_id . '[row-template][2]',
 			'field_label'			=>	'',
  			'value'					=> '',
 			'placeholder'			=> __( 'Extension?', 'wic-issues-crm' ),
@@ -858,17 +771,17 @@ class WP_Issues_CRM_Form_Utilities {
 				
 				$row = '<p class = "phone-number-row" id = "' . $repeater_group_id . '-' . $i . '">';
 							
-				$phone_type_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][0]';
+				$phone_type_array['field_slug'] 	= $repeater_group_id . '[' . $i  . '][0]';
 				$phone_type_array['value']			= $repeater_group_data_array[$i][0];
 				$row .= $this->create_select_control ( $phone_type_array );
 	
 			
-				$phone_number_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][1]';
+				$phone_number_array['field_slug'] 	= $repeater_group_id . '[' . $i  . '][1]';
 	 			$phone_number_array['value']				= $this->format_phone ( $repeater_group_data_array[$i][1] );
 				$row .= $this->create_text_control( $phone_number_array );
 	
 
-				$phone_extension_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][2]';
+				$phone_extension_array['field_slug'] 	= $repeater_group_id . '[' . $i  . '][2]';
 	 			$phone_extension_array['value']				= $repeater_group_data_array[$i][2];
 				$row .= $this->create_text_control( $phone_extension_array );
 				
@@ -940,7 +853,7 @@ class WP_Issues_CRM_Form_Utilities {
 		$row = '<p class = "hidden-template" id = "' . $repeater_group_id . '-row-template' . '">'; // template opening line	
 	
 		$email_type_array = array ( 
-				'field_name_id' 	=> $repeater_group_id . '[row-template][0]',
+				'field_slug' 	=> $repeater_group_id . '[row-template][0]',
 				'field_label'		=>	'',
 				'placeholder' => __( 'eMail type?', 'wp-issues-crm' ),
 				'select_array'		=>	$wic_constituent_definitions->email_type_options,
@@ -951,7 +864,7 @@ class WP_Issues_CRM_Form_Utilities {
 		$row .= $this->create_select_control ( $email_type_array );
 
 		$email_address_array = array ( 
-			'field_name_id' 	=> $repeater_group_id . '[row-template][1]',
+			'field_slug' 	=> $repeater_group_id . '[row-template][1]',
 			'field_label'			=>	'',
  			'value'					=> '', 
  			'placeholder'			=> __( 'eMail address?', 'wic-issues-crm' ),
@@ -980,12 +893,12 @@ class WP_Issues_CRM_Form_Utilities {
 				
 				$row = '<p class = "email-address-row" id = "' . $repeater_group_id . '-' . $i . '">';
 							
-				$email_type_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][0]';
+				$email_type_array['field_slug'] 	= $repeater_group_id . '[' . $i  . '][0]';
 				$email_type_array['value']			= $repeater_group_data_array[$i][0];
 				$row .= $this->create_select_control ( $email_type_array );
 	
 			
-				$email_address_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][1]';
+				$email_address_array['field_slug'] 	= $repeater_group_id . '[' . $i  . '][1]';
 	 			$email_address_array['value']				= $repeater_group_data_array[$i][1];
 				$row .= $this->create_text_control( $email_address_array );
 				
@@ -1060,7 +973,7 @@ class WP_Issues_CRM_Form_Utilities {
 		$row = '<p class = "hidden-template" id = "' . $repeater_group_id . '-row-template' . '">'; // template opening line	
 	
 		$address_type_array = array ( 
-				'field_name_id' 	=> $repeater_group_id . '[row-template][0]',
+				'field_slug' 	=> $repeater_group_id . '[row-template][0]',
 				'field_label'		=>	'',
 				'placeholder' => __( 'Address type?', 'wp-issues-crm' ),
 				'select_array'		=>	$wic_constituent_definitions->address_type_options,
@@ -1071,7 +984,7 @@ class WP_Issues_CRM_Form_Utilities {
 		$row .= $this->create_select_control ( $address_type_array );
 
 		$address_street_array = array ( 
-			'field_name_id' 	=> $repeater_group_id . '[row-template][1]',
+			'field_slug' 	=> $repeater_group_id . '[row-template][1]',
 			'field_label'			=>	'',
  			'value'					=> '', 
  			'placeholder'			=> __( 'Street Address?', 'wic-issues-crm' ),
@@ -1082,7 +995,7 @@ class WP_Issues_CRM_Form_Utilities {
 		$row .= $this->create_text_control( $address_street_array );
 
 		$address_zip_array = array ( 
-			'field_name_id' 	=> $repeater_group_id . '[row-template][2]',
+			'field_slug' 	=> $repeater_group_id . '[row-template][2]',
 			'field_label'			=>	'',
 			'placeholder' => __( 'City/Zip?', 'wp-issues-crm' ),
 			'select_array'		=>	$wic_constituent_definitions->address_zip_options,
@@ -1112,17 +1025,17 @@ class WP_Issues_CRM_Form_Utilities {
 								
 				$row = '<p class = "address-number-row" id = "' . $repeater_group_id . '-' . $i . '">';
 							
-				$address_type_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][0]';
+				$address_type_array['field_slug'] 	= $repeater_group_id . '[' . $i  . '][0]';
 				$address_type_array['value']			= $repeater_group_data_array[$i][0];
 				$row .= $this->create_select_control ( $address_type_array );
 	
 			
-				$address_street_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][1]';
+				$address_street_array['field_slug'] 	= $repeater_group_id . '[' . $i  . '][1]';
 	 			$address_street_array['value']				= $repeater_group_data_array[$i][1];
 				$row .= $this->create_text_control( $address_street_array );
 	
 
-				$address_zip_array['field_name_id'] 	= $repeater_group_id . '[' . $i  . '][2]';
+				$address_zip_array['field_slug'] 	= $repeater_group_id . '[' . $i  . '][2]';
 	 			$address_zip_array['value']				= $repeater_group_data_array[$i][2];
 				$row .= $this->create_select_control( $address_zip_array );
 				

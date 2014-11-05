@@ -32,6 +32,7 @@
 // include plugin_dir_path( __FILE__ ) . 'class-wic-table.php';
 /* new files */
 include plugin_dir_path( __FILE__ ) . 'class-wic-data-dictionary.php';
+include plugin_dir_path( __FILE__ ) . 'class-wic-db-access.php';
 include plugin_dir_path( __FILE__ ) . 'class-wic-entity.php';
 include plugin_dir_path( __FILE__ ) . 'class-wic-form.php';
 include plugin_dir_path( __FILE__ ) . 'class-wic-control.php';
@@ -60,46 +61,8 @@ function wp_issue_crm_setup_styles() {
 
 }
 
- add_action( 'wp_enqueue_scripts', 'wp_issue_crm_setup_styles');
+add_action( 'wp_enqueue_scripts', 'wp_issue_crm_setup_styles');
 
-function multi_array_key_sort ( $multi_array, $key )	{
-		$temp = array();
-		
-		foreach ( $multi_array as $line_item ) {
-			 $temp[$line_item[$key]] = $line_item;
-		}
-		ksort ($temp);
-		$sorted_line_items = array();
-		foreach ($temp as $key => $value ) {
-			array_push( $sorted_line_items, $value );			
-		}
-		return ( $sorted_line_items) ;
-	}
-
-function wp_issue_crm_list_width_styles() {
-	
-	global $wic_base_definitions;
-
-	$output = '<!-- width styles for wp-issues-crm post lists --><style>';
-	foreach ( $wic_base_definitions->wic_post_types as $key => $value ) {
-		global ${ 'wic_' . $key . '_definitions' };	
-		//	must exist in valid config:  proper class name and field wic_post_fields within class	
-		foreach ( ${ 'wic_' . $key . '_definitions' }->wic_post_fields as $field ) {
-			if ( $field['list'] > 0 ) { 		
-	 			$output .= '.pl-' . $key . '-' . $field['slug'] . '{ width:' . $field['list'] . '%;}';  
-	 		}
-		}
-	}
-	$output .= '</style>';
-	echo $output;
-}
-// add_action( 'wp_head', 'wp_issue_crm_list_width_styles' );
-
-
-function initial_cap ( $string ) {
-	$string[0] = strtoupper ( $string[0] );
-	return ( $string ); 
-}
 
 
 function wic_utilities_script_setup() {
@@ -157,14 +120,24 @@ class WP_Issues_CRM {
 
 		echo '</form>';		
 
-		// now populate control value with any submitted button
+		/* 
+		* This is the central request handler for the entire plugin.
+		* It distributes button submissions (all of which have the same name, with an array of values) 
+		*   to an class entity class with an action request and arguments.
+		*/
 		if ( isset ( $_POST['wic_form_button'] ) ) {
 			 $control_array = explode( ',', $_POST['wic_form_button'] ); 
 			if ( '' == $control_array[0] ) {
 				$this->show_dashboard();		
 			} else {
-				$class_name = 'WIC_' . initial_cap ( $control_array[0] );
-				${ 'wic_'. $control_array[0]} = new $class_name ( $control_array[1], null ) ;		
+				$class_name = 'WIC_' . initial_cap ( $control_array[0] ); // entity_requested
+				$action_requested 		= $control_array[1];
+				$args = array (
+					'id_requested'			=>	$control_array[2],
+					'referring_parent' 	=> $control_array[3],
+					'new_form'				=> $control_array[4],
+				);
+				${ 'wic_'. $control_array[0]} = new $class_name ( $action_requested, $args ) ;		
 			}
 		} else {
 			$this->show_dashboard();
@@ -248,3 +221,10 @@ class WP_Issues_CRM {
 }
 
 $wp_issues_crm = new WP_Issues_CRM;
+
+
+function initial_cap ( $string ) {
+	$string[0] = strtoupper ( $string[0] );
+	return ( $string ); 
+}
+

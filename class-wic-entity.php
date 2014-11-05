@@ -11,49 +11,45 @@
 
 abstract class WIC_Entity {
 	
-	private $entity		= ''; // e.g., constituent, activity, issue
-	private $entity_type = ''; // WIC if uses WIC dedicated tables or WP is uses Wordpress tables
-	private $fields = array(); // will be initialized as field_slug => type from wp_wic_data_dictionary
-	private $data_array = array(); 		// will be initialized as field_slug => value from $fields and type classes (may make some values arrays and some strings, but will not add slugs) 
-	
+	protected $entity		= ''; // e.g., constituent, activity, issue
+	protected $fields = array(); // will be initialized as field_slug => type from wp_wic_data_dictionary
+	protected $data_array = array(); 		// will be initialized as field_slug => value from $fields and type classes (may make some values arrays and some strings, but will not add slugs) 
 		
-	abstract protected function set_entity_parms (); // must be included to set entity and entity type 
+	abstract protected function set_entity_parms (); // must be included to set entity
 
 	/*
 	*
-	* constructor just initializes minimal blank structure and passes control to named requested
+	* constructor just initializes minimal blank structure and passes control to named action requested
 	*
 	*/
 	public function __construct ( $action_requested, $args ) {
 		$this->set_entity_parms();
-		$this->fields = WIC_Data_Dictionary::get_fields( $this->entity );
-		$this->data_array = $this->initialize_data_array();
 		$this->$action_requested( $args );
-		
 	}
-
 
 	/*
 	*
 	* initialize_data_array gets all entity field slugs with blank values (string or array according to field type)
 	*
 	*/
-	protected function initialize_data_array() {
-		foreach ( $this->fields as $field_slug => $field_type ) {
-			$class_name = 'WIC_' . $field_type . '_Control';
-			$this->data_array[$field_slug] = $class_name::get_initial_value();		
+	protected function initialize_data_array() { 
+		foreach ( $this->fields as $field ) {
+			$class_name = 'WIC_' . $field->field_type . '_Control';
+			$this->data_array[$field->field_slug] = $class_name::get_initial_value();
+			
 		}		
 	}
 
 	/*
 	*
-	* get_values_from_submitted_form just copies values into working array
+	* get_values_from_submitted_form just copies values into working array ( or takes initialized values if not set )
 	*
 	*/
-	protected function get_values_from_submitted_form() {
-		foreach ( $this->data_array as $field_slug=>$value ) {
-			$value = $_POST[$field_slug];		
-		} 	
+	protected function initialize_data_array_from_submitted_form() { 		
+		foreach ( $this->fields as $field ) {  	
+			$class_name = 'WIC_' . $field->field_type . '_Control';		
+			$this->data_array[$field->field_slug] = isset ( $_POST[$field->field_slug] ) ? $_POST[$field->field_slug] : $class_name::get_initial_value();	
+		} 
 	}	
 	
 	
@@ -135,7 +131,6 @@ abstract class WIC_Entity {
 	/* the major actions that can be requested of the object -- search, save, update */
 
 	protected function search() {
-		initialize_from_post();
 		$wic_query = $wpdb->get_results( prepare_search_sql ('new') );
 		if ( 0 == $wpdb->num_rows ) {
 			$this->guidance	=	__( 'No matching record found. Try a save? ', 'wp-issues-crm' );
