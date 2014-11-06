@@ -100,6 +100,21 @@ class WIC_Data_Dictionary {
 		return ( $elements );
 	}
 
+	public static function get_sort_order_for_entity ( $entity ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'wic_data_dictionary';
+		$sort_clause = $wpdb->get_results( 
+			$wpdb->prepare (
+					"
+					SELECT group_concat( field_slug ORDER BY sort_clause_order ASC SEPARATOR ', ' ) AS sort_clause_string
+					FROM $table 
+					WHERE entity_slug = %s 
+					"				
+					, array ( $entity )
+					)
+				, OBJECT );
+		return ( $sort_clause );
+	}
 
 
 }

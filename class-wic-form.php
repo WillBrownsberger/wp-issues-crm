@@ -99,9 +99,6 @@ abstract class WIC_Form  {
 
 	}
 
-
-
-
 	protected function emit_debugging_information() {
 		echo '<span style="color:green;"> <br /> $_POST:';  		
   		var_dump ($_POST);

@@ -228,3 +228,10 @@ function initial_cap ( $string ) {
 	return ( $string ); 
 }
 
+function wic_generic_sanitizor ( $value ) {
+		return sanitize_text_field ( stripslashes ( $value ) );	
+}
+
+function foobar ( $value ) {
+		echo $value . '???? Fucked up beyond all recognition!';	
+}

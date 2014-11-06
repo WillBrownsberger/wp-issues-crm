@@ -11,6 +11,8 @@
 *		-- Text
 *		-- Textarea
 * 
+* It also includes validation and sanitization functions -- apply functions to control structure
+*
 *
 *
 */
@@ -38,12 +40,17 @@ abstract class WIC_Control {
 		'placeholder' 				=> '',
 	);
 
+	/*********************************************************************************
+	*
+	* methods for control creation for different types of forms -- new, search, save, update
+	*
+	***********************************************************************************/
 	public static function get_initial_value () {
 		return ( '' ); 
 	}
 	
+
 	public static function new_control () {
-		$this->control_args['value'] = '';
 		$this->search_control();
 	}
 
@@ -83,18 +90,48 @@ abstract class WIC_Control {
 		return ( $control );
 
 	}
-	
 
-
-	public function set_required_values_legend () {
+	public static function set_required_values_legend () {
 		$required_individual = ( 'individual' == $this->required ) ? '*' : '';
 		$required_group = ( 'group' == $this->required ) ? '(+)' : '';
 		$this->control_args['field_label_suffix'] = $required_individual . $required_group;  
 	}
 
+
+	/*********************************************************************************
+	*
+	* control validate/sanitize -- will handle  including multiple values
+	*
+	*********************************************************************************/
+
+	public static function sanitize_value( $field_slug, $dirty, $sanitizor ) {
+		$clean = $sanitizor( $dirty );
+		return $clean;
+	}
+
+	/*********************************************************************************
+	*
+	* create where/join clause components for control elements in generic wp form 
+	*
+	*********************************************************************************/
+
+	public static function create_search_clauses ( $field_slug, $value, $like ) {
+		if ( '' == $value ) {
+			return ('');		
+		}		
+		$compare = $like ? 'like' : '=';
+		$query_clauses = array (
+			'join_clause' 	=> '',
+			'where_clause' => array (
+				'key' 	=> $field_slug,
+				'value'	=> $value,
+				'compare'=> $compare
+			)			
+		);
+		return ( $query_clauses );
+	}
+
 }
-
-
 /************************************************************************************
 *
 *  WIC Checked Field
@@ -1078,10 +1115,6 @@ class WP_Issues_CRM_Form_Utilities {
 		return( $outcome );		
 			
 	}
-	
-
-	
-	
 
 	public function create_wic_form_button ( $control_array_plus_class ) { 
 	

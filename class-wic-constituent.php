@@ -25,12 +25,10 @@ class WIC_Constituent extends WIC_Entity {
 	protected function form_search () { 
 		$this->fields = WIC_Data_Dictionary::get_fields( $this->entity );
 		$this->initialize_data_array_from_submitted_form();
-		$wic_db_access = WIC_DB_Access_Factory::make_a_db_access_ojbect( $this->entity );
+		$wic_db_access = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$wic_results = $wic_db_access->search ( $this->entity, $this->data_array );
 
-
-
-		$wic_query = $wpdb->get_results( prepare_search_sql ('new') );
+/*		$wic_query = $wpdb->get_results( prepare_search_sql ('new') );
 		if ( 0 == $wpdb->num_rows ) {
 			$this->guidance	=	__( 'No matching record found. Try a save? ', 'wp-issues-crm' );
 			$this->next_action 	=	'save';
@@ -44,7 +42,7 @@ class WIC_Constituent extends WIC_Entity {
 			$this->next_action 	=	'search';
 			$show_list = true;
 		}						
-	
+*/	
 
 	}	
 

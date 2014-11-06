@@ -19,16 +19,15 @@ interface WIC_DB_Template {
 	public function update ( $entity, $data_array );
 	public function search ( $entity, $data_array );
 	public function id_search ( $entity, $data_array );
-	
-	/* $entity is a string; $data_array is as $field_slug => $value 	
-	
-	  all functions should return as follows:
-			$outcome  -- integer save/update/search # records found or acted on  or false if error
-			$explanation  reason for outcome 
-			$entity_object_array -- as saved, update or found( possibly multiple )
-	*/
-
+	// all functions should return result in form of WIC_DB_Result	
 }
+
+class WIC_DB_Result {
+	public $outcome; 		// integer save/update/search # records found or acted on  or false if error
+	public $explanation; // reason for outcome
+	public $result; 		// entity_object_array -- as saved, update or found( possibly multiple ) (each row as object with field_names properties)
+}
+
 
 class WIC_DB_Access_Factory {
 
@@ -38,7 +37,7 @@ class WIC_DB_Access_Factory {
 		'issue' => 'WIC_WP_DB_Access',
 	);
 
-	public static function make_a_db_access_ojbect ( $entity ) {
+	public static function make_a_db_access_object ( $entity ) {
 		$right_db_class = self::$entity_model_array[$entity];
 		$new_db_access_object = new $right_db_class ( $entity );
 		return ( $new_db_access_object );	
@@ -55,17 +54,17 @@ abstract class WIC_DB_Access implements WIC_DB_Template {
 		
 	public function __construct ( $entity ) { 
 		$this->entity_rules = WIC_Data_Dictionary::get_rules_for_entity( $entity );
-		// var_dump($this->entity_rules);
 	}		
 
 	public function search ( $entity, $data_array) {
 		$this->sanitize_values( $data_array );
-		$result = $this->db_search( $entity, $data_array );
+		$meta_query_array = $this->assemble_meta_query_array ( $data_array );  
+		$result = $this->db_search( $entity, $meta_query_array );
+		return $result;
 	}
 
 	public function id_search ( $entity, $data_array) {
 		$this->sanitize_values( $data_array );
-
 		$result = $this->db_search( $data_array );
 	}
 
@@ -85,21 +84,41 @@ abstract class WIC_DB_Access implements WIC_DB_Template {
 	}
 
 	protected function sanitize_values( $data_array ) {
-		/* var_dump ($data_array);*/
 		foreach ( $data_array as $field => $value ) {
 		   $sanitizor = $this->entity_rules[$field]->sanitize_call_back;
-		   $sanitizor = $sanitizor > '' ? $sanitizor : 'generic_sanitizor';
-			$value = $this->$sanitizor( $value );
+		   $sanitizor = $sanitizor > '' ? $sanitizor : 'wic_generic_sanitizor';
+   		$class_name = 'WIC_' . initial_cap ( $this->entity_rules[$field]->field_type ) . '_Control';
+			$value = $class_name::sanitize_value( $field, $value, $sanitizor );
 		}
 	}
 
-	protected function generic_sanitizor ( $value ) {
-		return sanitize_text_field ( stripslashes ( $value ) );	
+	protected function assemble_meta_query_array ( $data_array ) {
+		$meta_query_array = array (
+			'where_array' => array(),
+			'join_array'	=> array(),
+		);
+
+		foreach ( $data_array as $field => $value ) {
+		   $like = $this->entity_rules[$field]->like_search_enabled;
+		   $like = ( $this->get_strict_match_setting() ) ? false : $like;
+   		$class_name = 'WIC_' . initial_cap ( $this->entity_rules[$field]->field_type ) . '_Control';
+			$query_clauses = $class_name::create_search_clauses( $field, $value, $like );
+			if ( is_array ( $query_clauses ) ) {
+				$meta_query_array['where_array'][] = $query_clauses['where_clause'];
+				$meta_query_array['join_array'][] = $query_clauses['join_clause'];
+			}
+		}	
+		return $meta_query_array;
 	}
 
 	protected function validate_values() {
 	
 	
+	}
+	
+	protected function get_strict_match_setting() {
+		$strict_match = isset ( $_POST['strict_match'] )  ? true : false;
+		return ( $strict_match );
 	}
 	
 	protected function check_required_values () { // REWRITE!!!
@@ -133,42 +152,53 @@ abstract class WIC_DB_Access implements WIC_DB_Template {
 
 class WIC_WIC_DB_Access Extends WIC_DB_Access {
 
+	protected $entity_table_translation_array = array (
+		'constituent' 	=> 'wic_constituents',	
+		'activity'		=>	'wic_activities',	
+	);
+
 	protected function db_save ( $entity, $data_array ) {
 
 	}
 
-	protected function db_search( $entity, $data_array ) {
-	
-	
-	}	
-		
-	protected function prepare_search_sql( $mode ) {
-	
+	protected function db_search( $entity, $meta_query_array ) {
+
+		global $wpdb;
+
 		$join = '';
 		$where = '';
 		$values = array();
+		$table  = $wpdb->prefix . $this->entity_table_translation_array[$entity]; 
+		$sort_clause_array = WIC_Data_Dictionary::get_sort_order_for_entity( $entity );
+		$sort_clause = $sort_clause_array[0]->sort_clause_string;
 		
-		foreach ( $this->fields as $field ) {
-			$search_clauses = $field->search_clauses();
-			$join .= $search_clauses['join'];
-			$where .= $search_clauses['where'];
-			// each field will return an array of several values that need to be strung into main values array
-			foreach ( $search_clauses['values'] as $value ) { 
-				$values[] = $value;			
-			}
+		foreach ( $meta_query_array['where_array'] as $where_item ) {
+			$field_name		= $where_item['key'];
+			$compare 		= $where_item['compare'];
+			$where 			.= " AND $field_name $compare %s ";
+			$values[] 		= ( '=' == $where_item['compare'] ) ? $where_item['value'] : $wpdb->esc_like ( $where_item['value'] ) . '%' ;
 		}
+
+		/* deal with joins! */		
 		
 		$sql = $wpdb->prepare( "
 					SELECT 	* 
 					FROM 		$table
 					$join
 					WHERE 1=1 $where
-					ORDER BY $this->sort_order['orderby'] $this->sort_order['order']
-					LIMIT 0, $this->max_records
+					ORDER BY $sort_clause ASC
+					LIMIT 0, 100
 					",
 				$values );	
+		
+		$result = new WIC_DB_Result;
+		$result->result = $wpdb->get_results ( $sql );		
+		$result->outcome = count( $result->result );
+		$result->explanation = ''; 
+		// wpdb get_results does not return errors for searches, so assume zero return is just a none found condition (not an error)
+		// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results
 			
-		return ( $sql );
+		return ( $result );
 	}	
 
 }
