@@ -122,7 +122,7 @@ class WIC_Data_Dictionary {
 		$sort_clause = $wpdb->get_results( 
 			$wpdb->prepare (
 				"
-				SELECT field_slug, field_type 
+				SELECT field_slug, field_type, field_label 
 				FROM $table
 				WHERE entity_slug = %s
 				AND listing_order > 0 

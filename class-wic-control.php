@@ -67,12 +67,12 @@ abstract class WIC_Control {
 	
 	public static function save_control () {
 		if( ! $this->readonly ) {
-			return  ( '<p>'. $this->create_control( $this->control_args ) . '</p>' );	
+			return  ( '<p>'. static::create_control( $control_args ) . '</p>' );	
 		}
 	}
 	
 	public static function update_control () {
-		return ( '<p>'. $this->create_control( $this->control_args ) . '</p>' );	
+		return ( '<p>'. static::create_control( $control_args ) . '</p>' );	
 	}
 
 	protected static function create_control ( $control_args ) { // basic create text control

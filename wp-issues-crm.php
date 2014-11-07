@@ -35,9 +35,11 @@ include plugin_dir_path( __FILE__ ) . 'class-wic-data-dictionary.php';
 include plugin_dir_path( __FILE__ ) . 'class-wic-db-access.php';
 include plugin_dir_path( __FILE__ ) . 'class-wic-entity.php';
 include plugin_dir_path( __FILE__ ) . 'class-wic-form.php';
+include plugin_dir_path( __FILE__ ) . 'class-wic-form-constituent-search.php';
+include plugin_dir_path( __FILE__ ) . 'class-wic-form-constituent-update.php';
 include plugin_dir_path( __FILE__ ) . 'class-wic-control.php';
 include plugin_dir_path( __FILE__ ) . 'class-wic-constituent.php';
-include plugin_dir_path( __FILE__ ) . 'class-wic-constituent-search-form.php';
+include plugin_dir_path( __FILE__ ) . 'class-wic-list.php';
 /* old files
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-base-definitions.php'; 
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituent-definitions.php'; 

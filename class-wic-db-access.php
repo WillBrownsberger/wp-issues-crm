@@ -54,11 +54,6 @@ abstract class WIC_DB_Access {
 		$this->db_search( $meta_query_array );
 	}
 
-	public function id_search ( $id ) {
-		$this->sanitize_values( $data_array );
-		$result = $this->db_search( $data_array );
-	}
-
 	public function update ( $data_array) {
 		$this->sanitize_values( $data_array );
 		$result = $this->db_search( $data_array );

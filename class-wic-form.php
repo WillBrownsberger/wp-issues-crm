@@ -8,9 +8,15 @@
 
 abstract class WIC_Form  {
 
+	protected $message_level_to_css_convert = array(
+		'guidance' 	=> 'wic-form-routine-guidance',
+		'notice' 	=> 'wic-form-search-notices',
+		'error' 		=> 'wic-form-errors-found',	
+	);
+
 	abstract protected function get_the_entity();
 	abstract protected function get_the_buttons();
-	abstract protected function get_the_header();
+	abstract protected function get_the_header( &$data_array );
 	abstract protected function get_the_control( $control_args );
 	abstract protected function get_the_legends();
 	
@@ -29,9 +35,9 @@ abstract class WIC_Form  {
 
 			<div class = "wic-form-field-group wic-group-odd">
 			
-				<h2><?php echo esc_html( $this->get_the_header() ) ?></h2> 
+				<h2><?php echo esc_html( $this->get_the_header( $data_array ) ) ?></h2> 
 				
-				<div id="post-form-message-box" class = "<?php echo $message_level; ?>" ><?php echo esc_html( $message ); ?></div>
+				<div id="post-form-message-box" class = "<?php echo $this->message_level_to_css_convert[$message_level]; ?>" ><?php echo esc_html( $message ); ?></div>
 			   
 			   <?php $buttons = $this->get_the_buttons(); 
 			   		echo $buttons;	?>			   
@@ -136,7 +142,7 @@ abstract class WIC_Form  {
 		return ($button);
 	}
 
-	public function create_wic_form_button ( $control_array_plus_class ) { 
+	static public function create_wic_form_button ( $control_array_plus_class ) { 
 	
 		$entity_requested			= '';
 		$action_requested			= '';

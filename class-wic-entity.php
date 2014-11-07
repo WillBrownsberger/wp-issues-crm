@@ -20,6 +20,9 @@ abstract class WIC_Entity {
 	/*
 	*
 	* constructor just initializes minimal blank structure and passes control to named action requested
+	* 
+	* note that the current class is an abstract parent class WIC_Entity
+	* 	-- entity is chosen in the wp-issues-crm which initializes the corresponding child class  -- e.g. WIC_Constituent
 	*
 	*/
 	public function __construct ( $action_requested, $args ) {
@@ -36,7 +39,6 @@ abstract class WIC_Entity {
 		foreach ( $this->fields as $field ) {
 			$class_name = 'WIC_' . $field->field_type . '_Control';
 			$this->data_array[$field->field_slug] = $class_name::get_initial_value();
-			
 		}		
 	}
 
@@ -52,7 +54,19 @@ abstract class WIC_Entity {
 		} 
 	}	
 	
+	/*
+	*
+	* get_values_from_submitted_form just copies values into working array ( or takes initialized values if not set )
+	*
+	*/
+	protected function initialize_data_array_from_found_record( &$wic_query) { 		
+		foreach ( $this->fields as $field ) {  	
+			$class_name = 'WIC_' . $field->field_type . '_Control';		
+			$this->data_array[$field->field_slug] = $wic_query->result[0]->{$field->field_slug};	
+		} 
+	}	
 	
+		
 	/*
 	*
 	* form_save-- maintained as separate function from save per se, so that class can later be used with other AJAX/JSON which may not submit full form
