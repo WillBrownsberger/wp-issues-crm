@@ -145,14 +145,13 @@ abstract class WIC_Form  {
 		$new_form 					= 'n'; // go straight to a save
 		$button_class				= 'wic-form-button';
 		$button_label				= '';
-		$omit_label_and_close_tag = false;
+	
 
 		extract ( $control_array_plus_class, EXTR_OVERWRITE );
 
 		$button_value = $entity_requested . ',' . $action_requested  . ',' . $id_requested  . ',' . $referring_parent . ',' . $new_form;
-		$close = $omit_label_and_close_tag ? '' : __( $button_label, 'wp-issues-crm' ) . '</button>';
-
-		$button =  '<button class = "' . $button_class . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . $close;
+	
+		$button =  '<button class = "' . $button_class . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . $button_label . '</button>';
 		return ( $button );
 	}
 

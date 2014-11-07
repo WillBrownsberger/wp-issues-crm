@@ -25,8 +25,17 @@ class WIC_Constituent extends WIC_Entity {
 	protected function form_search () { 
 		$this->fields = WIC_Data_Dictionary::get_fields( $this->entity );
 		$this->initialize_data_array_from_submitted_form();
-		$wic_db_access = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-		$wic_results = $wic_db_access->search ( $this->entity, $this->data_array );
+		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		$wic_query->search ( $this->data_array );
+		// $list = WIC_Entity_List::format_entity_list ( $wic_results, true );
+		var_dump($wic_query);
+	}
+	
+	// handle a search request for an ID coming from any where
+	protected function id_search () {
+			
+		
+	}
 
 /*		$wic_query = $wpdb->get_results( prepare_search_sql ('new') );
 		if ( 0 == $wpdb->num_rows ) {
@@ -44,6 +53,6 @@ class WIC_Constituent extends WIC_Entity {
 		}						
 */	
 
-	}	
+
 
 }

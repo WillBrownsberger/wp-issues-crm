@@ -13,22 +13,6 @@
 * 
 */
 
-interface WIC_DB_Template {
-
-	public function save ( $entity, $data_array ); 
-	public function update ( $entity, $data_array );
-	public function search ( $entity, $data_array );
-	public function id_search ( $entity, $data_array );
-	// all functions should return result in form of WIC_DB_Result	
-}
-
-class WIC_DB_Result {
-	public $outcome; 		// integer save/update/search # records found or acted on  or false if error
-	public $explanation; // reason for outcome
-	public $result; 		// entity_object_array -- as saved, update or found( possibly multiple ) (each row as object with field_names properties)
-}
-
-
 class WIC_DB_Access_Factory {
 
 	static private $entity_model_array = array (
@@ -48,32 +32,39 @@ class WIC_DB_Access_Factory {
 
 
 
-abstract class WIC_DB_Access implements WIC_DB_Template {
+abstract class WIC_DB_Access {
+	
+	// these properties contain  the results of the db access
+	public $entity;		// top level entity searched for ( e.g., constituents or issues )
+	public $sql; 			// for search, the query executed;
+	public $result; 		// entity_object_array -- as saved, update or found( possibly multiple ) (each row as object with field_names properties)
+	public $outcome; 		// integer save/update/search # records found or acted on  or false if error
+	public $explanation; // reason for outcome
 
 	protected $entity_rules;
 		
 	public function __construct ( $entity ) { 
+		$this->entity = $entity;
 		$this->entity_rules = WIC_Data_Dictionary::get_rules_for_entity( $entity );
 	}		
 
-	public function search ( $entity, $data_array) {
+	public function search ( $data_array) {
 		$this->sanitize_values( $data_array );
 		$meta_query_array = $this->assemble_meta_query_array ( $data_array );  
-		$result = $this->db_search( $entity, $meta_query_array );
-		return $result;
+		$this->db_search( $meta_query_array );
 	}
 
-	public function id_search ( $entity, $data_array) {
+	public function id_search ( $id ) {
 		$this->sanitize_values( $data_array );
 		$result = $this->db_search( $data_array );
 	}
 
-	public function update ( $entity, $data_array) {
+	public function update ( $data_array) {
 		$this->sanitize_values( $data_array );
 		$result = $this->db_search( $data_array );
 	}
 
-	public function save ( $entity, $data_array) {
+	public function save ( $data_array) {
 		$this->sanitize_values( $data_array );
 		$errors = $this->validate_values( $data_array );
 		$errors .= $this->do_required_checks( $data_array );
@@ -143,9 +134,9 @@ abstract class WIC_DB_Access implements WIC_DB_Template {
    	}
 	}
 
-	abstract protected function db_save ( $entity, $data_array );
+	abstract protected function db_save ( $data_array );
 	
-	abstract protected function db_search ( $entity, $data_array );
+	abstract protected function db_search ( $data_array );
 	
 }
 
@@ -157,19 +148,19 @@ class WIC_WIC_DB_Access Extends WIC_DB_Access {
 		'activity'		=>	'wic_activities',	
 	);
 
-	protected function db_save ( $entity, $data_array ) {
+	protected function db_save ( $data_array ) {
 
 	}
 
-	protected function db_search( $entity, $meta_query_array ) {
+	protected function db_search( $meta_query_array ) {
 
 		global $wpdb;
 
 		$join = '';
 		$where = '';
 		$values = array();
-		$table  = $wpdb->prefix . $this->entity_table_translation_array[$entity]; 
-		$sort_clause_array = WIC_Data_Dictionary::get_sort_order_for_entity( $entity );
+		$table  = $wpdb->prefix . $this->entity_table_translation_array[$this->entity]; 
+		$sort_clause_array = WIC_Data_Dictionary::get_sort_order_for_entity( $this->entity );
 		$sort_clause = $sort_clause_array[0]->sort_clause_string;
 		
 		foreach ( $meta_query_array['where_array'] as $where_item ) {
@@ -191,25 +182,24 @@ class WIC_WIC_DB_Access Extends WIC_DB_Access {
 					",
 				$values );	
 		
-		$result = new WIC_DB_Result;
-		$result->result = $wpdb->get_results ( $sql );		
-		$result->outcome = count( $result->result );
-		$result->explanation = ''; 
+		$this->sql = $sql; 
+		$this->result = $wpdb->get_results ( $sql );	
+		$this->outcome = count( $this->result );
+		$this->explanation = ''; 
+
 		// wpdb get_results does not return errors for searches, so assume zero return is just a none found condition (not an error)
 		// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results
-			
-		return ( $result );
 	}	
 
 }
 
 class WIC_WP_DB_Access Extends WIC_DB_Access {
 
-	protected function db_save( $entity, $data_array ) {
+	protected function db_save(  $data_array ) {
 		
 	}
 	
-	protected function db_search( $entity, $data_array ) {
+	protected function db_search( $data_array ) {
 
 	}
 	

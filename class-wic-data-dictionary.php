@@ -116,5 +116,24 @@ class WIC_Data_Dictionary {
 		return ( $sort_clause );
 	}
 
+	public static function get_list_fields_for_entity ( $entity ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'wic_data_dictionary';
+		$sort_clause = $wpdb->get_results( 
+			$wpdb->prepare (
+				"
+				SELECT field_slug, field_type 
+				FROM $table
+				WHERE entity_slug = %s
+				AND listing_order > 0 
+				ORDER BY listing_order
+				"				
+				, array ( $entity )
+				)
+			, OBJECT );
+		return ( $sort_clause );
+	}
+
+
 
 }
