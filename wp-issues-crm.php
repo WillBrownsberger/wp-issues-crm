@@ -30,7 +30,7 @@
 *  -- later files use definitions . . .
 */
 // include plugin_dir_path( __FILE__ ) . 'class-wic-table.php';
-/* new files */
+/* new files 
 include plugin_dir_path( __FILE__ ) . 'class-wic-data-dictionary.php';
 include plugin_dir_path( __FILE__ ) . 'class-wic-db-access.php';
 include plugin_dir_path( __FILE__ ) . 'class-wic-entity.php';
@@ -53,11 +53,22 @@ include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-main-form.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-posts-list.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-import-routines.php';
 */
+
+function wp_issues_crm_autoloader( $class ) {
+	if ( 'WIC_' == substr ($class, 0, 4 ) ) {
+		$subdirectory = 'php'. DIRECTORY_SEPARATOR . strtolower( substr( $class, 4, ( strpos ( $class, '_', 4  ) - 4 )  ) ) . DIRECTORY_SEPARATOR ;
+		$class = strtolower( str_replace( '_', '-', $class ) );
+	   require_once plugin_dir_path( __FILE__ ) . $subdirectory .  'class-' . str_replace ( '_', '-', $class ) . '.php'; 
+	}	
+}
+
+spl_autoload_register('wp_issues_crm_autoloader', false, true);
+
 function wp_issue_crm_setup_styles() {
 
 	wp_register_style(
 		'wp-issues-crm-styles',
-		plugins_url( 'wp-issues-crm.css' , __FILE__ ) // ,
+		plugins_url( 'css' . DIRECTORY_SEPARATOR . 'wp-issues-crm.css' , __FILE__ )
 		);
 	wp_enqueue_style('wp-issues-crm-styles');
 
@@ -132,14 +143,14 @@ class WP_Issues_CRM {
 			if ( '' == $control_array[0] ) {
 				$this->show_dashboard();		
 			} else {
-				$class_name = 'WIC_' . initial_cap ( $control_array[0] ); // entity_requested
+				$class_name = 'WIC_Entity_' . initial_cap ( $control_array[0] ); // entity_requested
 				$action_requested 		= $control_array[1];
 				$args = array (
 					'id_requested'			=>	$control_array[2],
 					'referring_parent' 	=> $control_array[3],
 					'new_form'				=> $control_array[4],
 				);
-				${ 'wic_'. $control_array[0]} = new $class_name ( $action_requested, $args ) ;		
+				${ 'wic_entity_'. $control_array[0]} = new $class_name ( $action_requested, $args ) ;		
 			}
 		} else {
 			$this->show_dashboard();

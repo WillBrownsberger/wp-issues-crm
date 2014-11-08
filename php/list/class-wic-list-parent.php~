@@ -1,6 +1,6 @@
 <?php
 /*
-* File: class-wic-entity-list.php
+* File: class-wic-list-parent.php
 *
 * Description: lists entities (posts) passed as query 
 * 
@@ -8,7 +8,7 @@
 *
 */ 
 
-class WIC_List {
+class WIC_List_Parent {
 	/*
 	*
 	* field definitions for ready reference array 
@@ -17,7 +17,7 @@ class WIC_List {
 		
   public function format_entity_list( &$wic_query, $show_top_buttons ) {
   	
-  		$fields =  WIC_Data_Dictionary::get_list_fields_for_entity( $wic_query->entity );
+  		$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $wic_query->entity );
   	
   		$list_button_args = array(
 			'entity_requested'		=> $wic_query->entity,

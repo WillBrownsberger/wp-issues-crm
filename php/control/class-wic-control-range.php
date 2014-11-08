@@ -22,7 +22,7 @@
 *  WIC Field
 *
 ************************************************************************************/
-abstract class WIC_Control {
+abstract class WIC_Control_Parent {
 		
 	// parameters for text control creation -- the text control is used by multiple extensions of the class
 	public static $default_control_args = array (
@@ -137,7 +137,7 @@ abstract class WIC_Control {
 *  WIC Checked Field
 *
 ************************************************************************************/
-class WIC_Checked_Control extends WIC_Control {
+class WIC_Control_Checked extends WIC_Control_Parent {
 	
 	public static function create_control ( $control_args ) {
 		
@@ -165,7 +165,7 @@ class WIC_Checked_Control extends WIC_Control {
 *  WIC Date Field
 *
 ************************************************************************************/
-class WIC_Range_Control extends WIC_Control {
+class WIC_Control_Range extends WIC_Control_Parent {
 	
 	
 	public static function get_initial_value () {
@@ -526,7 +526,7 @@ class WIC_Select_Control extends WIC_Text_Control {
 *  WIC Text Field
 *
 *******************************************************************************/
-class WIC_Text_Control extends WIC_Control {
+class WIC_Text_Control extends WIC_Control_Parent {
 	// named just for consistency
 }
 
@@ -535,7 +535,7 @@ class WIC_Text_Control extends WIC_Control {
 *  WIC Text Area Field
 *
 *******************************************************************************/
-Class WIC_Textarea_Control extends WIC_Control {
+Class WIC_Textarea_Control extends WIC_Control_Parent {
 
 	public static function create_control ( $control_args ) {
 		
@@ -561,7 +561,7 @@ Class WIC_Textarea_Control extends WIC_Control {
 *
 *******************************************************************************/
 
-class WIC_TextCSV_Control extends WIC_Control {
+class WIC_TextCSV_Control extends WIC_Control_Parent {
 
 	/*
 	* convert string with various possible white spaces and commas into comma separated	

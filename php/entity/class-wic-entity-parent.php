@@ -9,11 +9,11 @@
 * 
 */
 
-abstract class WIC_Entity {
+abstract class WIC_Entity_Parent {
 	
-	protected $entity		= ''; // e.g., constituent, activity, issue
-	protected $fields = array(); // will be initialized as field_slug => type from wp_wic_data_dictionary
-	protected $data_array = array(); 		// will be initialized as field_slug => value from $fields and type classes (may make some values arrays and some strings, but will not add slugs) 
+	protected $entity		= ''; 						// e.g., constituent, activity, issue
+	protected $fields = array(); 						// will be initialized as field_slug => type from wp_wic_data_dictionary
+	protected $data_object_array = array(); 		// will be initialized as field_slug => control object 
 		
 	abstract protected function set_entity_parms (); // must be included to set entity
 
@@ -32,13 +32,13 @@ abstract class WIC_Entity {
 
 	/*
 	*
-	* initialize_data_array gets all entity field slugs with blank values (string or array according to field type)
+	* initialize_data_object_array as field_slug => control object
 	*
 	*/
-	protected function initialize_data_array() { 
-		foreach ( $this->fields as $field ) {
-			$class_name = 'WIC_' . $field->field_type . '_Control';
-			$this->data_array[$field->field_slug] = $class_name::get_initial_value();
+	protected function initialize_data_object_array() { 
+		foreach ( $this->fields as $field ) { 
+			$this->data_object_array[$field->field_slug] = WIC_Control_Factory::make_a_control( $field->field_type );
+			$this->data_object_array[$field->field_slug]->initialize_default_values(  $this->entity, $field->field_slug );
 		}		
 	}
 
@@ -47,10 +47,13 @@ abstract class WIC_Entity {
 	* get_values_from_submitted_form just copies values into working array ( or takes initialized values if not set )
 	*
 	*/
-	protected function initialize_data_array_from_submitted_form() { 		
+	protected function initialize_data_object_array_from_submitted_form() { 		
 		foreach ( $this->fields as $field ) {  	
-			$class_name = 'WIC_' . $field->field_type . '_Control';		
-			$this->data_array[$field->field_slug] = isset ( $_POST[$field->field_slug] ) ? $_POST[$field->field_slug] : $class_name::get_initial_value();	
+			$this->data_object_array[$field->field_slug] = WIC_Control_Factory::make_a_control( $field->field_type );
+			$this->data_object_array[$field->field_slug]->initialize_default_values(  $this->entity, $field->field_slug );
+			if ( isset ( $_POST[$field->field_slug] ) ) {		
+				$this->data_object_array[$field->field_slug]->set_value ( $_POST[$field->field_slug] );
+			}	
 		} 
 	}	
 	
@@ -59,10 +62,9 @@ abstract class WIC_Entity {
 	* get_values_from_submitted_form just copies values into working array ( or takes initialized values if not set )
 	*
 	*/
-	protected function initialize_data_array_from_found_record( &$wic_query) { 		
-		foreach ( $this->fields as $field ) {  	
-			$class_name = 'WIC_' . $field->field_type . '_Control';		
-			$this->data_array[$field->field_slug] = $wic_query->result[0]->{$field->field_slug};	
+	protected function populate_data_object_array_from_found_record( &$wic_query) { 		
+		foreach ( $this->data_object_array as $field_slug => $control ) {  
+			$control->set_value ( $wic_query->result[0]->{$field_slug} );	
 		} 
 	}	
 	
@@ -229,9 +231,9 @@ abstract class WIC_Entity {
 		$save_update_array = array();		
 		
 		foreach ( $this->fields as $field ) {
-			$field_data_array = $field->data_array();
+			$field_data_object_array = $field->data_object_array();
 			// each field will return an array of several values that need to be strung into main values array
-			foreach ( $field_data_array as $datum ) { 
+			foreach ( $field_data_object_array as $datum ) { 
 				$save_update_array[] = $datum;			
 			} 		
 		}

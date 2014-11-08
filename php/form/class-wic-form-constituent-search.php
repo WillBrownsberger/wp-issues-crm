@@ -5,7 +5,7 @@
 *
 */
 
-class WIC_Form_Constituent_Search extends WIC_Form  {
+class WIC_Form_Constituent_Search extends WIC_Form_Parent  {
 	
 	protected function get_the_entity() {
 		return ( 'constituent' );	
@@ -24,21 +24,21 @@ class WIC_Form_Constituent_Search extends WIC_Form  {
 		return ( __('Search Constituents', 'wp-issues-crm') );
 	}
 
-	protected function get_the_control ( $control_args ) {
-		extract ( $control_args );
-		$class_name = 'WIC_' . initial_cap ( $field_type ) . '_Control';
-		return ( $class_name::search_control ( $control_args ) ) ; 
+	protected function get_the_formatted_control ( $control ) {
+		$args = array();
+		return ( $control->search_control( $args ) ); 
 	}
 
 	protected function get_the_legends() {
-		$elements = WIC_Data_Dictionary::get_field_suffix_elements( $this->get_the_entity() );
+		$elements = WIC_DB_Dictionary::get_field_suffix_elements( $this->get_the_entity() );
 		if ( $elements[1]->like_search_enabled ) {
 			$control_args = array ( 
 				'field_slug'		=> 'strict_match',
 				'field_label'			=>	'(%) ' . __( 'Full-text search conditionally enabled for these fields -- require strict match instead this time? ' , 'wp-issues-crm' ),
 				'value'					=> 0,
 			);
-		return ( '<p class = "wic-form-legend">' . WIC_Checked_Control::search_control ( $control_args ) . '</p>' );
+			$check_box = new WIC_Control_Checked;
+		return ( '<p class = "wic-form-legend">' . $check_box->search_control ( $control_args ) . '</p>' );
 		}
 	}
 }

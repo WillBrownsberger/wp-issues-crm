@@ -5,7 +5,7 @@
 *
 */
 
-class WIC_Form_Constituent_Update extends WIC_Form  {
+class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 	
 	protected function get_the_entity() {
 		return ( 'constituent' );	
@@ -25,10 +25,9 @@ class WIC_Form_Constituent_Update extends WIC_Form  {
 		return ( sprintf ( __('Update %1$s' , 'wp-issues-crm'), $title ) );
 	}
 
-	protected function get_the_control ( $control_args ) {
-		extract ( $control_args );
-		$class_name = 'WIC_' . initial_cap ( $field_type ) . '_Control';
-		return ( $class_name::update_control ( $control_args ) ) ; 
+	protected function get_the_formatted_control ( $control ) {
+		$args = array();
+		return ( $control->update_control( $args ) ); 
 	}
 
 	protected function get_the_legends() {
@@ -55,10 +54,10 @@ class WIC_Form_Constituent_Update extends WIC_Form  {
 		} */
 		
    	// title is ln OR ln,fn OR fn OR email -- one of these is required in validation to be non-blank.	
-		$title = 	isset ( $data_array['last_name'] ) ? $data_array['last_name'] : '';
-		$title .= 	isset ( $data_array['first_name'] ) ? ( $title > '' ? ', ' : '' ) . $data_array['first_name'] : '';
+		$title = 	$data_array['last_name']->get_value();
+		$title .= 	$data_array['first_name']->get_value() > '' ? ( $title > '' ? ', ' : '' ) . $data_array['first_name']->get_value() : '';
 	//	$title =		( '' == $title ) ? $email_for_title : $title;
-		$title =		( '' == $title ) ? 'Constituent' : $title;
+		$title =		( '' == $title ) ? 'Constituent ' : $title;
 		
 		return  ( $title );
 	}
