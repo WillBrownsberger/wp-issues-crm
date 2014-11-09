@@ -26,7 +26,7 @@ abstract class WIC_Form_Parent  {
 	}
 
 	public function layout_form ( &$data_array, $message, $message_level ) {
-	
+
 		// $this->emit_debugging_information();
 
 		?><div id='wic-forms'>

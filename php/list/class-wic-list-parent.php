@@ -16,7 +16,7 @@ class WIC_List_Parent {
 	*/
 		
   public function format_entity_list( &$wic_query, $show_top_buttons ) {
-  	
+  
   		$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $wic_query->entity );
   	
   		$list_button_args = array(
@@ -32,7 +32,7 @@ class WIC_List_Parent {
 	
 			
 		if ( $show_top_buttons ) {	
-			$output .=	'<h2> Found ' . $wic_query->outcome . ' records, showing ' . $wic_query->outcome . '</h2>' . 
+			$output .=	'<h2> Found ' . $wic_query->found_count . ' records, showing ' . $wic_query->found_count . '</h2>' . 
 				'<button id = "form-toggle-button-on-list" type="button" onclick = "togglePostForm()">' . __( 'Show Search', 'wp-issues-crm' ) . '</button>' .
 				'<button id = "post-export-button" class = "wic-form-button" type="button" >' . __( 'Export (not built yet)', 'wp-issues-crm' ) . '</button>' .
 				'</div>';

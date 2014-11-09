@@ -5,16 +5,17 @@
 */
 class WIC_DB_Dictionary {
 	
-	public static function get_fields ( $entity ) {
-		// returns array of row objects
+	public static function get_form_fields ( $entity ) {
+		// returns array of row objects -- note: this join limits the form system to fields assigned to groups
 		global $wpdb;
-		$table = $wpdb->prefix . 'wic_data_dictionary';
+		$table1 = $wpdb->prefix . 'wic_data_dictionary';
+		$table2 = $wpdb->prefix . 'wic_form_field_groups';
 		$fields = $wpdb->get_results( 
 			$wpdb->prepare (
 				"
 				SELECT field_slug, field_type 
-				FROM $table
-				WHERE entity_slug = %s
+				FROM $table1 t1 inner join $table2 t2 on t1.entity_slug = t2.entity_slug and t1.group_slug = t2.group_slug
+				WHERE t1.entity_slug = %s
 				"				
 				, array ( $entity )
 				)
@@ -134,6 +135,45 @@ class WIC_DB_Dictionary {
 			, OBJECT );
 		return ( $sort_clause );
 	}
+
+	public static function get_dup_check_string ( $entity ) {
+	
+		global $wpdb;
+		$table = $wpdb->prefix . 'wic_data_dictionary';
+		$dup_check_string = $wpdb->get_row( 
+			$wpdb->prepare (
+					"
+					SELECT group_concat( field_label SEPARATOR ', ' ) AS dup_check_string
+					FROM $table 
+					WHERE entity_slug = %s and dedup = 1 
+					"				
+					, array ( $entity )
+					)
+				, OBJECT );
+	
+		return ( trim( $dup_check_string->dup_check_string, "," ) ); 
+
+	}
+
+	public static function get_group_required_string ( $entity ) {
+	
+		global $wpdb;
+		$table = $wpdb->prefix . 'wic_data_dictionary';
+		$group_required_string = $wpdb->get_row( 
+			$wpdb->prepare (
+					"
+					SELECT group_concat( field_label SEPARATOR ', ' ) AS dup_check_string
+					FROM $table 
+					WHERE entity_slug = %s and required = 'group' 
+					"				
+					, array ( $entity )
+					)
+				, OBJECT );
+	
+		return ( trim( $group_required_string->group_required_string, "," ) ); 
+
+	}
+
 
 
 

@@ -71,7 +71,7 @@ abstract class WIC_Control_Parent {
 		$final_control_args['readonly'] = false;
 		$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
 		$final_control_args['value'] = $this->value;
-		$control = '<p>'. $this->create_control( $final_control_args ) . '</p>';
+		$control =  $this->create_control( $final_control_args ) ;
 		return ( $control ) ;
 	}
 	
@@ -80,7 +80,7 @@ abstract class WIC_Control_Parent {
 		if( ! $final_control_args['readonly'] ) {
 			$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
 			$final_control_args['value'] = $this->value;
-			return  ( '<p>'. $this->create_control( $control_args ) . '</p>' );	
+			return  ( $this->create_control( $control_args ) );	
 		}
 	}
 	
@@ -88,7 +88,7 @@ abstract class WIC_Control_Parent {
 		$final_control_args = array_merge ( $this->default_control_args, $control_args );
 		$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
 		$final_control_args['value'] = $this->value;
-		return ( '<p>'. $this->create_control( $final_control_args ) . '</p>' );	
+		return ( $this->create_control( $final_control_args )  );	
 	}
 
 	protected function create_control ( $control_args ) { // basic create text control
@@ -129,6 +129,67 @@ abstract class WIC_Control_Parent {
 		$sanitizor = $sanitizor > '' ? $sanitizor : 'wic_generic_sanitizor';
 		$this->value = $sanitizor ( $this->value );
 	}
+
+	/*********************************************************************************
+	*
+	* control validate -- will handle all including multiple values -- generic case is string
+	*
+	*********************************************************************************/
+
+	public function validate() {
+		$validation_error = '';
+		$validator = $this->field->validate_call_back;
+		if ( $validator > '' ) {
+			$validation_error = $validator ( $this->value );
+		}
+		return $validation_error;
+	}
+
+	/*********************************************************************************
+	*
+	* report whether field should be included in deduping.
+	*
+	*********************************************************************************/
+
+
+	public function dup_check() {
+		return $this->field->dedup;	
+	}
+
+
+	/*********************************************************************************
+	*
+	* report whether field fails individual requirement
+	*
+	*********************************************************************************/
+	public function required_check() {
+		if ( "individual" == $this->field->required && ! is_present() ) {
+			return ( sprintf ( __( ' %s is a required field. ', 'wp-issues-crm' ), $this->field->field_label ) ) ;		
+		} else {
+			return '';		
+		}	
+	}
+
+	/*********************************************************************************
+	*
+	* report whether field is present as possibly required -- note that is not trivial for multivalued
+	*
+	*********************************************************************************/
+	public function is_present() {
+		$present = ( '' < $this->value ); 
+		return $present;		
+	}
+	
+	/*********************************************************************************
+	*
+	* report whether field is required in a group 
+	*
+	*********************************************************************************/
+	public function is_group_required() {
+		$group_required = ( 'group' ==  $this->field->required ); 
+		return $group_required;		
+	}
+
 
 	/*********************************************************************************
 	*

@@ -16,8 +16,11 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 	protected function db_save ( $data_array ) {
 
 	}
+protected function db_update ( $data_array ) {
 
-	protected function db_search( $meta_query_array ) {
+	}
+
+	protected function db_search( $meta_query_array, $dup_check ) {
 
 		global $wpdb;
 
@@ -30,9 +33,9 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		
 		foreach ( $meta_query_array['where_array'] as $where_item ) {
 			$field_name		= $where_item['key'];
-			$compare 		= $where_item['compare'];
+			$compare 		= $dup_check ? '=' : $where_item['compare'];
 			$where 			.= " AND $field_name $compare %s ";
-			$values[] 		= ( '=' == $where_item['compare'] ) ? $where_item['value'] : $wpdb->esc_like ( $where_item['value'] ) . '%' ;
+			$values[] 		= ( '=' == $where_item['compare']  || $dup_check ) ? $where_item['value'] : $wpdb->esc_like ( $where_item['value'] ) . '%' ;
 		}
 
 		/* deal with joins! */		
@@ -43,17 +46,18 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 					$join
 					WHERE 1=1 $where
 					ORDER BY $sort_clause ASC
-					LIMIT 0, 100
+					LIMIT 0, 10
 					",
 				$values );	
 		
 		$this->sql = $sql; 
 		$this->result = $wpdb->get_results ( $sql );	
-		$this->outcome = count( $this->result );
+		$this->outcome = true;  // wpdb get_results does not return errors for searches, so assume zero return is just a none found condition (not an error)
+										// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results 
+		$this->found_count = count( $this->result ); 
 		$this->explanation = ''; 
 
-		// wpdb get_results does not return errors for searches, so assume zero return is just a none found condition (not an error)
-		// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results
+
 	}	
 
 }

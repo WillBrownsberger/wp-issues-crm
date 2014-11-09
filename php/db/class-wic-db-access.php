@@ -17,52 +17,123 @@
 abstract class WIC_DB_Access {
 	
 	// these properties contain  the results of the db access
-	public $entity;		// top level entity searched for ( e.g., constituents or issues )
+	public $entity;		// top level entity searched for or acted on ( e.g., constituents or issues )
 	public $sql; 			// for search, the query executed;
 	public $result; 		// entity_object_array -- as saved, update or found( possibly multiple ) (each row as object with field_names properties)
-	public $outcome; 		// integer save/update/search # records found or acted on  or false if error
+	public $outcome; 		// true or false if error
 	public $explanation; // reason for outcome
+	public $found_count; // integer save/update/search # records found or acted on
 
-	protected $entity_rules;
-		
 	public function __construct ( $entity ) { 
 		$this->entity = $entity;
 	}		
 
-	public function search ( $data_array) {
-		$this->sanitize_values( $data_array );
-		$meta_query_array = $this->assemble_meta_query_array ( $data_array );  
-		$this->db_search( $meta_query_array );
+	/*
+	*	publicly callable methods that will return results -- 
+	*		these methods do not alter the object array as it exists in the object calling them
+	*
+	*/
+
+
+
+	public function search ( $dao ) { // receives $data_object_array
+		$this->sanitize_values( $dao );
+		$meta_query_array = $this->assemble_meta_query_array ( $dao );  
+		$this->db_search( $meta_query_array, false );
 	}
 
-	public function update ( $data_array) {
-		$this->sanitize_values( $data_array );
-		$result = $this->db_search( $data_array );
-	}
-
-	public function save ( $data_array) {
-		$this->sanitize_values( $data_array );
-		$errors = $this->validate_values( $data_array );
-		$errors .= $this->do_required_checks( $data_array );
-		if ( '' == $errors ) {
-			$result = $this->db_save($data_array);
+	public function update ( $dao) {
+		$this->sanitize_values( $dao );
+		$this->dup_check ( $dao );
+		$this->validate_values ( $dao );
+		$this->required_check ( $dao );
+		if ( false === $this->outcome ) {
+			return;					
+		} else {
+			$this->db_update ( $dao );		
 		}
-		return $result;
 	}
 
-	protected function sanitize_values( $data_array ) {
-		foreach ( $data_array as $field => $control ) {
+	public function save ( $dao) {
+		$this->sanitize_values( $dao );
+		$this->dup_check ( $dao );
+		$this->validate_values ( $dao );
+		$this->required_check ( $dao );
+		if ( false === $this->outcome ) {
+			return;					
+		} else {
+			$this->db_save ( $dao );		
+		}
+	}
+	/*
+	* protected helper functions, take $dao by reference
+	*  and may alter the working copy of the $dao within this object
+	*
+	*/
+
+	protected function sanitize_values( &$dao ) {
+		foreach ( $dao as $field => $control ) {
 			$control->sanitize();
 		}
 	}
 
-	protected function assemble_meta_query_array ( $data_array ) {
+	protected function dup_check ( &$dao ) {
+		$dup_check_array = array();
+		foreach ( $dao as $field_slug => $control ) {
+			if	( $control->dup_check() ) {
+				$dup_check_array[$field_slug] = $control;
+			}	
+		}	
+		if ( count ($dup_check_array ) > 0 ) {
+			$meta_query_array = $this->assemble_meta_query_array ( $dup_check_array );
+			$this->db_search ( $meta_query_array, true );
+			if ( $this->found_count > 1 || ( ( 1 == $this->found_count ) && ( $this->result[0]->ID != $dao[ID]->get_value() ) ) ) {
+				$this->outcome = false;
+				$dup_check_string = WIC_DB_Dictionary::get_dup_check_string ( $this->entity );
+				$this->explanation .= sprintf ( __( 'Other records found with same combination of %s' , 'wp-issues-crm' ), $dup_check_string );		
+			}
+		}		 
+	}
+
+	protected function validate_values( &$dao ) {
+		$validation_errors = '';		
+		foreach ( $dao as $field => $control ) {
+			$validation_errors .= $control->validate();
+		}
+		if ( $validation_errors > '' ) {
+				$this->outcome = false;		
+				$this->explanation .= $validation_errors;
+		}
+	}
+
+	protected function required_check () { 
+		$required_errors = '';
+		$there_is_a_required_group = false;
+		$a_required_group_member_is_present = false;		
+		foreach ( $dao as $field_slug => $control ) {
+			$required_errors .= $control->required_check();	
+			if ( $control->is_group_required ) {
+				$there_is_a_required_group = true;			
+				$a_required_group_member_is_present = $control->is_present ? true : $a_required_group_member_is_present ;
+			}
+		}
+		if ( $there_is_a_required_group && ! $a_required_group_member_is_present ) {		
+			$required_errors .= sprintf ( __( ' At least one among %s is required. ', 'wp-issues-crm' ), WIC_DB_Dictionary::get_group_required_string( $this->entity ) );
+		}
+		if ( $required_errors > '' ) {
+			$this->outcome = false;
+			$this->explanation .= $required_errors;		
+		}
+   }
+
+
+	protected function assemble_meta_query_array ( &$dao ) {
 		$meta_query_array = array (
 			'where_array' => array(),
 			'join_array'	=> array(),
 		);
 
-		foreach ( $data_array as $field => $control ) {
+		foreach ( $dao as $field => $control ) {
 			$query_clauses = $control->create_search_clauses();
 			if ( is_array ( $query_clauses ) ) {
 				$meta_query_array['where_array'][] = $query_clauses['where_clause'];
@@ -72,36 +143,9 @@ abstract class WIC_DB_Access {
 		return $meta_query_array;
 	}
 
-	protected function validate_values() {
-	
-	
-	}
-
-	protected function check_required_values () { // REWRITE!!!
-		/* for each defined field, instantiate a field object (sanitize and validate post input) */		
-		$group_required_test = '';
-		$group_required_label = '';		
-		foreach ( $this->field_definitions as $args ) {
-			$class_name = 'WIC_' .  $args['type'] . '_Field';
-			${$args['name']} = new $class_name ( $args );
-			$this->fields[] = ${$args['name']};  
-			$this->error_messages .= ${$args['name']}->validation_errors;	
-			if ( '' == ${$args['name']}->present && "individual" == ${$args['name']}->required )
-				$this->missing_fields .= ' ' . sprintf( __( ' %s is a required field. ' , 'wp-issues-crm' ), ${$args['name']}->label );
-			}
-			if  ( "group" == ${$args['name']}->required ) {
- 				$group_required .= ${$args['name']}->present;
- 				$group_required_label .= ( '' == $group_required_label ) ? '' : ', ';	
- 				$group_required_label .= ${$args['name']}->label;
-			}
-		if ( '' == $group_required_test && $group_required_label > '' ) {
-			$this->missing_fields .= sprintf ( __( ' At least one among %s is required. ', 'wp-issues-crm' ), $group_required_label );
-   	}
-	}
-
-	abstract protected function db_save ( $data_array );
-	
-	abstract protected function db_search ( $data_array );
+	abstract protected function db_search ( $meta_query_array, $dup_check );
+	abstract protected function db_save ( $adfasdfasdf );
+	abstract protected function db_update ( $adfasdfasdf );
 	
 }
 
