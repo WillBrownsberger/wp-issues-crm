@@ -12,6 +12,7 @@ abstract class WIC_Form_Parent  {
 		'guidance' 	=> 'wic-form-routine-guidance',
 		'notice' 	=> 'wic-form-search-notices',
 		'error' 		=> 'wic-form-errors-found',	
+		'good_news'	=> 'wic-form-good-news',
 	);
 
 	abstract protected function get_the_entity();

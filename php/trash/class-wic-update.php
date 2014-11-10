@@ -34,7 +34,7 @@ class WIC_Update {
 			$sql = $wpdb->prepare( "
 					UPDATE $table
 					$set_clause
-					WHERE ID = %s
+					WHERE ID = %d
 					",
 				$set['set_values'] );
 			$success = $wpdb->query( $sql );

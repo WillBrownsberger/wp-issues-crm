@@ -136,6 +136,10 @@ p.wic-form-field-group-legend {
 	background: #fff0aa;
 }
 
+#post-form-message-box.wic-form-good-news {
+	background: #e0fae0;
+}
+
 /* individual field formatting */
 .wic-label {
 	display: inline-block;

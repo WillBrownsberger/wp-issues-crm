@@ -80,7 +80,7 @@ abstract class WIC_Control_Parent {
 		if( ! $final_control_args['readonly'] ) {
 			$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
 			$final_control_args['value'] = $this->value;
-			return  ( $this->create_control( $control_args ) );	
+			return  ( $this->create_control( $final_control_args ) );	
 		}
 	}
 	
@@ -213,7 +213,22 @@ abstract class WIC_Control_Parent {
 		);
 		return ( $query_clauses );
 	}
-
+	
+	/*********************************************************************************
+	*
+	* create set array or sql statements for saves/updates 
+	*
+	*********************************************************************************/
+	public function create_update_clauses () {
+		$update_clauses = array (
+			'direct_sql_statement' 	=> '',
+			'set_array' => array (
+				'key' 	=> $this->field->field_slug,
+				'value'	=> $this->value,
+			)			
+		);
+		return ( $update_clauses );
+	}
 	
 	protected function get_strict_match_setting() {
 		$strict_match = isset ( $_POST['strict_match'] )  ? true : false;
