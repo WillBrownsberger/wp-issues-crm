@@ -34,7 +34,6 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			$this->explanation = __( 'Unknown database error. Update may not have been successful' );
 		}
 		$this->sql = $sql;
-			
 		return;
 	}
 	

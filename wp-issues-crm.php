@@ -82,7 +82,7 @@ function wic_utilities_script_setup() {
 	if ( !is_admin() ) {
 		wp_register_script(
 			'wic-utilities',
-			plugins_url( 'wic-utilities.js' , __FILE__ ) 
+			plugins_url( 'js' . DIRECTORY_SEPARATOR . 'wic-utilities.js' , __FILE__ ) 
 		);
 		
 	wp_enqueue_script('wic-utilities');

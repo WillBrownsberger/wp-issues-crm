@@ -14,9 +14,18 @@ abstract class WIC_Entity_Parent {
 	protected $entity		= ''; 						// e.g., constituent, activity, issue
 	protected $fields = array(); 						// will be initialized as field_slug => type from wp_wic_data_dictionary
 	protected $data_object_array = array(); 		// will be initialized as field_slug => control object 
+	protected $outcome = '';							// results of latest request 
+	protected $outcome_dups = false;					// supplementary outcome information -- dups among error causes	
+	protected $explanation	= '';						// explanation for outcome
+	
 		
 	abstract protected function set_entity_parms (); // must be included to set entity
-
+	abstract protected function new_form();
+	abstract protected function form_search();
+	abstract	protected function id_search( $args );
+	abstract protected function form_update ( $args );
+	abstract	protected function form_save ( $args );
+	
 	/*
 	*
 	* constructor just initializes minimal blank structure and passes control to named action requested
@@ -30,24 +39,20 @@ abstract class WIC_Entity_Parent {
 		$this->$action_requested( $args );
 	}
 
-	/*
+	/*************************************************************************************
 	*
-	* initialize_data_object_array as field_slug => control object
+	*  METHODS FOR FILLING THE DATA_OBJECT_ARRAY
 	*
-	*/
-	protected function initialize_data_object_array() { 
+	**************************************************************************************/
+	protected function initialize_data_object_array() {
+		// initialize_data_object_array as field_slug => control object 
 		foreach ( $this->fields as $field ) { 
 			$this->data_object_array[$field->field_slug] = WIC_Control_Factory::make_a_control( $field->field_type );
 			$this->data_object_array[$field->field_slug]->initialize_default_values(  $this->entity, $field->field_slug );
 		}		
 	}
 
-	/*
-	*
-	* get_values_from_submitted_form just copies values into working array ( or takes initialized values if not set )
-	*
-	*/
-	protected function initialize_data_object_array_from_submitted_form() { 		
+	protected function populate_data_object_array_from_submitted_form() {
 		foreach ( $this->fields as $field ) {  	
 			$this->data_object_array[$field->field_slug] = WIC_Control_Factory::make_a_control( $field->field_type );
 			$this->data_object_array[$field->field_slug]->initialize_default_values(  $this->entity, $field->field_slug );
@@ -56,192 +61,187 @@ abstract class WIC_Entity_Parent {
 			}	
 		} 
 	}	
-	
-	/*
-	*
-	* get_values_from_submitted_form just copies values into working array ( or takes initialized values if not set )
-	*
-	*/
-	protected function populate_data_object_array_from_found_record( &$wic_query) { 		
+
+	protected function populate_data_object_array_from_found_record( &$wic_query) {
 		foreach ( $this->data_object_array as $field_slug => $control ) {  
 			$control->set_value ( $wic_query->result[0]->{$field_slug} );	
 		} 
 	}	
+
+	/*************************************************************************************
+	*
+	*  METHODS FOR SANITIZING VALIDATING THE DATA_OBJECT_ARRAY
+	*     Results stored in object properties -- outcome, outcome_dups, explanation
+	*
+	**************************************************************************************/
+	public function update_ready( $save ) {
+		// runs all four sanitize/validate functions
+		$this->sanitize_values();
+		$this->dup_check ( $save );
+		$this->validate_values();
+		$this->required_check();
+	}
 	
-		
-	/*
-	*
-	* form_save-- maintained as separate function from save per se, so that class can later be used with other AJAX/JSON which may not submit full form
-	*
-	*/
-	protected function form_save ( $args ) {	
-		$this->get_values_from_submitted_form();
+	public function sanitize_values() {
+		// have each control sanitize itself
+		foreach ( $this->data_object_array as $field => $control ) {
+			$control->sanitize();
+		}
 	}
 
-
-
-
-
-/***************THE LOGIC FLOW TO REPLACE *********************
-				if ( 0 == $this->id_requested ) { 
-					// clean and validate POST input and populate next form output	
-					$wic_form_utilities->sanitize_validate_input( $next_form_output, $this->working_post_fields );
-					// do search in all submitted cases, but do only on dup check fields if request is a save or update (does not alter next_form_output)
-					$search_mode = ( 'search' == $this->action_requested ) ? 'new' : 'dup';
-				} else { 
-					$search_mode = 'db_check';
-					$next_form_output['wic_post_id']	= $this->id_requested;	
-				}
-				$wic_query = $wic_database_utilities->search_wic_posts( $search_mode, $next_form_output, $this->working_post_fields, $this->form_requested ); 
-	
-				// do last form requests and define form_notices and next_action based on results of sanitize_validate, search_wic_posts and save/update requests  
-				switch ( $this->action_requested ) {	
-
-								
-
-				} // closes switch statement	
-			} // closes handling of cases other than simple referring parent case
-			 
-			// prepare to show list of posts if found more than one
-			if ( $show_list ) {
-				$wic_list_posts = new WP_Issues_CRM_Posts_List ( $wic_query, $this->working_post_fields, $this->form_requested, 0, true );			
-				$post_list = $wic_list_posts->post_list;
-				if ( 'search' == $this->action_requested  && '' == $next_form_output['search_notices'] ) // always show form unless was a search and no search notices
-					$next_form_output['initial_form_state'] = 'wic-form-closed';
-			} else {
-				$post_list = '';			
+	protected function dup_check ( $save ) {
+		// check for dups -- $save is true/false for save/update 
+		$dup_check_array = array();
+		foreach ( $this->data_object_array as $field_slug => $control ) {
+			if	( $control->dup_check() ) {
+				$dup_check_array[$field_slug] = $control;
+			}	
+		}	
+		if ( count ($dup_check_array ) > 0 ) {
+			$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+			$wic_query->search ( $dup_check_array, true ); // true indicates a dedup search
+			if ( $wic_query->found_count > 1 || ( ( 1 == $wic_query->found_count ) && 
+						( $wic_query->result[0]->ID != $this->data_object_array['ID']->get_value() ) )
+						// for update, 1 group OK iff same record
+					|| ( $save && $wic_query->found_count > 0 ) ) {
+						// for save, dups are never OK
+				$this->outcome = false;
+				$dup_check_string = WIC_DB_Dictionary::get_dup_check_string ( $this->entity );
+				$this->explanation .= sprintf ( __( 'Other records found with same combination of %s' , 'wp-issues-crm' ), $dup_check_string );
+				$this->outcome_dups = true;		
 			}
+		}		 
+	}
 
-			// prepare to show list of posts if found exactly one
-			$children_list_output = '';
-			if ( $next_form_output['wic_post_id'] > 0 && count( $this->child_types ) > 0 ) { 
-				$children_lists = $wic_database_utilities->get_children_lists ( $next_form_output['wic_post_id'], $this->form_requested, $this->child_types );
-				foreach ( $children_lists as $child_list ) { 
-					$wic_list_posts = new WP_Issues_CRM_Posts_List ( $child_list['list_query'], $child_list['fields_array'], $child_list['child_type'], $next_form_output['wic_post_id'],  false );	
-					$children_list_output = $wic_list_posts->post_list;		
-				}			
+	protected function validate_values( ) {
+		// have each control validate itself and report
+		$validation_errors = '';		
+		foreach ( $this->data_object_array as $field => $control ) {
+			$validation_errors .= $control->validate();
+		}
+		if ( $validation_errors > '' ) {
+				$this->outcome = false;		
+				$this->explanation .= $validation_errors;
+		}
+	}
+
+	protected function required_check () {
+		// have each control see if it is present as required 
+		$required_errors = '';
+		$there_is_a_required_group = false;
+		$a_required_group_member_is_present = false;		
+		foreach ( $this->data_object_array as $field_slug => $control ) {
+			$required_errors .= $control->required_check();	
+			if ( $control->is_group_required() ) {
+				$there_is_a_required_group = true;			
+				$a_required_group_member_is_present = $control->is_present() ? true : $a_required_group_member_is_present ;
 			}
+		}
+		// report cross-control group required result
+		if ( $there_is_a_required_group && ! $a_required_group_member_is_present ) {		
+			$required_errors .= sprintf ( __( ' At least one among %s is required. ', 'wp-issues-crm' ), WIC_DB_Dictionary::get_group_required_string( $this->entity ) );
+		}
+		if ( $required_errors > '' ) {
+			$this->outcome = false;
+			$this->explanation .= $required_errors;		
+		}
+   }
 
-			// done with queries
-			wp_reset_postdata();
-			wp_reset_query();
+	/*************************************************************************************
+	*
+	*  REQUEST HANDLERS: new form, id search, general search, save/update
+	*     Child class functions are wrap arounds to choose next forms
+	*
+	**************************************************************************************/
 
- 		} // close if not just a new query
- 		
- 		// deliver the results ( if new form)
- 		ob_start();
- 		$this->display_form( $next_form_output );
- 		if ( isset ( $post_list ) ) {
-			echo $post_list; 		
- 		}
- 		if ( isset ( $children_list_output ) ) {
- 			echo $children_list_output;	
- 		}
- 		ob_end_flush();
+	protected function new_form_generic( $form ) {
+		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+		$this->initialize_data_object_array();
+		$new_search = new $form;
+		$new_search->layout_form( $this->data_object_array, 
+			__( 'Enter data and search. If record not found, you will be able to save.', 'wp-issues-crm'),
+			 'guidance' );
+	}	
 
-   } // close function
-	
-/**************THE LOGIC FLOW TO REPLACE IS ABOVE *********************************************/
-
-
-	/* the major actions that can be requested of the object -- search, save, update */
-
-
-	protected function save() {
-		initialize_fields_post();
-		$wic_query = $wpdb->get_results( prepare_search_sql ('dup') );
-		$this->error_messages = $this->missing_fields . $this->error_messages;
-		if ( 0 == $wpdb->num_rows || $this->error_messages > '' ) { // putting error condition here puts form error checking ahead of dup checking 
-			if ( $this->error_messages > '' ) { 
-				$this->guidance	=	__( 'Please correct form errors: ', 'wp-issues-crm' );
-				$this->next_action 	=	'save';
-			} else {
-				$success = $wpdb->insert( $table, prepare_save_update_array() );
-				if ( ! $success ) { 
-					$this->guidance	=	__( 'Please retry -- there were database errors: ', 'wp-issues-crm' );
-					$this->error_messages = __( 'Unknown database error in save/update.', 'wp-issues-crm' );
-					$this->next_action 	=	'save';
-				} else {
-					$this->ID['value'] = $wpdb->insert_id;	
-					$this->guidance	=	__( 'Record saved -- you can further update this record.', 'wp-issues-crm' );
-					$this->next_action 	=	'update';
-						/* fix this	if ( trim( $next_form_output[ 'wic_post_content' ] )  > '' ) { // parallels update to database
-						$this->old_wic_post_content = $wic_form_utilities->format_wic_post_content( $this->wic_post_content ) . $this->old_wic_post_content;
-						$this->wic_post_content = ''; */
-				}
-			}
+	//handle an update request coming from a form
+	protected function form_save_update_generic ( $args, $save, $fail_form, $success_form ) {
+		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+		$this->populate_data_object_array_from_submitted_form();
+		$this->update_ready( $save ); // false, not a save
+		if ( false === $this->outcome ) {
+			$message = __( 'Not successful: ', 'wp-issues-crm' ) . $this->explanation;
+			$message_level = 'error';
+			$form = new $fail_form;
+			$form->layout_form ( $this->data_object_array, $message, $message_level );
+			if ( $this->outcome_dups ) {	
+				$lister = new WIC_List_Parent;
+				$list = $lister->format_entity_list( $this->data_object_array, false );
+				echo $list;
+			}	
+			return;
+		}
+		$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		$wic_access_object->save_update( $this->data_object_array ); 
+		if ( false === $wic_access_object->outcome ) {
+			$message =  $wic_access_object->explanation;
+			$message_level = 'error';
+			$form = new $fail_form;
+			$form->layout_form ( $this->data_object_array, $message, $message_level );
 		} else {
-			$this->guidance = '';
-			$this->search_notices	=	sprintf ( __( 'Record not saved -- other records match the new combination of %s. View matches below.', 'wp-issues-crm' ), $this->create_dup_check_fields_list());
-			$this->next_action 	=	'search';
-			$show_list = true;
-		}						
-		
-	}
-
-	protected function update() {
-		initialize_fields_post();
-		$wic_query = $wpdb->get_results( prepare_search_sql ('dup') );
-		$this->error_messages = $this->missing_fields . $this->error_messages;
-		// next form action will be update iff any of three possibilities  . . .
-			// submitted non-dup dupcheck values (OK to do update) OR							
-		if ( 0 == $wpdb->num_rows || 
-			// submitted dupcheck values not changed (OK to do update) OR					
-			( 1 == $wpdb->num_rows && $wic_query[0]->ID == $this->fields['ID']->value ) ||
-			// there are form errors (must correct and resubmit update)  
-			$this->error_messages > '' ) { 
-			// next action is update after an update whether or not successful (unless poss dup)						
-			$this->next_action 	=	'update'; 
-			if ( $this->error_messages > '' ) { 
-				$this->guidance	=	__( 'Please correct form errors: ', 'wp-issues-crm' );	
-			} else {
-				$success = '';//FIX LATER;$wpdb->insert( $table, prepare_save_update_array(), array ( 'ID' = $this->fields['ID']->value ) ); 
-				if ( ! $success )  { 
-					$this->guidance = __( 'Please retry -- there were database errors. ', 'wp-issues-crm' );
-					$this->error_messages = __( 'Unknown database error in save/update.', 'wp-issues-crm' );
-				} else { 
-					$this->guidance = __( 'Update successful -- you can further update this record.', 'wp-issues-crm' );								
-				/* fix this	if ( trim( $next_form_output[ 'wic_post_content' ] ) > '' ) { // update to database
-						$this->old_wic_post_content'] = $wic_form_utilities->format_wic_post_content( $this->wic_post_content'] ) . $this->old_wic_post_content'];
-						$this->wic_post_content'] = ''; */
-				}					
+			if ( $save ) {
+				$this->data_object_array['ID']->set_value( $wic_access_object->insert_id );		
 			}
-		// error if form values match a record other than the original record	
-		} else { 
-			$this->guidance = '';						
-			$this->fields['ID']->value = 0; // reset so search does not bring back the original record
-			$this->search_notices	=	sprintf ( __( 'Record not updated -- other records match the new combination of %s. View matches below.', 'wp-issues-crm' ), $this->create_dup_check_fields_list());
-			$this->next_action 	=	'search';
-			$show_list = true;
+			$message = __( 'Successful.  You can update further. ', 'wp-issues-crm' );
+			$message_level = 'good_news';
+			$form = new $success_form;
+			$form->layout_form ( $this->data_object_array, $message, $message_level );					
+		}
+	}
+	
+	// handle a search request for an ID coming from anywhere
+	protected function id_search_generic ( $args, $success_form ) {
+		// initialize data array with only the ID and do search
+		$this->data_object_array['ID'] = WIC_Control_Factory::make_a_control( 'text' );
+		$this->data_object_array['ID']->initialize_default_values(  $this->entity, 'ID' );	
+		$this->data_object_array['ID']->set_value( $args['id_requested'] );
+		$wic_query = 	WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		$wic_query->search ( $this->data_object_array, false ); 
+		// retrieve record if found, otherwise error
+		if ( 1==$wic_query->found_count ) {
+			$message = __( 'Record Retrieved. Try an update?', 'wp-issues-crm' );
+			$message_level =  'guidance';
+			$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+			$this->initialize_data_object_array();	
+			$this->populate_data_object_array_from_found_record ( $wic_query );			
+			$update_form = new $success_form;
+			$update_form->layout_form ( $this->data_object_array, $message, $message_level );	
+		} else {
+			die ( sprintf ( __( 'Data base corrupted for record ID: %1$s', 'wp-issues-crm' ) , $args['id_requested'] ) );		
+		} 
+	}
+	
+	protected function form_search_generic ( $save_form, $update_form ) { 
+		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+		$this->populate_data_object_array_from_submitted_form();
+		$this->sanitize_values();
+		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		$wic_query->search ( $this->data_object_array, false );
+		if ( 0 == $wic_query->found_count ) {
+			$message = __( 'No matching record found -- try a save?', 'wp-issues-crm' );
+			$message_level =  'guidance';
+			$form = new $save_form;
+			$form->layout_form ( $this->data_object_array, $message, $message_level );			
+		} elseif ( 1 == $wic_query->found_count) {
+			$message = __( 'One matching record found. Try an update?', 'wp-issues-crm' );
+			$message_level =  'guidance';
+			$this->populate_data_object_array_from_found_record ( $wic_query );			
+			$form = new $update_form;
+			$form->layout_form (	$this->data_object_array, $message, $message_level );			
+		} else {
+			$lister = new WIC_List_Parent;
+			$list = $lister->format_entity_list( $wic_query,true );
+			echo $list;	
 		}						
-
 	}
-
-	protected function populate_fields( $query_result ) {
-		foreach ( $this->fields as $field ) {
-			$field->set_value ( $query_result->$field['name'] );		
-		}
-	}
-	
-
-
-
-	protected function prepare_save_update_array() {
-				
-		$save_update_array = array();		
-		
-		foreach ( $this->fields as $field ) {
-			$field_data_object_array = $field->data_object_array();
-			// each field will return an array of several values that need to be strung into main values array
-			foreach ( $field_data_object_array as $datum ) { 
-				$save_update_array[] = $datum;			
-			} 		
-		}
-		
-		return ( $save_update_array );
-	
-	}
-
-
 }
 
