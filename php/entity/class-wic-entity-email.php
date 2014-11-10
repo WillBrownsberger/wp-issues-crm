@@ -5,10 +5,10 @@
 *
 */
 
-class WIC_Entity_Constituent extends WIC_Entity_Parent {
+class WIC_Entity_Email extends WIC_Entity_Parent {
 
 	protected function set_entity_parms() {
-		$this->entity = 'constituent';
+		$this->entity = 'email';
 	} 
 
 	// handle a request for a new standard form
