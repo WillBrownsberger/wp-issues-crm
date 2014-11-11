@@ -7,12 +7,14 @@
 
 class WIC_Entity_Constituent extends WIC_Entity_Parent {
 
-	protected function set_entity_parms() {
+	protected function set_entity_parms( $args ) {
+		extract ( $args );
 		$this->entity = 'constituent';
+		$this->entity_instance = $instance;
 	} 
 
 	// handle a request for a new standard form
-	protected function new_form() {
+	protected function new_form() { 
 		$this->new_form_generic( 'WIC_Form_Constituent_Search' );
 		return;
 	}

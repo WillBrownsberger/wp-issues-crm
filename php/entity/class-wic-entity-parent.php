@@ -12,6 +12,7 @@
 abstract class WIC_Entity_Parent {
 	
 	protected $entity		= ''; 						// e.g., constituent, activity, issue
+	protected $entity_instance = '';					// relevant where entity is a row of multivalue array as in emails for a constituent
 	protected $fields = array(); 						// will be initialized as field_slug => type from wp_wic_data_dictionary
 	protected $data_object_array = array(); 		// will be initialized as field_slug => control object 
 	protected $outcome = '';							// results of latest request 
@@ -19,7 +20,7 @@ abstract class WIC_Entity_Parent {
 	protected $explanation	= '';						// explanation for outcome
 	
 		
-	abstract protected function set_entity_parms (); // must be included to set entity
+	abstract protected function set_entity_parms ( $args ); // must be included to set entity
 	abstract protected function new_form();
 	abstract protected function form_search();
 	abstract	protected function id_search( $args );
@@ -32,11 +33,20 @@ abstract class WIC_Entity_Parent {
 	* 
 	* note that the current class is an abstract parent class WIC_Entity
 	* 	-- entity is chosen in the wp-issues-crm which initializes the corresponding child class  -- e.g. WIC_Constituent
+	*  
+	* args is an associative array, which MAY be populated as follows:
+	*	-- the following are arguments in the control array from form buttons
+	*		'id_requested'			=>	$control_array[2],
+	*		'referring_parent' 	=> $control_array[3],
+	*		'new_form'				=> $control_array[4],
+	*  -- the following will be passed in the case of the object being initialized as a multi-value field
+	*		'instance'				=> '',	
 	*
 	*/
 	public function __construct ( $action_requested, $args ) {
-		$this->set_entity_parms();
+		$this->set_entity_parms( $args );
 		$this->$action_requested( $args );
+
 	}
 
 	/*************************************************************************************
@@ -44,18 +54,18 @@ abstract class WIC_Entity_Parent {
 	*  METHODS FOR FILLING THE DATA_OBJECT_ARRAY
 	*
 	**************************************************************************************/
-	protected function initialize_data_object_array() {
+	protected function initialize_data_object_array()  {
 		// initialize_data_object_array as field_slug => control object 
 		foreach ( $this->fields as $field ) { 
 			$this->data_object_array[$field->field_slug] = WIC_Control_Factory::make_a_control( $field->field_type );
-			$this->data_object_array[$field->field_slug]->initialize_default_values(  $this->entity, $field->field_slug );
+			$this->data_object_array[$field->field_slug]->initialize_default_values(  $this->entity, $field->field_slug, $this->entity_instance );
 		}		
 	}
 
 	protected function populate_data_object_array_from_submitted_form() {
 		foreach ( $this->fields as $field ) {  	
 			$this->data_object_array[$field->field_slug] = WIC_Control_Factory::make_a_control( $field->field_type );
-			$this->data_object_array[$field->field_slug]->initialize_default_values(  $this->entity, $field->field_slug );
+			$this->data_object_array[$field->field_slug]->initialize_default_values(  $this->entity, $field->field_slug, $this->entity_instance  );
 			if ( isset ( $_POST[$field->field_slug] ) ) {		
 				$this->data_object_array[$field->field_slug]->set_value ( $_POST[$field->field_slug] );
 			}	

@@ -149,7 +149,9 @@ class WP_Issues_CRM {
 					'id_requested'			=>	$control_array[2],
 					'referring_parent' 	=> $control_array[3],
 					'new_form'				=> $control_array[4],
+					'instance'				=> '', // unnecessary in this context, absence will not create an error but here for consistency about arguments;
 				);
+				
 				${ 'wic_entity_'. $control_array[0]} = new $class_name ( $action_requested, $args ) ;		
 			}
 		} else {

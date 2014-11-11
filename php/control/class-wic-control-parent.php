@@ -23,7 +23,7 @@
 ************************************************************************************/
 abstract class WIC_Control_Parent {
 	protected $field;
-	protected $default_control_args = array(
+	public $default_control_args = array(
 		'field_label' 				=> '',
 		'value'						=> '',
 		'like_search_enabled' 	=> false,
@@ -41,9 +41,16 @@ abstract class WIC_Control_Parent {
 	// parameters for text control creation -- the text control is used by multiple extensions of the class
 
 
-	public function initialize_default_values ( $entity, $field_slug ) {
+	public function initialize_default_values ( $entity, $field_slug, $instance ) {
 		$this->field = WIC_DB_Dictionary::get_field_rules( $entity, $field_slug );
 		$this->default_control_args =  array_merge( $this->default_control_args, get_object_vars ( $this->field ) );
+		$this->default_control_args['field_slug'] = ( '' == $instance ) ?
+		// if no instance supplied, this is just a field in a main form, and use field slug for field name and field id
+		$field_slug :
+		// if an instance is supplied prepare to output the field as an array element, i.e., a row in a multivalue field 
+		// note that the entity name for a row object in a multivalue field is the same as the field_slug for the multivalue field
+		// this is a trap for the unwary in setting up the dictionary table 
+		$entity . '[' . $instance . ']['. $field_slug . ']';
 	}
 
 	/*********************************************************************************
