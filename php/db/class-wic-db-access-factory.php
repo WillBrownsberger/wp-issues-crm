@@ -18,6 +18,7 @@ class WIC_DB_Access_Factory {
 	static private $entity_model_array = array (
 		'constituent' => 'WIC_DB_Access_WIC',	
 		'activity' => 'WIC_DB_Access_WIC',
+		'email'	=> 'WIC_DB_Access_WIC',
 		'issue' => 'WIC_DB_Access_WP',
 	);
 

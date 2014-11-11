@@ -163,6 +163,16 @@ abstract class WIC_Control_Parent {
 		return $this->field->dedup;	
 	}
 
+	/*********************************************************************************
+	*
+	* report whether field is multivalue
+	*
+	*********************************************************************************/
+
+
+	public function is_multivalue() {
+		return ( $this->field->field_type == 'multivalue' );	
+	}
 
 	/*********************************************************************************
 	*
@@ -204,21 +214,21 @@ abstract class WIC_Control_Parent {
 	*
 	*********************************************************************************/
 
-	public function create_search_clauses () {
+	public function create_search_clause ( $dup_check ) {
 		if ( '' == $this->value ) {
 			return ('');		
 		}		
 		$compare = $this->field->like_search_enabled ? 'like' : '=';
-		$compare = ( $this->get_strict_match_setting() ) ? '=' : $compare;
-		$query_clauses = array (
-			'join_clause' 	=> '',
-			'where_clause' => array (
-				'key' 	=> $this->field->field_slug,
-				'value'	=> $this->value,
-				'compare'=> $compare,
-			)			
-		);
-		return ( $query_clauses );
+		$compare = ( $this->get_strict_match_setting() || $dup_check  ) ? '=' : $compare;
+		$query_clause =  array ( // double layer array to standardize a return that allows multivalue fields
+				array (
+					'table'	=> $this->field->entity_slug,
+					'key' 	=> $this->field->field_slug,
+					'value'	=> $this->value,
+					'compare'=> $compare,
+				)
+			);
+		return ( $query_clause );
 	}
 	
 	/*********************************************************************************

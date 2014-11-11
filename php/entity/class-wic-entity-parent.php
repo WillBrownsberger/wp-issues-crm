@@ -73,8 +73,13 @@ abstract class WIC_Entity_Parent {
 	}	
 
 	protected function populate_data_object_array_from_found_record( &$wic_query) {
-		foreach ( $this->data_object_array as $field_slug => $control ) {  
-			$control->set_value ( $wic_query->result[0]->{$field_slug} );	
+		foreach ( $this->data_object_array as $field_slug => $control ) { 
+			if ( ! $control->is_multivalue() ) {
+				$control->set_value ( $wic_query->result[0]->{$field_slug} );
+			} else { // for multivalue fields, set_value wants array of row arrays -- 
+						// query results don't have that form or even an appropriate field slug  
+				$control->set_value_by_parent_pointer( $wic_query->result[0]->ID );
+			}
 		} 
 	}	
 
@@ -84,7 +89,7 @@ abstract class WIC_Entity_Parent {
 	*     Results stored in object properties -- outcome, outcome_dups, explanation
 	*
 	**************************************************************************************/
-	public function update_ready( $save ) {
+	private function update_ready( $save ) {
 		// runs all four sanitize/validate functions
 		$this->sanitize_values();
 		$this->dup_check ( $save );
@@ -109,7 +114,7 @@ abstract class WIC_Entity_Parent {
 		}	
 		if ( count ($dup_check_array ) > 0 ) {
 			$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-			$wic_query->search ( $dup_check_array, true ); // true indicates a dedup search
+			$wic_query->search ( $this->assemble_meta_query_array( true ) );  // true indicates a dedup search
 			if ( $wic_query->found_count > 1 || ( ( 1 == $wic_query->found_count ) && 
 						( $wic_query->result[0]->ID != $this->data_object_array['ID']->get_value() ) )
 						// for update, 1 group OK iff same record
@@ -156,6 +161,24 @@ abstract class WIC_Entity_Parent {
 			$this->explanation .= $required_errors;		
 		}
    }
+
+	/*************************************************************************************
+	*
+	*  METHODS FOR COMPILING DATA BASE ACCESS REQUESTS FROM CONTROLS
+	*     
+	*
+	**************************************************************************************/
+	public function assemble_meta_query_array ( $dup_check ) {
+		$meta_query_array = array ();
+		foreach ( $this->data_object_array as $field => $control ) {
+			$query_clause = $control->create_search_clause( $dup_check );
+			if ( is_array ( $query_clause ) && // skipping empty fields
+					( ! $dup_check || $control->dup_check() ) ) { // including all non-empty or only those that are dupcheck fields  
+				$meta_query_array = array_merge ( $meta_query_array, $query_clause );
+			}
+		}	
+		return $meta_query_array;
+	}	
 
 	/*************************************************************************************
 	*
@@ -215,7 +238,7 @@ abstract class WIC_Entity_Parent {
 		$this->data_object_array['ID']->initialize_default_values(  $this->entity, 'ID' );	
 		$this->data_object_array['ID']->set_value( $args['id_requested'] );
 		$wic_query = 	WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-		$wic_query->search ( $this->data_object_array, false ); 
+		$wic_query->search ( $this->assemble_meta_query_array( false ) ); 
 		// retrieve record if found, otherwise error
 		if ( 1==$wic_query->found_count ) {
 			$message = __( 'Record Retrieved. Try an update?', 'wp-issues-crm' );
@@ -235,7 +258,7 @@ abstract class WIC_Entity_Parent {
 		$this->populate_data_object_array_from_submitted_form();
 		$this->sanitize_values();
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-		$wic_query->search ( $this->data_object_array, false );
+		$wic_query->search ( $this->assemble_meta_query_array( false ) );
 		if ( 0 == $wic_query->found_count ) {
 			$message = __( 'No matching record found -- try a save?', 'wp-issues-crm' );
 			$message_level =  'guidance';
@@ -253,5 +276,7 @@ abstract class WIC_Entity_Parent {
 			echo $list;	
 		}						
 	}
+	
+
 }
 

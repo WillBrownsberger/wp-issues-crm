@@ -110,7 +110,7 @@ class WIC_DB_Dictionary {
 					"
 					SELECT group_concat( field_slug ORDER BY sort_clause_order ASC SEPARATOR ', ' ) AS sort_clause_string
 					FROM $table 
-					WHERE entity_slug = %s 
+					WHERE entity_slug = %s and sort_clause_order > 0
 					"				
 					, array ( $entity )
 					)

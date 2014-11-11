@@ -36,9 +36,8 @@ abstract class WIC_DB_Access {
 	*
 	*/
 
-	public function search ( $doa, $dup_check  ) { // receives $data_object_array
-		$meta_query_array = $this->assemble_meta_query_array ( $doa );  
-		$this->db_search( $meta_query_array, $dup_check  );
+	public function search ( $meta_query_array  ) { // receives pre-assembled meta_query_array
+		$this->db_search( $meta_query_array );
 		return;
 	}
 
@@ -53,27 +52,6 @@ abstract class WIC_DB_Access {
 		return;	
 	}
 
-
-	/*
-	*
-	* Assemble query strings from controls ( use WP format, even for direct table updates )
-	*
-	*/
-
-	protected function assemble_meta_query_array ( &$doa ) {
-		$meta_query_array = array (
-			'where_array' => array(),
-			'join_array'	=> array(),
-		);
-		foreach ( $doa as $field => $control ) {
-			$query_clauses = $control->create_search_clauses();
-			if ( is_array ( $query_clauses ) ) { // skipping empty fields
-				$meta_query_array['where_array'][] = $query_clauses['where_clause'];
-				$meta_query_array['join_array'][] = $query_clauses['join_clause'];
-			}
-		}	
-		return $meta_query_array;
-	}
 
 	/*
 	*
@@ -93,7 +71,7 @@ abstract class WIC_DB_Access {
 		return ( $save_update_array );
 	}
 
-	abstract protected function db_search ( $meta_query_array, $dup_check );
+	abstract protected function db_search ( $meta_query_array );
 	abstract protected function db_save ( $meta_query_array );
 	abstract protected function db_update ( $meta_query_array );
 	
