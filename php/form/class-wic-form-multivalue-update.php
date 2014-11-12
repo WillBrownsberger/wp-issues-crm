@@ -25,7 +25,8 @@ class WIC_Form_Multivalue_Update extends WIC_Form_Multivalue_Search  {
 	protected function get_the_header ( &$data_array ) {}	
 	protected function get_the_formatted_control ( $control ) {
 		$args = array(
-			'onclick_delete' => 'hideSelf(\'' . esc_attr( $this->entity . '-' . $this->entity_instance ) . '\')',		
+//			'onclick_delete' => 'hideSelf(\'' . esc_attr( $this->entity . '-' . $this->entity_instance ) . '\')',
+			'onclick_delete' => 'hideSelf(\'' . esc_attr( $this->entity . '[' . $this->entity_instance . ']'  ) . '\')',		
 		);
 		return ( $control->update_control( $args ) ); 
 	}
@@ -34,7 +35,7 @@ class WIC_Form_Multivalue_Update extends WIC_Form_Multivalue_Search  {
 	public function layout_form ( &$data_array, $message, $message_level ) {
 		$groups = $this->get_the_groups();
 		$class = ( 'row-template' == $this->entity_instance ) ? 'hidden-template' : 'visible-templated-row';
-		$search_row = '<div class = "'. $class . '" id="' . $this->entity . '-' . $this->entity_instance . '">';
+		$search_row = '<div class = "'. $class . '" id="' . $this->entity . '[' . $this->entity_instance . ']">';
 		$search_row .= '<div id="wic-multivalue-block">';
 			foreach ( $groups as $group ) {
 				 $search_row .= '<div class = "wic-multivalue-field-subgroup" id = "wic-field-subgroup-' . esc_attr( $group->group_slug ) . '">';

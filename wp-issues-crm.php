@@ -98,7 +98,7 @@ class WP_Issues_CRM {
 	}
 		
 	public function wp_issues_crm() {
-
+		var_dump($_POST);
 		if ( ! current_user_can ( 'activate_plugins' ) ) { 
 			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
 			return;
@@ -245,6 +245,12 @@ function initial_cap ( $string ) {
 function wic_generic_sanitizor ( $value ) {
 		return sanitize_text_field ( stripslashes ( $value ) );	
 }
+
+	
+function validate_individual_email( $email ) { 
+	$error = filter_var( $email, FILTER_VALIDATE_EMAIL ) ? '' : __( 'Email address appears to be not valid. ', 'wp-issues-crm' );
+	return $error;	
+}	
 
 function foobar ( $value ) {
 		echo $value . '???? Fucked up beyond all recognition!';	

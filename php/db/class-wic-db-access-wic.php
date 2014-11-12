@@ -10,7 +10,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 
 	protected function db_save ( $save_update_array ) {
 		global $wpdb;
-		$table  = $wpdb->prefix . $this->entity_table_translation_array[$this->entity]; 
+		$table  = $wpdb->prefix . 'wic_' . $this->entity;  
 		
 		$set = $this->parse_save_update_array( $save_update_array );
   		$set_clause_with_placeholders = $set['set_clause_with_placeholders'];
@@ -26,7 +26,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			$this->insert_id = $wpdb->insert_id;	
 		} else {		
 			$this->outcome = false;
-			$this->explanation = __( 'Unknown database error. Update may not have been successful' );
+			$this->explanation = __( 'Unknown database error. Update may not have been successful', 'wp-issues-crm' );
 		}
 		$this->sql = $sql;
 		return;
@@ -47,7 +47,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			$set['set_value_array'] );
 		$update_result = $wpdb->query( $sql );
 		$this->outcome = ( 1 == $update_result );
-		$this->explanation = ( $this->outcome ) ? '' : __( 'Unknown database error. Update may not have been successful' );
+		$this->explanation = ( $this->outcome ) ? '' : __( 'Unknown database error. Update may not have been successful', 'wp-issues-crm' );
 		$this->sql = $sql;
 		return;
 	}
@@ -110,9 +110,9 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$set_clause_with_placeholders = 'SET last_updated_time = now()';
 		$set_array = array();
 		$current_user = wp_get_current_user();
+		$entity_id = '';
 		
-		
-		foreach ( $save_update_array['set_array'] as $save_update_clause ) {
+		foreach ( $save_update_array as $save_update_clause ) {
 			if ( $save_update_clause['key'] != 'ID' ) {
 				$set_clause_with_placeholders .= ', ' . $save_update_clause['key'] . ' = %s'; 		
 				$set_value_array[] = $save_update_clause['value'];
@@ -133,6 +133,16 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			'set_value_array'	=> $set_value_array,
 				)		
 			);
+	}
+
+	protected function db_delete_by_id ( $id ) {
+		
+		global $wpdb;		
+		$table  = $wpdb->prefix . 'wic_' . $this->entity;
+		$outcome = $wpdb->delete ( $table, array( 'ID' => $id ) );
+		if ( ! ( 1 == $outcome ) ) {
+			die ( sprintf (  __('Database error on execution of requested delete of %s.' , 'wp-issues-crm' ), $this->entity ) );	
+		}
 	}
 
 }

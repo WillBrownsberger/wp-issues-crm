@@ -28,16 +28,25 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	* Even if it had a value, this would be the appropriate response -- to overlay the value with a new array of objects.  
 	*
 	*/
-	public function set_value ( $value ) {
+	public function set_value ( $value ) { // value is an array created by multi-value field coming back from $_Post
 		$this->value = array();
 		$class_name = 'WIC_Entity_' . initial_cap ( $this->field->field_slug );
 		$instance_counter = 0;
-		foreach ( $value as $form_row_array ) {
+		foreach ( $value as $key=>$form_row_array ) {
 			$args = array (
 				'instance' => strval( $instance_counter ),
 				'form_row_array' => $form_row_array, // have to pass whole row, since can't assume $_POST numbering is the same							
 			);
-			$this->value[$instance_counter] = new $class_name( 'populate_from_form', $args );
+			if ( strval($key) != 'row-template' ) { // skip the template row created by all multivalue fields
+				if ( isset ( $form_row_array['screen_deleted'] ) ) {			
+					if ( $form_row_array['ID'] > 0 ) {
+						$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( $this->field->field_slug );
+						$wic_access_object->delete_by_id( $form_row_array['ID'] ); 
+					}
+				} else {
+					$this->value[$instance_counter] = new $class_name( 'populate_from_form', $args );
+				}
+			}
 			$instance_counter++;
 		}
 	}
@@ -85,6 +94,53 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	}
 
 	/*
+	* 
+	* validate  each row object has its own validation function with return, so this is easy
+	*
+	*/
+	public function validate() {
+		$error_message = '';
+		foreach ( $this->value as $row_object ) {
+			$error_message .= $row_object->validate_values();
+		}
+		return ( $error_message );	
+	}
+
+	/*********************************************************************************
+	*
+	* report whether field is present as possibly required -- if at least one row of 
+	* multi-value passes its own set of required checks -- to require one email address,
+	* (a) set value of email group as required and (b) define email address as required 
+	*
+	*********************************************************************************/
+	public function is_present() {
+		$error_message = '';
+		foreach ( $this->value as $row_object ) {	
+			$error_message .= $row_object->required_check (); 
+		} 
+		return ( '' == $error_message ); 		
+	}
+
+
+	/*********************************************************************************
+	*
+	* report whether field fails individual requirement, with reasons
+	*
+	*********************************************************************************/
+	public function required_check() {
+		if ( "individual" == $this->field->required && ! is_present() ) {
+			$error_message = '';
+			foreach ( $this->value as $row_object ) {	
+				$error_message .= $row_object->required_check (); 
+			} 
+			return ( sprintf ( __( ' %s missing required elements: ', 'wp-issues-crm' ), $this->field->field_label ) . $error_message . '.' ) ;		
+		} else {
+			return '';		
+		}	
+	}
+
+
+	/*
 	*
 	* search control works off a single row, producing controls for that row -- $control_args are ignored
 	*
@@ -103,9 +159,20 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	}
 
 	public function create_search_clause ( $dup_check ) {
-		$query_clause = $this->value[0]->assemble_meta_query_array( $dup_check );
-		return ( $query_clause ); 	
+		if ( count ( $this->value ) > 0 ) {
+			$query_clause = reset( $this->value )->assemble_meta_query_array( $dup_check );
+			return ( $query_clause );
+		} else {
+			return ( '' );		
+		} 	
 	}
+
+	/* 
+	*
+	* update control works with array of values from record or form input
+	*
+	*/	
+	
 	
 	public function update_control ( $control_args ) {
 		$final_control_args = array_merge ( $this->default_control_args, $control_args );
@@ -142,7 +209,8 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		return ($control_set);	
 	}
 	
-	/* this button will create a new instance of the templated base paragraph (repeater row) and insert it above related counter in the DOM*/
+	// the function called by this button will create a new instance of the templated base paragraph (repeater row) 
+	// and insert it above related counter in the DOM
 	public function create_add_button ( $base, $button_label ) {
 		$button =  
 			'<button ' . 
@@ -155,5 +223,13 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		return ($button);
 	}
 		
+	public function do_save_updates ( $id  ) {
+		$errors = '';
+		foreach ( $this->value as $child_entity ) {
+			$errors .= $child_entity->do_save_update ( $this->field->entity_slug, $id );		 
+		}
+		return $errors;
+	}
+
 
 }	

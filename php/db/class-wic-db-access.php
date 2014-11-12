@@ -41,14 +41,42 @@ abstract class WIC_DB_Access {
 		return;
 	}
 
+	public function delete_by_id ( $id ) {
+		$this->db_delete_by_id ( $id );	
+	}
+
 
 	public function save_update ( $doa ) {
 		$save_update_array = $this->assemble_save_update_array( $doa );
-		if ( $doa['ID']->get_value() > 0 ) {
-			$this->db_update ( $save_update_array );		
-		} else {
-			$this->db_save ( $save_update_array );
-		}	
+		if ( count ( $save_update_array ) > 0 ) {
+			if ( $doa['ID']->get_value() > 0 ) {
+				$this->db_update ( $save_update_array );		
+			} else {
+				$this->db_save ( $save_update_array );
+			}	
+		} 
+		$no_multivalue_updates = true;
+		if ( $this->outcome ) { // if main update OK, do multivalue ( child ) updates
+			$id =  ( $doa['ID']->get_value() > 0 ) ? $doa['ID']->get_value() : $this->insert_id;
+			$errors = '';			
+			foreach ( $doa as $field => $control ) {
+				if ( $control->is_multivalue() ) {
+					$errors .= $control->do_save_updates( $id );
+					$no_multivalue_updates = false;
+				}			
+			}
+			if ( $errors > '' ) {
+				$this->outcome = false;
+				$this->explanation .= $errors;
+			}		
+		}
+		if ( ( 0 == count ( $save_update_array ) ) && $no_multivalue_updates ) {		
+			$this->results = '';
+			$this->sql = '';
+			$this->outcome = false;
+			$this->explanation = __( 'No data received for update.  May have been deleted in sanitization.', 'wp-issues-crm' );
+			$this->insert_id = 0;
+		}
 		return;	
 	}
 
@@ -59,14 +87,14 @@ abstract class WIC_DB_Access {
 	*
 	*/
 	protected function assemble_save_update_array ( &$doa ) {
-		$save_update_array = array(
-			'set_array'	=> array(),
-			'direct_sql_statement' => array(),
-		);
+		$save_update_array = array();
 		foreach ( $doa as $field => $control ) {
-			$update_clauses = $control->create_update_clauses();
-			$save_update_array['set_array'][] = $update_clauses['set_array'];
-			$save_update_array['direct_sql_statement'][] = $update_clauses['direct_sql_statement'];
+			if ( ! $control->is_multivalue() ) {
+				$update_clause = $control->create_update_clause();
+				if ( '' < $update_clause ) {
+					$save_update_array[] = $update_clause;
+				}
+			}
 		}	
 		return ( $save_update_array );
 	}
@@ -74,6 +102,7 @@ abstract class WIC_DB_Access {
 	abstract protected function db_search ( $meta_query_array );
 	abstract protected function db_save ( $meta_query_array );
 	abstract protected function db_update ( $meta_query_array );
+	abstract protected function db_delete_by_id ( $id );
 	
 }
 

@@ -50,6 +50,20 @@ abstract class WIC_Entity_Multivalue extends WIC_Entity_Parent {
 		return $new_update_row;
 	}
 
+	public function do_save_update( $parent_slug, $id ) {
+		$parent_link_field = $parent_slug . '_' . 'id';
+		var_dump ($parent_link_field);
+		// var_dump ($this->data_object_array());
+		$this->data_object_array[$parent_link_field]->set_value( $id );
+		$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		$wic_access_object->save_update( $this->data_object_array ); 
+		if ( false === $wic_access_object->outcome ) {
+			$error =  $wic_access_object->explanation;
+		} else {
+			$error = '';
+		}
+		return ( $error );
+	}
 
 
 	// empty functions required by parent class, but not implemented

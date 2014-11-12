@@ -128,19 +128,25 @@ abstract class WIC_Entity_Parent {
 		}		 
 	}
 
-	protected function validate_values( ) {
+	public function validate_values() {
 		// have each control validate itself and report
 		$validation_errors = '';		
 		foreach ( $this->data_object_array as $field => $control ) {
 			$validation_errors .= $control->validate();
 		}
 		if ( $validation_errors > '' ) {
-				$this->outcome = false;		
-				$this->explanation .= $validation_errors;
+			$this->outcome = false;		
+			$this->explanation .= $validation_errors;
+			return ( $validation_errors . sprintf( __( ' (Message from %1$s, instance %2$s.) ', 'wp-issues-crm' ), 
+				$this->entity, $this->entity_instance ) );		
+		} else {
+			return ('');		
 		}
 	}
 
-	protected function required_check () {
+
+
+	public function required_check () {
 		// have each control see if it is present as required 
 		$required_errors = '';
 		$there_is_a_required_group = false;
@@ -160,6 +166,8 @@ abstract class WIC_Entity_Parent {
 			$this->outcome = false;
 			$this->explanation .= $required_errors;		
 		}
+		
+		return ( $required_errors );
    }
 
 	/*************************************************************************************
@@ -174,7 +182,7 @@ abstract class WIC_Entity_Parent {
 			$query_clause = $control->create_search_clause( $dup_check );
 			if ( is_array ( $query_clause ) && // skipping empty fields
 					( ! $dup_check || $control->dup_check() ) ) { // including all non-empty or only those that are dupcheck fields  
-				$meta_query_array = array_merge ( $meta_query_array, $query_clause );
+				$meta_query_array = array_merge ( $meta_query_array, $query_clause ); // will do append since the arrays of arrays are not keyed arrays 
 			}
 		}	
 		return $meta_query_array;

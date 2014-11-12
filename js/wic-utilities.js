@@ -33,7 +33,12 @@ function togglePostFormSection( section ) {
 function hideSelf( rowname ) {
 	var row = document.getElementById ( rowname );
 	rowClass =row.className; 
-	row.className = rowClass.replace( 'visible-templated-row', 'hidden-template' ) ;
+	var test = confirm ( "When you update, this row will be permanently deleted."  )
+	if ( test == true ) {
+		row.className = rowClass.replace( 'visible-templated-row', 'hidden-template' ) ;
+	} else {
+		document.getElementById( rowname + '[screen_deleted]' ).checked = false;	
+	}
 }
 
 
@@ -44,10 +49,11 @@ function moreFields( base ) {
 	counter++;
 	document.getElementById( base + '-row-counter' ).innerHTML = counter;
 	
-	var newFields = document.getElementById( base + '-row-template' ).cloneNode(true);
+	var newFields = document.getElementById( base + '[row-template]' ).cloneNode(true);
 	
 	/* set up row paragraph with  id and class */
-	newFields.id = base + '-' + counter ;
+//	newFields.id = base + '-' + counter ;
+	newFields.id = base + '[' + counter + ']' ;
 	newFieldsClass = newFields.className; 
 	newFields.className = newFieldsClass.replace('hidden-template', 'visible-templated-row') ;
 
@@ -76,7 +82,8 @@ function replaceInDescendants ( template, oldValue, newValue, base  ) {
 			} 
 			var theOnClick = newField[i].onclick;
 			if ( undefined != theOnClick)  {
-				newClickVal = 'hideSelf(\'' + base + '-' + newValue + '\')' ;
+//				newClickVal = 'hideSelf(\'' + base + '-' + newValue + '\')' ;
+				newClickVal = 'hideSelf(\'' + base + '[' + newValue + ']' + '\')' ;
 				newField[i].setAttribute( "onClick", newClickVal );
 			} 
 			replaceInDescendants ( newField[i], oldValue, newValue, base )

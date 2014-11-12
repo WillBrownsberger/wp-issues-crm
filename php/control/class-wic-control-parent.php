@@ -251,15 +251,14 @@ abstract class WIC_Control_Parent {
 	* create set array or sql statements for saves/updates 
 	*
 	*********************************************************************************/
-	public function create_update_clauses () {
-		$update_clauses = array (
-			'direct_sql_statement' 	=> '',
-			'set_array' => array (
-				'key' 	=> $this->field->field_slug,
-				'value'	=> $this->value,
-			)			
-		);
-		return ( $update_clauses );
+	public function create_update_clause () {
+		if ( ! $this->field->transient ) {
+			$update_clause = array (
+					'key' 	=> $this->field->field_slug,
+					'value'	=> $this->value,
+			);
+			return ( $update_clause );
+		}
 	}
 	
 	protected function get_strict_match_setting() {
