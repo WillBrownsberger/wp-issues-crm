@@ -99,7 +99,7 @@ abstract class WIC_Control_Parent {
 	}
 
 	protected function create_control ( $control_args ) { // basic create text control
-		
+
 		extract ( $control_args, EXTR_SKIP );
 		 
 		$readonly = $readonly ? 'readonly' : '';

@@ -30,6 +30,11 @@ function togglePostFormSection( section ) {
 	}
 }
 
+function hideSelf( row ) {
+	var row = document.getElementById ( row );
+	rowClass =row.className; 
+	row.className = rowClass.replace( 'visible-templated-row', 'hidden-template' ) ;
+}
 
 
 function moreFields( base ) {
@@ -40,23 +45,41 @@ function moreFields( base ) {
 	document.getElementById( base + '-row-counter' ).innerHTML = counter;
 	
 	var newFields = document.getElementById( base + '-row-template' ).cloneNode(true);
-
+	
 	/* set up row paragraph with  id and class */
 	newFields.id = base + '-' + counter ;
 	newFieldsClass = newFields.className; 
 	newFields.className = newFieldsClass.replace('hidden-template', 'visible-templated-row') ;
-	
-	/* set up each field within row with indexed id, class and on-click (for destroy button) */
-	var newField = newFields.childNodes;
-	for (var i = 0; i < newField.length; i++ ) {
-		if ( "BUTTON" != newField[i].tagName ) {
-			var theName = newField[i].name;
-			newField[i].name = theName.replace( 'row-template', counter );
-			var theID = newField[i].id;
-			newField[i].id = theID.replace( 'row-template', counter ); 
-		} 
-	}		
-	
+
+	/* walk child nodes of template and insert current counter value as index*/
+	replaceInDescendants ( newFields, 'row-template', counter, base);	
+
 	var insertHere = document.getElementById( base + '-row-counter' );
 	insertHere.parentNode.insertBefore( newFields, insertHere );
+}
+
+function replaceInDescendants ( template, oldValue, newValue, base  ) {
+	var newField = template.childNodes;
+	if ( newField.length > 0 ) {
+		for ( var i = 0; i < newField.length; i++ ) {
+			var theName = newField[i].name;
+			if ( undefined != theName) {
+				newField[i].name = theName.replace( oldValue, newValue );
+			}
+			var theID = newField[i].id;
+			if ( undefined != theID)  {
+				newField[i].id = theID.replace( oldValue, newValue );
+			} 
+			var theFor = newField[i].htmlFor;
+			if ( undefined != theFor)  {
+				newField[i].htmlFor = theFor.replace( oldValue, newValue );
+			} 
+			var theOnClick = newField[i].onclick;
+			if ( undefined != theOnClick)  {
+				newClickVal = 'hideSelf(\'' + base + '-' + newValue + '\')' ;
+				newField[i].setAttribute( "onClick", newClickVal );
+			} 
+			replaceInDescendants ( newField[i], oldValue, newValue, base )
+		}
+	}
 }

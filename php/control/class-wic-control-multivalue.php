@@ -106,55 +106,34 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 
 		// create a hidden template row for adding rows in wic-utilities.js through moreFields() 
 		// moreFields will replace the string 'row-template' with row-counter index value after creating the new row
-		$row = '<div class = "hidden-template" id = "' . $this->field->field_slug . '-row-template' . '">'; // template opening line	
-			$class_name = 'WIC_Entity_' . initial_cap ( $this->field->field_slug ) ; // note, php would forgive the initial_cap missing in the field_slug, but . . . 
-			$args = array(
-				'instance' => 'row-template'		
-				);
-			$template = new $class_name( 'initialize', $args );
-			$row .= $template->update_row ( $save );
-			$row .= $this->create_destroy_button ();
-		$row .= '</div>';
-	
-		// put completed template row into division			
-		$control_set .= $row;
+		
+		$class_name = 'WIC_Entity_' . initial_cap ( $this->field->field_slug ) ; // note, php would forgive the initial_cap missing in the field_slug, but . . . 
+		$args = array(
+			'instance' => 'row-template'		
+			);
+		$template = new $class_name( 'initialize', $args );
+		$control_set .= $template->update_row ( $save );
 
 		// now proceed to add rows for any existing records from database or previous form
 		
 		if ( count ( $this->value ) > 0 ) {
 
 			foreach ( $this->value as $value_row ) {
-				
-				// note, in this loop, need only instantiate the changing arguments in the arrays			
-				
-				$row = '<p class = "email-address-row">';
-					$row.= $value_row->update_row ( $save );
-					$row .= $this->create_destroy_button ();
-				$row .= '</p>';
-				$control_set .= $row;
+				$control_set .= $value_row->update_row ( $save );
 			}
 		}		
 		$control_set .= '<div class = "hidden-template" id = "' . $this->field->field_slug . '-row-counter">' . count( $this->value ) . '</div>';		
 		$control_set .= $this->create_add_button ( $this->field->field_slug, sprintf ( __( 'Add %s ', 'wp-issues-crm' ), $this->field->field_label ) . ' ' . $repeater_group_label_suffix ) ;
 		$control_set .= '</div>';
 
-		
-		
 		return ($control_set);	
 	}
 
-	public function create_destroy_button () {
 
-		$button = '<button ' .  
-			' class	="destroy-button"' . 
-			' onclick = {this.parentNode.parentNode.removeChild(this.parentNode);}' .
-			' type 	= "button" ' .
-			' name	= "destroy-button" ' .
-			' title  = ' . __( 'Remove Row', 'wp-issues-crm' ) .
-			' >x</button>';	
 
-		return ($button);
-	}
+
+
+
 	
 		/* this button will create a new instance of the templated base paragraph (repeater row) and insert it above related counter in the DOM*/
 	public function create_add_button ( $base, $button_label ) {
