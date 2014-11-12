@@ -114,7 +114,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		 
 		$control_set = ( $field_label > '' && ! ( 1 == $hidden ) ) ? '<label class="' . esc_attr ( $label_class ) .
 				 ' ' . esc_attr( $field_slug_css ) . '" for="' . esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
-		// create emails division opening tag 		
+		// create division opening tag 		
 		$control_set .= '<div id = "' . $this->field->field_slug . '-control-set' . '" class = "wic-multivalue-control-set">';
 
 		// create a hidden template row for adding rows in wic-utilities.js through moreFields() 
