@@ -175,12 +175,24 @@ p.wic-form-field-group-legend {
 	padding: 0;
 }
 
+.wic-control {
+	margin: 10px 0; 
+}
+.wic-multivalue-control-set {
+	display: inline-block;
+}
 .wic-input {
 	background: #ffffff;
 	border: 1px solid #f0f0f0;
 	min-width: 300px;
 } 
 
+.wic-input.email-type {
+	background: #ffffff;
+	border: 1px solid #f0f0f0;
+	width: 80px;
+	min-width: 0px; 
+} 
 
 .wic-input-checked:hover, 
 .wic-input:hover {
@@ -374,7 +386,7 @@ p.wic-form-field-group-legend {
 	cursor: pointer;
 	display: inline-block;
 	font-size: 0.7em;
-	margin: 0 0 0 18px;
+	margin: 0;
 	padding: 0;
 }
 

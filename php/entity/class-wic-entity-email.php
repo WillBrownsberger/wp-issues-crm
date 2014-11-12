@@ -48,41 +48,12 @@ class WIC_Entity_Email extends WIC_Entity_Parent {
 	}
 
 	public function update_row() {
-		$new_search_row_object = new WIC_Form_Multivalue_Update ( $this->entity );
-		$class = ( 'row-template' == $this->entity_instance ) ? 'hidden-template' : 'visible-templated-row';
-		$new_search_row = '<div class = "'. $class . '" id="' . $this->entity . '-' . $this->entity_instance . '">';
-			$new_search_row .= $new_search_row_object->layout_form( $this->data_object_array, null, null );
-			$new_search_row .= $this->create_destroy_button ( $this->entity . '-' . $this->entity_instance );
-		$new_search_row .= '</div>';
-		return $new_search_row;
+		$new_update_row_object = new WIC_Form_Multivalue_Update ( $this->entity, $this->entity_instance );
+		$new_update_row = $new_update_row_object->layout_form( $this->data_object_array, null, null );
+		return $new_update_row;
 	}
 
-/*	protected function create_destroy_button () {
 
-		$button = '<button ' .  
-			' class	="destroy-button"' . 
-			' onclick = {this.parentNode.parentNode.removeChild(this.parentNode);}' .
-			' type 	= "button" ' .
-			' name	= "destroy-button" ' .
-			' title  = ' . __( 'Remove Row', 'wp-issues-crm' ) .
-			' >x</button>';	
-
-		return ($button);
-	}
-*/
-	protected function create_destroy_button ( $base ) {
-		
-		$button ='<button ' . 
-			' class = "destroy-button" ' .
-			' name	= "destroy-button" ' .
-			' title  = ' . __( 'Remove Row', 'wp-issues-crm' ) .
-			' type = "button" ' .
-			' onclick="hideSelf(\'' . esc_attr( $base ) . '\')" ' .
-			' >x</button>'; 
-
-		return ($button);
-	}
-		
 
 	// empty functions required by parent class, but not implemented
 	protected function new_form() {}

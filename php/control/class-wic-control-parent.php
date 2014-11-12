@@ -44,6 +44,7 @@ abstract class WIC_Control_Parent {
 	public function initialize_default_values ( $entity, $field_slug, $instance ) {
 		$this->field = WIC_DB_Dictionary::get_field_rules( $entity, $field_slug );
 		$this->default_control_args =  array_merge( $this->default_control_args, get_object_vars ( $this->field ) );
+		$this->default_control_args['field_slug_css'] = str_replace( '_', '-', $field_slug );
 		$this->default_control_args['field_slug'] = ( '' == $instance ) ?
 		// if no instance supplied, this is just a field in a main form, and use field slug for field name and field id
 		$field_slug :
@@ -106,8 +107,9 @@ abstract class WIC_Control_Parent {
 		$type = ( 1 == $hidden ) ? 'hidden' : 'text';
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' . $field_label_suffix . '</span>' : '';
 		 
-		$control = ( $field_label > '' && ! ( 1 == $hidden ) ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
-		$control .= '<input class="' . $input_class . '" id="' . esc_attr( $field_slug )  . 
+		$control = ( $field_label > '' && ! ( 1 == $hidden ) ) ? '<label class="' . esc_attr ( $label_class ) .
+				 ' ' . esc_attr( $field_slug_css ) . '" for="' . esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
+		$control .= '<input class="' . esc_attr( $input_class ) . ' ' .  esc_attr( $field_slug_css ) . '" id="' . esc_attr( $field_slug )  . 
 			'" name="' . esc_attr( $field_slug ) . '" type="' . $type . '" placeholder = "' .
 			 esc_attr( $placeholder ) . '" value="' . esc_attr ( $value ) . '" ' . $readonly  . '/>' . $field_label_suffix_span; 
 			

@@ -99,10 +99,15 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		return ( $query_clause ); 	
 	}
 	
-	public function update_control ( $save ) {
-
+	public function update_control ( $control_args ) {
+		$final_control_args = array_merge ( $this->default_control_args, $control_args );
+		extract ( $final_control_args );
+		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' . $field_label_suffix . '</span>' : '';
+		 
+		$control_set = ( $field_label > '' && ! ( 1 == $hidden ) ) ? '<label class="' . esc_attr ( $label_class ) .
+				 ' ' . esc_attr( $field_slug_css ) . '" for="' . esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
 		// create emails division opening tag 		
-		$control_set = '<div id = "' . $this->field->field_slug . '-control-set' . '">';
+		$control_set .= '<div id = "' . $this->field->field_slug . '-control-set' . '" class = "wic-multivalue-control-set">';
 
 		// create a hidden template row for adding rows in wic-utilities.js through moreFields() 
 		// moreFields will replace the string 'row-template' with row-counter index value after creating the new row
@@ -117,11 +122,11 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		// now proceed to add rows for any existing records from database or previous form
 		
 		if ( count ( $this->value ) > 0 ) {
-
 			foreach ( $this->value as $value_row ) {
 				$control_set .= $value_row->update_row ( $save );
 			}
 		}		
+
 		$control_set .= '<div class = "hidden-template" id = "' . $this->field->field_slug . '-row-counter">' . count( $this->value ) . '</div>';		
 		$control_set .= $this->create_add_button ( $this->field->field_slug, sprintf ( __( 'Add %s ', 'wp-issues-crm' ), $this->field->field_label ) . ' ' . $repeater_group_label_suffix ) ;
 		$control_set .= '</div>';
@@ -138,7 +143,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		/* this button will create a new instance of the templated base paragraph (repeater row) and insert it above related counter in the DOM*/
 	public function create_add_button ( $base, $button_label ) {
 		
-		$button ='<div class = "add-button-spacer"></div>' .  
+		$button =  
 			'<button ' . 
 			' class = "row-add-button" ' .
 			' id = "' . esc_attr( $base ) . '-add-button" ' .
