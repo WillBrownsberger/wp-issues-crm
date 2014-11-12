@@ -164,7 +164,20 @@ abstract class WIC_Control_Parent {
 	public function dup_check() {
 		return $this->field->dedup;	
 	}
+	/*********************************************************************************
+	*
+	* report whether field is transient
+	*
+	*********************************************************************************/
 
+
+	public function is_transient() {
+		return ( $this->field->transient );	
+	}
+
+	
+	
+	
 	/*********************************************************************************
 	*
 	* report whether field is multivalue

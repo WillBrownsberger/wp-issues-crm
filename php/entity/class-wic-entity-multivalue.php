@@ -22,15 +22,19 @@ abstract class WIC_Entity_Multivalue extends WIC_Entity_Parent {
 		// note that row numbering may not synch between $_POST and the multivalue array 
 		$this->initialize();
 		foreach ($this->fields as $field ) {
-			$this->data_object_array[$field->field_slug]->set_value( $form_row_array[$field->field_slug] );
+			if ( isset ( $form_row_array[$field->field_slug] ) ) {
+				$this->data_object_array[$field->field_slug]->set_value( $form_row_array[$field->field_slug] );
+			}
 		}
 	}
 
 	protected function populate_from_object( $args ) {
 		extract( $args );
 		$this->initialize();
-		foreach ($this->fields as $field ) {
-			$this->data_object_array[$field->field_slug]->set_value( $form_row_object->{$field->field_slug} );
+		foreach ( $this->fields as $field ) {
+			if ( ! $this->data_object_array[$field->field_slug]->is_transient() ) {
+				$this->data_object_array[$field->field_slug]->set_value( $form_row_object->{$field->field_slug} );
+			}
 		}
 	}
 

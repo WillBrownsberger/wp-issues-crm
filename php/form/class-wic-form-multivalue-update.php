@@ -24,7 +24,9 @@ class WIC_Form_Multivalue_Update extends WIC_Form_Multivalue_Search  {
 	protected function get_the_buttons(){}
 	protected function get_the_header ( &$data_array ) {}	
 	protected function get_the_formatted_control ( $control ) {
-		$args = array();
+		$args = array(
+			'onclick_delete' => 'hideSelf(\'' . esc_attr( $this->entity . '-' . $this->entity_instance ) . '\')',		
+		);
 		return ( $control->update_control( $args ) ); 
 	}
 	protected function get_the_legends() {}	
@@ -34,36 +36,14 @@ class WIC_Form_Multivalue_Update extends WIC_Form_Multivalue_Search  {
 		$class = ( 'row-template' == $this->entity_instance ) ? 'hidden-template' : 'visible-templated-row';
 		$search_row = '<div class = "'. $class . '" id="' . $this->entity . '-' . $this->entity_instance . '">';
 		$search_row .= '<div id="wic-multivalue-block">';
-			$count = count($groups);
-			$counter = 1;
 			foreach ( $groups as $group ) {
 				 $search_row .= '<div class = "wic-multivalue-field-subgroup" id = "wic-field-subgroup-' . esc_attr( $group->group_slug ) . '">';
 						$group_fields = WIC_DB_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
 						$search_row .= $this->the_controls ( $group_fields, $data_array );
-						if ( $counter == $count ) {
-							$search_row .= $this->create_destroy_button ( $this->entity . '-' . $this->entity_instance );							
-						}   
 				$search_row .= '</div>';
-				$counter++;
 			} 
-
 		$search_row .= '</div></div>';
 		return $search_row;
 	}
-	
-	protected function create_destroy_button ( $base ) {
-		
-		$button ='<button ' . 
-			' class = "destroy-button" ' .
-			' name	= "destroy-button" ' .
-			' title  = ' . __( 'Remove Row', 'wp-issues-crm' ) .
-			' type = "button" ' .
-			' onclick="hideSelf(\'' . esc_attr( $base ) . '\')" ' .
-			' >x</button>'; 
 
-		return ($button);
-	}
-			
-	
-	
 }

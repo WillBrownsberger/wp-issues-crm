@@ -150,6 +150,25 @@ p.wic-form-field-group-legend {
 	padding-right: 20px;
 }
 
+.wic-input-deleted {
+    display: none;
+}
+
+.wic-input-deleted-label {
+	background: #f6f6f6;
+	border: none;
+	color: #333;
+	cursor: pointer;
+	margin: 0 10px; 
+	padding: 0 10px;
+}
+
+.wic-input-deleted-label:hover {
+	background: red;
+	color: white;
+	font-weight: 700;
+}
+
 .add-button-spacer {
 	min-width: 180px;
 	display: inline-block;

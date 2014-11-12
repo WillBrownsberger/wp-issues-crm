@@ -99,7 +99,6 @@ class WP_Issues_CRM {
 		
 	public function wp_issues_crm() {
 
-
 		if ( ! current_user_can ( 'activate_plugins' ) ) { 
 			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
 			return;

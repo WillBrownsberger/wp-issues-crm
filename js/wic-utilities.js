@@ -30,8 +30,8 @@ function togglePostFormSection( section ) {
 	}
 }
 
-function hideSelf( row ) {
-	var row = document.getElementById ( row );
+function hideSelf( rowname ) {
+	var row = document.getElementById ( rowname );
 	rowClass =row.className; 
 	row.className = rowClass.replace( 'visible-templated-row', 'hidden-template' ) ;
 }

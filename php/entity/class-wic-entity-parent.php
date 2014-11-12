@@ -235,7 +235,7 @@ abstract class WIC_Entity_Parent {
 	protected function id_search_generic ( $args, $success_form ) {
 		// initialize data array with only the ID and do search
 		$this->data_object_array['ID'] = WIC_Control_Factory::make_a_control( 'text' );
-		$this->data_object_array['ID']->initialize_default_values(  $this->entity, 'ID' );	
+		$this->data_object_array['ID']->initialize_default_values(  $this->entity, 'ID', $this->entity_instance );	
 		$this->data_object_array['ID']->set_value( $args['id_requested'] );
 		$wic_query = 	WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$wic_query->search ( $this->assemble_meta_query_array( false ) ); 

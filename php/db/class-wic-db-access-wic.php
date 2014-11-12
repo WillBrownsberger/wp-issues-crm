@@ -35,7 +35,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 	protected function db_update ( $save_update_array ) {
 		
 		global $wpdb;
-		 
+		$table  = $wpdb->prefix . 'wic_' . $this->entity;  
 		
 		$set = $this->parse_save_update_array( $save_update_array );
   		$set_clause_with_placeholders = $set['set_clause_with_placeholders'];

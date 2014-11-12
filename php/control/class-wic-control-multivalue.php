@@ -125,18 +125,18 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 			'instance' => 'row-template'		
 			);
 		$template = new $class_name( 'initialize', $args );
-		$control_set .= $template->update_row ( $save );
+		$control_set .= $template->update_row ();
 
 		// now proceed to add rows for any existing records from database or previous form
 		
 		if ( count ( $this->value ) > 0 ) {
 			foreach ( $this->value as $value_row ) {
-				$control_set .= $value_row->update_row ( $save );
+				$control_set .= $value_row->update_row ();
 			}
 		}		
 
 		$control_set .= '<div class = "hidden-template" id = "' . $this->field->field_slug . '-row-counter">' . count( $this->value ) . '</div>';		
-		$control_set .= $this->create_add_button ( $this->field->field_slug, sprintf ( __( 'Add %s ', 'wp-issues-crm' ), $this->field->field_label ) . ' ' . $repeater_group_label_suffix ) ;
+		$control_set .= $this->create_add_button ( $this->field->field_slug, sprintf ( __( 'Add %s ', 'wp-issues-crm' ), $this->field->field_label ) . ' ' . $field_label_suffix_span ) ;
 		$control_set .= '</div>';
 
 		return ($control_set);	
