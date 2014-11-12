@@ -34,13 +34,11 @@ class WIC_Form_Multivalue_Search extends WIC_Form_Parent  {
 	
 	public function layout_form ( &$data_array, $message, $message_level ) {
 		$groups = $this->get_the_groups();
-		$search_row = '<div id="wic-multivalue-block">';
+		$search_row = '<div id="wic-multivalue-block" class = "wic-multivalue-control-set">';
 			foreach ( $groups as $group ) {
 				 $search_row .= '<div class = "wic-multivalue-field-subgroup" id = "wic-field-subgroup-' . esc_attr( $group->group_slug ) . '">';
 						$group_fields = WIC_DB_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
-						$search_row .= '<p>' . 
-							$this->the_controls ( $group_fields, $data_array )
-						   . '</p>' 
+						$search_row .= $this->the_controls ( $group_fields, $data_array )
 					. '</div>';
 			} 
 		$search_row .= '</div>';
