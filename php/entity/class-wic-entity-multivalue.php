@@ -49,19 +49,26 @@ abstract class WIC_Entity_Multivalue extends WIC_Entity_Parent {
 		$new_update_row = $new_update_row_object->layout_form( $this->data_object_array, null, null );
 		return $new_update_row;
 	}
+	
+	public function save_row() {
+		$new_save_row_object = new WIC_Form_Multivalue_Save ( $this->entity, $this->entity_instance );
+		$new_save_row = $new_save_row_object->layout_form( $this->data_object_array, null, null );
+		return $new_save_row;
+	}
 
 	public function do_save_update( $parent_slug, $id ) {
 		$parent_link_field = $parent_slug . '_' . 'id';
-		var_dump ($parent_link_field);
-		// var_dump ($this->data_object_array());
 		$this->data_object_array[$parent_link_field]->set_value( $id );
 		$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$wic_access_object->save_update( $this->data_object_array ); 
 		if ( false === $wic_access_object->outcome ) {
-			$error =  $wic_access_object->explanation;
+			$error =  $wic_access_object->explanation . 'from class.wic-entity-multivalue';
 		} else {
 			$error = '';
-		}
+			if ( '' == $this->data_object_array['ID']->get_value() ) { // then just did a save, so . . .
+				$this->data_object_array['ID']->set_value( $wic_access_object->insert_id );
+			}
+		}		
 		return ( $error );
 	}
 

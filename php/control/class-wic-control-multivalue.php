@@ -45,9 +45,10 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 					}
 				} else {
 					$this->value[$instance_counter] = new $class_name( 'populate_from_form', $args );
+					$instance_counter++;
 				}
 			}
-			$instance_counter++;
+			
 		}
 	}
 
@@ -173,11 +174,23 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	*
 	*/	
 	
-	
 	public function update_control ( $control_args ) {
+		$control_set = $this->save_update_control ( $control_args, false );
+		return ( $control_set );	
+	}
+	
+	public function save_control ( $control_args ) {
+		$control_set = $this->save_update_control ( $control_args, true );
+		return ( $control_set );	
+	}
+	
+	
+	public function save_update_control ( $control_args, $save ) { 
 		$final_control_args = array_merge ( $this->default_control_args, $control_args );
 		extract ( $final_control_args );
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' . $field_label_suffix . '</span>' : '';
+		 
+		$form_to_call = ( $save ) ? 'save_row' : 'update_row';		 
 		 
 		$control_set = ( $field_label > '' && ! ( 1 == $hidden ) ) ? '<label class="' . esc_attr ( $label_class ) .
 				 ' ' . esc_attr( $field_slug_css ) . '" for="' . esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
@@ -192,13 +205,14 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 			'instance' => 'row-template'		
 			);
 		$template = new $class_name( 'initialize', $args );
-		$control_set .= $template->update_row ();
+		
+		$control_set .= $template->$form_to_call();
 
 		// now proceed to add rows for any existing records from database or previous form
 		
 		if ( count ( $this->value ) > 0 ) {
 			foreach ( $this->value as $value_row ) {
-				$control_set .= $value_row->update_row ();
+				$control_set .= $value_row->$form_to_call();
 			}
 		}		
 

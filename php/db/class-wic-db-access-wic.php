@@ -142,7 +142,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$outcome = $wpdb->delete ( $table, array( 'ID' => $id ) );
 		if ( ! ( 1 == $outcome ) ) {
 			die ( sprintf (  __('Database error on execution of requested delete of %s.' , 'wp-issues-crm' ), $this->entity ) );	
-		}
+		} 
 	}
 
 }
