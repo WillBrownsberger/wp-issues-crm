@@ -18,6 +18,13 @@ class WIC_List_Parent {
   public function format_entity_list( &$wic_query, $show_top_buttons ) {
   
   		$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $wic_query->entity );
+		$class_name = 'WIC_Entity_' . initial_cap ( $wic_query->entity );
+		
+		$args = array (
+			'action_requested' => 'open_list_entity_for_access'
+			); 
+		$list_entity = new $class_name ( 'open_list_entity_for_access', null );  		
+
   	
   		$list_button_args = array(
 			'entity_requested'		=> $wic_query->entity,
@@ -48,8 +55,9 @@ class WIC_List_Parent {
 					}
 			$output .= '</ul></li>';
 
-			foreach ( $wic_query->result as $entity ) {
+			foreach ( $wic_query->result as $result ) {
 
+				$row_array = $list_entity->get_row ( $result->ID );
 				$row= '';
 				$line_count++;
 				$row_class = ( 0 == $line_count % 2 ) ? "pl-even" : "pl-odd";
@@ -57,7 +65,7 @@ class WIC_List_Parent {
 				$row .= '<ul class = "wic-post-list-line">';			
 					foreach ( $fields as $field ) {
 						$row .= '<li class = "wic-post-list-field pl-' . $wic_query->entity . '-' . $field->field_slug . ' "> ';
-							$row .= esc_html ( $entity->{$field->field_slug} );
+							$row .= esc_html ( $row_array[$field->field_slug] );
 						$row .= '</li>';			
 					}
 				$row .='</ul>';				

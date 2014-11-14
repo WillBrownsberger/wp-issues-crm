@@ -48,4 +48,9 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		$this->form_save_update_generic ( true, 'WIC_Form_Constituent_Save', 'WIC_Form_Constituent_Update' );
 		return;
 	}
+	
+	// initialize a shortened object for repetitive list access
+	protected function open_list_entity_for_access () {
+		$this->initialize_list_controls();	
+	}
 }

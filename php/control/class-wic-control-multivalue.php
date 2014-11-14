@@ -79,7 +79,8 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 						'value'	=> $pointer,
 						'compare'=> '=',
 					)
-				)
+				),   // get child records
+				'*'  // get all values for each
 			);
 
 		$this->value = array();

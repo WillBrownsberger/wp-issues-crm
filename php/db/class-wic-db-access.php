@@ -38,8 +38,8 @@ abstract class WIC_DB_Access {
 
 	
 
-	public function search ( $meta_query_array  ) { // receives pre-assembled meta_query_array
-		$this->db_search( $meta_query_array );
+	public function search ( $meta_query_array, $select_mode  ) { // receives pre-assembled meta_query_array
+		$this->db_search( $meta_query_array, $select_mode );
 		return;
 	}
 

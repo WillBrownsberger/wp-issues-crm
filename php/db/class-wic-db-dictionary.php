@@ -121,10 +121,10 @@ class WIC_DB_Dictionary {
 	public static function get_list_fields_for_entity ( $entity ) {
 		global $wpdb;
 		$table = $wpdb->prefix . 'wic_data_dictionary';
-		$sort_clause = $wpdb->get_results( 
+		$list_fields = $wpdb->get_results( 
 			$wpdb->prepare (
 				"
-				SELECT field_slug, field_type, field_label, field_type 
+				SELECT field_slug, field_label, field_type
 				FROM $table
 				WHERE entity_slug = %s
 				AND listing_order > 0 
@@ -133,7 +133,7 @@ class WIC_DB_Dictionary {
 				, array ( $entity )
 				)
 			, OBJECT );
-		return ( $sort_clause );
+		return ( $list_fields );
 	}
 
 	public static function get_dup_check_string ( $entity ) {

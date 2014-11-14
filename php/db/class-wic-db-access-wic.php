@@ -53,8 +53,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		return;
 	}
 
-	protected function db_search( $meta_query_array ) {
-
+	protected function db_search( $meta_query_array, $select_mode = '*' ) {
 		global $wpdb;
 
 		$top_entity = $this->entity;
@@ -65,7 +64,23 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$sort_clause_array = WIC_DB_Dictionary::get_sort_order_for_entity( $this->entity );
 		$sort_clause = $sort_clause_array[0]->sort_clause_string;
 		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause ASC ";
-		
+
+		$select_list = '';	
+		if ( 'list' == $select_mode ) {
+			$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $this->entity );
+			foreach ( $fields as $field ) { 
+				if ( 'multivalue' != $field->field_type ) {
+					$select_list .= ( '' == $select_list ) ? $top_entity . '.' : ', ' . $top_entity . '.' ;
+					$select_list .= $field->field_slug;
+					$select_list .= ' ';	
+				}		
+			}	
+		} elseif ( 'id' == $select_mode) {
+			$select_list = $top_entity . '.' . 'ID ';		
+		} else {
+			$select_list = $top_entity . '.' . '* '; 
+		}
+
 		foreach ( $meta_query_array as $where_item ) {
 			if( ! in_array( $where_item['table'], $table_array ) ) {
 				$table_array[] = $where_item['table'];			
@@ -85,9 +100,9 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		}
 
 		$join = ( '' == $join ) ? $wpdb->prefix . 'wic_' . $this->entity : $join; 
-		
+
 		$sql = $wpdb->prepare( "
-					SELECT 	$top_entity.* 
+					SELECT 	$select_list
 					FROM 	$join
 					WHERE 1=1 $where
 					GROUP BY $top_entity.ID
@@ -96,6 +111,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 					",
 				$values );	
 		// $sql group by always returns single row, even if multivalues for some records 
+
 		$this->sql = $sql; 
 		$this->result = $wpdb->get_results ( $sql );	
 		$this->outcome = true;  // wpdb get_results does not return errors for searches, so assume zero return is just a none found condition (not an error)
