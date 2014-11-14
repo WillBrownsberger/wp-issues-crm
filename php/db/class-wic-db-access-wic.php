@@ -47,6 +47,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			$set['set_value_array'] );
 		$update_result = $wpdb->query( $sql );
 		$this->outcome = ( 1 == $update_result );
+		$this->outcome = ! ( false === $update_result );
 		$this->explanation = ( $this->outcome ) ? '' : __( 'Unknown database error. Update may not have been successful', 'wp-issues-crm' );
 		$this->sql = $sql;
 		return;

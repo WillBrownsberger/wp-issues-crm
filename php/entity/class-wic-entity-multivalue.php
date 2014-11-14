@@ -62,7 +62,7 @@ abstract class WIC_Entity_Multivalue extends WIC_Entity_Parent {
 		$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$wic_access_object->save_update( $this->data_object_array ); 
 		if ( false === $wic_access_object->outcome ) {
-			$error =  $wic_access_object->explanation . 'from class.wic-entity-multivalue';
+			$error =  $wic_access_object->explanation . ' Error reported by class WIC_Entity_Multivalue. ';
 		} else {
 			$error = '';
 			if ( '' == $this->data_object_array['ID']->get_value() ) { // then just did a save, so . . .
@@ -72,11 +72,13 @@ abstract class WIC_Entity_Multivalue extends WIC_Entity_Parent {
 		return ( $error );
 	}
 
-
-	// empty functions required by parent class, but not implemented
-	protected function new_form() {}
-	protected function form_search () {}
-	protected function id_search ( $args ) {}
-	protected function form_update ( $args ) {}
-	protected function form_save ( $args ) {}
+	public function get_display_value() {
+		$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $wic_query->entity );
+		$display_value = '';
+		foreach ( $fields as $field ) {
+			$display_value = ( $display_value = '' ) ? '' : ', ';
+			$display_value .= $this->data_access_object[$field]->get_display_value();
+		}	
+		return $display_value;	
+	}
 }

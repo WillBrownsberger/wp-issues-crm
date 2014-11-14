@@ -18,40 +18,38 @@
 
 /************************************************************************************
 *
-*  WIC Field
+*  WIC Control Parent
 *
 ************************************************************************************/
 abstract class WIC_Control_Parent {
 	protected $field;
-	public $default_control_args = array(
-		'field_label' 				=> '',
-		'value'						=> '',
-		'like_search_enabled' 	=> false,
-		'readonly' 					=> false,
-		'required'					=> '',
-		'hidden'						=> false,
-		// elements below not derived directly from field settings, but from combination of field type and settings
-		'field_label_suffix' 	=> '',
-		'input_class' 				=> 'wic-input',
-		'label_class' 				=> 'wic-label',
-		'placeholder' 				=> '',
-		);
-
+	public $default_control_args = array();
 	protected $value = '';	
-	// parameters for text control creation -- the text control is used by multiple extensions of the class
+
+
+	/***
+	*
+	*	The control create functions COULD be promiscuous in that they get their control arguments from multiple places.
+	*		Instead, limit input to rules from database on initialization and 
+	*		-- rules specified in the named control function (search_control, update_control) 
+	*		In child controls, may allow direct passage of arguments -- see checked and multivalue.
+	*		Note that have potential to get css specified to them based on their field slug
+	*/
 
 
 	public function initialize_default_values ( $entity, $field_slug, $instance ) {
 		$this->field = WIC_DB_Dictionary::get_field_rules( $entity, $field_slug );
 		$this->default_control_args =  array_merge( $this->default_control_args, get_object_vars ( $this->field ) );
 		$this->default_control_args['field_slug_css'] = str_replace( '_', '-', $field_slug );
-		$this->default_control_args['field_slug'] = ( '' == $instance ) ?
-		// if no instance supplied, this is just a field in a main form, and use field slug for field name and field id
-		$field_slug :
-		// if an instance is supplied prepare to output the field as an array element, i.e., a row in a multivalue field 
-		// note that the entity name for a row object in a multivalue field is the same as the field_slug for the multivalue field
-		// this is a trap for the unwary in setting up the dictionary table 
-		$entity . '[' . $instance . ']['. $field_slug . ']';
+		$this->default_control_args['field_slug'] = ( '' == $instance ) ? // ternary
+				// if no instance supplied, this is just a field in a main form, and use field slug for field name and field id
+				$field_slug :
+				// if an instance is supplied prepare to output the field as an array element, i.e., a row in a multivalue field 
+				// note that the entity name for a row object in a multivalue field is the same as the field_slug for the multivalue field
+				// this is a trap for the unwary in setting up the dictionary table 
+				$entity . '[' . $instance . ']['. $field_slug . ']';
+		$this->default_control_args['onclick_delete'] =  'hideSelf(\'' . esc_attr( $entity . '[' . $instance . ']'  ) . '\')'; 
+				// only used by the transient field type deleted
 	}
 
 	/*********************************************************************************
@@ -69,13 +67,26 @@ abstract class WIC_Control_Parent {
 		return $this->value;	
 	}
 	
+	public function get_display_value () {
+		if ( isset ( $this->field->format_call_back ) ) {
+			return $this->field->format_call_back( $this->value );
+		} else {
+			return ( $this->value ) ;		
+		}	
+	}
 
+	/*********************************************************************************
+	*
+	* methods for control creation for different types of forms -- new, search, save, update
+	*
+	***********************************************************************************/
+	
 	public static function new_control () {
 		$this->search_control();
 	}
 
-	public function search_control ( $control_args ) {
-		$final_control_args = array_merge ( $this->default_control_args, $control_args );
+	public function search_control () {
+		$final_control_args = $this->default_control_args;
 		$final_control_args['readonly'] = false;
 		$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
 		$final_control_args['value'] = $this->value;
@@ -83,8 +94,8 @@ abstract class WIC_Control_Parent {
 		return ( $control ) ;
 	}
 	
-	public function save_control ( $control_args ) {
-		$final_control_args = array_merge ( $this->default_control_args, $control_args );
+	public function save_control () {
+		$final_control_args = $this->default_control_args;
 		if( ! $final_control_args['readonly'] ) {
 			$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
 			$final_control_args['value'] = $this->value;
@@ -92,16 +103,16 @@ abstract class WIC_Control_Parent {
 		}
 	}
 	
-	public function update_control ( $control_args ) {
-		$final_control_args = array_merge ( $this->default_control_args, $control_args );
+	public function update_control () {
+		$final_control_args = $this->default_control_args;
 		$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
 		$final_control_args['value'] = $this->value;
 		return ( $this->create_control( $final_control_args )  );	
 	}
 
-	protected function create_control ( $control_args ) { // basic create text control
+	protected function create_control ( $control_args ) { // basic create text control, accessed through control methodsabove
 
-		extract ( $control_args, EXTR_SKIP );
+		extract ( $control_args, EXTR_OVERWRITE );
 		 
 		$readonly = $readonly ? 'readonly' : '';
 		$type = ( 1 == $hidden ) ? 'hidden' : 'text';

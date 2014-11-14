@@ -5,6 +5,17 @@
 */
 class WIC_Control_Checked extends WIC_Control_Parent {
 	
+	/* public to allow direct call for occasional non database use
+	 -- must set up args:
+		$control_args = array ( 
+			'field_slug'		=> 'non blank',
+			'field_label'			=>	'probably non blank ' , 'wp-issues-crm' ),
+			'value'					=> 0,
+			'readonly' => 0,
+			'field_label_suffix' => '',
+			'label_class' => '',				
+		);	*/
+	
 	public function create_control ( $control_args ) {
 		
 		$input_class = 'wic_input_checked';

@@ -36,6 +36,8 @@ abstract class WIC_DB_Access {
 	*
 	*/
 
+	
+
 	public function search ( $meta_query_array  ) { // receives pre-assembled meta_query_array
 		$this->db_search( $meta_query_array );
 		return;
@@ -45,8 +47,11 @@ abstract class WIC_DB_Access {
 		$this->db_delete_by_id ( $id );	
 	}
 
-
-	public function save_update ( $doa ) {
+	// note that the assembly of the save update array occurs in this database access class because
+	// updates are handled for particular entities (and this object serves a particular entity)
+	// by contrast, the search array assembly is handled at the entity level because it needs to be able to report up to
+	// a multivalue control and contribute to a join across multiple entities in addition the primary object entity  
+	public function save_update ( $doa ) { // 
 		$save_update_array = $this->assemble_save_update_array( $doa );
 		if ( count ( $save_update_array ) > 0 ) {
 			if ( $doa['ID']->get_value() > 0 ) {

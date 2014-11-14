@@ -26,8 +26,7 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 	}
 
 	protected function get_the_formatted_control ( $control ) {
-		$args = array();
-		return ( $control->update_control( $args ) ); 
+		return ( $control->update_control() ); 
 	}
 
 	protected function get_the_legends() {

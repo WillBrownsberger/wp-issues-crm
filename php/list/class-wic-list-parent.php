@@ -49,6 +49,7 @@ class WIC_List_Parent {
 			$output .= '</ul></li>';
 
 			foreach ( $wic_query->result as $entity ) {
+
 				$row= '';
 				$line_count++;
 				$row_class = ( 0 == $line_count % 2 ) ? "pl-even" : "pl-odd";

@@ -25,8 +25,7 @@ class WIC_Form_Constituent_Search extends WIC_Form_Parent  {
 	}
 
 	protected function get_the_formatted_control ( $control ) {
-		$args = array();
-		return ( $control->search_control( $args ) ); 
+		return ( $control->search_control() ); 
 	}
 
 	protected function get_the_legends() {
@@ -36,9 +35,13 @@ class WIC_Form_Constituent_Search extends WIC_Form_Parent  {
 				'field_slug'		=> 'strict_match',
 				'field_label'			=>	'(%) ' . __( 'Full-text search conditionally enabled for these fields -- require strict match instead this time? ' , 'wp-issues-crm' ),
 				'value'					=> 0,
+				'like_search_enabled' => '',
+				'readonly' => 0,
+				'field_label_suffix' => '',
+				'label_class' => '',				
 			);
 			$check_box = new WIC_Control_Checked;
-		return ( '<p class = "wic-form-legend">' . $check_box->search_control ( $control_args ) . '</p>' );
+		return ( '<p class = "wic-form-legend">' . $check_box->create_control ( $control_args ) . '</p>' );
 		}
 	}
 }

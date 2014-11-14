@@ -110,8 +110,6 @@ class WP_Issues_CRM {
 			'form_requested'			=> '',
 			'action_requested'		=> '',
 			'id_requested'				=> 0,
-			'referring_parent' 		=> 0,
-			'new_form'					=> 'n',
 		);	
 
 		// use default control array to set up top row of buttons that always shows over dashboard and over main form 
@@ -146,8 +144,6 @@ class WP_Issues_CRM {
 				$action_requested 		= $control_array[1];
 				$args = array (
 					'id_requested'			=>	$control_array[2],
-					'referring_parent' 	=> $control_array[3],
-					'new_form'				=> $control_array[4],
 					'instance'				=> '', // unnecessary in this context, absence will not create an error but here for consistency about arguments;
 				);
 				

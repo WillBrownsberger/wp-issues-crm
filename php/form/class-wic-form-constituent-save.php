@@ -25,8 +25,7 @@ class WIC_Form_Constituent_Save extends WIC_Form_Constituent_Update  {
 	}
 
 	protected function get_the_formatted_control ( $control ) {
-		$args = array();
-		return ( $control->save_control( $args ) ); 
+		return ( $control->save_control() ); 
 	}
 
 	

@@ -14,9 +14,6 @@
 class WIC_Form_Multivalue_Save extends WIC_Form_Multivalue_Update  {
 
 	protected function get_the_formatted_control ( $control ) {
-		$args = array(
-			'onclick_delete' => 'hideSelf(\'' . esc_attr( $this->entity . '[' . $this->entity_instance . ']'  ) . '\')',		
-		);
-		return ( $control->save_control( $args ) ); 
+		return ( $control->save_control() ); 
 	}
 }

@@ -13,19 +13,14 @@ abstract class WIC_Entity_Parent {
 	
 	protected $entity		= ''; 						// e.g., constituent, activity, issue
 	protected $entity_instance = '';					// relevant where entity is a row of multivalue array as in emails for a constituent
-	protected $fields = array(); 						// will be initialized as field_slug => type from wp_wic_data_dictionary
+	protected $fields = array(); 						// will be initialized as field_slug => type array from wp_wic_data_dictionary
 	protected $data_object_array = array(); 		// will be initialized as field_slug => control object 
 	protected $outcome = '';							// results of latest request 
 	protected $outcome_dups = false;					// supplementary outcome information -- dups among error causes	
 	protected $explanation	= '';						// explanation for outcome
 	
 		
-	abstract protected function set_entity_parms ( $args ); // must be included to set entity
-	abstract protected function new_form();
-	abstract protected function form_search();
-	abstract	protected function id_search( $args );
-	abstract protected function form_update ( $args );
-	abstract	protected function form_save ( $args );
+	abstract protected function set_entity_parms ( $args ); // must be included in child to set entity and possibly instance
 	
 	/*
 	*
@@ -35,12 +30,8 @@ abstract class WIC_Entity_Parent {
 	* 	-- entity is chosen in the wp-issues-crm which initializes the corresponding child class  -- e.g. WIC_Constituent
 	*  
 	* args is an associative array, which MAY be populated as follows:
-	*	-- the following are arguments in the control array from form buttons
-	*		'id_requested'			=>	$control_array[2],
-	*		'referring_parent' 	=> $control_array[3],
-	*		'new_form'				=> $control_array[4],
-	*  -- the following will be passed in the case of the object being initialized as a multi-value field
-	*		'instance'				=> '',	
+	*		'id_requested'			=>	$control_array[2] passed by wp-issues-crm from form button for an ID search
+	*		'instance'				=> passed in the case of the object being initialized as a row in multi-value field:	
 	*
 	*/
 	public function __construct ( $action_requested, $args ) {
@@ -77,7 +68,8 @@ abstract class WIC_Entity_Parent {
 			if ( ! $control->is_multivalue() ) {
 				$control->set_value ( $wic_query->result[0]->{$field_slug} );
 			} else { // for multivalue fields, set_value wants array of row arrays -- 
-						// query results don't have that form or even an appropriate field slug  
+						// query results don't have that form or even an appropriate field slug, 
+						// so have to search by parent ID  
 				$control->set_value_by_parent_pointer( $wic_query->result[0]->ID );
 			}
 		} 
@@ -89,7 +81,7 @@ abstract class WIC_Entity_Parent {
 	*     Results stored in object properties -- outcome, outcome_dups, explanation
 	*
 	**************************************************************************************/
-	private function update_ready( $save ) {
+	private function update_ready( $save ) { // true is save, false is update
 		// runs all four sanitize/validate functions
 		$this->sanitize_values();
 		$this->dup_check ( $save );
@@ -137,8 +129,8 @@ abstract class WIC_Entity_Parent {
 		if ( $validation_errors > '' ) {
 			$this->outcome = false;		
 			$this->explanation .= $validation_errors;
-			return ( $validation_errors . sprintf( __( ' (Message from %1$s, instance %2$s.) ', 'wp-issues-crm' ), 
-				$this->entity, $this->entity_instance ) );		
+			return ( $validation_errors . sprintf( __( ' (Message from %1$s object, instance %2$s.) ', 'wp-issues-crm' ), 
+				$this->entity, $this->entity_instance + 1 ) );		
 		} else {
 			return ('');		
 		}
@@ -172,8 +164,11 @@ abstract class WIC_Entity_Parent {
 
 	/*************************************************************************************
 	*
-	*  METHODS FOR COMPILING DATA BASE ACCESS REQUESTS FROM CONTROLS
-	*     
+	*  METHODS FOR COMPILING SEARCH REQUESTS FROM CONTROLS 
+	*	This function lives in this class so that it can be called publicly by a multivalue control
+	*	   which may be assembling query conditions from entities within it to contribute to a 
+	*     search involving a multi-table join.  The corresponding update assembly lives in the database access
+	*		layer which, although it will support multi-entity searches, only updates one entity.
 	*
 	**************************************************************************************/
 	public function assemble_meta_query_array ( $dup_check ) {
@@ -204,8 +199,8 @@ abstract class WIC_Entity_Parent {
 			 'guidance' );
 	}	
 
-	//handle an update request coming from a form
-	protected function form_save_update_generic ( $args, $save, $fail_form, $success_form ) {
+	//handle an update request coming from a form ( $save is true or false )
+	protected function form_save_update_generic ( $save, $fail_form, $success_form ) {
 		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
 		$this->populate_data_object_array_from_submitted_form();
 		$this->update_ready( $save ); // false, not a save
@@ -240,11 +235,11 @@ abstract class WIC_Entity_Parent {
 	}
 	
 	// handle a search request for an ID coming from anywhere
-	protected function id_search_generic ( $args, $success_form ) {
+	protected function id_search_generic ( $id, $success_form ) {
 		// initialize data array with only the ID and do search
 		$this->data_object_array['ID'] = WIC_Control_Factory::make_a_control( 'text' );
 		$this->data_object_array['ID']->initialize_default_values(  $this->entity, 'ID', $this->entity_instance );	
-		$this->data_object_array['ID']->set_value( $args['id_requested'] );
+		$this->data_object_array['ID']->set_value( $id );
 		$wic_query = 	WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$wic_query->search ( $this->assemble_meta_query_array( false ) ); 
 		// retrieve record if found, otherwise error

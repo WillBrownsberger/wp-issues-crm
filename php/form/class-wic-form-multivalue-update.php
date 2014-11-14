@@ -25,10 +25,7 @@ class WIC_Form_Multivalue_Update extends WIC_Form_Multivalue_Search  {
 	protected function get_the_header ( &$data_array ) {}	
 	
 	protected function get_the_formatted_control ( $control ) { 
-		$args = array(
-			'onclick_delete' => 'hideSelf(\'' . esc_attr( $this->entity . '[' . $this->entity_instance . ']'  ) . '\')',		
-		);
-		return ( $control->update_control( $args ) ); 
+		return ( $control->update_control() ); 
 	}
 	protected function get_the_legends() {}	
 	
