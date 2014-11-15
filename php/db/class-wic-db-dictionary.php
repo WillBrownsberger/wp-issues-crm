@@ -9,7 +9,7 @@
 *  The first two methods are used in assembling the data_object_array for entities.  They load all field
 *		rules into the controls in the array.
 *
-*	Outside those controls, no routines know individual field rules.  There are, however, select occasions where
+*	Outside those controls, no routines access the dictionary for information about individual fields.  There are, however, select occasions where
 *		it is convenient to query across all fields for certain properties.  These are limited to:
 *			+ like_search_enabled, dup_check and required solely for the purpose of formatting of form legend creation or of error messages
 *			+ sort_clause_order soley for the purpose of creating a sort string

@@ -520,6 +520,7 @@ ul.wic-post-list-line {
 	width: 100%;	
 }
 .pl-constituent-first_name{ width:14%;}
+.pl-constituent-middle_name{ width:14%;}
 .pl-constituent-last_name{ width:14%;}
 .pl-constituent-phones{ width:15%;}
 .pl-constituent-emails{ width:28%;}
