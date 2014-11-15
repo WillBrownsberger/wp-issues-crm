@@ -19,6 +19,9 @@ class WIC_DB_Access_Factory {
 		'constituent' => 'WIC_DB_Access_WIC',	
 		'activity' => 'WIC_DB_Access_WIC',
 		'email'	=> 'WIC_DB_Access_WIC',
+		'phone'	=> 'WIC_DB_Access_WIC',
+		'address'	=> 'WIC_DB_Access_WIC',
+		'email'	=> 'WIC_DB_Access_WIC',
 		'issue' => 'WIC_DB_Access_WP',
 	);
 
