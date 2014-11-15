@@ -62,44 +62,21 @@ abstract class WIC_Entity_Parent {
 		} 
 	}	
 
-	protected function populate_data_object_array_from_found_record( &$wic_query) {
+	protected function populate_data_object_array_from_found_record( &$wic_query, $offset=0 ) {
 		foreach ( $this->data_object_array as $field_slug => $control ) { 
 			if ( ! $control->is_multivalue() ) { 
-				$control->set_value ( $wic_query->result[0]->{$field_slug} );
+				$control->set_value ( $wic_query->result[$offset]->{$field_slug} );
 			} else { // for multivalue fields, set_value wants array of row arrays -- 
 						// query results don't have that form or even an appropriate field slug, 
 						// so have to search by parent ID  
-				$control->set_value_by_parent_pointer( $wic_query->result[0]->ID );
+				$control->set_value_by_parent_pointer( $wic_query->result[$offset]->ID );
 			}
 		} 
 	}	
 
 	protected function initialize_list_controls () { 
-		$this->data_object_array['ID'] = WIC_Control_Factory::make_a_control( 'text' ); // add the ID field for use in searching 	
-		$this->data_object_array['ID']->initialize_default_values(  $this->entity, 'ID', $this->entity_instance ); // initialize it	
-		$this->data_object_array['ID']->get_value();
  		$this->fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $this->entity ); // identify the list fields
 		$this->initialize_data_object_array(); // add and initialize the list fields 
-	}
-
-	public function get_row ( $id ) {  // fill list controls based on an ID
-		$this->data_object_array['ID']->set_value( $id );
-		$list_row_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-		$list_row_query->search ( $this->assemble_meta_query_array( false ), 'list' ); 
-		// retrieve record if found, otherwise error
-		if ( 1==$list_row_query->found_count ) {
-			$this->populate_data_object_array_from_found_record ( $list_row_query );
-			// generate row array for list use
-			$row_array = array();
-			
-			foreach ( $this->data_object_array as $key=>$control ) {
-				$row_array[$key] = $control->get_display_value();
-			}
-			
-			return ( $row_array );
-		} else {
-			die ( sprintf ( __( 'Data base corrupted for record ID: %1$s', 'wp-issues-crm' ) , $args['id_requested'] ) );		
-		} 
 	}
 
 	/*************************************************************************************
@@ -162,8 +139,6 @@ abstract class WIC_Entity_Parent {
 			return ('');		
 		}
 	}
-
-
 
 	public function required_check () {
 		// have each control see if it is present as required 
@@ -270,8 +245,8 @@ abstract class WIC_Entity_Parent {
 		$wic_query = 	WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$wic_query->search ( $this->assemble_meta_query_array( false ), '*' ); 
 		// retrieve record if found, otherwise error
-		if ( 1==$wic_query->found_count ) {
-			$message = __( 'Matching record found. Try an update?', 'wp-issues-crm' );
+		if ( 1 == $wic_query->found_count ) {
+			$message = __( 'Record found. You can update.', 'wp-issues-crm' );
 			$message_level =  'guidance';
 			$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
 			$this->initialize_data_object_array();	
@@ -279,10 +254,11 @@ abstract class WIC_Entity_Parent {
 			$update_form = new $success_form;
 			$update_form->layout_form ( $this->data_object_array, $message, $message_level );	
 		} else {
-			die ( sprintf ( __( 'Data base corrupted for record ID: %1$s', 'wp-issues-crm' ) , $args['id_requested'] ) );		
+			die ( sprintf ( __( 'Data base corrupted for record ID: %1$s in id_search_generic.', 'wp-issues-crm' ) , $args['id_requested'] ) );		
 		} 
 	}
 	
+	// handle a search request coming from a full form
 	protected function form_search_generic ( $save_form, $update_form ) { 
 		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
 		$this->populate_data_object_array_from_submitted_form();
@@ -303,6 +279,32 @@ abstract class WIC_Entity_Parent {
 		}						
 	}
 	
+	// return array of values based on an ID, where object already has been instantiated and possibly used in listing
+	public function get_row ( $id ) {  
+		// reset existing control values
+		foreach ( $this->data_object_array as $key=>$control ) {
+				$row_array[$key] = $control->reset_value();
+		}
+		// set id control
+		$this->data_object_array['ID']->set_value( $id );
+		// search with the id only, retrieving only list fields ( which always include ID )
+		$list_row_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		$list_row_query->search ( $this->assemble_meta_query_array( false ), 'list' ); 
+		// retrieve record if found, otherwise error
+		if ( 1 ==  $list_row_query->found_count ) {
+			// populate object
+			$this->populate_data_object_array_from_found_record ( $list_row_query );
+			// generate row array for list use
+			$row_array = array();
+			foreach ( $this->data_object_array as $key=>$control ) {
+				$row_array[$key] = $control->get_display_value();
+			}
+			
+			return ( $row_array );
+		} else {
+			die ( sprintf ( __( 'Data base corrupted for record ID: %1$s -- list row retrieval.', 'wp-issues-crm' ) , $args['id_requested'] ) );		
+		} 
+	}
 
 }
 

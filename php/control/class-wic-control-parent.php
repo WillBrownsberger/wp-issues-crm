@@ -23,7 +23,7 @@
 ************************************************************************************/
 abstract class WIC_Control_Parent {
 	protected $field;
-	public $default_control_args = array();
+	protected $default_control_args = array();
 	protected $value = '';	
 
 
@@ -74,6 +74,11 @@ abstract class WIC_Control_Parent {
 			return ( $this->value ) ;		
 		}	
 	}
+	
+	public function reset_value() {
+		$this->value = '';	
+	}
+
 
 	/*********************************************************************************
 	*
@@ -128,7 +133,7 @@ abstract class WIC_Control_Parent {
 
 	}
 
-	public function set_required_values_marker ( $required ) {
+	protected function set_required_values_marker ( $required ) {
 		$required_individual = ( 'individual' == $required ) ? '*' : '';
 		$required_group = ( 'group' == $required ) ? '(+)' : '';
 		// won't actually be both, but may be one or the other

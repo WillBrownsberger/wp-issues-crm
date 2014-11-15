@@ -64,8 +64,9 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$sort_clause_array = WIC_DB_Dictionary::get_sort_order_for_entity( $this->entity );
 		$sort_clause = $sort_clause_array[0]->sort_clause_string;
 		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause ASC ";
-
+		$found_rows = '';
 		$select_list = '';	
+
 		if ( 'list' == $select_mode ) {
 			$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $this->entity );
 			foreach ( $fields as $field ) { 
@@ -76,7 +77,8 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 				}		
 			}	
 		} elseif ( 'id' == $select_mode) {
-			$select_list = $top_entity . '.' . 'ID ';		
+			$select_list = $top_entity . '.' . 'ID ';	
+			$found_rows = 'SQL_CALC_FOUND_ROWS';	
 		} else {
 			$select_list = $top_entity . '.' . '* '; 
 		}
@@ -102,7 +104,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$join = ( '' == $join ) ? $wpdb->prefix . 'wic_' . $this->entity : $join; 
 
 		$sql = $wpdb->prepare( "
-					SELECT 	$select_list
+					SELECT $found_rows	$select_list
 					FROM 	$join
 					WHERE 1=1 $where
 					GROUP BY $top_entity.ID
@@ -111,12 +113,16 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 					",
 				$values );	
 		// $sql group by always returns single row, even if multivalues for some records 
-
+		$sql_found = "SELECT FOUND_ROWS()";
 		$this->sql = $sql; 
-		$this->result = $wpdb->get_results ( $sql );	
+
+		$this->result = $wpdb->get_results ( $sql );
+	 	$this->showing_count = count ( $this->result );
+		// only do sql_calc_found_rows on id searches; in other searches, found count will always equal showing count
+		$found_count_object_array = $wpdb->get_results( $sql_found );
+		$this->found_count = get_object_vars( $found_count_object_array[0] )["FOUND_ROWS()"];
 		$this->outcome = true;  // wpdb get_results does not return errors for searches, so assume zero return is just a none found condition (not an error)
 										// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results 
-		$this->found_count = count( $this->result ); 
 		$this->explanation = ''; 
 
 

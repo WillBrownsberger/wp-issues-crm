@@ -17,9 +17,18 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		// first just initializing the this multivalue control itself
 		parent::initialize_default_values( $entity, $field_slug, $instance );
 		// now initializing the multi-value array
+		$this->reset_value();
+		$this->set_blank_first_row(); // needed for searching
+	}
+
+	public function reset_value() {  
+		// use this function only where doing repopulation in a list context -- otherwise initialize_default_values
 		$this->value = array();
+	}		
+	
+	protected function set_blank_first_row () {	
 		// here initializing the first row of the multi-value array -- field slug for the multi value is the class of the rows
-		$class_name = 'WIC_Entity_' . initial_cap ( $field_slug ) ; // note, php would forgive the initial_cap missing in the field_slug, but . . . 
+		$class_name = 'WIC_Entity_' . initial_cap ( $this->field->field_slug ) ; // note, php would forgive the initial_cap missing in the field_slug, but . . . 
 		$args = array(
 			'instance' => '0'		
 		);
@@ -97,13 +106,13 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	}
 	
 	/*
-	*	Multivalue function display components from rows
+	*	Multivalue -- concatenate display components from rows
 	*
 	*/
 	public function get_display_value () {
 		$display_value = '';
 		foreach ( $this->value as $row_object ) {
-			$display_value = ( $display_value = '' ) ? '' : '; ';
+			$display_value .= ( '' == $display_value ) ? '' : '; ';
 			$display_value .=	$row_object->get_display_value();		
 		}	
 		return ( $display_value ) ;

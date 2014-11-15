@@ -39,7 +39,7 @@ class WIC_List_Parent {
 	
 			
 		if ( $show_top_buttons ) {	
-			$output .=	'<h2> Found ' . $wic_query->found_count . ' records, showing ' . $wic_query->found_count . '</h2>' . 
+			$output .=	'<h2> Found ' . $wic_query->found_count . ' records, showing ' . $wic_query->showing_count . '</h2>' . 
 				'<button id = "form-toggle-button-on-list" type="button" onclick = "togglePostForm()">' . __( 'Show Search', 'wp-issues-crm' ) . '</button>' .
 				'<button id = "post-export-button" class = "wic-form-button" type="button" >' . __( 'Export (not built yet)', 'wp-issues-crm' ) . '</button>' .
 				'</div>';
@@ -51,7 +51,9 @@ class WIC_List_Parent {
 			'<li class = "pl-odd">' .							// header is a list item with a ul within it
 				'<ul class = "wic-post-list-headers">';				
 					foreach ( $fields as $field ) {
-						$output .= '<li class = "wic-post-list-header pl-' . $wic_query->entity . '-' . $field->field_slug . '">' . $field->field_label . '</li>';			
+						if ( $field->field_slug != 'ID' ) {
+							$output .= '<li class = "wic-post-list-header pl-' . $wic_query->entity . '-' . $field->field_slug . '">' . $field->field_label . '</li>';
+						}			
 					}
 			$output .= '</ul></li>';
 
@@ -64,9 +66,11 @@ class WIC_List_Parent {
 				// $control_array['id_requested'] =  $wic_query->post->ID;
 				$row .= '<ul class = "wic-post-list-line">';			
 					foreach ( $fields as $field ) {
-						$row .= '<li class = "wic-post-list-field pl-' . $wic_query->entity . '-' . $field->field_slug . ' "> ';
-							$row .= esc_html ( $row_array[$field->field_slug] );
-						$row .= '</li>';			
+						if ( 'ID' != $field->field_slug ) {
+							$row .= '<li class = "wic-post-list-field pl-' . $wic_query->entity . '-' . $field->field_slug . ' "> ';
+								$row .= esc_html ( $row_array[$field->field_slug] );
+							$row .= '</li>';			
+						}	
 					}
 				$row .='</ul>';				
 				
@@ -74,7 +78,7 @@ class WIC_List_Parent {
 						'entity_requested'	=> $wic_query->entity,
 						'action_requested'	=> 'id_search',
 						'button_class' 		=> 'wic-post-list-button ' . $row_class,
-						'id_requested'			=> $entity->ID,
+						'id_requested'			=> $row_array['ID'],
 						'button_label' 		=> $row,				
 				);			
 				$output .= '<li>' . WIC_Form_Parent::create_wic_form_button( $list_button_args ) . '</li>';		
