@@ -87,6 +87,8 @@ class WIC_List_Parent {
 		$output .= 	wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ) .
 		'</form></div>'; 
 		
+		$output .= 	'<p class = "wic-list-legend">' . __('Search SQL was:', 'wp-issues-crm' )	 .  $wic_query->sql . '</p>';	
+
 		return $output;
    } // close function
 }	

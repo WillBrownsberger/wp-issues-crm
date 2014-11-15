@@ -19,14 +19,14 @@ abstract class WIC_Form_Parent  {
 	abstract protected function get_the_buttons();
 	abstract protected function get_the_header( &$data_array );
 	abstract protected function get_the_formatted_control( $control_args );
-	abstract protected function get_the_legends();
+	abstract protected function get_the_legends( $sql = '' );
 	
 	protected function get_the_groups () {
 		$groups = WIC_DB_Dictionary::get_form_field_groups( $this->get_the_entity() );
 		return ($groups );
 	}
 
-	public function layout_form ( &$data_array, $message, $message_level ) {
+	public function layout_form ( &$data_array, $message, $message_level, $sql = '' ) {
 
 		// $this->emit_debugging_information();
 
@@ -80,7 +80,7 @@ abstract class WIC_Form_Parent  {
 			echo '<div class = "wic-form-field-group ' . $row_class . '" id = "bottom-button-group">';?>
 				<?php	echo $buttons; // output second instance of buttons ?>  		 		
 		 		<?php wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); ?>
-				<?php echo $this->get_the_legends(); ?>
+				<?php echo $this->get_the_legends( $sql ); ?>
 			</div>								
 		</form>
 		</div>

@@ -29,7 +29,8 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 		return ( $control->update_control() ); 
 	}
 
-	protected function get_the_legends() {
+	protected function get_the_legends( $sql = '' ) {
+
 		$elements = WIC_DB_Dictionary::get_field_suffix_elements( $this->get_the_entity() );
 		$legend = '';
 		if ( $elements[1]->required_individual ) {
@@ -37,6 +38,10 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 		}
 		if ( $elements[1]->required_group ) {
 			$legend .=  '<p class = "wic-form-legend">' . '(+) ' . __('At least one among these fields must be supplied.', 'wp-issues-crm' )	 . '</p>';
+		}
+		
+		if ( $sql > '' ) {
+			$legend .= 	'<p class = "wic-form-legend">' . __('Search SQL was:', 'wp-issues-crm' )	 .  $sql . '</p>';	
 		}
 		return  $legend;
 	}

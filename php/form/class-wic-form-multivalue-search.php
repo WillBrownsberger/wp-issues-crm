@@ -30,9 +30,9 @@ class WIC_Form_Multivalue_Search extends WIC_Form_Parent  {
 		$args = array();
 		return ( $control->search_control( $args ) ); 
 	}
-	protected function get_the_legends() {}	
+	protected function get_the_legends( $sql = '' ) {}	
 	
-	public function layout_form ( &$data_array, $message, $message_level ) { 
+	public function layout_form ( &$data_array, $message, $message_level, $sql = '' ) { 
 		$groups = $this->get_the_groups();
 		$search_row = '<div id="wic-multivalue-block" class = "wic-multivalue-control-set">';
 			foreach ( $groups as $group ) {

@@ -426,13 +426,24 @@ p.wic-form-field-group-legend {
 }
 
 .wic-form-legend-flag,
-.wic-form-legend {
+.wic-form-legend,
+.wic-list-legend {
 	color: #333;
 	font-size: .8em;
 }
 .wic-form-legend {
 	margin: 10px 0 10px 200px;
 }
+
+
+.wic-list-legend {
+	margin: 10px 0;
+}
+
+#full-width-content-wrapper p.wic-list-legend {
+	max-width: 1200px;
+}
+
 /* styling of field rows */
 .hidden-template {
 	display: none;
@@ -522,8 +533,8 @@ ul.wic-post-list-line {
 .pl-constituent-first_name{ width:14%;}
 .pl-constituent-middle_name{ width:14%;}
 .pl-constituent-last_name{ width:14%;}
-.pl-constituent-phones{ width:15%;}
-.pl-constituent-emails{ width:28%;}
+.pl-constituent-phone{ width:15%;}
+.pl-constituent-email{ width:28%;}
 .pl-constituent-city{ width:20%;}
 .pl-activity-activity_date{ width:19%;}
 .pl-activity-activity_type{ width:10%;}

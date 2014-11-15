@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 15, 2014 at 02:39 PM
+-- Generation Time: Nov 15, 2014 at 04:36 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -79,17 +79,17 @@ CREATE TABLE IF NOT EXISTS `wp_wic_address` (
 CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `ssid` varchar(13) NOT NULL,
-  `civicrm_id` bigint(20) unsigned NOT NULL,
-  `VAN_id` bigint(20) unsigned NOT NULL,
+  `civi_id` bigint(20) unsigned NOT NULL,
+  `van_id` bigint(20) unsigned NOT NULL,
   `last_name` varchar(30) NOT NULL,
   `first_name` varchar(20) NOT NULL,
   `middle_name` varchar(20) NOT NULL,
   `title` varchar(3) NOT NULL,
   `post_title` varchar(250) NOT NULL,
-  `dob` date NOT NULL,
+  `date_of_birth` date NOT NULL,
   `is_deceased` tinyint(1) NOT NULL,
   `is_deleted` tinyint(1) NOT NULL,
-  `assigned` int(10) unsigned NOT NULL,
+  `case_assigned` int(10) unsigned NOT NULL,
   `case_review_date` date NOT NULL,
   `case_status` varchar(1) NOT NULL,
   `notes` text NOT NULL,
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   `state` varchar(2) NOT NULL,
   `zip` varchar(10) NOT NULL,
   `occupation` varchar(20) NOT NULL,
-  `organization_name` varchar(50) NOT NULL,
+  `organization` varchar(50) NOT NULL,
   `party` varchar(2) NOT NULL,
   `gender` varchar(1) NOT NULL,
   `ward` tinyint(4) NOT NULL,
@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `last_name` (`last_name`),
   KEY `middle_name` (`middle_name`),
   KEY `title` (`title`),
-  KEY `dob` (`dob`),
+  KEY `dob` (`date_of_birth`),
   KEY `street_number` (`street_number`),
   KEY `street_suffix` (`street_suffix`),
   KEY `street_name` (`street_name`),
@@ -128,12 +128,12 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `precinct` (`precinct`),
   KEY `voter_status` (`voter_status`),
   KEY `first_name` (`first_name`),
-  KEY `civicrm_id` (`civicrm_id`),
-  KEY `VAN_id` (`VAN_id`),
+  KEY `civicrm_id` (`civi_id`),
+  KEY `VAN_id` (`van_id`),
   KEY `post_title` (`post_title`),
   KEY `is_deceased` (`is_deceased`),
   KEY `is_deleted` (`is_deleted`),
-  KEY `assigned` (`assigned`),
+  KEY `assigned` (`case_assigned`),
   KEY `case_review_date` (`case_review_date`),
   KEY `case_status` (`case_status`),
   KEY `fnln` (`last_name`,`first_name`)
@@ -146,43 +146,6 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
 --
 
 CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
-  `field_id` int(11) NOT NULL,
-  `entity_slug` varchar(20) NOT NULL,
-  `group_slug` varchar(30) NOT NULL,
-  `field_slug` varchar(20) NOT NULL,
-  `field_type` varchar(30) NOT NULL COMMENT 'name of entity supplying multiple rows for this field',
-  `field_label` varchar(30) NOT NULL,
-  `field_order` mediumint(9) NOT NULL,
-  `listing_order` int(11) NOT NULL,
-  `sort_clause_order` mediumint(11) NOT NULL,
-  `required` varchar(10) NOT NULL,
-  `dedup` tinyint(1) NOT NULL,
-  `readonly` tinyint(1) NOT NULL,
-  `hidden` tinyint(1) NOT NULL,
-  `field_default` varchar(30) NOT NULL,
-  `like_search_enabled` tinyint(1) NOT NULL,
-  `transient` tinyint(1) NOT NULL,
-  `wp_query_parameter` varchar(30) NOT NULL,
-  `sanitize_call_back` varchar(30) NOT NULL,
-  `validate_call_back` varchar(30) NOT NULL,
-  `format_call_back` varchar(30) NOT NULL,
-  `enum_values` varchar(255) NOT NULL,
-  `field_label_suffix` varchar(5) NOT NULL,
-  `input_class` varchar(30) NOT NULL DEFAULT 'wic-input',
-  `label_class` varchar(30) NOT NULL DEFAULT 'wic-label',
-  `placeholder` varchar(50) NOT NULL,
-  PRIMARY KEY (`field_id`),
-  KEY `entity_slug` (`entity_slug`),
-  KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `wp_wic_data_dictionary_backup`
---
-
-CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary_backup` (
   `field_id` int(11) NOT NULL AUTO_INCREMENT,
   `entity_slug` varchar(20) NOT NULL,
   `group_slug` varchar(30) NOT NULL,
@@ -211,7 +174,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary_backup` (
   PRIMARY KEY (`field_id`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=58 ;
 
 -- --------------------------------------------------------
 

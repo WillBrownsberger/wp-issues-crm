@@ -237,7 +237,7 @@ abstract class WIC_Entity_Parent {
 	}
 	
 	// handle a search request for an ID coming from anywhere
-	protected function id_search_generic ( $id, $success_form ) {
+	protected function id_search_generic ( $id, $success_form, $sql = '' ) {
 		// initialize data array with only the ID and do search
 		$this->data_object_array['ID'] = WIC_Control_Factory::make_a_control( 'text' );
 		$this->data_object_array['ID']->initialize_default_values(  $this->entity, 'ID', $this->entity_instance );	
@@ -252,7 +252,7 @@ abstract class WIC_Entity_Parent {
 			$this->initialize_data_object_array();	
 			$this->populate_data_object_array_from_found_record ( $wic_query );			
 			$update_form = new $success_form;
-			$update_form->layout_form ( $this->data_object_array, $message, $message_level );	
+			$update_form->layout_form ( $this->data_object_array, $message, $message_level, $sql );	
 		} else {
 			die ( sprintf ( __( 'Data base corrupted for record ID: %1$s in id_search_generic.', 'wp-issues-crm' ) , $args['id_requested'] ) );		
 		} 
@@ -265,13 +265,14 @@ abstract class WIC_Entity_Parent {
 		$this->sanitize_values();
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$wic_query->search ( $this->assemble_meta_query_array( false ), 'id' ); // get a list of id's meeting search criteria
+		$sql = $wic_query->sql;
 		if ( 0 == $wic_query->found_count ) {
 			$message = __( 'No matching record found -- try a save?', 'wp-issues-crm' );
 			$message_level =  'guidance';
 			$form = new $save_form;
-			$form->layout_form ( $this->data_object_array, $message, $message_level );			
+			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );			
 		} elseif ( 1 == $wic_query->found_count) {
-			$this->id_search_generic ( $wic_query->result[0]-> ID, $update_form );			
+			$this->id_search_generic ( $wic_query->result[0]-> ID, $update_form, $sql );			
 		} else {
 			$lister = new WIC_List_Parent;
 			$list = $lister->format_entity_list( $wic_query,true );

@@ -13,23 +13,18 @@
 
 class WIC_Form_Multivalue_Update extends WIC_Form_Multivalue_Search  {
 	
-	
-	protected $entity = '';
-	
 	public function __construct ( $entity, $instance ) {
-		$this->entity = $entity; 
+		$this->entity = $entity;
 		$this->entity_instance = $instance;
 	}
-	
-	protected function get_the_buttons(){}
-	protected function get_the_header ( &$data_array ) {}	
-	
+
+		
 	protected function get_the_formatted_control ( $control ) { 
 		return ( $control->update_control() ); 
 	}
-	protected function get_the_legends() {}	
+		
 	
-	public function layout_form ( &$data_array, $message, $message_level ) { 
+	public function layout_form ( &$data_array, $message, $message_level, $sql = '' ) { 
 		$groups = $this->get_the_groups();
 		$class = ( 'row-template' == $this->entity_instance ) ? 'hidden-template' : 'visible-templated-row';
 		$search_row = '<div class = "'. $class . '" id="' . $this->entity . '[' . $this->entity_instance . ']">';

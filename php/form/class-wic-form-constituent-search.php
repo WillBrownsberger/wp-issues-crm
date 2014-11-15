@@ -28,7 +28,7 @@ class WIC_Form_Constituent_Search extends WIC_Form_Parent  {
 		return ( $control->search_control() ); 
 	}
 
-	protected function get_the_legends() {
+	protected function get_the_legends( $sql = '' ) {
 		$elements = WIC_DB_Dictionary::get_field_suffix_elements( $this->get_the_entity() );
 		if ( $elements[1]->like_search_enabled ) {
 			$control_args = array ( 
@@ -41,7 +41,12 @@ class WIC_Form_Constituent_Search extends WIC_Form_Parent  {
 				'label_class' => '',				
 			);
 			$check_box = new WIC_Control_Checked;
-		return ( '<p class = "wic-form-legend">' . $check_box->create_control ( $control_args ) . '</p>' );
+	
+		$legend = '<p class = "wic-form-legend">' . $check_box->create_control ( $control_args ) . '</p>';	
+		if ( $sql > '' ) {
+			$legend .= 	'<p class = "wic-form-legend">' . __('Search SQL was:', 'wp-issues-crm' )	 .  $sql . '</p>';	
+		}		
+		return ( $legend );
 		}
 	}
 }
