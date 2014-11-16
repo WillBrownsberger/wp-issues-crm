@@ -180,6 +180,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	public function search_control () {
 		$final_control_args = $this->default_control_args;
 		extract ( $final_control_args );
+		$field_label_suffix = $like_search_enabled ? '(%)' : '';
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' . $field_label_suffix . '</span>' : '';
 		 
 		$control = ( $field_label > '' && ! ( 1 == $hidden ) ) ? '<label class="' . esc_attr ( $label_class ) .
@@ -209,6 +210,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	private function save_update_control ( $save ) { // true/false corresponds to save/update
 		$final_control_args = $this->default_control_args;
 		extract ( $final_control_args );
+		$field_label_suffix = $this->set_required_values_marker ( $required );		
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' . $field_label_suffix . '</span>' : '';
 		 
 		$form_to_call = ( $save ) ? 'save_row' : 'update_row';		 

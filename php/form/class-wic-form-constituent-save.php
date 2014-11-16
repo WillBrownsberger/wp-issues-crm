@@ -1,16 +1,12 @@
 <?php
 /*
 *
-*  class-wic-form-constituent-update.php
+*  class-wic-form-constituent-save.php
 *
 */
 
 class WIC_Form_Constituent_Save extends WIC_Form_Constituent_Update  {
 	
-	protected function get_the_entity() {
-		return ( 'constituent' );	
-	}
-
 	protected function get_the_buttons () {
 		$button_args_main = array(
 			'entity_requested'			=> 'constituent',

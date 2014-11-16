@@ -18,6 +18,33 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 
 	}
 	
+	protected  $wp_query_parameters = array(
+		'author' 	=> array ( 
+			'update_post_parameter'	=> 'post_author',
+			),
+		'cat' 	=> array ( 
+			'update_post_parameter'	=> 'post_category',
+			),
+		'date' 	=> array ( 
+			'update_post_parameter'	=> 'post_date',
+			),
+		's' 	=> array ( 
+			'update_post_parameter'	=> '',
+			),
+		'tag' 	=> array ( 
+			'update_post_parameter'	=> 'post_tags',
+			),
+		'post_status' 	=> array ( 
+			'update_post_parameter'	=> 'post_status',
+			),
+		'post_title' 	=> array ( 
+			'update_post_parameter'	=> 'post_title',
+			),			
+	);
+	
+	
+	
+	
 }
 
 

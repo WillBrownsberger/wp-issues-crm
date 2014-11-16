@@ -15,6 +15,11 @@
 */
 class WIC_Control_Deleted extends WIC_Control_Parent {
 
+	public function initialize_default_values ( $entity, $field_slug, $instance ) {
+		parent::initialize_default_values ( $entity, $field_slug, $instance );
+		$this->default_control_args['onclick_delete'] =  'hideSelf(\'' . esc_attr( $entity . '[' . $instance . ']'  ) . '\')';		
+	}
+	
 	// hidden control do nothing on save or update	
 	public function create_search_clause ( $dup_check ) {}
 	public function create_update_clauses () {}	

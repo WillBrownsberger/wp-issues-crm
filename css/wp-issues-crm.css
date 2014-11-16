@@ -41,12 +41,12 @@
 }
 
 .wic-form-field-group {
-	padding: 16px 8px; 
+	padding: 0px 8px; 
 	max-width: 100%;
 }
 
 .wic-form-field-group h2 {
-	margin: 10px 0 10px 200px;
+	margin: 20px 0 0 200px;
 }
 
 h3.wic-form-field-group-label {
@@ -121,7 +121,7 @@ p.wic-form-field-group-legend {
 #post-form-message-box {
 	background: #f8f8f8;
 	color: #777;
-	margin:  20px 0;
+	margin:  10px 0;
 	padding: 20px 0 20px 200px;
 }
 

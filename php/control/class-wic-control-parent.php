@@ -1,6 +1,6 @@
 <?php
 /*
-* wic-field.php
+* class-wic-control-parent.php
 *
 * This file contains WIC_Control base class and child classes with names of the form WIC_Control_{Type} 
 * This is the list of valid Types for WIC Fields:
@@ -48,8 +48,6 @@ abstract class WIC_Control_Parent {
 				// note that the entity name for a row object in a multivalue field is the same as the field_slug for the multivalue field
 				// this is a trap for the unwary in setting up the dictionary table 
 				$entity . '[' . $instance . ']['. $field_slug . ']';
-		$this->default_control_args['onclick_delete'] =  'hideSelf(\'' . esc_attr( $entity . '[' . $instance . ']'  ) . '\')'; 
-				// only used by the transient field type deleted
 	}
 
 	/*********************************************************************************
@@ -108,7 +106,7 @@ abstract class WIC_Control_Parent {
 		}
 	}
 	
-	public function update_control () {
+	public function update_control () { 
 		$final_control_args = $this->default_control_args;
 		$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
 		$final_control_args['value'] = $this->value;
@@ -116,9 +114,8 @@ abstract class WIC_Control_Parent {
 	}
 
 	protected function create_control ( $control_args ) { // basic create text control, accessed through control methodsabove
-
+    
 		extract ( $control_args, EXTR_OVERWRITE );
-		 
 		$readonly = $readonly ? 'readonly' : '';
 		$type = ( 1 == $hidden ) ? 'hidden' : 'text';
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' . $field_label_suffix . '</span>' : '';
@@ -268,7 +265,7 @@ abstract class WIC_Control_Parent {
 	*
 	*********************************************************************************/
 	public function create_update_clause () {
-		if ( ! $this->field->transient ) {
+		if ( ( ! $this->field->transient ) && ( ! $this->field->readonly ) ) {
 			$update_clause = array (
 					'key' 	=> $this->field->field_slug,
 					'value'	=> $this->value,
