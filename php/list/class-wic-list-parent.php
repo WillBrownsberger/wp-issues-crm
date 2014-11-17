@@ -19,7 +19,7 @@ class WIC_List_Parent {
   
   		$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $wic_query->entity );
 		$class_name = 'WIC_Entity_' . initial_cap ( $wic_query->entity );
-		
+		// var_dump ($wic_query->result);
 		$args = array (
 			'action_requested' => 'open_list_entity_for_access'
 			); 

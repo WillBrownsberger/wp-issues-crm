@@ -54,6 +54,9 @@ include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-posts-list.php';
 include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-import-routines.php';
 */
 
+// this field is initialized by the first call to WIC_DB_Dictionary::get_field_rules
+$wp_issues_crm_field_rules_cache = array();
+
 function wp_issues_crm_autoloader( $class ) {
 	if ( 'WIC_' == substr ($class, 0, 4 ) ) {
 		$subdirectory = 'php'. DIRECTORY_SEPARATOR . strtolower( substr( $class, 4, ( strpos ( $class, '_', 4  ) - 4 )  ) ) . DIRECTORY_SEPARATOR ;

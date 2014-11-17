@@ -18,6 +18,8 @@
 *
 *		NB: all field properties are private to the control objects, but certain properties are disclosed in processing -- see wic-control classes. 
 *
+*	Conversion to using field_rules_cache, instead of sql queries for the repetitive queries did cut page assembly times.
+*
 */
 
 class WIC_DB_Dictionary {
@@ -28,10 +30,31 @@ class WIC_DB_Dictionary {
 	*
 	**************************************************************************/	
 	
-	// assemble fields for an entity -- n.b. limits the assembly to fields assigned to groups
+	// assemble fields for an entity -- n.b. as rewritten, limits the assembly to fields assigned to form field groups
+	// does not force groups to be implemented though, since not joining to groups table -- assignment to a 
+	// 	non-existent group could lead to data corruption
 	public static function get_form_fields ( $entity ) {
 		// returns array of row objects, one for each field 
-		global $wpdb;
+
+		global $wp_issues_crm_field_rules_cache;
+		
+		if ( 0 == count ( $wp_issues_crm_field_rules_cache ) ) {
+			self::initialize_field_rules_cache();		
+		}
+	
+		$fields_array = array();
+		foreach ( $wp_issues_crm_field_rules_cache as $field_rule ) {
+			if ( $entity == $field_rule->entity_slug && $field_rule->group_slug > '' ) {
+				$fields_array[] = ( new WIC_DB_Field_List_Object ( $field_rule->field_slug, $field_rule->field_type, $field_rule->field_label ) );			
+			}		
+		}
+		
+		return ( $fields_array );		
+		
+	}	
+	/*	
+		
+		global $wpdb;		
 		$table1 = $wpdb->prefix . 'wic_data_dictionary';
 		$table2 = $wpdb->prefix . 'wic_form_field_groups';
 		$fields = $wpdb->get_results( 
@@ -47,29 +70,47 @@ class WIC_DB_Dictionary {
 
 		return ( $fields );
 	}
-
+*/
 	// expose the rules for all fields for an entity -- only called in control initialization;
 	// rules are passed to each control that is in the data object array directly -- no processing;
 	// the set retrieved by this method is not limited to group members and might support a data dump function, 
 	// 	but in the online system, only the fields selected by get_form_fields are actually set up as controls  
 	public static function get_field_rules ( $entity, $field_slug ) {
 		// this is only called in the control object -- only the control object knows field details
+
 		global $wpdb;
+
+		global $wp_issues_crm_field_rules_cache;
+		
+		if ( 0 == count ( $wp_issues_crm_field_rules_cache ) ) {
+			self::initialize_field_rules_cache();		
+		}
+	
+		foreach ( $wp_issues_crm_field_rules_cache as $field_rule ) {
+			if ( $entity == $field_rule->entity_slug && $field_slug == $field_rule->field_slug ) {
+				return ( $field_rule );			
+			}		
+		}
+		
+		die ( __('Field rule table inconsistency. WIC_DB_Dictionary::get_field_rules reporting.', 'wp-issues-crm' ) );		
+		
+	}
+
+	private static function initialize_field_rules_cache () {
+		global $wpdb;
+		global $wp_issues_crm_field_rules_cache; 
+		
 		$table = $wpdb->prefix . 'wic_data_dictionary';
-		$field_rules = $wpdb->get_row( 
+		$wp_issues_crm_field_rules_cache = $wpdb->get_results( 
 			$wpdb->prepare (
 				"
 				SELECT * 
 				FROM $table
-				WHERE entity_slug = %s and field_slug = %s
 				"				
-				, array ( $entity, $field_slug )
+				, array ( )
 				)
 			, OBJECT );
-
-		return ( $field_rules );
 	}
-
 	/*************************************************************************
 	*	
 	* Methods supporting list display -- sort order and shortened field list 
@@ -78,40 +119,54 @@ class WIC_DB_Dictionary {
 
 	// return string of fields for inclusion in sort clause for lists
 	public static function get_sort_order_for_entity ( $entity ) {
+	
 		global $wpdb;
-		$table = $wpdb->prefix . 'wic_data_dictionary';
-		$sort_clause = $wpdb->get_results( 
-			$wpdb->prepare (
-					"
-					SELECT group_concat( field_slug ORDER BY sort_clause_order ASC SEPARATOR ', ' ) AS sort_clause_string
-					FROM $table 
-					WHERE entity_slug = %s and sort_clause_order > 0
-					"				
-					, array ( $entity )
-					)
-				, OBJECT );
-		return ( $sort_clause );
+
+		global $wp_issues_crm_field_rules_cache;
+		
+		if ( 0 == count ( $wp_issues_crm_field_rules_cache ) ) {
+			self::initialize_field_rules_cache();		
+		}
+		$sort_string = array();
+		foreach ( $wp_issues_crm_field_rules_cache as $field_rule ) {
+			if ( $entity == $field_rule->entity_slug && $field_rule->sort_clause_order > 0 )  {
+				$sort_string[$field_rule->sort_clause_order] = $field_rule->field_slug;
+			}		
+		}
+		ksort( $sort_string );
+		$sort_string_scalar = implode ( ',', $sort_string );
+		
+		return ( $sort_string_scalar );
+
 	}
 
 	// return short list of fields for inclusion in display in lists (always include id) 
 	// also used in assembly of shortened data object array for lists
 	public static function get_list_fields_for_entity ( $entity ) {
+		
 		global $wpdb;
-		$table = $wpdb->prefix . 'wic_data_dictionary';
-		$list_fields = $wpdb->get_results( 
-			$wpdb->prepare (
-				"
-				SELECT field_slug, field_label, field_type
-				FROM $table
-				WHERE entity_slug = %s
-				AND ( listing_order > 0 or field_slug = 'ID' )
-				ORDER BY listing_order
-				"				
-				, array ( $entity )
-				)
-			, OBJECT );
-		return ( $list_fields );
-	}
+		global $wp_issues_crm_field_rules_cache;
+		
+		if ( 0 == count ( $wp_issues_crm_field_rules_cache ) ) {
+			self::initialize_field_rules_cache();		
+		}
+		
+		$list_fields = array();
+		foreach ( $wp_issues_crm_field_rules_cache as $field_rule ) {
+			if ( $entity == $field_rule->entity_slug && ( $field_rule->listing_order > 0 || 'ID' == $field_rule->field_slug ) ) {
+				$list_fields[$field_rule->listing_order] = $field_rule;
+			}		
+		}
+
+		$list_fields_sorted = array();
+		foreach ( $list_fields as $key=>$field_rule ) {
+			$list_fields_sorted[] = new WIC_DB_Field_List_Object ( $field_rule->field_slug, $field_rule->field_type, $field_rule->field_label);  		
+		} 
+
+		return ( $list_fields_sorted );
+		
+	}	
+
 
 	/*************************************************************************
 	*	

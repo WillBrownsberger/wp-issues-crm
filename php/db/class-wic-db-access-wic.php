@@ -38,6 +38,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$table  = $wpdb->prefix . 'wic_' . $this->entity;  
 		
 		$set = $this->parse_save_update_array( $save_update_array );
+				
   		$set_clause_with_placeholders = $set['set_clause_with_placeholders'];
 		$sql = $wpdb->prepare( "
 				UPDATE $table
@@ -45,6 +46,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 				WHERE ID = %s
 				",
 			$set['set_value_array'] );
+
 		$update_result = $wpdb->query( $sql );
 		$this->outcome = ( 1 == $update_result );
 		$this->outcome = ! ( false === $update_result );
@@ -61,8 +63,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$where = '';
 		$join = '';
 		$values = array();
-		$sort_clause_array = WIC_DB_Dictionary::get_sort_order_for_entity( $this->entity );
-		$sort_clause = $sort_clause_array[0]->sort_clause_string;
+		$sort_clause = WIC_DB_Dictionary::get_sort_order_for_entity( $this->entity );
 		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause ASC ";
 		$found_rows = '';
 		$select_list = '';	
@@ -109,7 +110,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 					WHERE 1=1 $where
 					GROUP BY $top_entity.ID
 					$order_clause
-					LIMIT 0, 10
+					LIMIT 0, 100
 					",
 				$values );	
 		// $sql group by always returns single row, even if multivalues for some records 
@@ -149,7 +150,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 
 		if ( $entity_id > '' ) {
 			$set_value_array[] = $entity_id; // tag entity ID on to end of array (will not be present in save cases, since is a readonly field)
-		}	
+		}	// see setup in WIC_CONTROL_Parent::create_update_clause
 	
 		return ( array (
 			'set_clause_with_placeholders' => $set_clause_with_placeholders,

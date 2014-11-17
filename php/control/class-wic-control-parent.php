@@ -265,7 +265,10 @@ abstract class WIC_Control_Parent {
 	*
 	*********************************************************************************/
 	public function create_update_clause () {
-		if ( ( ! $this->field->transient ) && ( ! $this->field->readonly ) ) {
+		if ( ( ( ! $this->field->transient ) && ( ! $this->field->readonly ) ) || 'ID' == $this->field->field_slug ) {
+			// exclude transient and readonly fields, but since want to be able to treat ID as readonly
+			// and allow direct search by it for constituents, add that ID will be passed through -- see special handling 
+			// for ID, which is a where condition on an update in WIC_DB_Access_WIC::db_update
 			$update_clause = array (
 					'key' 	=> $this->field->field_slug,
 					'value'	=> $this->value,
