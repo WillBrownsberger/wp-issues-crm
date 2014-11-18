@@ -3,10 +3,11 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 15, 2014 at 04:36 PM
+-- Generation Time: Nov 18, 2014 at 12:44 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
+SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
@@ -40,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_activity` (
   KEY `constituent_id` (`constituent_id`),
   KEY `email_address` (`activity_type`),
   KEY `email_type` (`date`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=19 ;
 
 -- --------------------------------------------------------
 
@@ -68,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_address` (
   KEY `apartment` (`apartment`),
   KEY `zip` (`zip`),
   KEY `civicrm_id` (`constituent_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171477 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171480 ;
 
 -- --------------------------------------------------------
 
@@ -136,8 +137,9 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `assigned` (`case_assigned`),
   KEY `case_review_date` (`case_review_date`),
   KEY `case_status` (`case_status`),
-  KEY `fnln` (`last_name`,`first_name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171478 ;
+  KEY `fnln` (`last_name`,`first_name`),
+  KEY `city` (`city`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171481 ;
 
 -- --------------------------------------------------------
 
@@ -166,15 +168,14 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   `sanitize_call_back` varchar(30) NOT NULL,
   `validate_call_back` varchar(30) NOT NULL,
   `format_call_back` varchar(30) NOT NULL,
-  `enum_values` varchar(255) NOT NULL,
-  `field_label_suffix` varchar(5) NOT NULL,
   `input_class` varchar(30) NOT NULL DEFAULT 'wic-input',
   `label_class` varchar(30) NOT NULL DEFAULT 'wic-label',
   `placeholder` varchar(50) NOT NULL,
+  `blank_prohibited` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`field_id`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=58 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=62 ;
 
 -- --------------------------------------------------------
 
@@ -193,7 +194,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_email` (
   KEY `constituent_id` (`constituent_id`),
   KEY `email_address` (`email_address`),
   KEY `email_type` (`email_type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10527 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10530 ;
 
 -- --------------------------------------------------------
 
@@ -209,8 +210,9 @@ CREATE TABLE IF NOT EXISTS `wp_wic_form_field_groups` (
   `group_legend` text NOT NULL,
   `group_order` smallint(6) NOT NULL DEFAULT '0',
   `initial_open` tinyint(1) NOT NULL,
+  `search_only` tinyint(1) NOT NULL,
   PRIMARY KEY (`group_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=16 ;
 
 -- --------------------------------------------------------
 
@@ -230,7 +232,8 @@ CREATE TABLE IF NOT EXISTS `wp_wic_phone` (
   KEY `constituent_id` (`constituent_id`),
   KEY `email_address` (`phone`),
   KEY `email_type` (`phone_type`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+SET FOREIGN_KEY_CHECKS=1;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

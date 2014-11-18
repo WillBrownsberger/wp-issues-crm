@@ -39,7 +39,7 @@ class WIC_List_Parent {
 			'<div class = "wic-post-field-group wic-group-odd">';
 			
 		if ( $wic_query->found_count < $wic_query->retrieve_limit ) {
-			$header_message = sprintf ( __( 'Found total of $1%s records', 'wp-issues-crm'), $wic_query->found_count );		
+			$header_message = sprintf ( __( 'Found total of %1$s records', 'wp-issues-crm'), $wic_query->found_count );		
 		} elseif ( $wic_query->found_count_real ) {
 			$header_message = sprintf ( __( 'Found total of %1$s records, showing search optional maximum -- %2$s.', 'wp-issues-crm'),
 				 $wic_query->found_count, $wic_query->showing_count  ); 		
