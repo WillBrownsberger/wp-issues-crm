@@ -55,35 +55,37 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		return;
 	}
 
-	protected function db_search( $meta_query_array, $select_mode = '*' ) {
+	protected function db_search( $meta_query_array, $search_parameters ) { // $select_mode = '*' ) {
+
+		// default search parameters
+		$select_mode 		= 'id';
+		$sort_order 		= 'false';
+		$compute_total 	= 'false';
+		$retrieve_limit 	= '10';
+		
+		extract ( $search_parameters, EXTR_OVERWRITE );
+
+		// implement search parameters
+		$top_entity = $this->entity;
+		if ( 'id' == $select_mode) {
+			$select_list = $top_entity . '.' . 'ID ';	
+		} else {
+			$select_list = $top_entity . '.' . '* '; 
+		}
+		$sort_clause = $sort_order ? WIC_DB_Dictionary::get_sort_order_for_entity( $this->entity ) : '';
+		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause ASC ";
+		$found_rows = $compute_total ? 'SQL_CALC_FOUND_ROWS' : '';
+		// retrieve limit goes directly into SQL
+		 
+		// set global access object 
 		global $wpdb;
 
-		$top_entity = $this->entity;
+		// prepare $where and join clauses
 		$table_array = array( $this->entity );
 		$where = '';
 		$join = '';
 		$values = array();
-		$sort_clause = WIC_DB_Dictionary::get_sort_order_for_entity( $this->entity );
-		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause ASC ";
-		$found_rows = '';
-		$select_list = '';	
-
-		if ( 'list' == $select_mode ) {
-			$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $this->entity );
-			foreach ( $fields as $field ) { 
-				if ( 'multivalue' != $field->field_type ) {
-					$select_list .= ( '' == $select_list ) ? $top_entity . '.' : ', ' . $top_entity . '.' ;
-					$select_list .= $field->field_slug;
-					$select_list .= ' ';	
-				}		
-			}	
-		} elseif ( 'id' == $select_mode) {
-			$select_list = $top_entity . '.' . 'ID ';	
-			$found_rows = 'SQL_CALC_FOUND_ROWS';	
-		} else {
-			$select_list = $top_entity . '.' . '* '; 
-		}
-
+		// explode the meta_query_array into where string and array ready for wpdb->prepare
 		foreach ( $meta_query_array as $where_item ) {
 			if( ! in_array( $where_item['table'], $table_array ) ) {
 				$table_array[] = $where_item['table'];			
@@ -94,6 +96,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			$where 			.= " AND $table.$field_name $compare %s ";
 			$values[] 		= ( '=' == $where_item['compare'] ) ? $where_item['value'] : $wpdb->esc_like ( $where_item['value'] ) . '%' ;
 		}
+		// prepare a join clause		
 		$array_counter = 0;
 		foreach ( $table_array as $table ) {
 			$table_name  = $wpdb->prefix . 'wic_' . $table;
@@ -101,27 +104,31 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			$join .= ( 0 < $array_counter ) ? " INNER JOIN $table_name as $table on $table.$child_table_link = $top_entity.ID " : " $table_name as $table " ;
 			$array_counter++; 		
 		}
-
 		$join = ( '' == $join ) ? $wpdb->prefix . 'wic_' . $this->entity : $join; 
 
+		// prepare SQL
 		$sql = $wpdb->prepare( "
 					SELECT $found_rows	$select_list
 					FROM 	$join
 					WHERE 1=1 $where
 					GROUP BY $top_entity.ID
 					$order_clause
-					LIMIT 0, 100
+					LIMIT 0, $retrieve_limit
 					",
 				$values );	
 		// $sql group by always returns single row, even if multivalues for some records 
 		$sql_found = "SELECT FOUND_ROWS()";
 		$this->sql = $sql; 
-
+		
+		// do search
 		$this->result = $wpdb->get_results ( $sql );
 	 	$this->showing_count = count ( $this->result );
 		// only do sql_calc_found_rows on id searches; in other searches, found count will always equal showing count
 		$found_count_object_array = $wpdb->get_results( $sql_found );
 		$this->found_count = get_object_vars( $found_count_object_array[0] )["FOUND_ROWS()"];
+		// set value to say whether found_count is known
+		$this->found_count_real = $compute_total;
+		$this->retrieve_limit = $retrieve_limit;
 		$this->outcome = true;  // wpdb get_results does not return errors for searches, so assume zero return is just a none found condition (not an error)
 										// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results 
 		$this->explanation = ''; 
@@ -160,13 +167,61 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 	}
 
 	protected function db_delete_by_id ( $id ) {
-		
 		global $wpdb;		
 		$table  = $wpdb->prefix . 'wic_' . $this->entity;
 		$outcome = $wpdb->delete ( $table, array( 'ID' => $id ) );
 		if ( ! ( 1 == $outcome ) ) {
 			die ( sprintf (  __('Database error on execution of requested delete of %s.' , 'wp-issues-crm' ), $this->entity ) );	
 		} 
+	}
+
+	protected function db_list_by_id ( $id_string ) {
+		global $wpdb;	
+
+		$top_entity = $this->entity;
+		$table_array = array( $this->entity );
+		$where = $top_entity . '.ID IN ' . $id_string . ' ';
+		$join = $wpdb->prefix . 'wic_' . $this->entity . ' AS ' . $this->entity;
+		$sort_clause = WIC_DB_Dictionary::get_sort_order_for_entity( $this->entity );
+		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause ASC ";
+		$select_list = '';	
+
+		$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $this->entity );
+		foreach ( $fields as $field ) { 
+				if ( 'multivalue' != $field->field_type ) {
+					$select_list .= ( '' == $select_list ) ? $top_entity . '.' : ', ' . $top_entity . '.' ;
+					$select_list .= $field->field_slug . ' AS ' . $field->field_slug ;
+				} else {
+					$select_list .= '' == $select_list ? '' : ', ';
+					$sub_fields = WIC_DB_Dictionary::get_list_fields_for_entity( $field->field_slug );
+					$sub_field_list = ''; 
+					foreach ( $sub_fields as $sub_field ) {
+						if ( 'ID' != $sub_field->field_slug ) { 
+							$sub_field_list .= ( '' == $sub_field_list ) ? $field->field_slug . '.' : ', ' . $field->field_slug . '.' ;
+							$sub_field_list .= $sub_field->field_slug;
+						}
+					}
+					$select_list .= ' GROUP_CONCAT( DISTINCT ' . $sub_field_list . ' SEPARATOR \', \' ) AS ' . $field->field_slug;
+					$join .= ' LEFT JOIN ' .  $wpdb->prefix . 'wic_' . $field->field_slug . ' ' . $field->field_slug . ' ON ' . 
+						$this->entity . '.ID = ' . $field->field_slug . '.constituent_id ';
+				}		
+			}	
+
+		$sql = 	"SELECT $select_list
+					FROM 	$join
+					WHERE $where
+					GROUP BY $top_entity.ID
+					$order_clause
+					LIMIT 0, 100
+					";
+
+		$this->sql = $sql; 
+		$this->result = $wpdb->get_results ( $sql );
+	 	$this->showing_count = count ( $this->result );
+	 	$this->found_count = $this->showing_count; 
+		$this->outcome = true;  // wpdb get_results does not return errors for searches, so assume zero return is just a none found condition (not an error)
+										// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results 
+		$this->explanation = ''; 
 	}
 
 }

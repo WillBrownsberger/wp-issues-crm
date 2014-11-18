@@ -66,4 +66,8 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 		return  ( $title );
 	}
 	
+	protected function group_screen( $group ) {
+		return ( ! ( 1 == $group->search_only ) );	
+	}
+	
 }

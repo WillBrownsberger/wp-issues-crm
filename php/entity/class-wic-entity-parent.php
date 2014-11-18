@@ -64,9 +64,9 @@ abstract class WIC_Entity_Parent {
 
 	protected function populate_data_object_array_from_found_record( &$wic_query, $offset=0 ) {
 		foreach ( $this->data_object_array as $field_slug => $control ) { 
-			if ( ! $control->is_multivalue() ) { 
+			if ( ! $control->is_multivalue() && ! $control->is_transient()  ) { 
 				$control->set_value ( $wic_query->result[$offset]->{$field_slug} );
-			} else { // for multivalue fields, set_value wants array of row arrays -- 
+			} elseif ( $control->is_multivalue() ) { // for multivalue fields, set_value wants array of row arrays -- 
 						// query results don't have that form or even an appropriate field slug, 
 						// so have to search by parent ID  
 				$control->set_value_by_parent_pointer( $wic_query->result[$offset]->ID );
@@ -74,10 +74,6 @@ abstract class WIC_Entity_Parent {
 		} 
 	}	
 
-	protected function initialize_list_controls () { 
- 		$this->fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $this->entity ); // identify the list fields
-		$this->initialize_data_object_array(); // add and initialize the list fields 
-	}
 
 	/*************************************************************************************
 	*
@@ -110,7 +106,10 @@ abstract class WIC_Entity_Parent {
 		}	
 		if ( count ($dup_check_array ) > 0 ) {
 			$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-			$wic_query->search ( $this->assemble_meta_query_array( true ), 'id' );  // true indicates a dedup search
+			$search_parameters = array(
+				'select_mode' => 'id',		
+			);
+			$wic_query->search ( $this->assemble_meta_query_array( true ), $search_parameters );  // true indicates a dedup search
 			if ( $wic_query->found_count > 1 || ( ( 1 == $wic_query->found_count ) && 
 						( $wic_query->result[0]->ID != $this->data_object_array['ID']->get_value() ) )
 						// for update, 1 group OK iff same record
@@ -212,7 +211,8 @@ abstract class WIC_Entity_Parent {
 			$form = new $fail_form;
 			$form->layout_form ( $this->data_object_array, $message, $message_level );
 			if ( $this->outcome_dups ) {	
-				$lister = new WIC_List_Parent;
+				$lister_class = 'WIC_List_' . $this->entity;
+				$lister = new $lister_class;
 				$list = $lister->format_entity_list( $this->data_object_array, false );
 				echo $list;
 			}	
@@ -243,7 +243,10 @@ abstract class WIC_Entity_Parent {
 		$this->data_object_array['ID']->initialize_default_values(  $this->entity, 'ID', $this->entity_instance );	
 		$this->data_object_array['ID']->set_value( $id );
 		$wic_query = 	WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-		$wic_query->search ( $this->assemble_meta_query_array( false ), '*' ); 
+		$search_parameters = array(
+			'select_mode' => '*'		
+		);
+		$wic_query->search ( $this->assemble_meta_query_array( false ), $search_parameters ); 
 		// retrieve record if found, otherwise error
 		if ( 1 == $wic_query->found_count ) {
 			$message = __( 'Record found. You can update.', 'wp-issues-crm' );
@@ -264,7 +267,14 @@ abstract class WIC_Entity_Parent {
 		$this->populate_data_object_array_from_submitted_form();
 		$this->sanitize_values();
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-		$wic_query->search ( $this->assemble_meta_query_array( false ), 'id' ); // get a list of id's meeting search criteria
+		$search_parameters= array(
+			'sort_order' => $this->data_object_array['sort_order']->get_value(),
+			'compute_total' => $this->data_object_array['compute_total']->get_value(),
+			'retrieve_limit' => $this->data_object_array['retrieve_limit']->get_value(),
+			'select_mode'	=> 'id'
+			);
+		// note that the transient search parameter 'strict_match' is handled by individual controls in create_search_clause()
+		$wic_query->search ( $this->assemble_meta_query_array( false ), $search_parameters ); // get a list of id's meeting search criteria
 		$sql = $wic_query->sql;
 		if ( 0 == $wic_query->found_count ) {
 			$message = __( 'No matching record found -- try a save?', 'wp-issues-crm' );
@@ -274,37 +284,11 @@ abstract class WIC_Entity_Parent {
 		} elseif ( 1 == $wic_query->found_count) {
 			$this->id_search_generic ( $wic_query->result[0]-> ID, $update_form, $sql );			
 		} else {
-			$lister = new WIC_List_Parent;
+			$lister_class = 'WIC_List_' . $this->entity ;
+			$lister = new $lister_class;
 			$list = $lister->format_entity_list( $wic_query,true );
 			echo $list;	
 		}						
-	}
-	
-	// return array of values based on an ID, where object already has been instantiated and possibly used in listing
-	public function get_row ( $id ) {  
-		// reset existing control values
-		foreach ( $this->data_object_array as $key=>$control ) {
-				$row_array[$key] = $control->reset_value();
-		}
-		// set id control
-		$this->data_object_array['ID']->set_value( $id );
-		// search with the id only, retrieving only list fields ( which always include ID )
-		$list_row_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-		$list_row_query->search ( $this->assemble_meta_query_array( false ), 'list' ); 
-		// retrieve record if found, otherwise error
-		if ( 1 ==  $list_row_query->found_count ) {
-			// populate object
-			$this->populate_data_object_array_from_found_record ( $list_row_query );
-			// generate row array for list use
-			$row_array = array();
-			foreach ( $this->data_object_array as $key=>$control ) {
-				$row_array[$key] = $control->get_display_value();
-			}
-			
-			return ( $row_array );
-		} else {
-			die ( sprintf ( __( 'Data base corrupted for record ID: %1$s -- list row retrieval.', 'wp-issues-crm' ) , $args['id_requested'] ) );		
-		} 
 	}
 
 }

@@ -80,6 +80,9 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	*/
 	public function set_value_by_parent_pointer ( $pointer ) { // pointer is the ID of the top-level entity -- constituent
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->field->field_slug );
+		$search_parameters = array(  
+			'select_mode' => '*',  // get all values for each		
+			); 
 		$wic_query->search ( 		
 			array ( // double layer array to standardize a return that allows multivalue fields
 					array (
@@ -89,7 +92,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 						'compare'=> '=',
 					)
 				),   // get child records
-				'*'  // get all values for each
+				$search_parameters
 			);
 
 		$this->value = array();

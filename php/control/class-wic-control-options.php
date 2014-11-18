@@ -143,6 +143,24 @@ Class WIC_Control_Options {
 			'label'	=>	'Con' ),
 		);
 
+	private static $retrieve_limit_options = array ( 
+		array(
+			'value'	=> '10',
+			'label'	=>	'Up to 10 Records' ),
+		array(
+			'value'	=> '50',
+			'label'	=>	'Up to 50 Records' ),
+		array(
+			'value'	=> '100',
+			'label'	=>	'Up to 100 Records' ),
+		array(
+			'value'	=> '500',
+			'label'	=>	'Up to 500 Records' ),
+		array(
+			'value'	=> '1000',
+			'label'	=>	'Up to 1000 Records' ),
+		);
+
 	private static $state_options = array (
 		array(
 			'value'	=> 'MA',
@@ -234,6 +252,10 @@ Class WIC_Control_Options {
 
 	public static function get_pro_con_options() {
 		return self::$pro_con_options; 
+	}
+
+	public static function get_retrieve_limit_options() {
+		return self::$retrieve_limit_options; 
 	}
 
 	public static function get_state_options() {

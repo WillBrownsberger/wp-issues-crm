@@ -38,8 +38,8 @@ abstract class WIC_DB_Access {
 
 	
 
-	public function search ( $meta_query_array, $select_mode  ) { // receives pre-assembled meta_query_array
-		$this->db_search( $meta_query_array, $select_mode );
+	public function search ( $meta_query_array, $search_parameters ) { // receives pre-assembled meta_query_array
+		$this->db_search( $meta_query_array, $search_parameters );
 		return;
 	}
 
@@ -85,6 +85,9 @@ abstract class WIC_DB_Access {
 		return;	
 	}
 
+	public function list_by_id ( $id_string ) {
+		$this->db_list_by_id ( $id_string ); 
+	}
 
 	/*
 	*
@@ -104,7 +107,7 @@ abstract class WIC_DB_Access {
 		return ( $save_update_array );
 	}
 
-	abstract protected function db_search ( $meta_query_array );
+	abstract protected function db_search ( $meta_query_array, $search_parameters );
 	abstract protected function db_save ( $meta_query_array );
 	abstract protected function db_update ( $meta_query_array );
 	abstract protected function db_delete_by_id ( $id );

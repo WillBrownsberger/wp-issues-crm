@@ -243,7 +243,7 @@ abstract class WIC_Control_Parent {
 	*********************************************************************************/
 
 	public function create_search_clause ( $dup_check ) {
-		if ( '' == $this->value ) {
+		if ( '' == $this->value || 1 == $this->field->transient ) {
 			return ('');		
 		}		
 		$compare = $this->field->like_search_enabled ? 'like' : '=';

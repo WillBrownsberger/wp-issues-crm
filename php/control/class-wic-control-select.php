@@ -5,6 +5,17 @@
 */
 class WIC_Control_Select extends WIC_Control_Parent {
 	
+	
+	public function search_control () {
+		$final_control_args = $this->default_control_args;
+		$final_control_args['readonly'] = false;
+		$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
+		$final_control_args['value'] = $this->value;
+		$final_control_args['required'] = false; // no field is required on search, except for search parms may be blank prohibited 
+		$control =  $this->create_control( $final_control_args ) ;
+		return ( $control ) ;
+	}
+	
 
 
 	public function update_control () {
@@ -13,6 +24,7 @@ class WIC_Control_Select extends WIC_Control_Parent {
 		$final_control_args['value'] = $this->value;
 		if ( $this->field->readonly ) {	
 			$final_control_args['readonly_update'] = 1 ; // lets control know to only show one the already set value if readonly
+																		// readonly control will not show at all on update
 		} 
 			return ( $this->create_control ( $final_control_args ) );
 	}	
@@ -31,8 +43,10 @@ class WIC_Control_Select extends WIC_Control_Parent {
 				'label'	=> $placeholder,								
 			);  
 			$getter = 'get_' . $this->field->field_slug . '_options';
-			$option_array =  WIC_Control_Options::$getter(); 
-			array_push( $option_array, $not_selected_option );
+			$option_array =  WIC_Control_Options::$getter();
+			if ( 0 == $required && 0 == $blank_prohibited ) { // difference is that required is not a required setting on search, but blank_prohibited is 
+				array_push( $option_array, $not_selected_option );
+			}
 		} else { 
 			$getter = 'get_' . $this->field->field_slug . '_label';
 			$option_array = array (

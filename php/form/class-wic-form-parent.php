@@ -49,30 +49,34 @@ abstract class WIC_Form_Parent  {
 			$group_count = 0;
 			$groups = $this->get_the_groups();
 		   foreach ( $groups as $group ) {
+				
+				if ( $this->group_screen( $group ) ) {				
 						   	
-				$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
-				$group_count++;
+					$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
+					$group_count++;
+					
+					echo '<div class = "wic-form-field-group ' . $row_class . '" id = "wic-field-group-' . esc_attr( $group->group_slug  ) . '">';				
+					
+						$button_args = array (
+							'class'			=> 	'field-group-show-hide-button',		
+							'name_base'		=> 	'wic-inner-field-group-',
+							'name_variable' => 	$group->group_slug ,
+							'label' 			=> 	$group->group_label ,
+							'show_initial' => 	$group->initial_open,
+						);
 				
-				echo '<div class = "wic-form-field-group ' . $row_class . '" id = "wic-field-group-' . esc_attr( $group->group_slug  ) . '">';				
-				
-					$button_args = array (
-						'class'			=> 	'field-group-show-hide-button',		
-						'name_base'		=> 	'wic-inner-field-group-',
-						'name_variable' => 	$group->group_slug ,
-						'label' 			=> 	$group->group_label ,
-						'show_initial' => 	$group->initial_open,
-					);
-			
-					echo $this->output_show_hide_toggle_button( $button_args );			
-				
-					$show_class = $group->initial_open ? 'visible-template' : 'hidden-template';
-					echo '<div class="' . $show_class . '" id = "wic-inner-field-group-' . esc_attr( $group->group_slug ) . '">' .					
-					'<p class = "wic-form-field-group-legend">' . esc_html ( $group->group_legend )  . '</p>';
-
-					$group_fields =  WIC_DB_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
-					$this->the_controls ( $group_fields, $data_array );
-						
-				echo '</div></div>';		   
+						echo $this->output_show_hide_toggle_button( $button_args );			
+					
+						$show_class = $group->initial_open ? 'visible-template' : 'hidden-template';
+						echo '<div class="' . $show_class . '" id = "wic-inner-field-group-' . esc_attr( $group->group_slug ) . '">' .					
+						'<p class = "wic-form-field-group-legend">' . esc_html ( $group->group_legend )  . '</p>';
+	
+						$group_fields =  WIC_DB_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
+						$this->the_controls ( $group_fields, $data_array );
+							
+					echo '</div></div>';	
+					
+				}	   
 		   } // close foreach group
 		
 			// final button group div
@@ -102,6 +106,10 @@ abstract class WIC_Form_Parent  {
   		echo '</span>';  
 
 	}	
+	
+	protected function group_screen( $group ) { // allows child forms to screen out groups
+		return ( true );	
+	}
 
 	/*
 	*
