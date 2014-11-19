@@ -122,7 +122,7 @@ abstract class WIC_Control_Parent {
 	}
 
 	protected function create_control ( $control_args ) { // basic create text control, accessed through control methodsabove
-   
+
 		extract ( $control_args, EXTR_OVERWRITE );   
     
     	$class_name = 'WIC_Entity_' . $entity_slug;
@@ -167,7 +167,24 @@ abstract class WIC_Control_Parent {
 		} else {
 			$this->value = sanitize_text_field ( stripslashes ( $this->value ) );		
 		}
+		if ( $this->field->is_date ) {
+			$this->value = $this->sanitize_date ( $this->value );		
+		}
 	}
+
+	/*
+	* date sanitization function ( no error message for bad date, but will fail a required test )
+	*
+	*/   
+	protected function sanitize_date ( $possible_date ) {
+		try {
+			$test = new DateTime( $possible_date );
+		}	catch ( Exception $e ) {
+			return ( '' );
+		}	   			
+ 		return ( date_format( $test, 'Y-m-d' ) );
+	}
+   
 
 	/*********************************************************************************
 	*

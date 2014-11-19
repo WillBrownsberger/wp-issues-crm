@@ -33,7 +33,6 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 	}
 	
 	protected function db_update ( $save_update_array ) {
-		
 		global $wpdb;
 		$table  = $wpdb->prefix . 'wic_' . $this->entity;  
 		
@@ -92,15 +91,21 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			}
 			$field_name		= $where_item['key'];
 			// scan is like with front and back wildcards
-			$compare 		= ( 'scan' == $where_item['compare'] ) ? 'like' : $where_item['compare']; 
+			$compare = ( 'scan' == $where_item['compare'] ) ? 'like' : $where_item['compare']; 
 			$table = $where_item['table'];
-			$where 			.= " AND $table.$field_name $compare %s ";
-			if ( 'scan' == $where_item['compare'] ) {
-				$values[] = '%' . $wpdb->esc_like ( $where_item['value'] )  . '%';
-			} elseif ( 'like' == $where_item['compare'] ) {
-				$values[] = $wpdb->esc_like ( $where_item['value'] ) . '%' ;
-			} else{
-				$values[] = $where_item['value']; 			
+			if ( 'BETWEEN' == $compare ) {
+				$where .= " AND $table.$field_name >= %s AND $table.$field_name <= %s" ;  			
+				$values[] = $where_item['value'][0];
+				$values[] = $where_item['value'][1];
+			} else {
+				$where .= " AND $table.$field_name $compare %s ";
+				if ( 'scan' == $where_item['compare'] ) {
+					$values[] = '%' . $wpdb->esc_like ( $where_item['value'] )  . '%';
+				} elseif ( 'like' == $where_item['compare'] ) {
+					$values[] = $wpdb->esc_like ( $where_item['value'] ) . '%' ;
+				} else{
+					$values[] = $where_item['value']; 			
+				}
 			}
 		}
 		// prepare a join clause		

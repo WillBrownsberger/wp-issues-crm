@@ -70,7 +70,7 @@ class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 	*/
 		return self::$activity_type_options; 
 	}
-	 
+
 	private static $pro_con_options = array ( 
 		array(
 			'value'	=> '0',
