@@ -15,4 +15,34 @@ class WIC_Entity_Address extends WIC_Entity_Multivalue {
 		$this->entity_instance = $instance;
 	} 
 
+	private static $address_type_options	= array(	
+		array(
+			'value'	=> '0',
+			'label'	=>	'Home Address' ),
+		array(
+			'value'	=> '1',
+			'label'	=>	'Work Address' ),
+		array(
+			'value'	=> '2',
+			'label'	=>	'Mail Address' ),
+		array(
+			'value'	=> '3',
+			'label'	=>	'Other Address' ),
+		);
+
+	public static function get_address_type_options() {
+		return self::$address_type_options; 
+	}
+
+	private static $state_options = array (
+		array(
+			'value'	=> 'MA',
+			'label'	=>	'MA'),
+		);		
+
+	public static function get_state_options() {
+		return self::$activity_type_options; 
+	}
+
+
 }

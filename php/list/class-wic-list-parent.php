@@ -77,8 +77,16 @@ class WIC_List_Parent {
 				$row .= '<ul class = "wic-post-list-line">';			
 					foreach ( $fields as $field ) {
 						if ( 'ID' != $field->field_slug ) {
+							$class_name = 'WIC_Entity_' . $wic_query->entity;
+							$formatter = $field->field_slug . '_formatter';
+							if ( method_exists ( $class_name, $formatter ) ) { 
+								// note:  formatter MUST include esc_html on value unless known sanitized field like phone
+								$display_value = $class_name::$formatter (  $row_array->{$field->field_slug} );
+							} else {
+								$display_value =  esc_html( $row_array->{$field->field_slug} );		
+							}
 							$row .= '<li class = "wic-post-list-field pl-' . $wic_query->entity . '-' . $field->field_slug . ' "> ';
-								$row .= esc_html ( $row_array->{$field->field_slug} );
+								$row .=  $display_value ;
 							$row .= '</li>';			
 						}	
 					}

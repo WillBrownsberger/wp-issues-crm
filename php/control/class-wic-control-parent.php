@@ -114,8 +114,15 @@ abstract class WIC_Control_Parent {
 	}
 
 	protected function create_control ( $control_args ) { // basic create text control, accessed through control methodsabove
+   
+		extract ( $control_args, EXTR_OVERWRITE );   
     
-		extract ( $control_args, EXTR_OVERWRITE );
+    	$class_name = 'WIC_Entity_' . $entity_slug;
+		$formatter = $this->field->field_slug . '_formatter';
+		if ( method_exists ( $class_name, $formatter ) ) { 
+			$value = $class_name::$formatter ( $value );
+		}
+
 		$readonly = $readonly ? 'readonly' : '';
 		$type = ( 1 == $hidden ) ? 'hidden' : 'text';
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' . $field_label_suffix . '</span>' : '';
@@ -145,11 +152,13 @@ abstract class WIC_Control_Parent {
 	*********************************************************************************/
 
 	public function sanitize() {
-		$sanitizor = $this->field->sanitize_call_back;
-		// apply stripslashes and sanitize text field 
-		// note that these sanitization call backs are generic functions or are in wp-issues-crm.php)
-		$sanitizor = $sanitizor > '' ? $sanitizor : 'wic_generic_sanitizor';
-		$this->value = $sanitizor ( $this->value );
+		$class_name = 'WIC_Entity_' . $this->field->entity_slug;
+		$sanitizor = $this->field->field_slug . '_sanitizor';
+		if ( method_exists ( $class_name, $sanitizor ) ) { 
+			$this->value = $class_name::$sanitizor ( $this->value );
+		} else {
+			$this->value = sanitize_text_field ( stripslashes ( $this->value ) );		
+		}
 	}
 
 	/*********************************************************************************
@@ -160,9 +169,10 @@ abstract class WIC_Control_Parent {
 
 	public function validate() {
 		$validation_error = '';
-		$validator = $this->field->validate_call_back;
-		if ( $validator > '' ) {
-			$validation_error = $validator ( $this->value );
+		$class_name = 'WIC_Entity_' . $this->field->entity_slug;
+		$validator = $this->field->field_slug . '_validator';
+		if ( method_exists ( $class_name, $validator ) ) { 
+			$validation_error = $class_name::$validator ( $this->value );
 		}
 		return $validation_error;
 	}

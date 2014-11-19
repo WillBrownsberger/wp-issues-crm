@@ -49,4 +49,158 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		return;
 	}
 	
+	/***************************************************************************
+	*
+	* Constituent properties, setters and getters
+	*
+	****************************************************************************/ 	
+
+  	private static $case_status_options = array ( 
+		array(
+			'value'	=> '0',
+			'label'	=>	'Closed' ),
+		array(
+			'value'	=> '1',
+			'label'	=>	'Open' ),
+		);
+		
+
+	private static $gender_options = array ( 
+		array(
+			'value'	=> 'm',
+			'label'	=>	'Male' ),
+		array(
+			'value'	=> 'f',
+			'label'	=>	'Female' ),
+		);
+
+	private static $party_options = array ( 
+		array(
+			'value'	=> 'd',
+			'label'	=>	'Democrat' ),
+		array(
+			'value'	=> 'r',
+			'label'	=>	'Republican' ),
+		array(
+			'value'	=> 'u',
+			'label'	=>	'Unenrolled' ),
+		array(
+			'value'	=> 'l',
+			'label'	=>	'Libertarian' ),
+		array(
+			'value'	=> 'j',
+			'label'	=>	'Green-Rainbow' ),
+		array(
+			'value'	=> 'g',
+			'label'	=>	'Green Party USA' ),	
+		array(
+			'value'	=> 's',
+			'label'	=>	'Socialist' ),	
+		array(
+			'value'	=> 'o',
+					'label'	=>	'Other' ),						
+		);	
+
+
+	private static $retrieve_limit_options = array ( 
+		array(
+			'value'	=> '10',
+			'label'	=>	'Up to 10 Records' ),
+		array(
+			'value'	=> '50',
+			'label'	=>	'Up to 50 Records' ),
+		array(
+			'value'	=> '100',
+			'label'	=>	'Up to 100 Records' ),
+		array(
+			'value'	=> '500',
+			'label'	=>	'Up to 500 Records' ),
+		array(
+			'value'	=> '1000',
+			'label'	=>	'Up to 1000 Records' ),
+		);
+
+
+
+	private static $voter_status_options = array ( 
+		array(
+			'value'	=> 'a',
+			'label'	=>	'Active' ),
+		array(
+			'value'	=> 'i',
+			'label'	=>	'Inactive' ),
+		array(
+			'value'	=> 'x',
+			'label'	=>	'Not Registered' ),
+		);	
+	
+	/*
+	*	option array get functions
+	*/
+
+		
+  	public static function get_case_status_options() {
+		return self::$case_status_options; 
+	} 
+	
+	public static function get_gender_options() {
+		return self::$gender_options; 
+	}
+	
+	public static function get_party_options() {
+		return self::$party_options; 
+	}
+	
+	public static function get_party_label( $lookup ) {
+		foreach ( self::$party_options as $select_item_array ) {
+			if ( $lookup == $select_item_array['value'] ) {
+				return ( $select_item_array['label'] );			
+			} 
+		}
+	}
+	// note: since phone is multivalue, and formatter is not invoked in the 
+	// WIC_Control_Multivalue class (rather at the child entity level), 
+	// this function is only invoked in the list context
+	public static function phone_formatter ( $phone_list ) {
+		$phone_array = explode ( ',', $phone_list );
+		$formatted_phone_array = array();
+		foreach ( $phone_array as $phone ) {
+			$formatted_phone_array[] = WIC_Entity_Phone::phone_formatter ( $phone );		
+		}
+		return ( implode ( '<br />', $formatted_phone_array ) );
+	}
+	
+	public static function email_formatter ( $email_list ) {
+		$email_array = explode ( ',', $email_list );
+		$clean_email_array = array();
+		foreach ( $email_array as $email ) {
+			$clean_email_array[] = esc_html ( $email );		
+		}
+		return ( implode ( '<br />', $clean_email_array ) );
+	}		
+
+	public static function address_formatter ( $address_list ) {
+		return self::email_formatter ( $address_list );	
+	}	
+
+	public static function get_retrieve_limit_options() {
+		return self::$retrieve_limit_options; 
+	}
+
+
+	public static function get_voter_status_options() {
+		return self::$voter_status_options; 
+	}
+	
+	public static function get_voter_status_label( $lookup ) {
+		foreach ( self::$voter_status_options as $select_item_array ) {
+			if ( $lookup == $select_item_array['value'] ) {
+				return ( $select_item_array['label'] );			
+			} 
+		}
+	}
+
+	
+	
+	
 }

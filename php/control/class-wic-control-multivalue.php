@@ -28,7 +28,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	
 	protected function set_blank_first_row () {	
 		// here initializing the first row of the multi-value array -- field slug for the multi value is the class of the rows
-		$class_name = 'WIC_Entity_' . initial_cap ( $this->field->field_slug ) ; // note, php would forgive the initial_cap missing in the field_slug, but . . . 
+		$class_name = 'WIC_Entity_' . $this->field->field_slug; // note -- class_name is not case sensitive, but autoloader looks from WIC_ (sic) 
 		$args = array(
 			'instance' => '0'		
 		);
@@ -49,7 +49,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	*/
 	public function set_value ( $value ) { // value is an array created by multi-value field coming back from $_Post
 		$this->value = array();
-		$class_name = 'WIC_Entity_' . initial_cap ( $this->field->field_slug );
+		$class_name = 'WIC_Entity_' . $this->field->field_slug;
 		$instance_counter = 0;
 		foreach ( $value as $key=>$form_row_array ) {
 			$args = array (
@@ -96,7 +96,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 			);
 
 		$this->value = array();
-		$class_name = 'WIC_Entity_' . initial_cap ( $this->field->field_slug );
+		$class_name = 'WIC_Entity_' . $this->field->field_slug;
 		$instance_counter = 0;
 		foreach ( $wic_query->result as $form_row_object ) {
 			$args = array (
@@ -226,7 +226,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		// create a hidden template row for adding rows in wic-utilities.js through moreFields() 
 		// moreFields will replace the string 'row-template' with row-counter index value after creating the new row
 		
-		$class_name = 'WIC_Entity_' . initial_cap ( $this->field->field_slug ) ; // note, php would forgive the initial_cap missing in the field_slug, but . . . 
+		$class_name = 'WIC_Entity_' . $this->field->field_slug; 
 		$args = array(
 			'instance' => 'row-template'		
 			);

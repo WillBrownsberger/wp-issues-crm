@@ -56,7 +56,7 @@ include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-import-routines.php';
 
 // this field is initialized by the first call to WIC_DB_Dictionary::get_field_rules
 $wp_issues_crm_field_rules_cache = array();
-
+// autoloader is case insensitive, except that requires WIC_ (sic) as a prefix.
 function wp_issues_crm_autoloader( $class ) {
 	if ( 'WIC_' == substr ($class, 0, 4 ) ) {
 		$subdirectory = 'php'. DIRECTORY_SEPARATOR . strtolower( substr( $class, 4, ( strpos ( $class, '_', 4  ) - 4 )  ) ) . DIRECTORY_SEPARATOR ;
@@ -143,7 +143,7 @@ class WP_Issues_CRM {
 			if ( '' == $control_array[0] ) {
 				$this->show_dashboard();		
 			} else {
-				$class_name = 'WIC_Entity_' . initial_cap ( $control_array[0] ); // entity_requested
+				$class_name = 'WIC_Entity_' . $control_array[0]; // entity_requested
 				$action_requested 		= $control_array[1];
 				$args = array (
 					'id_requested'			=>	$control_array[2],
@@ -235,25 +235,3 @@ class WP_Issues_CRM {
 
 $wp_issues_crm = new WP_Issues_CRM;
 
-
-function initial_cap ( $string ) {
-	$string[0] = strtoupper ( $string[0] );
-	return ( $string ); 
-}
-
-function wic_generic_sanitizor ( $value ) {
-		return sanitize_text_field ( stripslashes ( $value ) );	
-}
-
-	
-function validate_individual_email( $email ) { 
-	$error = '';
-	if ( $email > '' ) {	
-		$error = filter_var( $email, FILTER_VALIDATE_EMAIL ) ? '' : __( 'Email address appears to be not valid. ', 'wp-issues-crm' );
-	}
-	return $error;	
-}	
-
-function foobar ( $value ) {
-		echo $value . '???? Fucked up beyond all recognition!';	
-}

@@ -23,8 +23,8 @@ class WIC_Control_Select extends WIC_Control_Parent {
 		$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
 		$final_control_args['value'] = $this->value;
 		if ( $this->field->readonly ) {	
-			$final_control_args['readonly_update'] = 1 ; // lets control know to only show one the already set value if readonly
-																		// readonly control will not show at all on update
+			$final_control_args['readonly_update'] = 1 ; // lets control know to only show the already set value if readonly
+																		// (readonly control will not show at all on save, so need not cover that case)
 		} 
 			return ( $this->create_control ( $final_control_args ) );
 	}	
@@ -36,23 +36,25 @@ class WIC_Control_Select extends WIC_Control_Parent {
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 
 		$control = '';
-				
-		if ( ! isset ( $readonly_update ) ) {		
+		
+		$entity_class = 'WIC_Entity_' . $this->field->entity_slug;		
+		if ( ! isset ( $readonly_update ) ) { // the usual mode -- show drop down		
 			$not_selected_option = array (
 				'value' 	=> '',
 				'label'	=> $placeholder,								
 			);  
 			$getter = 'get_' . $this->field->field_slug . '_options';
-			$option_array =  WIC_Control_Options::$getter();
+			$option_array =  $entity_class::$getter();
 			if ( 0 == $required && 0 == $blank_prohibited ) { // difference is that required is not a required setting on search, but blank_prohibited is 
 				array_push( $option_array, $not_selected_option );
 			}
-		} else { 
+		} else { // show just the already set option if a readonly field, but in update mode 
+					// (if were to show as a readonly text, would lose the variable for later use)
 			$getter = 'get_' . $this->field->field_slug . '_label';
 			$option_array = array (
 				array (
 					'value' => $value,
-					'label' => WIC_Control_Options::$getter( $value )
+					'label' => $entity_class::$getter( $value )
 				)
 			);			
 		} 

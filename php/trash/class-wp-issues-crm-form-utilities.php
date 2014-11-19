@@ -1,19 +1,4 @@
-					}
-				} else { // non array for serialized field is only from a search -- compress/sanitize, but not validate
-					if ( 'phones' == $field['slug'] ) {
-						$clean_input[$field['slug']] = preg_replace("/[^0-9]/", '', $_POST[$field['slug']] );
-					} else {
-						$clean_input[$field['slug']] = stripslashes( sanitize_text_field( $_POST[$field['slug']] ) );
-					}
-				} // close non-array for serialized fields
-			} elseif ( 'multi_select' == $field['type'] ) { 
-				$clean_input[$field['slug']] = array();
-					if( isset ( $_POST[$field['slug']] ) ) {
-						foreach ( $_POST[$field['slug']] as $key => $value ) {
-							$clean_input[$field['slug']][] = $key; 					
-						}
-					}
-			}
+<?php
 			
 
 			// add date hi-lo ranges to array and standardize all dates to yyyy-mm-dd 
@@ -261,51 +246,6 @@
 	}	
 
 
-
-	/* little function to format phone numbers for display */	
-   function format_phone ($raw_phone) {
-   	
-		$phone = preg_replace( "/[^0-9]/", '', $raw_phone );
-   	
-		if ( 7 == strlen($phone) ) {
-			return ( substr ( $phone, 0, 3 ) . '-' . substr($phone,3,4) );		
-		} elseif ( 10  == strlen($phone) ) {
-			return ( '(' . substr ( $phone, 0, 3 ) . ') ' . substr($phone, 3, 3) . '-' . substr($phone,6,4) );	
-		} else {
-			return ($phone);		
-		}
-    
-    }
-
-	/*
-	*	repeater validation function for phones
-	*/
-
-	function validate_phones( $phone_number_row ) {
-		
-		$outcome = array(
-			'result' 	=> '',
-			'error'		=> '',
-			'present' 	=> false
-		);
-
-		$outcome['result'] = array(
-				preg_replace( "/[^0-9]/", '', $phone_number_row[0] ),
-				preg_replace( "/[^0-9]/", '', $phone_number_row[1] ),
-				preg_replace( "/[^0-9]/", '', $phone_number_row[2] ), 
-			);
-			
-		$outcome['present'] = $outcome['result'][1] > '' ;
-		
-		return( $outcome );		
-			
-	}
-	
-	
-	function validate_individual_email( $email ) { 
-		$error = filter_var( $email, FILTER_VALIDATE_EMAIL ) ? '' : __( 'Email address appears to be not valid. ', 'wp-issues-crm' );
-		return $error;	
-	}	
 
 /*
 *	function for address groups
