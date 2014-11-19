@@ -267,6 +267,10 @@ p.wic-form-field-group-legend {
 	padding:0;
 }
 
+textarea#notes.wic-input.notes {
+	background: #f0f0f0;
+	width: 800px;
+}
 .wic-multi-select-group-label {
 	display: inline-block;
 	min-width: 180px;

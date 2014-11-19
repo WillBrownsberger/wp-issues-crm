@@ -18,15 +18,14 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		parent::initialize_default_values( $entity, $field_slug, $instance );
 		// now initializing the multi-value array
 		$this->reset_value();
-		$this->set_blank_first_row(); // needed for searching
+   //		$this->set_blank_first_row(); // needed for searching
 	}
 
 	public function reset_value() {  
-		// use this function only where doing repopulation in a list context -- otherwise initialize_default_values
 		$this->value = array();
 	}		
 	
-	protected function set_blank_first_row () {	
+	protected function set_blank_first_row () { // called in search control set up
 		// here initializing the first row of the multi-value array -- field slug for the multi value is the class of the rows
 		$class_name = 'WIC_Entity_' . $this->field->field_slug; // note -- class_name is not case sensitive, but autoloader looks from WIC_ (sic) 
 		$args = array(
@@ -64,8 +63,17 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 						$wic_access_object->delete_by_id( $form_row_array['ID'] ); 
 					}
 				} else { // not deleted rows -- may be blank
-					$this->value[$instance_counter] = new $class_name( 'populate_from_form', $args );
-					$instance_counter++;
+					$values_set = false;
+					foreach ( $form_row_array as $value ){
+						if ( '' != $value  ) {
+							$values_set = true;
+							break;						
+						}	
+					}
+					if ( $values_set ) {					
+						$this->value[$instance_counter] = new $class_name( 'populate_from_form', $args );
+						$instance_counter++;
+					}
 				}
 			}
 		}
@@ -110,8 +118,8 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	
 	/*
 	*	Multivalue -- concatenate display components from rows
+	*  obsolete -- for first try at list object
 	*
-	*/
 	public function get_display_value () {
 		$display_value = '';
 		foreach ( $this->value as $row_object ) {
@@ -119,7 +127,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 			$display_value .=	$row_object->get_display_value();		
 		}	
 		return ( $display_value ) ;
-	}
+	} */
 
 	/*
 	*  Multivalue control passes requests to its components instead of actually doing the action as scalar controls do.
@@ -140,6 +148,15 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		foreach ( $this->value as $row_object ) {
 			$error_message .= $row_object->validate_values();
 		}
+		// treat required checks for sub rows of entity as a validation issue -- 
+		// should always be done even if row not required -- otherwise, end up with garbage rows.
+		$required_notice = '';		
+		foreach ( $this->value as $row_object ) {	
+			$required_notice .= $row_object->required_check (); 
+		} 
+		if ( $required_notice > '' ) {
+			$error_message .= sprintf ( __( ' %s row has missing elements: ', 'wp-issues-crm' ), $this->field->field_label ) . $required_notice  ; 		
+		}
 		return ( $error_message );	
 	}
 
@@ -152,22 +169,23 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	* -- doing only the second step will serve to prevent population of db with blank addresses,
 	* but will not force an email for each constituent.
 	*********************************************************************************/
-		$error_message = '';
-		foreach ( $this->value as $row_object ) {	
-			$error_message .= $row_object->required_check (); 
-		} 
-		return ( '' == $error_message ); // true or false		
+		$is_present = false;		
+		if ( count ( $this->value ) > 0  ) {
+			foreach ( $this->value as $row_object ) {	
+				$error_message = $row_object->required_check ();
+				if ( '' == $error_message ) {
+					$is_present = true;
+					break;				
+				} 
+			}			
+		}
+		return ( $is_present ); // true or false		
 	}
 
-
 	//report whether field fails individual requirement, with reasons
-	public function required_check() {
-		if ( "individual" == $this->field->required && ! is_present() ) {
-			$error_message = '';
-			foreach ( $this->value as $row_object ) {	
-				$error_message .= $row_object->required_check (); 
-			} 
-			return ( sprintf ( __( ' %s missing required elements: ', 'wp-issues-crm' ), $this->field->field_label ) . $error_message . '.' ) ;		
+	public function required_check() { 
+		if ( "individual" == $this->field->required && ! $this->is_present() ) {
+			return ( sprintf ( __( ' %s is a required field group. ', 'wp-issues-crm' ), $this->field->field_label ) ) ;		
 		} else {
 			return '';	// if has non-empty value, then fails check -- consistent with scalar, but here compiled across rows. 	
 		}	
@@ -181,6 +199,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	**************************************************************************************/
 	// search control works off a single row, producing controls for that row
 	public function search_control () {
+		$this->set_blank_first_row(); // needed for searching
 		$final_control_args = $this->default_control_args;
 		extract ( $final_control_args );
 		$field_label_suffix = $like_search_enabled ? '(%)' : '';
@@ -214,7 +233,6 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		$final_control_args = $this->default_control_args;
 		extract ( $final_control_args );
 		$field_label_suffix = $this->set_required_values_marker ( $required );		
-		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' . $field_label_suffix . '</span>' : '';
 		 
 		$form_to_call = ( $save ) ? 'save_row' : 'update_row';		 
 		 
@@ -231,8 +249,9 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 			'instance' => 'row-template'		
 			);
 		$template = new $class_name( 'initialize', $args );
-		
-		$control_set .= $template->$form_to_call();
+		// always initialize a save_row for the template, because will be saving that row new regardless of
+		// whether main update is a save or an update
+		$control_set .= $template->save_row();
 
 		// now proceed to add rows for any existing records from database or previous form
 		
@@ -243,7 +262,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		}		
 
 		$control_set .= '<div class = "hidden-template" id = "' . $this->field->field_slug . '-row-counter">' . count( $this->value ) . '</div>';		
-		$control_set .= $this->create_add_button ( $this->field->field_slug, sprintf ( __( 'Add %s ', 'wp-issues-crm' ), $this->field->field_label ) . ' ' . $field_label_suffix_span ) ;
+		$control_set .= $this->create_add_button ( $this->field->field_slug, sprintf ( __( 'Add %s ', 'wp-issues-crm' ), $this->field->field_label ) . ' ' . $field_label_suffix ) ;
 		$control_set .= '</div>';
 
 		return ($control_set);	

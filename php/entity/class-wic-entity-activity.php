@@ -43,6 +43,9 @@ class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 		return self::$activity_type_options; 
 	}
 
+	public static function date_set_default( $value )  {
+		return ( date ( 'Y-m-d' ) );
+	}	
 	
 	public static function get_issue_options() {
 	/*	

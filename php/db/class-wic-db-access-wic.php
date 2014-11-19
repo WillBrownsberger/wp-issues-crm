@@ -91,10 +91,17 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 				$table_array[] = $where_item['table'];			
 			}
 			$field_name		= $where_item['key'];
-			$compare 		= $where_item['compare'];
+			// scan is like with front and back wildcards
+			$compare 		= ( 'scan' == $where_item['compare'] ) ? 'like' : $where_item['compare']; 
 			$table = $where_item['table'];
 			$where 			.= " AND $table.$field_name $compare %s ";
-			$values[] 		= ( '=' == $where_item['compare'] ) ? $where_item['value'] : $wpdb->esc_like ( $where_item['value'] ) . '%' ;
+			if ( 'scan' == $where_item['compare'] ) {
+				$values[] = '%' . $wpdb->esc_like ( $where_item['value'] )  . '%';
+			} elseif ( 'like' == $where_item['compare'] ) {
+				$values[] = $wpdb->esc_like ( $where_item['value'] ) . '%' ;
+			} else{
+				$values[] = $where_item['value']; 			
+			}
 		}
 		// prepare a join clause		
 		$array_counter = 0;

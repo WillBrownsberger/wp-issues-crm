@@ -29,14 +29,16 @@ abstract class WIC_Control_Parent {
 
 	/***
 	*
-	*	The control create functions COULD be promiscuous in that they get their control arguments from multiple places.
-	*		Instead, limit input to rules from database on initialization and 
-	*		-- rules specified in the named control function (search_control, update_control) 
+	*	The control create functions are a little promiscuous in that they gather their control arguments from multiple places.
+	*		Field rules from database on initialization  
+	*		Rules specified in the named control function (search_control, update_control) 
 	*		In child controls, may allow direct passage of arguments -- see checked and multivalue.
 	*		Note that have potential to get css specified to them based on their field slug
+	*		Any special validation, sanitization, formatting and defaults values ( as opposed to default rule values ) are supplied from the relevant object
 	*/
 
 
+	// this function initializes the default values of field RULES -- not the $value property of the control 
 	public function initialize_default_values ( $entity, $field_slug, $instance ) {
 		$this->field = WIC_DB_Dictionary::get_field_rules( $entity, $field_slug );
 		$this->default_control_args =  array_merge( $this->default_control_args, get_object_vars ( $this->field ) );
@@ -101,7 +103,13 @@ abstract class WIC_Control_Parent {
 		$final_control_args = $this->default_control_args;
 		if( ! $final_control_args['readonly'] ) {
 			$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
-			$final_control_args['value'] = $this->value;
+	    	$class_name = 'WIC_Entity_' . $this->field->entity_slug;
+			$set_default = $this->field->field_slug . '_set_default';
+			if ( method_exists ( $class_name, $set_default ) ) { 
+				$final_control_args['value'] = $class_name::$set_default ( $this->value );
+			} else {
+				$final_control_args['value'] = $this->value;
+			}
 			return  ( $this->create_control( $final_control_args ) );	
 		}
 	}
@@ -218,8 +226,8 @@ abstract class WIC_Control_Parent {
 	*
 	*********************************************************************************/
 	public function required_check() {
-		if ( "individual" == $this->field->required && ! is_present() ) {
-			return ( sprintf ( __( ' %s is a required field. ', 'wp-issues-crm' ), $this->field->field_label ) ) ;		
+		if ( "individual" == $this->field->required && ! $this->is_present() ) {
+			return ( sprintf ( __( ' %s is required. ', 'wp-issues-crm' ), $this->field->field_label ) ) ;		
 		} else {
 			return '';		
 		}	

@@ -281,39 +281,6 @@ class WIC_Post_Content_Control extends WIC_Text_Control {
 
 /
 
-/*******************************************************************************
-*
-*  WIC Text Field
-*
-*******************************************************************************/
-class WIC_Text_Control extends WIC_Control_Parent {
-	// named just for consistency
-}
-
-/*******************************************************************************
-*
-*  WIC Text Area Field
-*
-*******************************************************************************/
-Class WIC_Textarea_Control extends WIC_Control_Parent {
-
-	public static function create_control ( $control_args ) {
-		
-		extract ( $control_args, EXTR_SKIP ); 
-	
-		$readonly = $readonly ? 'readonly' : '';
-		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
-		 
-		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . esc_attr( $field_label ) . '</label>' : '' ;
-		$control .= '<textarea class="' . $input_class . '" id="' . esc_attr( $field_slug ) . '" name="' . esc_attr( $field_slug ) . '" type="text" placeholder = "' . 
-			esc_attr( $placeholder ) . '" ' . $readonly  . '/>' . esc_textarea( $value ) . '</textarea>' . $field_label_suffix_span;
-			
-		return ( $control );
-
-	}	
-
-}
-
 
 /*******************************************************************************
 *
