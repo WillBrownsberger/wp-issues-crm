@@ -36,25 +36,19 @@ class WIC_Entity_Phone extends WIC_Entity_Multivalue {
 	private static $phone_type_options = array(	
 		array(
 			'value'	=> '0',
-			'label'	=>	'Home Landline' ),
+			'label'	=>	'Home' ),
 		array(
 			'value'	=> '1',
-			'label'	=>	'Personal Mobile' ),
+			'label'	=>	'Mobile' ),
 		array(
 			'value'	=> '2',
-			'label'	=>	'Work Landline' ),
+			'label'	=>	'Work' ),
 		array(
 			'value'	=> '3',
-			'label'	=>	'Work Mobile' ),
+			'label'	=>	'Fax' ),					
 		array(
 			'value'	=> '4',
-			'label'	=>	'Home Fax' ),					
-		array(
-			'value'	=> '5',
-			'label'	=>	'Work Fax' ),
-		array(
-			'value'	=> '6',
-			'label'	=>	'Other Phone' ),
+			'label'	=>	'Other' ),
 		);
 
 	public static function get_phone_type_options() {

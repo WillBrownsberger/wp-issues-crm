@@ -15,7 +15,7 @@ class WIC_Form_Constituent_Search extends WIC_Form_Parent  {
 		$button_args_main = array(
 			'entity_requested'			=> 'constituent',
 			'action_requested'			=> 'form_search',
-			'button_label'					=> __('Search Constituent', 'wp-issues-crm')
+			'button_label'					=> __('Search', 'wp-issues-crm')
 		);	
 		return ( $this->create_wic_form_button ( $button_args_main ) ) ;
 	}

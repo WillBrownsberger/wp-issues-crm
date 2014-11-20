@@ -72,7 +72,7 @@ abstract class WIC_Entity_Multivalue extends WIC_Entity_Parent {
 		return ( $error );
 	}
 
-	public function get_display_value() {
+/*	public function get_display_value() {
 		$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $this->entity );
 		$display_value = '';
 		foreach ( $fields as $field ) {
@@ -82,5 +82,5 @@ abstract class WIC_Entity_Multivalue extends WIC_Entity_Parent {
 			}
 		}	
 		return $display_value;	
-	}
+	} */
 }

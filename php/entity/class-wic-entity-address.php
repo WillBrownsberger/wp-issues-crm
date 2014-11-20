@@ -18,16 +18,16 @@ class WIC_Entity_Address extends WIC_Entity_Multivalue {
 	private static $address_type_options	= array(	
 		array(
 			'value'	=> '0',
-			'label'	=>	'Home Address' ),
+			'label'	=>	'Home' ),
 		array(
 			'value'	=> '1',
-			'label'	=>	'Work Address' ),
+			'label'	=>	'Work' ),
 		array(
 			'value'	=> '2',
-			'label'	=>	'Mail Address' ),
+			'label'	=>	'Mail' ),
 		array(
 			'value'	=> '3',
-			'label'	=>	'Other Address' ),
+			'label'	=>	'Other' ),
 		);
 
 	public static function get_address_type_options() {
@@ -41,7 +41,7 @@ class WIC_Entity_Address extends WIC_Entity_Multivalue {
 		);		
 
 	public static function get_state_options() {
-		return self::$activity_type_options; 
+		return self::$state_options; 
 	}
 
 

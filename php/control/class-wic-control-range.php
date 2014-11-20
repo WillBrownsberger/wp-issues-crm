@@ -16,10 +16,10 @@ class WIC_Control_Range extends WIC_Control_Parent {
 		$final_control_args['value'] = $this->value;
 		$field_slug_base = $final_control_args['field_slug'];
 		$final_control_args['field_slug'] = $field_slug_base . '[lo]';	
-		$final_control_args['field_label'] = $final_control_args['field_label'] . ' >= ';
 		$control = $this->create_control( $final_control_args ) ;
-		$final_control_args['field_label'] = ' <= ';		
-		$final_control_args['field_slug'] = $field_slug_base . '[hi]'; 
+		$final_control_args['field_label'] = ' <=> ';		
+		$final_control_args['field_slug'] = $field_slug_base . '[hi]';
+		$final_control_args['label_class'] = 'wic-label-2';  
 		$control .= $this->create_control( $final_control_args ) ;
 		return ( $control );
 	}
@@ -40,8 +40,8 @@ class WIC_Control_Range extends WIC_Control_Parent {
 			$query_clause = parent::create_search_clause ( $dup_check );
 			return ( $query_clause );		
 		}
-		 	
-		if ( ( '' == $this->value && '' == $this->value_lo && '' == $this->value_hi ) || 1 == $this->field->transient ) {
+		
+		if ( ( '' == $this->value_lo && '' == $this->value_hi ) || 1 == $this->field->transient ) {
 			return ('');
 		} elseif ( $this->value_lo > '' && $this->value_hi > '' ) {
 			$query_clause = array ( 

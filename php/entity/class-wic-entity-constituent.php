@@ -183,6 +183,14 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		return self::email_formatter ( $address_list );	
 	}	
 
+	public static function mark_deleted_validator ( $value ) {
+		if ( $value > '' && trim( strtolower( $value ) ) != 'deleted' ) {
+			return __( 'To hide this record from future searches, type the full word "DELETED" into Mark Deleted and then Update.', 'wp-issues-crm');		
+		}
+	}	
+
+
+
 	public static function get_retrieve_limit_options() {
 		return self::$retrieve_limit_options; 
 	}

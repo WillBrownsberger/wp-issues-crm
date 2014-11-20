@@ -126,6 +126,7 @@ p.wic-form-field-group-legend {
 }
 
 #post-form-message-box.wic-form-routine-guidance {
+	padding: 0 0 5px 200px;
 }
 
 #post-form-message-box.wic-form-errors-found {
@@ -159,14 +160,16 @@ p.wic-form-field-group-legend {
 	border: none;
 	color: #333;
 	cursor: pointer;
-	margin: 0 10px; 
-	padding: 0 10px;
+	font-size: 0.8em;
+	margin: 0 8px 0 0; 
 }
 
 .wic-input-deleted-label:hover {
 	background: red;
 	color: white;
+	font-size: 1em;
 	font-weight: 700;
+	padding: 0 20px;
 }
 
 .add-button-spacer {
@@ -177,7 +180,7 @@ p.wic-form-field-group-legend {
 .wic-label-2 {
 	display: inline-block;
 	color: #333;
-	padding: 0 20px;
+	padding: 0 8px 0 0;
 	
 }
 
@@ -204,14 +207,125 @@ p.wic-form-field-group-legend {
 	background: #ffffff;
 	border: 1px solid #f0f0f0;
 	min-width: 300px;
+	margin: 0 8px 4px 0;
 } 
 
+select.wic-input {
+	color: #999;
+	cursor: pointer;
+	font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
+}
+
+select.wic-input:hover {
+	color: #333;
+}
+
+::-webkit-input-placeholder {
+   color: #aaa;
+}
+:-moz-placeholder { /* Firefox 18- */
+   color: #aaa; 
+}
+::-moz-placeholder {  /* Firefox 19+ */
+   color: #aaa; 
+}
+
+:-ms-input-placeholder {  
+   color: red;  
+}
+
+.wic-input.activity-type,
+.wic-input.address-type,
+.wic-input.phone-type, 
 .wic-input.email-type {
-	background: #ffffff;
-	border: 1px solid #f0f0f0;
+	cursor: pointer;
+	width: 75px;
+	min-width: 0px; 
+} 
+	
+.wic-input.phone {
+	width: 120px;
+	min-width: 0px; 
+}
+
+
+.wic-input.extension,
+.wic-input.street-number,
+.wic-input.apartment {
+	width: 45px;
+	min-width: 0px; 
+} 
+
+.wic-input.street-suffix {
+	width: 25px;
+	min-width: 0px; 
+} 
+ 
+.wic-input.street-name {
+	width: 200px;
+	min-width: 0;
+}
+
+
+.wic-field-subgroup-activity_issue,
+.wic-field-subgroup-activity_note,
+.wic-field-subgroup-address_line_2 {
+	margin: 0 0 0 101px;
+}
+
+#wic-field-subgroup-activity_issue,
+#wic-field-subgroup-activity_note,
+#wic-field-subgroup-address_line_2 {
+	margin: 0 0 0 83px;
+}
+ 
+.wic-input.city, 
+.wic-input.case-review-date,
+.wic-input.date-of-birth,
+.wic-input.activity-date {
+	width: 82px;
+	min-width: 0;
+}
+ 
+.wic-input.zip {
+	width: 80px;
+	min-width: 0;
+}
+
+.wic-multivalue-field-subgroup .wic-form-legend-flag {
+	 display: none;
+}
+
+.wic-multivalue-field-subgroup .wic-label {
+	 color: #777;
+	 font-size: 0.9em;
+	 vertical-align: bottom;
+}
+
+
+.wic-input.state {
+	width: 50px;
+	min-width: 0;
+}
+
+.wic-input.pro-con {
 	width: 80px;
 	min-width: 0px; 
 } 
+
+label.wic-label.activity-date {
+	display: inline-block;
+	min-width: 0px;
+	text-align: left;
+	vertical-align: top;
+	padding: 0 3px;
+}
+
+input.wic-input.activity-note, 
+textarea.wic-input.activity-note {
+	width: 384px;
+	min-width: 0px;
+}
 
 .wic-input-checked:hover, 
 .wic-input:hover {
@@ -243,22 +357,8 @@ p.wic-form-field-group-legend {
 	
 }
 
-.wic-address-street,
-.wic-phone-number,
-.wic-email-address {
-	margin-left: 20px;
-}
 
-.wic-address-zip {
-	margin-left: 10px; 
-	color: #888;
-}
 
-.wic-address-street,
-.wic-phone-number,
-.wic-email-address {
-	width: 300px; 
-}
 
 .wic_multi_select {
 	display: inline-block;
@@ -387,20 +487,6 @@ textarea#notes.wic-input.notes {
 	margin-left: 10px;
 }
 
-.destroy-button {
-	background: #f6f6f6;
-	border: none;
-	color: #333;
-	cursor: pointer;
-	margin: 0 10px;
-}
-
-.destroy-button:hover {
-	background: red;
-	color: white;
-	font-weight: 700;
-}
-
 /* style to line up with labels above it */
 .row-add-button {
 	background: none;
@@ -409,7 +495,7 @@ textarea#notes.wic-input.notes {
 	cursor: pointer;
 	display: inline-block;
 	font-size: 0.7em;
-	margin: 0;
+	margin: 0 0 4px -3px;
 	padding: 0;
 }
 
@@ -432,7 +518,7 @@ textarea#notes.wic-input.notes {
 .wic-form-legend-flag,
 .wic-form-legend,
 .wic-list-legend {
-	color: #333;
+	color: #999;
 	font-size: .8em;
 }
 .wic-form-legend {
@@ -455,18 +541,6 @@ textarea#notes.wic-input.notes {
 
 .visible-template {
 	display: block;
-}
-
-.visible-templated-row, 
-.email-address-row,
-.phone-number-row,
-.address-number-row {
-	margin: 0;
-}
-#email_group-control-set,
-#street_addresses-control-set,
-#phone_numbers-control-set {
-	margin: 20px 0 0 0;
 }
 
 /* 

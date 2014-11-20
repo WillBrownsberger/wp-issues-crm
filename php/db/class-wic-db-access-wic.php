@@ -58,9 +58,10 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 
 		// default search parameters
 		$select_mode 		= 'id';
-		$sort_order 		= 'false';
-		$compute_total 	= 'false';
+		$sort_order 		= false;
+		$compute_total 	= false;
 		$retrieve_limit 	= '10';
+		$show_deleted		= true;
 		
 		extract ( $search_parameters, EXTR_OVERWRITE );
 
@@ -73,6 +74,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		}
 		$sort_clause = $sort_order ? WIC_DB_Dictionary::get_sort_order_for_entity( $this->entity ) : '';
 		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause ASC ";
+		$deleted_clause = $show_deleted ? '' : 'AND ' . $top_entity . '.mark_deleted != \'deleted\'';
 		$found_rows = $compute_total ? 'SQL_CALC_FOUND_ROWS' : '';
 		// retrieve limit goes directly into SQL
 		 
@@ -122,13 +124,14 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$sql = $wpdb->prepare( "
 					SELECT $found_rows	$select_list
 					FROM 	$join
-					WHERE 1=1 $where
+					WHERE 1=1 $deleted_clause $where 
 					GROUP BY $top_entity.ID
 					$order_clause
 					LIMIT 0, $retrieve_limit
 					",
 				$values );	
 		// $sql group by always returns single row, even if multivalues for some records 
+
 		$sql_found = "SELECT FOUND_ROWS()";
 		$this->sql = $sql; 
 		

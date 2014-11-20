@@ -107,7 +107,8 @@ abstract class WIC_Entity_Parent {
 		if ( count ($dup_check_array ) > 0 ) {
 			$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 			$search_parameters = array(
-				'select_mode' => 'id',		
+				'select_mode' => 'id',
+				'show_deleted' => false,		
 			);
 			$wic_query->search ( $this->assemble_meta_query_array( true ), $search_parameters );  // true indicates a dedup search
 			if ( $wic_query->found_count > 1 || ( ( 1 == $wic_query->found_count ) && 
@@ -244,7 +245,8 @@ abstract class WIC_Entity_Parent {
 		$this->data_object_array['ID']->set_value( $id );
 		$wic_query = 	WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$search_parameters = array(
-			'select_mode' => '*'		
+			'select_mode' => '*',
+			'show_deleted' => true,		
 		);
 		$wic_query->search ( $this->assemble_meta_query_array( false ), $search_parameters ); 
 		// retrieve record if found, otherwise error
@@ -271,6 +273,7 @@ abstract class WIC_Entity_Parent {
 			'sort_order' => $this->data_object_array['sort_order']->get_value(),
 			'compute_total' => $this->data_object_array['compute_total']->get_value(),
 			'retrieve_limit' => $this->data_object_array['retrieve_limit']->get_value(),
+			'show_deleted' => $this->data_object_array['show_deleted']->get_value(),
 			'select_mode'	=> 'id'
 			);
 		// note that the transient search parameter 'strict_match' is handled by individual controls in create_search_clause()
