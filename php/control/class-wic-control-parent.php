@@ -280,13 +280,20 @@ abstract class WIC_Control_Parent {
 	public function create_search_clause ( $dup_check ) {
 		if ( '' == $this->value || 1 == $this->field->transient ) {
 			return ('');		
+		}
+		if (  $this->get_strict_match_setting() || $dup_check || ( ! $this->field->like_search_enabled ) ) {
+			$compare = '=';
+			$key = $this->field->field_slug;							
+		} else {
+			$compare = 'like';
+			$key 	= $this->field->field_slug . '_soundex';	
 		}		
 		$compare = $this->field->like_search_enabled ? 'like' : '=';
 		$compare = ( $this->get_strict_match_setting() || $dup_check  ) ? '=' : $compare;
 		$query_clause =  array ( // double layer array to standardize a return that allows multivalue fields
 				array (
 					'table'	=> $this->field->entity_slug,
-					'key' 	=> $this->field->field_slug,
+					'key' 	=> $key,
 					'value'	=> $this->value,
 					'compare'=> $compare,
 				)
@@ -307,6 +314,7 @@ abstract class WIC_Control_Parent {
 			$update_clause = array (
 					'key' 	=> $this->field->field_slug,
 					'value'	=> $this->value,
+					'soundex_enabled' => ( 1 == $this->field->like_search_enabled ),
 			);
 			return ( $update_clause );
 		}

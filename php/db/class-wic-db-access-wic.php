@@ -100,7 +100,11 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 				$values[] = $where_item['value'][0];
 				$values[] = $where_item['value'][1];
 			} else {
-				$where .= " AND $table.$field_name $compare %s ";
+				if ( 'like' == $where_item['compare'] ) {
+					$where .= " AND $table.$field_name $compare soundex ( %s ) ";
+				} else {
+					$where .= " AND $table.$field_name $compare %s ";
+				}
 				if ( 'scan' == $where_item['compare'] ) {
 					$values[] = '%' . $wpdb->esc_like ( $where_item['value'] )  . '%';
 				} elseif ( 'like' == $where_item['compare'] ) {
@@ -162,6 +166,10 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			if ( $save_update_clause['key'] != 'ID' ) {
 				$set_clause_with_placeholders .= ', ' . $save_update_clause['key'] . ' = %s'; 		
 				$set_value_array[] = $save_update_clause['value'];
+				if ( $save_update_clause['soundex_enabled'] ) {
+					$set_clause_with_placeholders .= ', ' . $save_update_clause['key'] . '_soundex = soundex( %s ) '; 		
+					$set_value_array[] = $save_update_clause['value'];
+				}
 			} else { 
 				$entity_id = $save_update_clause['value'];
 			}
