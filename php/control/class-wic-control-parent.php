@@ -67,13 +67,13 @@ abstract class WIC_Control_Parent {
 		return $this->value;	
 	}
 	
-	public function get_display_value () {
+/*	public function get_display_value () {
 		if ( '' < $this->field->format_call_back  ) {
 			return $this->field->format_call_back( $this->value );
 		} else {
 			return ( $this->value ) ;		
 		}	
-	}
+	} */
 	
 	public function reset_value() {
 		$this->value = '';	
