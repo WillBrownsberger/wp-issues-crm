@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 19, 2014 at 09:46 PM
+-- Generation Time: Nov 21, 2014 at 07:19 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_activity` (
   KEY `constituent_id` (`constituent_id`),
   KEY `email_address` (`activity_type`),
   KEY `email_type` (`activity_date`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=30 ;
 
 -- --------------------------------------------------------
 
@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_address` (
   `street_number` varchar(7) NOT NULL,
   `street_suffix` varchar(3) NOT NULL,
   `street_name` varchar(25) NOT NULL,
+  `street_name_soundex` varchar(25) NOT NULL,
   `apartment` varchar(4) NOT NULL,
   `city` varchar(20) NOT NULL,
   `state` varchar(2) NOT NULL,
@@ -67,7 +68,8 @@ CREATE TABLE IF NOT EXISTS `wp_wic_address` (
   KEY `street_name` (`street_name`),
   KEY `apartment` (`apartment`),
   KEY `zip` (`zip`),
-  KEY `civicrm_id` (`constituent_id`)
+  KEY `civicrm_id` (`constituent_id`),
+  KEY `street_name_soundex` (`street_name_soundex`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171488 ;
 
 -- --------------------------------------------------------
@@ -82,8 +84,11 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   `civi_id` bigint(20) unsigned NOT NULL,
   `van_id` bigint(20) unsigned NOT NULL,
   `last_name` varchar(30) NOT NULL,
+  `last_name_soundex` varchar(30) NOT NULL,
   `first_name` varchar(20) NOT NULL,
+  `first_name_soundex` varchar(20) NOT NULL,
   `middle_name` varchar(20) NOT NULL,
+  `middle_name_soundex` varchar(20) NOT NULL,
   `title` varchar(3) NOT NULL,
   `post_title` varchar(250) NOT NULL,
   `date_of_birth` date NOT NULL,
@@ -136,8 +141,11 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `case_review_date` (`case_review_date`),
   KEY `case_status` (`case_status`),
   KEY `fnln` (`last_name`,`first_name`),
-  KEY `city` (`city`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171486 ;
+  KEY `city` (`city`),
+  KEY `first_name_soundex` (`first_name_soundex`),
+  KEY `last_name_soundex` (`last_name_soundex`),
+  KEY `middle_name_soundex` (`middle_name_soundex`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171494 ;
 
 -- --------------------------------------------------------
 

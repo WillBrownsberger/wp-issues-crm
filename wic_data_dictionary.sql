@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 19, 2014 at 09:46 PM
+-- Generation Time: Nov 21, 2014 at 07:21 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -61,14 +61,14 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
 INSERT INTO `wp_wic_data_dictionary` (`field_id`, `entity_slug`, `group_slug`, `field_slug`, `field_type`, `is_date`, `field_label`, `field_order`, `listing_order`, `sort_clause_order`, `required`, `dedup`, `readonly`, `hidden`, `field_default`, `like_search_enabled`, `transient`, `wp_query_parameter`, `input_class`, `label_class`, `placeholder`, `blank_prohibited`) VALUES
 (1, 'activity', 'activity', 'screen_deleted', 'deleted', 0, 'x', 1, 0, 0, '', 0, 0, 0, '', 0, 1, '', 'wic-input', 'wic-label', '', 0),
 (2, 'constituent', 'registration', 'ID', 'text', 0, 'Internal Id', 0, 0, 0, '', 0, 1, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
-(3, 'constituent', 'contact', 'first_name', 'text', 0, 'First Name', 10, 10, 30, 'group', 1, 0, 0, '', 1, 0, '', 'wic-input', 'wic-label', '', 0),
-(4, 'constituent', 'contact', 'middle_name', 'text', 0, 'Middle Name', 20, 20, 40, '', 1, 0, 0, '', 1, 0, '', 'wic-input', 'wic-label', '', 0),
-(5, 'constituent', 'contact', 'last_name', 'text', 0, 'Last Name', 30, 30, 20, 'group', 1, 0, 0, '', 1, 0, '', 'wic-input', 'wic-label', '', 0),
+(3, 'constituent', 'contact', 'first_name', 'text', 0, 'First Name', 10, 10, 30, 'group', 1, 0, 0, '', 2, 0, '', 'wic-input', 'wic-label', '', 0),
+(4, 'constituent', 'contact', 'middle_name', 'text', 0, 'Middle Name', 20, 20, 40, '', 1, 0, 0, '', 2, 0, '', 'wic-input', 'wic-label', '', 0),
+(5, 'constituent', 'contact', 'last_name', 'text', 0, 'Last Name', 30, 30, 20, 'group', 1, 0, 0, '', 2, 0, '', 'wic-input', 'wic-label', '', 0),
 (6, 'constituent', 'contact', 'phone', 'multivalue', 0, 'Phones', 40, 40, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
-(7, 'constituent', 'contact', 'email', 'multivalue', 0, 'Emails', 50, 50, 0, '', 1, 0, 0, '', 1, 0, '', 'wic-input', 'wic-label', '', 0),
-(8, 'constituent', 'contact', 'address', 'multivalue', 0, 'Addresses', 60, 60, 0, 'individual', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
+(7, 'constituent', 'contact', 'email', 'multivalue', 0, 'Emails', 50, 50, 0, 'group', 1, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
+(8, 'constituent', 'contact', 'address', 'multivalue', 0, 'Addresses', 60, 60, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
 (10, 'constituent', 'contact', 'activity', 'multivalue', 0, 'Activities', 80, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
-(11, 'constituent', 'case', 'case_assigned', 'text', 0, 'Staff', 110, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
+(11, 'constituent', 'case', 'case_assigned', 'select', 0, 'Staff', 110, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
 (12, 'constituent', 'case', 'case_status', 'select', 0, 'Status', 120, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
 (13, 'constituent', 'case', 'case_review_date', 'range', 1, 'Review Date', 130, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
 (14, 'constituent', 'personal', 'date_of_birth', 'range', 1, 'Date of Birth', 210, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
@@ -112,14 +112,14 @@ INSERT INTO `wp_wic_data_dictionary` (`field_id`, `entity_slug`, `group_slug`, `
 (52, 'phone', 'phone_row', 'ID', 'text', 0, 'Internal ID for Phone', 0, 0, 0, '', 0, 0, 1, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
 (53, 'phone', 'phone_row', 'constituent_id', 'text', 0, 'Constituent ID for Phone', 10, 0, 0, '', 0, 0, 1, '', 0, 0, '', 'wic-input', 'wic-label', '', 0),
 (54, 'phone', 'phone_row', 'phone_type', 'select', 0, '', 20, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', 'Type', 0),
-(55, 'phone', 'phone_row', 'phone', 'text', 0, 'Phone Number', 30, 100, 0, 'individual', 0, 0, 0, '', 1, 0, '', 'wic-input', 'hidden-template', '', 0),
+(55, 'phone', 'phone_row', 'phone', 'text', 0, 'Phone Number', 30, 100, 0, 'individual', 0, 0, 0, '', 0, 0, '', 'wic-input', 'hidden-template', '', 0),
 (56, 'phone', 'phone_row', 'extension', 'text', 0, '', 40, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', 'Ext.', 0),
 (57, 'phone', 'phone_row', 'screen_deleted', 'deleted', 0, 'x', 1, 0, 0, '', 0, 0, 0, '', 0, 1, '', 'wic-input', 'wic-label', '', 0),
-(58, 'constituent', 'search_parms', 'retrieve_limit', 'select', 0, '# of Records to Show', 1, 0, 0, '', 0, 0, 0, '10', 0, 1, '', 'wic-input', 'wic-label', '', 1),
-(59, 'constituent', 'search_parms', 'compute_total', 'checked', 0, 'Show Record Count', 10, 0, 0, '', 0, 0, 0, '', 0, 1, '', 'wic-input', 'wic-label', '', 0),
-(60, 'constituent', 'search_parms', 'sort_order', 'checked', 0, 'Sort Records', 20, 0, 0, '', 0, 0, 0, '', 0, 1, '', 'wic-input', 'wic-label', '', 0),
-(61, 'constituent', 'search_parms', 'strict_match', 'checked', 0, 'Require Strict Match', 30, 0, 0, '', 0, 0, 0, '', 0, 1, '', 'wic-input', 'wic-label', '', 0),
-(62, 'constituent', 'contact', 'mark_deleted', 'text', 0, 'Mark Deleted', 999, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', 'Type DELETED', 0),
+(58, 'constituent', 'search_parms', 'retrieve_limit', 'select', 0, '# of Records to Show', 10, 0, 0, '', 0, 0, 0, '', 0, 1, '', 'wic-input', 'wic-label', '', 1),
+(59, 'constituent', 'search_parms', 'compute_total', 'checked', 0, 'Show Total Count', 30, 0, 0, '', 0, 0, 0, '', 0, 1, '', 'wic-input', 'wic-label', '', 0),
+(60, 'constituent', 'search_parms', 'sort_order', 'checked', 0, 'Sort Records', 40, 0, 0, '', 0, 0, 0, '', 0, 1, '', 'wic-input', 'wic-label', '', 0),
+(61, 'constituent', 'search_parms', 'match_level', 'select', 0, 'Set match approach', 20, 0, 0, '', 0, 0, 0, '', 0, 1, '', 'wic-input', 'wic-label', '', 1),
+(62, 'constituent', 'contact', 'mark_deleted', 'text', 0, 'Mark Deleted', 999, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', 'DELETED', 0),
 (63, 'constituent', 'search_parms', 'show_deleted', 'checked', 0, 'Include Deleted', 50, 0, 0, '', 0, 0, 0, '', 0, 1, '', 'wic-input', 'wic-label', '', 0);
 
 -- --------------------------------------------------------
@@ -154,7 +154,7 @@ INSERT INTO `wp_wic_form_field_groups` (`group_id`, `entity_slug`, `group_slug`,
 (12, 'address', 'address_line_2', 'Address Line 2', '', 20, 0, 0),
 (13, 'email', 'email_row', 'Email Row', '', 10, 1, 0),
 (14, 'phone', 'phone_row', 'Phone Row', '', 10, 1, 0),
-(15, 'constituent', 'search_parms', 'Search Options', 'By default, a maximum of 10 records will be retrieved, unsorted, and no total count of existing records will be computed.  These settings minimize routine search response time. \n\nYou can alter these settings here if needed.  You can also override the default use of wildcard searching on the fields that have a ''(%)'' after them. The default behavior for these fields is to allow wildcard searching on the right side.  For example, "and" will retrieve Andrew, but not Landry.  You may wish to require strict match searching -- for example, if you are trying to save Paul, but you are getting a false dup for Paulsen.  Searching is not case sensitive.  Textarea fields are always searched as full text (right and left wildcards).\n\n', 70, 0, 1),
+(15, 'constituent', 'search_parms', 'Search Options', 'By default, a maximum of 10 records will be retrieved, unsorted, and no total count of existing records will be computed. You can alter these settings here if needed.  You can also override the default use of wildcard searching on the fields that have a ''(%)'' after them. The default behavior for these fields is to allow soundex searching for names and wildcard searching on the right side for other enabled fields.  Textarea fields are always searched as full text (right and left wildcards) unless strict matching is set.\n\n', 70, 0, 1),
 (16, 'activity', 'activity', '', '', 10, 0, 0),
 (17, 'activity', 'activity_issue', '', '', 15, 0, 0);
 
