@@ -31,6 +31,5 @@ class WIC_DB_Access_Factory {
 		return ( $new_db_access_object );	
 	}
 	
-	
 }
 

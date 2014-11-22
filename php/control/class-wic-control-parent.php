@@ -159,16 +159,16 @@ abstract class WIC_Control_Parent {
 	*
 	*********************************************************************************/
 
-	public function sanitize() {
+	public function sanitize() {  
 		$class_name = 'WIC_Entity_' . $this->field->entity_slug;
 		$sanitizor = $this->field->field_slug . '_sanitizor';
 		if ( method_exists ( $class_name, $sanitizor ) ) { 
 			$this->value = $class_name::$sanitizor ( $this->value );
-		} else {
+		} else { 
 			$this->value = sanitize_text_field ( stripslashes ( $this->value ) );		
-		}
-		if ( $this->field->is_date ) {
-			$this->value = $this->sanitize_date ( $this->value );		
+		} 
+		if ( $this->field->is_date && $this->value > '' ) { 				
+			$this->value = $this->sanitize_date ( $this->value );	
 		}
 	}
 
@@ -277,19 +277,36 @@ abstract class WIC_Control_Parent {
 	*
 	*********************************************************************************/
 
-	public function create_search_clause ( $dup_check ) {
+	public function create_search_clause ( $search_clause_args ) {
+		
+		// expecting $match_level and $dup_check, but want errors if not supplied, so no defaults
+		// match level is 0 for strict, 1 for like, 2 for soundex like
+		// dedup is true or false		
+		
+		extract ( $search_clause_args, EXTR_OVERWRITE );
+		
+		if ( ! isset( $match_level ) || ! isset ( $dup_check ) ) {
+			var_dump( debug_backtrace () ); 		
+			die ( __( 'Missing parameters for WIC_Control_Parent::create_search_clause().', 'wp-issues-crm' ) );
+		}
+		
 		if ( '' == $this->value || 1 == $this->field->transient ) {
 			return ('');		
 		}
-		if (  $this->get_strict_match_setting() || $dup_check || ( ! $this->field->like_search_enabled ) ) {
+		if ( 0 == $match_level || $dup_check || 0 == $this->field->like_search_enabled )  {
 			$compare = '=';
 			$key = $this->field->field_slug;							
-		} else {
+		} elseif ( 1 == $match_level || ( 1 == $this->field->like_search_enabled )) {
 			$compare = 'like';
+			$key 	= $this->field->field_slug;	
+		} elseif ( 2 == $match_level && 2 == $this->field->like_search_enabled ) {
+			$compare = 'sound';
 			$key 	= $this->field->field_slug . '_soundex';	
-		}		
-		$compare = $this->field->like_search_enabled ? 'like' : '=';
-		$compare = ( $this->get_strict_match_setting() || $dup_check  ) ? '=' : $compare;
+		} else {
+			die ( sprintf( __( 'Incorrect match_level settings for field %1$s reported by WIC_Control_Parent::create_search_clause.', 'WP_Issues_CRM' ),
+				 $this->field->field_slug ) ); 		
+		}				
+
 		$query_clause =  array ( // double layer array to standardize a return that allows multivalue fields
 				array (
 					'table'	=> $this->field->entity_slug,
@@ -314,16 +331,10 @@ abstract class WIC_Control_Parent {
 			$update_clause = array (
 					'key' 	=> $this->field->field_slug,
 					'value'	=> $this->value,
-					'soundex_enabled' => ( 1 == $this->field->like_search_enabled ),
+					'soundex_enabled' => ( 2 == $this->field->like_search_enabled ),
 			);
 			return ( $update_clause );
 		}
 	}
-	
-	protected function get_strict_match_setting() {
-		$strict_match = isset ( $_POST['strict_match'] )  ? true : false;
-		return ( $strict_match );
-	}
-	
 
 }

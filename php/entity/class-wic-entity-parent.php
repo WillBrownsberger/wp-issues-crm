@@ -16,7 +16,8 @@ abstract class WIC_Entity_Parent {
 	protected $fields = array(); 						// will be initialized as field_slug => type array from wp_wic_data_dictionary
 	protected $data_object_array = array(); 		// will be initialized as field_slug => control object 
 	protected $outcome = '';							// results of latest request 
-	protected $outcome_dups = false;					// supplementary outcome information -- dups among error causes	
+	protected $outcome_dups = false;					// supplementary outcome information -- dups among error causes
+	protected $outcome_dups_query_object;			// results of dup query for listing	
 	protected $explanation	= '';						// explanation for outcome
 	
 		
@@ -110,7 +111,12 @@ abstract class WIC_Entity_Parent {
 				'select_mode' => 'id',
 				'show_deleted' => false,		
 			);
-			$wic_query->search ( $this->assemble_meta_query_array( true ), $search_parameters );  // true indicates a dedup search
+			$search_clause_args = array(
+				'match_level' => '0',
+				'dup_check' => true,
+			);
+			// assembling meta_query with strict match and dedup requested
+			$wic_query->search ( $this->assemble_meta_query_array( $search_clause_args ), $search_parameters );  // true indicates a dedup search
 			if ( $wic_query->found_count > 1 || ( ( 1 == $wic_query->found_count ) && 
 						( $wic_query->result[0]->ID != $this->data_object_array['ID']->get_value() ) )
 						// for update, 1 group OK iff same record
@@ -119,7 +125,8 @@ abstract class WIC_Entity_Parent {
 				$this->outcome = false;
 				$dup_check_string = WIC_DB_Dictionary::get_dup_check_string ( $this->entity );
 				$this->explanation .= sprintf ( __( 'Other records found with same combination of %s' , 'wp-issues-crm' ), $dup_check_string );
-				$this->outcome_dups = true;		
+				$this->outcome_dups = true;
+				$this->outcome_dups_query_object = $wic_query;		
 			}
 		}		 
 	}
@@ -173,10 +180,11 @@ abstract class WIC_Entity_Parent {
 	*		layer which, although it will support multi-entity searches, only updates one entity.
 	*
 	**************************************************************************************/
-	public function assemble_meta_query_array ( $dup_check ) {
+	public function assemble_meta_query_array ( $search_clause_args ) {
+		extract ( $search_clause_args, EXTR_OVERWRITE );
 		$meta_query_array = array ();
 		foreach ( $this->data_object_array as $field => $control ) {
-			$query_clause = $control->create_search_clause( $dup_check );
+			$query_clause = $control->create_search_clause( $search_clause_args );
 			if ( is_array ( $query_clause ) && // skipping empty fields
 					( ! $dup_check || $control->dup_check() ) ) { // including all non-empty or only those that are dupcheck fields  
 				$meta_query_array = array_merge ( $meta_query_array, $query_clause ); // will do append since the arrays of arrays are not keyed arrays 
@@ -214,7 +222,7 @@ abstract class WIC_Entity_Parent {
 			if ( $this->outcome_dups ) {	
 				$lister_class = 'WIC_List_' . $this->entity;
 				$lister = new $lister_class;
-				$list = $lister->format_entity_list( $this->data_object_array, false );
+				$list = $lister->format_entity_list( $this->outcome_dups_query_object, false );
 				echo $list;
 			}	
 			return;
@@ -248,7 +256,12 @@ abstract class WIC_Entity_Parent {
 			'select_mode' => '*',
 			'show_deleted' => true,		
 		);
-		$wic_query->search ( $this->assemble_meta_query_array( false ), $search_parameters ); 
+		$search_clause_args = array(
+			'match_level' => '0',
+			'dup_check' => false,
+			);
+		// assemble metaquery with match_level = 0 (strict match) and dup check set to false
+		$wic_query->search ( $this->assemble_meta_query_array( $search_clause_args ), $search_parameters ); 
 		// retrieve record if found, otherwise error
 		if ( 1 == $wic_query->found_count ) {
 			$message = __( 'Record found. You can update.', 'wp-issues-crm' );
@@ -270,14 +283,18 @@ abstract class WIC_Entity_Parent {
 		$this->sanitize_values();
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$search_parameters= array(
-			'sort_order' => $this->data_object_array['sort_order']->get_value(),
-			'compute_total' => $this->data_object_array['compute_total']->get_value(),
-			'retrieve_limit' => $this->data_object_array['retrieve_limit']->get_value(),
-			'show_deleted' => $this->data_object_array['show_deleted']->get_value(),
-			'select_mode'	=> 'id'
+			'sort_order' 		=> $this->data_object_array['sort_order']->get_value(),
+			'compute_total' 	=> $this->data_object_array['compute_total']->get_value(),
+			'retrieve_limit' 	=> $this->data_object_array['retrieve_limit']->get_value(),
+			'show_deleted' 	=> $this->data_object_array['show_deleted']->get_value(),
+			'select_mode'		=> 'id'
 			);
-		// note that the transient search parameter 'strict_match' is handled by individual controls in create_search_clause()
-		$wic_query->search ( $this->assemble_meta_query_array( false ), $search_parameters ); // get a list of id's meeting search criteria
+		$search_clause_args = array(
+			'match_level' => $this->data_object_array['match_level']->get_value(),
+			'dup_check' => false,
+			);
+		// note that the transient search parameter 'match_level' is needed by individual controls in create_search_clause()
+		$wic_query->search ( $this->assemble_meta_query_array( $search_clause_args ), $search_parameters ); // get a list of id's meeting search criteria
 		$sql = $wic_query->sql;
 		if ( 0 == $wic_query->found_count ) {
 			$message = __( 'No matching record found -- try a save?', 'wp-issues-crm' );
@@ -285,6 +302,7 @@ abstract class WIC_Entity_Parent {
 			$form = new $save_form;
 			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );			
 		} elseif ( 1 == $wic_query->found_count) {
+			$this->data_object_array = array(); // discard possibly soft matching array values before doing straight id retrieval
 			$this->id_search_generic ( $wic_query->result[0]-> ID, $update_form, $sql );			
 		} else {
 			$lister_class = 'WIC_List_' . $this->entity ;

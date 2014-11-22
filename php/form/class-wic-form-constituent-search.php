@@ -31,8 +31,9 @@ class WIC_Form_Constituent_Search extends WIC_Form_Parent  {
 	protected function get_the_legends( $sql = '' ) {
 		$elements = WIC_DB_Dictionary::get_field_suffix_elements( $this->get_the_entity() );
 		$legend = '';
-		if ( $elements[1]->like_search_enabled ) {
-			$legend = '<p class = "wic-form-legend">' . '(%) ' .  __( 'Full-text search conditionally enabled for these fields -- you can require strict match under search options. ' , 'wp-issues-crm' ) . '</p>';
+		// selects single first array, the key for which may be 0, 1 or 2 -- same as the first value in the row
+		if ( reset( $elements)->like_search_enabled ) {
+			$legend = '<p class = "wic-form-legend">' . '(%) ' .  __( 'Soundex and/or wildcard search enabled for these fields -- you can require strict match under search options. ' , 'wp-issues-crm' ) . '</p>';
 		}	
 		if ( $sql > '' ) {
 			$legend .= 	'<p class = "wic-form-legend">' . __('Search SQL was:', 'wp-issues-crm' )	 .  $sql . '</p>';	

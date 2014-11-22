@@ -120,7 +120,17 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 			'label'	=>	'Up to 1000 Records' ),
 		);
 
-
+	private static $match_level_options = array ( 
+		array(
+			'value'	=> '2',
+			'label'	=>	'Soundex matching permitted for names.' ),
+		array(
+			'value'	=> '1',
+			'label'	=>	'Right wild card for names.' ),
+		array(
+			'value'	=> '0',
+			'label'	=>	'Strict match for all fields. ' ),
+		);
 
 	private static $voter_status_options = array ( 
 		array(
@@ -138,6 +148,30 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	*	option array get functions
 	*/
 
+	public static function get_case_assigned_options() {
+
+		// could set this elsewhere
+		$role = 'Administrator';
+		
+		$user_query_args = 	array (
+			'role' => $role,
+			'fields' => array ( 'ID', 'display_name'),
+		);						
+		$user_list = new WP_User_query ( $user_query_args );
+
+		$user_select_array = array();
+		foreach ( $user_list->results as $user ) {
+			$temp_array = array (
+				'value' => $user->ID,
+				'label'	=> $user->display_name,									
+			);
+			array_push ( $user_select_array, $temp_array );								
+		} 
+
+		return ( $user_select_array );
+
+	}
+
 		
   	public static function get_case_status_options() {
 		return self::$case_status_options; 
@@ -145,6 +179,10 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	
 	public static function get_gender_options() {
 		return self::$gender_options; 
+	}
+
+	public static function get_match_level_options() {
+		return self::$match_level_options; 
 	}
 	
 	public static function get_party_options() {
@@ -188,8 +226,6 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 			return __( 'To hide this record from future searches, type the full word "DELETED" into Mark Deleted and then Update.', 'wp-issues-crm');		
 		}
 	}	
-
-
 
 	public static function get_retrieve_limit_options() {
 		return self::$retrieve_limit_options; 

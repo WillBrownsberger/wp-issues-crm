@@ -32,7 +32,7 @@ abstract class WIC_Form_Parent  {
 
 		?><div id='wic-forms'>
 
-		<form id = "wic-post-form" method="POST" autocomplete = "on">
+		<form id = "<?php echo $this->get_the_form_id(); ?>" class="wic-post-form" method="POST" autocomplete = "on">
 
 			<div class = "wic-form-field-group wic-group-odd">
 			
@@ -91,6 +91,10 @@ abstract class WIC_Form_Parent  {
 		
 		<?php 
 		
+	}
+
+	protected function get_the_form_id() {
+		return( strtolower( str_replace( '_', '-', get_class( $this ) ) ) ); 
 	}
 
 	protected function the_controls ( $fields, &$data_array ) {

@@ -368,25 +368,6 @@
 					
 	}
 
-	public function wic_get_user_list ( $role ) {
-		/* query users with specified role (s) -- empty string returns all */
-		$user_query_args = 	array (
-			'role' => $role,
-			'fields' => array ( 'ID', 'display_name'),
-		);						
-		$user_list = new WP_User_query ( $user_query_args );
-
-		$user_select_array = array();
-		foreach ( $user_list->results as $user ) {
-			$temp_array = array (
-				'value' => $user->ID,
-				'label'	=> $user->display_name,									
-			);
-			array_push ( $user_select_array, $temp_array );								
-		} 
-
-		return ( $user_select_array );
-
 	}
 
 

@@ -36,13 +36,16 @@ class WIC_Control_Textarea extends WIC_Control_Parent {
 	}	
 	
 	// when searching, submit compare type = scan which is interpreted as double wildcards, front and back
-	public function create_search_clause ( $dup_check ) { 
+	public function create_search_clause ( $search_clause_args ) {
+
+		extract ( $search_clause_args );
+		 
 		if ( '' == $this->value || 1 == $this->field->transient ) {
 			return ('');		
 		}
 		// do two way wildcard for text areas;		
 		$compare = 'scan';
-		$compare = ( $this->get_strict_match_setting() || $dup_check  ) ? '=' : $compare;
+		$compare = ( ( 0 == $match_level )|| $dup_check  ) ? '=' : $compare;
 		$query_clause =  array ( // double layer array to standardize a return that allows multivalue fields
 				array (
 					'table'	=> $this->field->entity_slug,

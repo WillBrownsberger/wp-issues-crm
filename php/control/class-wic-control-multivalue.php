@@ -2,6 +2,8 @@
 /*
 * wic-control-multivalue.php
 *
+* NOTE: CANNOT HAVE MULTIVALUE WITH IN MULTIVALUE -- SET VALUE FOR MULTIVALUE BYPASSES ARRAYS
+*
 */
 class WIC_Control_Multivalue extends WIC_Control_Parent {
 	
@@ -65,7 +67,8 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 				} else { // not deleted rows -- may be blank
 					$values_set = false;
 					foreach ( $form_row_array as $value ){
-						if ( '' != $value  ) {
+						if ( '' != $value && 
+								! is_array ( $value ) ) { // this keeps date search ranges from looking like values
 							$values_set = true;
 							break;						
 						}	
@@ -116,19 +119,6 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 			$instance_counter++;
 		}
 	}
-	
-	/*
-	*	Multivalue -- concatenate display components from rows
-	*  obsolete -- for first try at list object
-	*
-	public function get_display_value () {
-		$display_value = '';
-		foreach ( $this->value as $row_object ) {
-			$display_value .= ( '' == $display_value ) ? '' : '; ';
-			$display_value .=	$row_object->get_display_value();		
-		}	
-		return ( $display_value ) ;
-	} */
 
 	/*
 	*  Multivalue control passes requests to its components instead of actually doing the action as scalar controls do.
@@ -255,7 +245,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		$control_set .= $template->save_row();
 
 		// now proceed to add rows for any existing records from database or previous form
-		
+		// this looks like it could be wrong if there were a difference between save and update -- i.e., had readonly fields in subrow
 		if ( count ( $this->value ) > 0 ) {
 			foreach ( $this->value as $value_row ) {
 				$control_set .= $value_row->$form_to_call();
@@ -290,9 +280,10 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	**************************************************************************************/
 
 	// for search, control is compiling and passing values from rows upwards to parent entity
-	public function create_search_clause ( $dup_check ) {
+	public function create_search_clause ( $search_clause_args ) {
 		if ( count ( $this->value ) > 0 ) {
-			$query_clause = reset( $this->value )->assemble_meta_query_array( $dup_check );
+			// reset returns pointer to first element
+			$query_clause = reset( $this->value )->assemble_meta_query_array( $search_clause_args );
 			return ( $query_clause );
 		} else {
 			return ( '' );		

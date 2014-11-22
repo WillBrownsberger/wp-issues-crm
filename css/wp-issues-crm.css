@@ -95,7 +95,7 @@ p.wic-form-field-group-legend {
 	
 }
 
-#wic-post-form .wic-form-button {
+.wic-post-form .wic-form-button {
 	margin-left: 200px;
 }
 
@@ -179,7 +179,7 @@ p.wic-form-field-group-legend {
 
 .wic-label-2 {
 	display: inline-block;
-	color: #333;
+	color: #aaa;
 	padding: 0 8px 0 0;
 	
 }
@@ -234,6 +234,11 @@ select.wic-input:hover {
    color: red;  
 }
 
+.wic-input.mark-deleted,
+.wic-input.party,
+.wic-input.voter-status,
+.wic-input.gender,
+.wic-input.case-status,
 .wic-input.activity-type,
 .wic-input.address-type,
 .wic-input.phone-type, 
@@ -256,10 +261,35 @@ select.wic-input:hover {
 	min-width: 0px; 
 } 
 
+.wic-input.extension {
+	display: none;
+}
+
+#phone-control-set .wic-input.extension {
+	display: inline-block;
+} 
+
+.wic-input.apartment {
+	display: none;
+}
+
+#address-control-set .wic-input.apartment {
+	display: inline-block;
+}
+
+
 .wic-input.street-suffix {
 	width: 25px;
-	min-width: 0px; 
+	min-width: 0px;
+	display: none; 
 } 
+
+#address-control-set .wic-input.street-suffix {
+	display: inline-block;
+}
+
+
+
  
 .wic-input.street-name {
 	width: 200px;
@@ -282,6 +312,7 @@ select.wic-input:hover {
 .wic-input.city, 
 .wic-input.case-review-date,
 .wic-input.date-of-birth,
+.wic-input.reg-date, 
 .wic-input.activity-date {
 	width: 82px;
 	min-width: 0;
@@ -292,9 +323,10 @@ select.wic-input:hover {
 	min-width: 0;
 }
 
+/*
 .wic-multivalue-field-subgroup .wic-form-legend-flag {
 	 display: none;
-}
+}*/
 
 .wic-multivalue-field-subgroup .wic-label {
 	 color: #777;
@@ -477,14 +509,6 @@ textarea#notes.wic-input.notes {
 
 .wic-back-end-link {
 	margin: 0 0 0 200px; 
-}
-
-
-
-.wic-phone-extension {
-	min-width: 80px;
-	width: 80px;
-	margin-left: 10px;
 }
 
 /* style to line up with labels above it */

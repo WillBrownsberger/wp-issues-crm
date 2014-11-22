@@ -33,10 +33,10 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 
 		$elements = WIC_DB_Dictionary::get_field_suffix_elements( $this->get_the_entity() );
 		$legend = '';
-		if ( $elements[1]->required_individual ) {
+		if ( reset( $elements )->required_individual ) {
 			$legend =  '<p class = "wic-form-legend">' . '* ' . __('Required field.', 'wp-issues-crm' )	 . '</p>';
 		}
-		if ( $elements[1]->required_group ) {
+		if ( reset( $elements )->required_group ) {
 			$legend .=  '<p class = "wic-form-legend">' . '(+) ' . __('At least one among these fields must be supplied.', 'wp-issues-crm' )	 . '</p>';
 		}
 		

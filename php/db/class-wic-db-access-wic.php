@@ -88,30 +88,36 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$values = array();
 		// explode the meta_query_array into where string and array ready for wpdb->prepare
 		foreach ( $meta_query_array as $where_item ) {
+
+			// pull out tables for join clause		
 			if( ! in_array( $where_item['table'], $table_array ) ) {
 				$table_array[] = $where_item['table'];			
 			}
+
 			$field_name		= $where_item['key'];
-			// scan is like with front and back wildcards
-			$compare = ( 'scan' == $where_item['compare'] ) ? 'like' : $where_item['compare']; 
-			$table = $where_item['table'];
-			if ( 'BETWEEN' == $compare ) {
+			$table 			= $where_item['table'];
+			$compare 		= $where_item['compare'];
+			
+			// set up $where clause with placeholders and array to fill them
+			if ( '=' == $compare ) {  // straight strict match			
+				$where .= " AND $table.$field_name = %s ";
+				$values[] = $where_item['value'];
+			} elseif ( 'like' == $compare ) { // right wild card like match
+				$where .= " AND $table.$field_name like %s ";
+				$values[] = $wpdb->esc_like ( $where_item['value'] ) . '%' ;	
+			} elseif( 'scan' == $compare ) { // right and left wild card match
+				$where .= " AND $table.$field_name like %s ";
+				$values[] = '%' . $wpdb->esc_like ( $where_item['value'] )  . '%';
+			} elseif ( 'sound' == $compare ) {
+				$where .= " AND $table.$field_name like concat(soundex( %s ), '%%') ";
+				$values[] = $wpdb->esc_like ( $where_item['value'] );
+			} elseif ( 'BETWEEN' == $compare ) { // date range
 				$where .= " AND $table.$field_name >= %s AND $table.$field_name <= %s" ;  			
 				$values[] = $where_item['value'][0];
 				$values[] = $where_item['value'][1];
 			} else {
-				if ( 'like' == $where_item['compare'] ) {
-					$where .= " AND $table.$field_name $compare soundex ( %s ) ";
-				} else {
-					$where .= " AND $table.$field_name $compare %s ";
-				}
-				if ( 'scan' == $where_item['compare'] ) {
-					$values[] = '%' . $wpdb->esc_like ( $where_item['value'] )  . '%';
-				} elseif ( 'like' == $where_item['compare'] ) {
-					$values[] = $wpdb->esc_like ( $where_item['value'] ) . '%' ;
-				} else{
-					$values[] = $where_item['value']; 			
-				}
+				 die ( sprintf( __( 'Incorrect compare settings for field %1$s reported by WIC_DB_Access_WIC::db_search.', 'WP_Issues_CRM' ),
+					 $this->field->field_slug ) ); 
 			}
 		}
 		// prepare a join clause		
@@ -235,7 +241,6 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 					WHERE $where
 					GROUP BY $top_entity.ID
 					$order_clause
-					LIMIT 0, 100
 					";
 
 		$this->sql = $sql; 
