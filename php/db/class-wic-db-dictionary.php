@@ -91,8 +91,8 @@ class WIC_DB_Dictionary {
 				return ( $field_rule );			
 			}		
 		}
-		
-		die ( __('Field rule table inconsistency. WIC_DB_Dictionary::get_field_rules reporting.', 'wp-issues-crm' ) );		
+
+		die ( sprintf( __('Field rule table inconsistency -- entity (%1$s), field_slug (%2$s) . WIC_DB_Dictionary::get_field_rules reporting.', 'wp-issues-crm' ) , $entity, $field_slug ) );		
 		
 	}
 
@@ -157,10 +157,12 @@ class WIC_DB_Dictionary {
 				$list_fields[$field_rule->listing_order] = $field_rule;
 			}		
 		}
-
+		
+		ksort ( $list_fields );
+		
 		$list_fields_sorted = array();
 		foreach ( $list_fields as $key=>$field_rule ) {
-			$list_fields_sorted[] = new WIC_DB_Field_List_Object ( $field_rule->field_slug, $field_rule->field_type, $field_rule->field_label);  		
+			$list_fields_sorted[] = new WIC_DB_Field_List_Object ( $field_rule->field_slug, $field_rule->field_type, $field_rule->field_label, $field_rule->listing_order );  		
 		} 
 
 		return ( $list_fields_sorted );

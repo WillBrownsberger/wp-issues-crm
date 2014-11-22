@@ -52,6 +52,7 @@ class WIC_Control_Textarea extends WIC_Control_Parent {
 					'key' 	=> $this->field->field_slug,
 					'value'	=> $this->value,
 					'compare'=> $compare,
+					'wp_query_parameter' => $this->field->wp_query_parameter,
 				)
 			);
 		return ( $query_clause );

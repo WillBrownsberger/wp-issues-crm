@@ -149,34 +149,14 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	*/
 
 	public static function get_case_assigned_options() {
-
-		// could set this elsewhere
-		$role = 'Administrator';
-		
-		$user_query_args = 	array (
-			'role' => $role,
-			'fields' => array ( 'ID', 'display_name'),
-		);						
-		$user_list = new WP_User_query ( $user_query_args );
-
-		$user_select_array = array();
-		foreach ( $user_list->results as $user ) {
-			$temp_array = array (
-				'value' => $user->ID,
-				'label'	=> $user->display_name,									
-			);
-			array_push ( $user_select_array, $temp_array );								
-		} 
-
-		return ( $user_select_array );
-
+		return ( wic_get_administrator_array() );
 	}
 
 		
   	public static function get_case_status_options() {
 		return self::$case_status_options; 
 	} 
-	
+
 	public static function get_gender_options() {
 		return self::$gender_options; 
 	}
@@ -190,11 +170,7 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	}
 	
 	public static function get_party_label( $lookup ) {
-		foreach ( self::$party_options as $select_item_array ) {
-			if ( $lookup == $select_item_array['value'] ) {
-				return ( $select_item_array['label'] );			
-			} 
-		}
+		return value_label_lookup ( $lookup,  self::$party_options );
 	}
 	// note: since phone is multivalue, and formatter is not invoked in the 
 	// WIC_Control_Multivalue class (rather at the child entity level), 
@@ -237,11 +213,7 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	}
 	
 	public static function get_voter_status_label( $lookup ) {
-		foreach ( self::$voter_status_options as $select_item_array ) {
-			if ( $lookup == $select_item_array['value'] ) {
-				return ( $select_item_array['label'] );			
-			} 
-		}
+		return value_label_lookup ( $lookup,  self::$voter_status_options );
 	}
 
 	

@@ -306,13 +306,14 @@ abstract class WIC_Control_Parent {
 			die ( sprintf( __( 'Incorrect match_level settings for field %1$s reported by WIC_Control_Parent::create_search_clause.', 'WP_Issues_CRM' ),
 				 $this->field->field_slug ) ); 		
 		}				
-
+ 
 		$query_clause =  array ( // double layer array to standardize a return that allows multivalue fields
 				array (
 					'table'	=> $this->field->entity_slug,
 					'key' 	=> $key,
 					'value'	=> $this->value,
 					'compare'=> $compare,
+					'wp_query_parameter' => $this->field->wp_query_parameter,
 				)
 			);
 		return ( $query_clause );

@@ -67,6 +67,8 @@ function wp_issues_crm_autoloader( $class ) {
 
 spl_autoload_register('wp_issues_crm_autoloader', false, true);
 
+$wic_issue_open_metabox = new WIC_Entity_Issue_Open_Metabox;
+
 function wp_issue_crm_setup_styles() {
 
 	wp_register_style(
@@ -113,6 +115,41 @@ function wic_generate_call_trace()
     return "\t" . implode("<br/>\n\t", $result);
 }
 
+	function wic_get_administrator_array() {
+
+		$role = 'Administrator';
+		
+		$user_query_args = 	array (
+			'role' => $role,
+			'fields' => array ( 'ID', 'display_name'),
+		);						
+		$user_list = new WP_User_query ( $user_query_args );
+
+		$user_select_array = array();
+		foreach ( $user_list->results as $user ) {
+			$temp_array = array (
+				'value' => $user->ID,
+				'label'	=> $user->display_name,									
+			);
+			array_push ( $user_select_array, $temp_array );								
+		} 
+
+		return ( $user_select_array );
+
+	}
+
+function value_label_lookup ( $value, $options_array ) {
+	if ( '' ==  $value ) {
+		return ( '' );	
+	}	
+	foreach ( $options_array as $option ) {
+			if ( $value == $option['value'] ) {
+				return ( $option['label'] );			
+			} 
+		}
+	return ( sprintf ( __('Option value (%s) missing in look up table.', 'wp-issues-crm' ), $value ) );
+}
+
 
 class WP_Issues_CRM {
 
@@ -147,7 +184,7 @@ class WP_Issues_CRM {
 		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New Constituent Search', 'wp-issues-crm' ) . '</button>';
 	
 		$control_array['form_requested'] = 'issue';
-		$control_array['action_requested'] = 'new';
+		$control_array['action_requested'] = 'new_form';
 		$button_value = implode ( ',' , $control_array );		
 		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New Issue Search', 'wp-issues-crm' ) . '</button>';
 

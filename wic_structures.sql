@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 21, 2014 at 07:19 PM
+-- Generation Time: Nov 22, 2014 at 01:26 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -84,11 +84,11 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   `civi_id` bigint(20) unsigned NOT NULL,
   `van_id` bigint(20) unsigned NOT NULL,
   `last_name` varchar(30) NOT NULL,
-  `last_name_soundex` varchar(30) NOT NULL,
+  `last_name_soundex` varchar(15) NOT NULL,
   `first_name` varchar(20) NOT NULL,
-  `first_name_soundex` varchar(20) NOT NULL,
+  `first_name_soundex` varchar(10) NOT NULL,
   `middle_name` varchar(20) NOT NULL,
-  `middle_name_soundex` varchar(20) NOT NULL,
+  `middle_name_soundex` varchar(10) NOT NULL,
   `title` varchar(3) NOT NULL,
   `post_title` varchar(250) NOT NULL,
   `date_of_birth` date NOT NULL,
@@ -144,8 +144,9 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `city` (`city`),
   KEY `first_name_soundex` (`first_name_soundex`),
   KEY `last_name_soundex` (`last_name_soundex`),
-  KEY `middle_name_soundex` (`middle_name_soundex`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171494 ;
+  KEY `middle_name_soundex` (`middle_name_soundex`),
+  KEY `soundex` (`mark_deleted`,`last_name_soundex`,`first_name_soundex`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171496 ;
 
 -- --------------------------------------------------------
 
@@ -179,7 +180,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   PRIMARY KEY (`field_id`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=64 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=76 ;
 
 -- --------------------------------------------------------
 
@@ -216,7 +217,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_form_field_groups` (
   `initial_open` tinyint(1) NOT NULL,
   `search_only` tinyint(1) NOT NULL,
   PRIMARY KEY (`group_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=18 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=22 ;
 
 -- --------------------------------------------------------
 

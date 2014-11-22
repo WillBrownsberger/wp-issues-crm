@@ -272,7 +272,7 @@ abstract class WIC_Entity_Parent {
 			$update_form = new $success_form;
 			$update_form->layout_form ( $this->data_object_array, $message, $message_level, $sql );	
 		} else {
-			die ( sprintf ( __( 'Data base corrupted for record ID: %1$s in id_search_generic.', 'wp-issues-crm' ) , $args['id_requested'] ) );		
+			die ( sprintf ( __( 'Data base corrupted for record ID: %1$s in id_search_generic.', 'wp-issues-crm' ) , $id ) );		
 		} 
 	}
 	
@@ -283,14 +283,14 @@ abstract class WIC_Entity_Parent {
 		$this->sanitize_values();
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$search_parameters= array(
-			'sort_order' 		=> $this->data_object_array['sort_order']->get_value(),
-			'compute_total' 	=> $this->data_object_array['compute_total']->get_value(),
-			'retrieve_limit' 	=> $this->data_object_array['retrieve_limit']->get_value(),
-			'show_deleted' 	=> $this->data_object_array['show_deleted']->get_value(),
+			'sort_order' 		=> isset ( $this->data_object_array['sort_order'] ) ? $this->data_object_array['sort_order']->get_value() : '',
+			'compute_total' 	=> isset ( $this->data_object_array['compute_total'] ) ? $this->data_object_array['compute_total']->get_value() : '',
+			'retrieve_limit' 	=> isset ( $this->data_object_array['retrieve_limit'] ) ? $this->data_object_array['retrieve_limit']->get_value() : '',
+			'show_deleted' 	=> isset ( $this->data_object_array['show_deleted'] ) ? $this->data_object_array['show_deleted']->get_value() : '',
 			'select_mode'		=> 'id'
 			);
 		$search_clause_args = array(
-			'match_level' => $this->data_object_array['match_level']->get_value(),
+			'match_level' =>  isset ( $this->data_object_array['match_level'] ) ? $this->data_object_array['match_level']->get_value() : '',
 			'dup_check' => false,
 			);
 		// note that the transient search parameter 'match_level' is needed by individual controls in create_search_clause()

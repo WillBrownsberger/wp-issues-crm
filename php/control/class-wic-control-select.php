@@ -26,17 +26,14 @@ class WIC_Control_Select extends WIC_Control_Parent {
 			$final_control_args['readonly_update'] = 1 ; // lets control know to only show the already set value if readonly
 																		// (readonly control will not show at all on save, so need not cover that case)
 		} 
-			return ( $this->create_control ( $final_control_args ) );
+		$control =  $this->create_control( $final_control_args ) ;
+		return ( $control );
 	}	
 	
-	protected function create_control ( $control_args ) { 
+	protected function create_options_array ( $control_args ) {
 
-		extract ( $control_args, EXTR_SKIP ); 
-		
-		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
+		extract ( $control_args, EXTR_SKIP );
 
-		$control = '';
-		
 		$entity_class = 'WIC_Entity_' . $this->field->entity_slug;		
 		if ( ! isset ( $readonly_update ) ) { // the usual mode -- show drop down		
 			$not_selected_option = array (
@@ -57,7 +54,25 @@ class WIC_Control_Select extends WIC_Control_Parent {
 					'label' => $entity_class::$getter( $value )
 				)
 			);			
-		} 
+		} 	
+	
+		return ( $option_array );	
+	}	
+	
+	protected function create_control ( $final_control_args ) {
+		$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );
+		return ( self::create_select_control ( $final_control_args ) );	
+	}	
+	
+	
+	public static function create_select_control ( $control_args ) { 
+
+		extract ( $control_args, EXTR_SKIP ); 
+		
+		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
+
+		$control = '';
+		
 		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . 
 				esc_html( $field_label ) . '</label>' : '';
 		$control .= '<select class="' . esc_attr( $input_class ) . ' ' .  esc_attr( $field_slug_css ) .'" id="' . esc_attr( $field_slug ) . '" name="' . esc_attr( $field_slug ) 
@@ -76,7 +91,8 @@ class WIC_Control_Select extends WIC_Control_Parent {
 	
 		return ( $control );
 	
-	}	
+	}
+		
 }
 
 

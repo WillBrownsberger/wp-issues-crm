@@ -79,6 +79,8 @@ abstract class WIC_Form_Parent  {
 				}	   
 		   } // close foreach group
 		
+			$this->pre_button_messaging( $data_array );		
+		
 			// final button group div
 			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
 			echo '<div class = "wic-form-field-group ' . $row_class . '" id = "bottom-button-group">';?>
@@ -102,6 +104,10 @@ abstract class WIC_Form_Parent  {
 			echo '<div class = "wic-control">' . $this->get_the_formatted_control ( $data_array[$field] ) . '</div>';
 		}	
 
+	}
+
+	protected function pre_button_messaging ( &$data_array ) {
+		// just a hook	
 	}
 
 	protected function emit_debugging_information() {

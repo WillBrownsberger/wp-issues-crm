@@ -234,6 +234,7 @@ select.wic-input:hover {
    color: red;  
 }
 
+
 .wic-input.mark-deleted,
 .wic-input.party,
 .wic-input.voter-status,
@@ -247,7 +248,13 @@ select.wic-input:hover {
 	width: 75px;
 	min-width: 0px; 
 } 
-	
+
+.wic-input.post-author,
+.wic-label.post-author {
+	font-style: normal;
+}	
+
+
 .wic-input.phone {
 	width: 120px;
 	min-width: 0px; 
@@ -390,7 +397,9 @@ textarea.wic-input.activity-note {
 }
 
 
-
+#wic-issue-post-edit-link {
+	
+}
 
 .wic_multi_select {
 	display: inline-block;
@@ -460,7 +469,12 @@ textarea#notes.wic-input.notes {
 	padding-left: 60px
 }
 
+#wic-issue-post-edit-link {
+	display: block;
+	margin: 10px 0 20px 208px;
+	font-size: 0.8em;
 
+}
 
 
 
@@ -642,11 +656,11 @@ ul.wic-post-list-line {
 .pl-activity-activity_type{ width:10%;}
 .pl-activity-activity_issue_id{ width:61%;}
 .pl-activity-activity_pro_con{ width:10%;}
-.pl-issue-assigned{ width:15%;}
-.pl-issue-wic_live_issue{ width:8%;}
-.pl-issue-case_status{ width:10%;}
+.pl-issue-issue_staff{ width:15%;}
+.pl-issue-comments_status{ width:8%;}
+.pl-issue-follow_up_status{ width:10%;}
 .pl-issue-post_title{ width:40%;}
-.pl-issue-cat{ width:17%;}
+.pl-issue-categories{ width:17%;}
 .pl-issue-post_status{ width:8%;}
 .wic-dashboard-header {
 	color: #777;
