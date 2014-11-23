@@ -170,7 +170,7 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	}
 	
 	public static function get_party_label( $lookup ) {
-		return value_label_lookup ( $lookup,  self::$party_options );
+		return wic_value_label_lookup ( $lookup,  self::$party_options );
 	}
 	// note: since phone is multivalue, and formatter is not invoked in the 
 	// WIC_Control_Multivalue class (rather at the child entity level), 
@@ -213,7 +213,7 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	}
 	
 	public static function get_voter_status_label( $lookup ) {
-		return value_label_lookup ( $lookup,  self::$voter_status_options );
+		return wic_value_label_lookup ( $lookup,  self::$voter_status_options );
 	}
 
 	

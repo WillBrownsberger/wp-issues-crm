@@ -9,7 +9,7 @@ class WIC_Control_Range extends WIC_Control_Parent {
 	private $value_lo = '';
 	private $value_hi = '';	
 	
-	public function search_control () {
+	public function search_control () { // no option to suppress on search -- don't use a range control if suppressing on search
 		$final_control_args = $this->default_control_args;
 		$final_control_args['readonly'] = false;
 		$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
@@ -34,8 +34,29 @@ class WIC_Control_Range extends WIC_Control_Parent {
 		}
 	}
 
-	public function create_search_clause ( $dup_check ) {
+	public function sanitize() {  
+		$class_name = 'WIC_Entity_' . $this->field->entity_slug;
+		$sanitizor = $this->field->field_slug . '_sanitizor';
+		if ( method_exists ( $class_name, $sanitizor ) ) { 
+			$this->value 		= $class_name::$sanitizor ( $this->value );
+			$this->value_lo	= $class_name::$sanitizor ( $this->value_lo );
+			$this->value_hi 	= $class_name::$sanitizor ( $this->value_hi );
+		} else { 
+			$this->value 		= sanitize_text_field ( stripslashes ( $this->value ) );			
+			$this->value_lo 	= sanitize_text_field ( stripslashes ( $this->value_lo ) );		
+			$this->value_hi 	= sanitize_text_field ( stripslashes ( $this->value_hi ) );
+		} 
+		if ( $this->field->is_date ) { 				
+			$this->value 		= $this->value 	> '' ? $this->sanitize_date ( $this->value ) 	: '';
+			$this->value_lo 	= $this->value_lo > '' ? $this->sanitize_date ( $this->value_lo ) : '';
+			$this->value_hi	= $this->value_hi > '' ? $this->sanitize_date ( $this->value_hi ) : '';	
+		}
+	}
+
+	public function create_search_clause ( $args ) {
 		
+		extract ( $args, EXTR_OVERWRITE );
+
 		if ( $dup_check ) {
 			$query_clause = parent::create_search_clause ( $dup_check );
 			return ( $query_clause );		

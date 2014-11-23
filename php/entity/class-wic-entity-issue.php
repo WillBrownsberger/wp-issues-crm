@@ -94,9 +94,47 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	*	option array get functions
 	*/
 
-	public static function get_category_options() {
-		// wic_get_category_list	
-	}
+	public static function get_categories_options() {
+		global $wic_category_select_array;
+		global $wic_category_array_depth;
+		$wic_category_select_array = array();
+		$wic_category_array_depth = 0;
+		return ( self::wic_get_category_list('') );
+	} 		
+
+
+	private static function wic_get_category_list ( $parent = '' ) {
+
+		global $wic_category_select_array;
+		global $wic_category_array_depth;
+		
+		$wic_category_array_depth++;		
+		// echo " depth is now $wic_category_array_depth";
+		$args = array(
+			'orderby'                  => 'name',
+			'order'                    => 'ASC',
+			'hide_empty'               => 0,
+			'taxonomy'                 => 'category',
+			'pad_counts'               => true, 
+			'parent'							=> $parent,
+		); 
+
+		$categories = get_categories( $args );
+		if ( 0 < count ( $categories ) ) {		
+			foreach ( $categories as $category ) {
+				$temp_array = array (
+					'value' => $category->term_id,
+					'label' => $category->name,
+					'class' => 'wic-multi-select-depth-' . $wic_category_array_depth,
+				);			
+				$wic_category_select_array[] = $temp_array;
+				self::wic_get_category_list ($category->term_id);	
+			}
+		}
+		$wic_category_array_depth--;
+		return ( $wic_category_select_array );
+	} 	
+
 
 	public static function get_post_categories ( $post_id ) {
 		$categories = get_the_category ( $post_id );
@@ -107,6 +145,16 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return ( $return_list ) ;	
 	}	
 	
+
+	public static function comments_status_formatter( $value ) {
+		return wic_value_label_lookup ( $value,  self::$comments_status_options );	
+	} 
+
+
+	public static function get_comments_status_options() {
+		return self::$comments_status_options; 
+	} 
+
 	
 	public static function get_issue_staff_options() {
 		return wic_get_administrator_array();
@@ -119,18 +167,10 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 
 		
   	public static function follow_up_status_formatter( $value ) {
-		return value_label_lookup ( $value,  self::$follow_up_status_options );	 
+		return wic_value_label_lookup ( $value,  self::$follow_up_status_options );	 
 	} 
 
 
-	public static function comments_status_formatter( $value ) {
-		return value_label_lookup ( $value,  self::$comments_status_options );	
-	} 
-
-
-	public static function get_comments_status_options() {
-		return self::$comments_status_options; 
-	} 
 
 	public static function issue_staff_formatter ( $user_id ) {
 		
@@ -148,16 +188,42 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return ( self::issue_staff_formatter ( $user_id ) );
 	}
 	
+	public static function get_post_author_options () {
+	
+		global $wpdb;
+		
+		$query_args = array(
+			'orderby' => 'name',
+			'order' => 'ASC',
+			'number' => '',
+			'fields' => array ( 'ID' , 'display_name' ),
+		);
+		$authors = get_users( $query_args );
+		
+		$author_options = array();
+		foreach ( $authors as $author ) {
+			$author_options[] = array (
+				'value' => $author->ID,
+				'label' => $author->display_name,			
+			); 
+		}
+		return ( $author_options ) ;
+	}
+		
+	
 	public static function get_post_status_options() {
 		return self::$post_status_options; 
 	} 
 	
 	public static function post_status_formatter( $value ) {
-		return value_label_lookup ( $value,  self::$post_status_options ); 
+		return wic_value_label_lookup ( $value,  self::$post_status_options ); 
 	} 
 	
 	public static function get_post_status_label ( $value ) {
 		return self::post_status_formatter ( $value );	
 	}
 	
+	public static function tags_sanitizor ( $value ) {
+		return wic_sanitize_textcsv( $value );	
+	}	
 }

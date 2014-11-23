@@ -138,7 +138,7 @@ function wic_generate_call_trace()
 
 	}
 
-function value_label_lookup ( $value, $options_array ) {
+function wic_value_label_lookup ( $value, $options_array ) {
 	if ( '' ==  $value ) {
 		return ( '' );	
 	}	
@@ -150,6 +150,25 @@ function value_label_lookup ( $value, $options_array ) {
 	return ( sprintf ( __('Option value (%s) missing in look up table.', 'wp-issues-crm' ), $value ) );
 }
 
+
+	/*
+	* convert dirty string with various possible white spaces and commas into clean compressed comma separated	
+	*/
+	function wic_sanitize_textcsv ( $textcsv ) {
+		
+		$temp_tags = str_replace ( ',', ' ', $textcsv )	;	
+		$temp_tags = explode ( ' ', $textcsv );
+		
+		$temp_tags2 = array();
+		foreach ( $temp_tags as $tag ) {
+			if ( sanitize_text_field ( stripslashes ( $tag ) ) > '' ) {
+				$temp_tags2[] = sanitize_text_field ( stripslashes ( $tag ) );
+			}			
+		}
+		$output_textcsv = implode ( ',', $temp_tags2 ); 		
+		return ( $output_textcsv );
+	}	
+	
 
 class WP_Issues_CRM {
 

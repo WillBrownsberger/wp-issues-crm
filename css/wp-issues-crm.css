@@ -284,6 +284,21 @@ select.wic-input:hover {
 	display: inline-block;
 }
 
+/*
+* Note: these display choices go along with decision in class-wic-db-access-wp.php
+*   not to support search by post-content.  The s parm in WP_Query searches title and content, so redundant. 
+*/
+
+#wic-form-issue-search .post-content {
+	display: none;
+}
+#wic-form-issue-search .wic-label.post-title  {
+	display: none;
+}
+#wic-form-issue-search .wic-input.post-title  {
+	margin-left: 200px;
+}
+
 
 .wic-input.street-suffix {
 	width: 25px;

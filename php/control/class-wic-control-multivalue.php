@@ -15,14 +15,6 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	*
 	**************************************************************************************/
 	
-	public function initialize_default_values ( $entity, $field_slug, $instance ) {
-		// first just initializing the this multivalue control itself
-		parent::initialize_default_values( $entity, $field_slug, $instance );
-		// now initializing the multi-value array
-		$this->reset_value();
-   //		$this->set_blank_first_row(); // needed for searching
-	}
-
 	public function reset_value() {  
 		$this->value = array();
 	}		
@@ -68,7 +60,9 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 					$values_set = false;
 					foreach ( $form_row_array as $value ){
 						if ( '' != $value && 
-								! is_array ( $value ) ) { // this keeps date search ranges from looking like values
+								! is_array ( $value ) ) { 
+								// the second half of this condition keeps blank date search ranges and multiselect fields from automatically looking like values
+								// it limits future flexibility to create multivalue fields within multivalue fields -- probably OK
 							$values_set = true;
 							break;						
 						}	

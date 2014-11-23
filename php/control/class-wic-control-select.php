@@ -5,19 +5,19 @@
 */
 class WIC_Control_Select extends WIC_Control_Parent {
 	
-	
 	public function search_control () {
 		$final_control_args = $this->default_control_args;
-		$final_control_args['readonly'] = false;
-		$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
-		$final_control_args['value'] = $this->value;
-		$final_control_args['required'] = false; // no field is required on search, except for search parms may be blank prohibited 
-		$control =  $this->create_control( $final_control_args ) ;
-		return ( $control ) ;
-	}
+		if ( ! $final_control_args['suppress on search'] ) {
+			$final_control_args['readonly'] = false;
+			$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
+			$final_control_args['value'] = $this->value;
+			$final_control_args['required'] = ''; // fields never required on search; set explicitly here for correct result in create_options_array
+			$control = $this->create_control( $final_control_args ) ;
+			return ( $control ) ;
+		}
+	}	
 	
-
-
+	
 	public function update_control () {
 		$final_control_args = $this->default_control_args;
 		$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
@@ -38,11 +38,11 @@ class WIC_Control_Select extends WIC_Control_Parent {
 		if ( ! isset ( $readonly_update ) ) { // the usual mode -- show drop down		
 			$not_selected_option = array (
 				'value' 	=> '',
-				'label'	=> $placeholder,								
+				'label'	=> $placeholder,
 			);  
 			$getter = 'get_' . $this->field->field_slug . '_options';
 			$option_array =  $entity_class::$getter();
-			if ( 0 == $required && 0 == $blank_prohibited ) { // difference is that required is not a required setting on search, but blank_prohibited is 
+			if ( '' == $required && 0 == $blank_prohibited ) { // difference is that required is not a required setting on search, but blank_prohibited is 
 				array_push( $option_array, $not_selected_option );
 			}
 		} else { // show just the already set option if a readonly field, but in update mode 

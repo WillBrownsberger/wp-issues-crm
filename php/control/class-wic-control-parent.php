@@ -24,7 +24,7 @@
 abstract class WIC_Control_Parent {
 	protected $field;
 	protected $default_control_args = array();
-	protected $value = '';	
+	protected $value;	
 
 
 	/***
@@ -38,8 +38,8 @@ abstract class WIC_Control_Parent {
 	*/
 
 
-	// this function initializes the default values of field RULES -- not the $value property of the control 
 	public function initialize_default_values ( $entity, $field_slug, $instance ) {
+	// initialize the default values of field RULES  
 		$this->field = WIC_DB_Dictionary::get_field_rules( $entity, $field_slug );
 		$this->default_control_args =  array_merge( $this->default_control_args, get_object_vars ( $this->field ) );
 		$this->default_control_args['field_slug_css'] = str_replace( '_', '-', $field_slug );
@@ -50,6 +50,8 @@ abstract class WIC_Control_Parent {
 				// note that the entity name for a row object in a multivalue field is the same as the field_slug for the multivalue field
 				// this is a trap for the unwary in setting up the dictionary table 
 				$entity . '[' . $instance . ']['. $field_slug . ']';
+		// initialize the value of the control
+		$this->reset_value();		
 	}
 
 	/*********************************************************************************
@@ -92,11 +94,13 @@ abstract class WIC_Control_Parent {
 
 	public function search_control () {
 		$final_control_args = $this->default_control_args;
-		$final_control_args['readonly'] = false;
-		$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
-		$final_control_args['value'] = $this->value;
-		$control =  $this->create_control( $final_control_args ) ;
-		return ( $control ) ;
+		if ( ! $final_control_args['suppress on search'] ) {
+			$final_control_args['readonly'] = false;
+			$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
+			$final_control_args['value'] = $this->value;
+			$control =  $this->create_control( $final_control_args ) ;
+			return ( $control ) ;
+		}
 	}
 	
 	public function save_control () {

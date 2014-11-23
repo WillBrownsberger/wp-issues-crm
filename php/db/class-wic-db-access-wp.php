@@ -17,7 +17,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 	}
 	
 	protected function db_search( $meta_query_array, $search_parameters ) {
-
+		var_dump ($meta_query_array);
 		// default search parameters supplied -- these need to be added to form elements or other call if to be varied
 		$select_mode 		= 'id';
 		$sort_order 		= false;
@@ -49,17 +49,29 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 						'p' => $search_clause['value'],					
 					);
 					break( 2 ); // exit switch and foreach with just the ID search array
+									// supports call from ID search
 				case '':
 					$meta_query_array[] = $search_clause;
 					break;
 				case 'author':
-				case 's' :
 				case 'tag' :
 				case 'post_status':
 					$query_args[$search_clause['wp_query_parameter']] = $search_clause['value'];
 					break;
+				case 'post_title': 
+							// note -- hiding post_content as a search field by css 
+						 	// on not found going to save form, the search term will come up in title
+						 	// the alternative approach would be to add a column to dictionary to suppress a field on search
+						 	// treating this as a css issue -- if it were shown, it would do nothing anyway, since
+						 	// post_content is not in this switch list 
+					$query_args['s'] = $search_clause['value'];
+					break;
 				case 'cat':
-					$query_args['category__in'] = $search_clause['value'];
+					$cats = array();
+					foreach ( $search_clause['value'] as $cat => $value ) {
+						$cats[] = $cat;				
+					}
+					$query_args['category__in'] = $cats;
 					break;
 				case 'date':
 					$date_array = array();
