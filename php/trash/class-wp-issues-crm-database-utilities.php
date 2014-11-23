@@ -293,30 +293,6 @@
 			
 	}
 
-	public function get_open_issues() {
-			
-		$meta_query_args = array(
-			'relation' => 'AND',
-			array(
-				'meta_key'     => 'wic_live_issues',
-				'value'   => 'open',
-				'compare' => '=',
-			)
-		);
-		
-		$list_query_args = array (
-			'ignore_sticky_posts'	=> true,
-			'post_type'		=>	'post',
- 			'posts_per_page' => 100,
- 			'meta_query' 	=> $meta_query_args, 
- 			'order'			=> 'DESC',
-	 		);	
-	 		
-	 	$open_posts = new WP_Query ( $list_query_args );
-	 	
-	 	return ( $open_posts );	
-		
-	}
 	
 /*	public function wic_get_post ( $post_id ) {
 		$wic_post_query = new WP_Query ( 'p=' . $post_id );		
