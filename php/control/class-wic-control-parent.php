@@ -81,6 +81,9 @@ abstract class WIC_Control_Parent {
 		$this->value = '';	
 	}
 
+	public function get_wp_query_parameter() {
+		return ( $this->field->wp_query_parameter );	
+	}
 
 	/*********************************************************************************
 	*
@@ -94,11 +97,11 @@ abstract class WIC_Control_Parent {
 
 	public function search_control () {
 		$final_control_args = $this->default_control_args;
-		if ( ! $final_control_args['suppress on search'] ) {
+		if ( ! $final_control_args['suppress_on_search'] ) {
 			$final_control_args['readonly'] = false;
 			$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
 			$final_control_args['value'] = $this->value;
-			$control =  $this->create_control( $final_control_args ) ;
+			$control =  static::create_control( $final_control_args ) ;
 			return ( $control ) ;
 		}
 	}
@@ -114,7 +117,7 @@ abstract class WIC_Control_Parent {
 			} else {
 				$final_control_args['value'] = $this->value;
 			}
-			return  ( $this->create_control( $final_control_args ) );	
+			return  ( static::create_control( $final_control_args ) );	
 		}
 	}
 	
@@ -122,15 +125,15 @@ abstract class WIC_Control_Parent {
 		$final_control_args = $this->default_control_args;
 		$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
 		$final_control_args['value'] = $this->value;
-		return ( $this->create_control( $final_control_args )  );	
+		return ( static::create_control( $final_control_args )  );	
 	}
 
-	protected function create_control ( $control_args ) { // basic create text control, accessed through control methodsabove
+	protected static function create_control ( $control_args ) { // basic create text control, accessed through control methodsabove
 
 		extract ( $control_args, EXTR_OVERWRITE );   
-    
-    	$class_name = 'WIC_Entity_' . $entity_slug;
-		$formatter = $this->field->field_slug . '_formatter';
+
+     	$class_name = 'WIC_Entity_' . $entity_slug;
+		$formatter = $field_slug . '_formatter';
 		if ( method_exists ( $class_name, $formatter ) ) { 
 			$value = $class_name::$formatter ( $value );
 		}

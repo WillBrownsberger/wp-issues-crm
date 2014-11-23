@@ -13,6 +13,37 @@
 
 class WIC_Entity_Issue extends WIC_Entity_Parent {
 
+	protected function populate_data_object_array_from_found_record( &$wic_query, $offset=0 ) {
+			foreach ( $this->data_object_array as $field_slug => $control ) { 
+			if ( ! $control->is_multivalue() && ! $control->is_transient()  ) { 
+
+				if ( 'cat' == $control->get_wp_query_parameter() ) {
+					$control->set_value( self::get_the_categories_ids ( $this->data_object_array['ID']->get_value() ) );
+				} else {
+					$control->set_value ( $wic_query->result[$offset]->{$field_slug} );
+				}
+			} elseif ( $control->is_multivalue() ) { // for multivalue fields, set_value wants array of row arrays -- 
+						// query results don't have that form or even an appropriate field slug, 
+						// so have to search by parent ID  
+				$control->set_value_by_parent_pointer( $wic_query->result[$offset]->ID );
+			}
+		} 
+	}	
+
+	// arguably, this belongs in WIC_DB_Access_WP, but compromising with levels using wordpress functions
+	// calling for it in different formats in list, so each use is getting data in the form it needs.
+	private static function get_the_categories_ids ( $id ) {
+		$category_object_array = get_the_category ( $id );
+		$categories_ids = array();
+		foreach ( $category_object_array as $category_object ) {
+			$categories_ids[] = $category_object->term_id;		
+		}
+		return ( $categories_ids );
+	}
+
+
+
+
 	protected function set_entity_parms( $args ) { // 
 		// accepts args to comply with abstract function definition, but as a parent does not process them -- no instance
 		$this->entity = 'issue';
@@ -99,11 +130,11 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		global $wic_category_array_depth;
 		$wic_category_select_array = array();
 		$wic_category_array_depth = 0;
-		return ( self::wic_get_category_list('') );
+		return ( self::wic_get_category_list(0) );
 	} 		
 
 
-	private static function wic_get_category_list ( $parent = '' ) {
+	private static function wic_get_category_list ( $parent ) {
 
 		global $wic_category_select_array;
 		global $wic_category_array_depth;
@@ -115,7 +146,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 			'order'                    => 'ASC',
 			'hide_empty'               => 0,
 			'taxonomy'                 => 'category',
-			'pad_counts'               => true, 
+			'pad_counts'               => false, 
 			'parent'							=> $parent,
 		); 
 
@@ -134,6 +165,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		$wic_category_array_depth--;
 		return ( $wic_category_select_array );
 	} 	
+
 
 
 	public static function get_post_categories ( $post_id ) {

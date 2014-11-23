@@ -17,7 +17,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 	}
 	
 	protected function db_search( $meta_query_array, $search_parameters ) {
-		var_dump ($meta_query_array);
+
 		// default search parameters supplied -- these need to be added to form elements or other call if to be varied
 		$select_mode 		= 'id';
 		$sort_order 		= false;

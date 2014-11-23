@@ -9,8 +9,8 @@ class WIC_Control_Textarea extends WIC_Control_Parent {
 
 	// when searching, offer a straight text control
 	public function search_control () {
-		if ( ! $final_control_args['suppress on search'] ) {
-			$final_control_args = $this->default_control_args;
+		$final_control_args = $this->default_control_args;
+		if ( ! $final_control_args['suppress_on_search'] ) {
 			$final_control_args['readonly'] = false;
 			$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
 			$final_control_args['value'] = $this->value;
@@ -22,7 +22,7 @@ class WIC_Control_Textarea extends WIC_Control_Parent {
 
 
 	
-	protected function create_control ( $control_args ) {
+	protected static function create_control ( $control_args ) {
 		
 		extract ( $control_args, EXTR_SKIP ); 
 	

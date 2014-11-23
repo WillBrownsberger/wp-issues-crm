@@ -29,7 +29,7 @@ class WIC_Control_Deleted extends WIC_Control_Parent {
 	}	
 	
 	// on create control, taking args passed in parent, which include an $onclick_delete reflecting $entity and $instance
-	protected function create_control ( $control_args ) {
+	protected static function create_control ( $control_args ) {
 
 		$input_class = 'wic-input-deleted';
 		$label_class = 'wic-input-deleted-label';

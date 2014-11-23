@@ -16,7 +16,7 @@ class WIC_Control_Checked extends WIC_Control_Parent {
 			'label_class' => '',				
 		);	*/
 	
-	public function create_control ( $control_args ) {
+	public static function create_control ( $control_args ) {
 		
 		$input_class = 'wic_input_checked';
 

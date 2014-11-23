@@ -216,7 +216,55 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		return wic_value_label_lookup ( $lookup,  self::$voter_status_options );
 	}
 
+	/*	public function drop_down_issues() {
+		
+		global $wic_database_utilities;		
+				
+		$wic_issues_query = $wic_database_utilities->get_open_issues();
+
+		$issues_array = array();
+		
+		if ( $wic_issues_query->have_posts() ) {		
+			while ( $wic_issues_query->have_posts() ) {
+				$wic_issues_query->the_post();
+				$issues_array[] = array(
+					'value'	=> $wic_issues_query->post->ID,
+					'label'	=>	$wic_issues_query->post->post_title,
+				);
+			}
+		}
+		
+		wp_reset_postdata();
+		return $issues_array;
+
+	}
 	
+		public function get_open_issues() {
+			
+		$meta_query_args = array(
+			'relation' => 'AND',
+			array(
+				'meta_key'     => 'wic_live_issues',
+				'value'   => 'open',
+				'compare' => '=',
+			)
+		);
+		
+		$list_query_args = array (
+			'ignore_sticky_posts'	=> true,
+			'post_type'		=>	'post',
+ 			'posts_per_page' => 100,
+ 			'meta_query' 	=> $meta_query_args, 
+ 			'order'			=> 'DESC',
+	 		);	
+	 		
+	 	$open_posts = new WP_Query ( $list_query_args );
+	 	
+	 	return ( $open_posts );	
+		
+	}
+
+*/
 	
 	
 }

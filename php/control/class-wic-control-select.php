@@ -7,16 +7,16 @@ class WIC_Control_Select extends WIC_Control_Parent {
 	
 	public function search_control () {
 		$final_control_args = $this->default_control_args;
-		if ( ! $final_control_args['suppress on search'] ) {
+		if ( ! $final_control_args['suppress_on_search'] ) {
 			$final_control_args['readonly'] = false;
 			$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
 			$final_control_args['value'] = $this->value;
+			$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );
 			$final_control_args['required'] = ''; // fields never required on search; set explicitly here for correct result in create_options_array
 			$control = $this->create_control( $final_control_args ) ;
 			return ( $control ) ;
 		}
 	}	
-	
 	
 	public function update_control () {
 		$final_control_args = $this->default_control_args;
@@ -26,8 +26,25 @@ class WIC_Control_Select extends WIC_Control_Parent {
 			$final_control_args['readonly_update'] = 1 ; // lets control know to only show the already set value if readonly
 																		// (readonly control will not show at all on save, so need not cover that case)
 		} 
+		$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );		
 		$control =  $this->create_control( $final_control_args ) ;
 		return ( $control );
+	}	
+	
+	public function save_control () {
+		$final_control_args = $this->default_control_args;
+		if( ! $final_control_args['readonly'] ) {
+			$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
+			$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );
+	    	$class_name = 'WIC_Entity_' . $this->field->entity_slug;
+			$set_default = $this->field->field_slug . '_set_default';
+			if ( method_exists ( $class_name, $set_default ) ) { 
+				$final_control_args['value'] = $class_name::$set_default ( $this->value );
+			} else {
+				$final_control_args['value'] = $this->value;
+			}
+			return  ( static::create_control( $final_control_args ) );	
+		}
 	}	
 	
 	protected function create_options_array ( $control_args ) {
@@ -59,13 +76,7 @@ class WIC_Control_Select extends WIC_Control_Parent {
 		return ( $option_array );	
 	}	
 	
-	protected function create_control ( $final_control_args ) {
-		$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );
-		return ( self::create_select_control ( $final_control_args ) );	
-	}	
-	
-	
-	public static function create_select_control ( $control_args ) { 
+	public static function create_control ( $control_args ) { 
 
 		extract ( $control_args, EXTR_SKIP ); 
 		
