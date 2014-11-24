@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 22, 2014 at 01:26 PM
+-- Generation Time: Nov 23, 2014 at 08:29 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_activity` (
   KEY `constituent_id` (`constituent_id`),
   KEY `email_address` (`activity_type`),
   KEY `email_type` (`activity_date`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=30 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=32 ;
 
 -- --------------------------------------------------------
 
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_address` (
   KEY `zip` (`zip`),
   KEY `civicrm_id` (`constituent_id`),
   KEY `street_name_soundex` (`street_name_soundex`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171488 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171491 ;
 
 -- --------------------------------------------------------
 
@@ -177,6 +177,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   `label_class` varchar(30) NOT NULL DEFAULT 'wic-label',
   `placeholder` varchar(50) NOT NULL,
   `blank_prohibited` tinyint(1) NOT NULL DEFAULT '0',
+  `suppress_on_search` tinyint(1) NOT NULL,
   PRIMARY KEY (`field_id`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)

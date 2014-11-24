@@ -128,9 +128,9 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	}
 
 	// validate  each row object has its own validation function with return, so this is easy
-	public function validate() {
+	public function validate() { 
 		$error_message = '';
-		foreach ( $this->value as $row_object ) {
+		foreach ( $this->value as $row_object ) { 
 			$error_message .= $row_object->validate_values();
 		}
 		// treat required checks for sub rows of entity as a validation issue -- 

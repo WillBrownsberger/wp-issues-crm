@@ -112,6 +112,31 @@ class WIC_DB_Dictionary {
 			, OBJECT );
 	}
 	/*************************************************************************
+	*
+	* Method supporting wp db interface
+	*
+	**************************************************************************/
+	public static function get_field_list_with_wp_query_parameters( $entity ) {
+		
+		global $wpdb;
+
+		global $wp_issues_crm_field_rules_cache;
+		
+		if ( 0 == count ( $wp_issues_crm_field_rules_cache ) ) {
+			self::initialize_field_rules_cache();		
+		}
+
+		$entity_fields = array();
+		foreach ( $wp_issues_crm_field_rules_cache as $field_rule ) {
+			if ( $entity == $field_rule->entity_slug ) {
+				$entity_fields[$field_rule->field_slug] = $field_rule->wp_query_parameter;	
+			}
+		}	
+		
+		return $entity_fields;
+	}	
+	
+	/*************************************************************************
 	*	
 	* Methods supporting list display -- sort order and shortened field list 
 	*

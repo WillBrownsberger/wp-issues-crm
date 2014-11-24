@@ -101,7 +101,7 @@ abstract class WIC_Form_Parent  {
 
 	protected function the_controls ( $fields, &$data_array ) {
 		foreach ( $fields as $field ) { 
-			echo '<div class = "wic-control">' . $this->get_the_formatted_control ( $data_array[$field] ) . '</div>';
+			echo '<div class = "wic-control" id = "wic-control-' . str_replace( '_', '-' , $field ) . '">' . $this->get_the_formatted_control ( $data_array[$field] ) . '</div>';
 		}	
 
 	}

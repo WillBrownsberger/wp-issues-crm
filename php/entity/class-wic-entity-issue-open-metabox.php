@@ -60,7 +60,7 @@ Class WIC_Entity_Issue_Open_Metabox {
 			'option_array' => $wic_live_issue_options, 
 		);	  
 
-		echo '<p>' . WIC_Control_Select::create_select_control ( $args) . '</p>';
+		echo '<p>' . WIC_Control_Select::create_control ( $args) . '</p>';
 	}
 	
 	function wic_save_live_issue_meta_box($post_id, $post) {

@@ -77,9 +77,9 @@ class WIC_Control_Select extends WIC_Control_Parent {
 	}	
 	
 	public static function create_control ( $control_args ) { 
-
-		extract ( $control_args, EXTR_SKIP ); 
 		
+		extract ( $control_args, EXTR_SKIP ); 
+
 		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 
 		$control = '';
@@ -93,13 +93,13 @@ class WIC_Control_Select extends WIC_Control_Parent {
 		foreach ( $option_array as $option ) {
 			$label = $option['label'];
 			if ( $value == $option['value'] ) { // Make selected first in list
+			
 				$p = '<option selected="selected" value="' . esc_attr( $option['value'] ) . '">' . esc_html ( $label ) . '</option>';
 			} else {
 				$r .= '<option value="' . esc_attr( $option['value'] ) . '">' . esc_html( $label ) . '</option>';
 			}
 		}
-		$control .=	$p . $r .	'</select>' . $field_label_suffix_span;	
-	
+		$control .=	$p . $r .	'</select>' . $field_label_suffix_span;
 		return ( $control );
 	
 	}

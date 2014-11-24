@@ -235,6 +235,28 @@ select.wic-input:hover {
 }
 
 
+#wic-control-first-name,
+#wic-control-middle-name,
+#wic-control-last-name {
+	display: inline-block;
+}
+
+.wic-label.middle-name,
+.wic-label.last-name {
+	display: none;
+}
+
+.wic-input.first-name,
+.wic-input.last-name {
+	min-width: 0;
+	width: 140px;
+}
+
+.wic-input.middle-name {
+	min-width: 0;
+	width: 40px;
+}
+
 .wic-input.mark-deleted,
 .wic-input.party,
 .wic-input.voter-status,

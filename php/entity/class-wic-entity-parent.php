@@ -99,13 +99,13 @@ abstract class WIC_Entity_Parent {
 
 	protected function dup_check ( $save ) {
 		// check for dups -- $save is true/false for save/update 
-		$dup_check_array = array();
+		$dup_check = false;
 		foreach ( $this->data_object_array as $field_slug => $control ) {
 			if	( $control->dup_check() ) {
-				$dup_check_array[$field_slug] = $control;
+				$dup_check_array = true;
 			}	
 		}	
-		if ( count ($dup_check_array ) > 0 ) {
+		if ( $dup_check_array ) {
 			$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 			$search_parameters = array(
 				'select_mode' => 'id',
@@ -184,10 +184,12 @@ abstract class WIC_Entity_Parent {
 		extract ( $search_clause_args, EXTR_OVERWRITE );
 		$meta_query_array = array ();
 		foreach ( $this->data_object_array as $field => $control ) {
-			$query_clause = $control->create_search_clause( $search_clause_args );
-			if ( is_array ( $query_clause ) && // skipping empty fields
-					( ! $dup_check || $control->dup_check() ) ) { // including all non-empty or only those that are dupcheck fields  
-				$meta_query_array = array_merge ( $meta_query_array, $query_clause ); // will do append since the arrays of arrays are not keyed arrays 
+			$query_clause = '';
+			if ( ! $dup_check || $control->dup_check() ) { // all fields if not dupchecking, otw, only dup_check fields
+				$query_clause = $control->create_search_clause( $search_clause_args );
+				if ( is_array ( $query_clause ) ) { // not making array elements unless field returned a query clause
+					$meta_query_array = array_merge ( $meta_query_array, $query_clause ); // will do append since the arrays of arrays are not keyed arrays 
+				}
 			}
 		}	
 		return $meta_query_array;
@@ -213,7 +215,7 @@ abstract class WIC_Entity_Parent {
 	protected function form_save_update_generic ( $save, $fail_form, $success_form ) {
 		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
 		$this->populate_data_object_array_from_submitted_form();
-		$this->update_ready( $save ); // false, not a save
+		$this->update_ready( $save ); // false, not a save 
 		if ( false === $this->outcome ) {
 			$message = __( 'Not successful: ', 'wp-issues-crm' ) . $this->explanation;
 			$message_level = 'error';

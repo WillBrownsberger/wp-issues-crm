@@ -130,7 +130,9 @@ abstract class WIC_Control_Parent {
 
 	protected static function create_control ( $control_args ) { // basic create text control, accessed through control methodsabove
 
-		extract ( $control_args, EXTR_OVERWRITE );   
+		extract ( $control_args, EXTR_OVERWRITE );  
+		
+		$value = ( '0000-00-00' == $value ) ? '' : $value; // don't show date fields with non values; 
 
      	$class_name = 'WIC_Entity_' . $entity_slug;
 		$formatter = $field_slug . '_formatter';
@@ -199,7 +201,7 @@ abstract class WIC_Control_Parent {
 	*
 	*********************************************************************************/
 
-	public function validate() {
+	public function validate() { 
 		$validation_error = '';
 		$class_name = 'WIC_Entity_' . $this->field->entity_slug;
 		$validator = $this->field->field_slug . '_validator';
@@ -293,8 +295,8 @@ abstract class WIC_Control_Parent {
 		extract ( $search_clause_args, EXTR_OVERWRITE );
 		
 		if ( ! isset( $match_level ) || ! isset ( $dup_check ) ) {
-			var_dump( debug_backtrace () ); 		
-			die ( __( 'Missing parameters for WIC_Control_Parent::create_search_clause().', 'wp-issues-crm' ) );
+			die ( sprintf ( __( 'Missing parameters for WIC_Control_Parent::create_search_clause() for %1$s.', 'wp-issues-crm' ),
+				 $this->field->field_slug  ) );
 		}
 		
 		if ( '' == $this->value || 1 == $this->field->transient ) {

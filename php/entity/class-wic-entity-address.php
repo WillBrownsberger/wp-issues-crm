@@ -53,30 +53,30 @@ class WIC_Entity_Address extends WIC_Entity_Multivalue {
 		$uspsRequest->state = $this->data_object_array['state']->get_value();
 		$uspsRequest->zip = '';
  
-		$result = $uspsRequest->submit_request();
- 
-		if (!empty($result)){
-			$xml = new SimpleXMLElement($result);
-		} else {
-			die;
+		if ( $uspsRequest->address2 > '' && $uspsRequest->city > '' && $uspsRequest->state > '' ) {	
+		
+			$result = $uspsRequest->submit_request();
+ 		
+			if (!empty($result)){
+				$xml = new SimpleXMLElement($result);
+			// if(isset($xml->Address[0]->Error)) { echo ' Error Address 1';}
+				if( ! isset($xml->Address[0]->Error)) {
+					$first_space = strpos( $xml->Address[0]->Address2, ' ' );	
+					$this->data_object_array['street_name']->set_value( substr ( $xml->Address[0]->Address2, $first_space ) );
+					$this->data_object_array['city']->set_value( $xml->Address[0]->City );	
+					$this->data_object_array['zip']->set_value( $xml->Address[0]->Zip5 ); //  . '-' . $xml->Address[0]->Zip4 );		 		 
+					/*echo $xml->Address[0]->Address2 . ' ' . $xml->Address[0]->Address1 ;
+					echo '<br />';
+					echo $xml->Address[0]->City. ' ' . $xml->Address[0]->State  . ' ' . $xml->Address[0]->Zip5;
+					echo '<br />';*/
+				}
+			} else {
+				echo '<h4>' . __( 'Check settings -- non-fatal error: Empty return from USPS ZipCode Validator.', 'wp-issues-crm' )  . '</h4>';
+			}
 		}
- 
-		 
-		// if(isset($xml->Address[0]->Error)) { echo ' Error Address 1';}
-		if( ! isset($xml->Address[0]->Error)) {
-			$first_space = strpos( $xml->Address[0]->Address2, ' ' );	
-			$this->data_object_array['street_name']->set_value( substr ( $xml->Address[0]->Address2, $first_space ) );
-			$this->data_object_array['city']->set_value( $xml->Address[0]->City );	
-			$this->data_object_array['zip']->set_value( $xml->Address[0]->Zip5 ); //  . '-' . $xml->Address[0]->Zip4 );		 		 
-			/*echo $xml->Address[0]->Address2 . ' ' . $xml->Address[0]->Address1 ;
-			echo '<br />';
-			echo $xml->Address[0]->City. ' ' . $xml->Address[0]->State  . ' ' . $xml->Address[0]->Zip5;
-			echo '<br />';*/
-		}
-	
 	}
 
-	public function validate_values () {
+	public function validate_values () { 
 		$this->get_zip_from_usps();
 		return ( parent::validate_values() );
 	} 

@@ -10,7 +10,7 @@
 
 class WIC_DB_Access_WP Extends WIC_DB_Access {
 
-	private static $wic_metakey =  '_wic_issue_';
+	const WIC_METAKEY =  'wic_data_';
 
 	protected function db_save(  $data_array ) {
 		
@@ -122,7 +122,44 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 										// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results 
 		$this->explanation = ''; 
 
+		if ( 1 == $this->found_count ) { // let the list function do some wp database access directly 
+			$this->complete_wp_record( $this->result[0] );	
+		}
  	}
+
+	protected function complete_wp_record ( &$post_object ) {
+		$entity_fields = WIC_DB_Dictionary::get_field_list_with_wp_query_parameters( $this->entity ); 	
+		foreach ( $entity_fields as $entity_field => $wp_query_parameter ) {
+			if ( $wp_query_parameter > '' ) { // otherwise, field slugs in data dictionary should match wp field table names
+				if ( 'cat' == $wp_query_parameter ) {
+				 	$post_object->$entity_field = self::get_the_categories_ids ( $post_object->ID );
+				} elseif ( 'tag' == $wp_query_parameter ) {
+					$post_object->$entity_field = self::get_the_tags_list ( $post_object->ID ); 
+				}
+			} else {
+				$post_object->$entity_field = get_post_meta ( $post_object->ID, self::WIC_METAKEY . $entity_field, true );
+				// true is return string as opposed to array -- not planning any array values;
+			}		
+		}
+	}
+
+	private static function get_the_categories_ids ( $id ) {
+		$category_object_array = get_the_category ( $id );
+		$categories_ids = array();
+		foreach ( $category_object_array as $category_object ) {
+			$categories_ids[] = $category_object->term_id;		
+		}
+		return ( $categories_ids );
+	}
+
+	private static function get_the_tags_list ( $id ) {
+		$tag_object_array = get_the_tags ( $id );
+		$tags_list = '';		
+		foreach ( $tag_object_array as $tag_object ) {
+			$tags_list .= ( '' == $tags_list ) ? $tag_object->name : ', ' . $tag_object->name; 		
+		}
+		return ( $tags_list );
+	}
 
 	protected function db_update ($doa){
 	}
