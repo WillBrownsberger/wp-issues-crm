@@ -61,6 +61,7 @@ abstract class WIC_Entity_Parent {
 				$this->data_object_array[$field->field_slug]->set_value ( $_POST[$field->field_slug] );
 			}	
 		} 
+		var_dump ($_POST['post_category']);
 	}	
 
 	protected function populate_data_object_array_from_found_record( &$wic_query, $offset=0 ) {
@@ -96,16 +97,20 @@ abstract class WIC_Entity_Parent {
 			$control->sanitize();
 		}
 	}
-
+	
+	// check for dups -- $save is true/false for save/update
 	protected function dup_check ( $save ) {
-		// check for dups -- $save is true/false for save/update 
+ 
 		$dup_check = false;
+		// first check whether any fields are set for dup checking
 		foreach ( $this->data_object_array as $field_slug => $control ) {
 			if	( $control->dup_check() ) {
-				$dup_check_array = true;
+				$dup_check = true;
 			}	
-		}	
-		if ( $dup_check_array ) {
+		}
+		
+		// if there are some dup check fields defined, proceed to do do dupcheck	
+		if ( $dup_check ) {
 			$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 			$search_parameters = array(
 				'select_mode' => 'id',
@@ -238,7 +243,8 @@ abstract class WIC_Entity_Parent {
 			$form->layout_form ( $this->data_object_array, $message, $message_level );
 		} else {
 			if ( $save ) {
-				$this->data_object_array['ID']->set_value( $wic_access_object->insert_id );		
+				$this->data_object_array['ID']->set_value( $wic_access_object->insert_id );
+				$this->special_entity_value_hook( $wic_access_object );		
 			}
 			$message = __( 'Successful.  You can update further. ', 'wp-issues-crm' );
 			$message_level = 'good_news';
@@ -314,5 +320,9 @@ abstract class WIC_Entity_Parent {
 		}						
 	}
 
+	protected function special_entity_value_hook ( &$wic_access_object ) {
+		// available to bring back values from save/update for entity if necessary
+		// not required.
+	}
 }
 

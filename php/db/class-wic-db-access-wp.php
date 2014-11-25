@@ -11,10 +11,11 @@
 class WIC_DB_Access_WP Extends WIC_DB_Access {
 
 	const WIC_METAKEY =  'wic_data_';
-
-	protected function db_save(  $data_array ) {
-		
-	}
+	
+	// results reporting fields
+	public $post_author;
+	public $post_date;
+	public $post_status;
 	
 	protected function db_search( $meta_query_array, $search_parameters ) {
 
@@ -154,59 +155,92 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 
 	private static function get_the_tags_list ( $id ) {
 		$tag_object_array = get_the_tags ( $id );
-		$tags_list = '';		
-		foreach ( $tag_object_array as $tag_object ) {
-			$tags_list .= ( '' == $tags_list ) ? $tag_object->name : ', ' . $tag_object->name; 		
+		$tags_list = '';	
+		if ( $tag_object_array ) {	
+			foreach ( $tag_object_array as $tag_object ) {
+				$tags_list .= ( '' == $tags_list ) ? $tag_object->name : ', ' . $tag_object->name; 		
+			}
 		}
 		return ( $tags_list );
 	}
 
-	protected function db_update ($doa){
+	protected function db_update ( &$save_update_array ) {
+		$this->process_save_update_array ( $save_update_array );
 	}
 
-	protected function db_delete_by_id ($id){
-	}
-	
-/*<?php
-	 	} elseif ( 'db_check' == $search_mode ) { 
-			$query_args = array (
-				'p' => $next_form_output['constituent_id'],
-				'post_type' => 'wic_constituent',			
-			);	 	
-	 	} 
-
- 		$wic_query = new WP_Query($query_args);
- 
- 		return $wic_query;
+	protected  function db_save ( &$save_update_array ) {
+		$this->process_save_update_array ( $save_update_array );
 	}
 
-*/	
-	
-			     	
-	protected  $wp_query_parameters = array(
-		'author' 	=> array ( 
-			'update_post_parameter'	=> 'post_author',
-			),
-		'cat' 	=> array ( 
-			'update_post_parameter'	=> 'post_category',
-			),
-		'date' 	=> array ( 
-			'update_post_parameter'	=> 'post_date',
-			),
-		's' 	=> array ( 
-			'update_post_parameter'	=> '',
-			),
-		'tag' 	=> array ( 
-			'update_post_parameter'	=> 'post_tags',
-			),
-		'post_status' 	=> array ( 
-			'update_post_parameter'	=> 'post_status',
-			),
-		'post_title' 	=> array ( 
-			'update_post_parameter'	=> 'post_title',
-			),			
-	);
-	
+	private function process_save_update_array ( &$save_update_array ) {
+		
+		$id = '';
+		$post_args = array();
+		$meta_args = array();		
+
+		foreach ( $save_update_array as $update_clause ) {
+
+			// break array into necessary id, post and meta segments
+			if ( 'ID' == $update_clause['key'] ) {
+				$id = $update_clause['value'];			
+			} elseif ( '' < $update_clause ['wp_query_parameter'] ) {
+				// fields are appropriately named to allow the following without qualification
+				// note, as a policy decision, the following fields are treated as always readonly and ignored on update:
+				// post_author, post_date, post_status -- these can be updated through the backend, but no good reason to update here
+				// ( on save, use wp defaults for post_author, post_date but set post_status = 'private')
+				$post_args[ $update_clause['key'] ] = $update_clause['value'];				
+			} else {
+				$meta_args[] = $update_clause;			
+			} 	
+		}
+		
+		if ( $id > 0 ) {
+			$post_args['ID'] = $id;
+			$check_id = wp_update_post ( $post_args );
+		} else {
+			$post_args['post_status'] = 'private';
+			$check_id = wp_insert_post ( $post_args );
+			// set values from save that are not in form -- picked up in entity class
+			$this->insert_id = $check_id;
+			$current_user = wp_get_current_user();
+			$this->post_author = $current_user->ID;
+			$this->post_date = now();
+			$this->post_status = 'private';
+		}
+		if ( 0 == $check_id ) {
+			$this->outcome = false;
+			$this->explanation =  __( 'Unknown error. Could not save/update record.  
+				Do new search on same record to check for possible partial results.', 'wp-issues-crm' );
+		} else {
+			$this->outcome = true;
+			// proceed to update meta values -- convention is blank value represented by absence of meta record
+			$result = true; // start with true so that this is the result in no action case;
+			foreach ( $meta_args as $meta_arg ) {
+				$meta_key = self::WIC_METAKEY . $meta_arg['key'];
+				if ( '' < $id ) { // update post, possible previous meta_values
+					$test_meta = get_post_meta ( $check_id, $meta_key, true ); // true says get single string value
+				} else {
+					$test_meta = ''; // note that get_post_meta with true set returns empty string on absence of record				
+				}
+				if ( '' < $test_meta && '' < $meta_arg['value'] && $test_meta != $meta_arg['value'] )  { // changed meta value
+					$result = update_post_meta ( $check_id, $meta_key, $meta_arg['value'] ); // false means failure, since know value changed
+				} elseif ( '' == $test_meta && '' < $meta_arg['value'] ) {// new meta value	
+					$result = add_post_meta ( $check_id, $meta_key, $meta_arg['value'] );
+				} elseif ( '' < $test_meta  && '' == $meta_arg['value'] ) { // deleted meta value
+					$result = delete_post_meta ( $check_id, $meta_key );
+				} // note no action on empty/empty case
+			}
+			if ( false == $result ) {
+				$this->outcome = false;
+				$this->explanation = __( 'Unknown error. Could not save metadata (details) for record.  
+					Do new search on same record to check for possible partial results.', 'wp-issues-crm' );
+			}
+		}
+	}
+
+	protected function db_delete_by_id ($id){ // not implemented for posts -- use the WP backend
+	}
+
 }
 
 

@@ -49,6 +49,13 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return;
 	}
 	
+	protected function special_entity_value_hook ( &$wic_access_object ) {
+		$this->data_object_array['post_author']->set_value( $wic_access_object->post_author );
+		$this->data_object_array['post_date']->set_value( $wic_access_object->post_date );
+		$this->data_object_array['post_status']->set_value( $wic_access_object->post_status );		
+	}	
+	
+	
 	/***************************************************************************
 	*
 	* Constituent properties, setters and getters
@@ -94,7 +101,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	*	option array get functions
 	*/
 
-	public static function get_categories_options() {
+	public static function get_post_category_options() {
 		global $wic_category_select_array;
 		global $wic_category_array_depth;
 		$wic_category_select_array = array();

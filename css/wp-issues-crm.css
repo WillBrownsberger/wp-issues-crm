@@ -679,10 +679,10 @@ ul.wic-post-list-line {
 .pl-activity-activity_issue_id{ width:61%;}
 .pl-activity-activity_pro_con{ width:10%;}
 .pl-issue-issue_staff{ width:15%;}
-.pl-issue-comments_status{ width:8%;}
+.pl-issue-wic_live_issue{ width:8%;}
 .pl-issue-follow_up_status{ width:10%;}
 .pl-issue-post_title{ width:40%;}
-.pl-issue-categories{ width:17%;}
+.pl-issue-post_category{ width:17%;}
 .pl-issue-post_status{ width:8%;}
 .wic-dashboard-header {
 	color: #777;

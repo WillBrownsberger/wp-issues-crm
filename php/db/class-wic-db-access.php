@@ -2,13 +2,7 @@
 /*
 *
 * class-wic-db-access.php
-*		intended as wraparound for wpdb 
-*
-* supports multiple formats for data access to be further implemented in subclasses
-*		WIC_Dedicated_Table_Access
-*		WIC_WP_Post_Access
-*
-* note, that as for wpdb and other wordpress object, this object includes all necessary pre-database sanitization and validation
+*		intended as wraparound for direct db access objects (implemented as extensions to this.) 
 *
 * 
 */
@@ -24,7 +18,6 @@ abstract class WIC_DB_Access {
 	public $explanation; // reason for outcome
 	public $found_count; // integer save/update/search # records found or acted on
 	public $insert_id;	// ID of newly saved entity
-
 
 	public function __construct ( $entity ) { 
 		$this->entity = $entity;
@@ -51,7 +44,7 @@ abstract class WIC_DB_Access {
 	// updates are handled for particular entities (and this object serves a particular entity)
 	// by contrast, the search array assembly is handled at the entity level because it needs to be able to report up to
 	// a multivalue control and contribute to a join across multiple entities in addition the primary object entity  
-	public function save_update ( $doa ) { // 
+	public function save_update ( &$doa ) { // 
 		$save_update_array = $this->assemble_save_update_array( $doa );
 		if ( count ( $save_update_array ) > 0 ) {
 			if ( $doa['ID']->get_value() > 0 ) {
@@ -85,6 +78,7 @@ abstract class WIC_DB_Access {
 		return;	
 	}
 
+
 	public function list_by_id ( $id_string ) {
 		$this->db_list_by_id ( $id_string ); 
 	}
@@ -108,8 +102,8 @@ abstract class WIC_DB_Access {
 	}
 
 	abstract protected function db_search ( $meta_query_array, $search_parameters );
-	abstract protected function db_save ( $meta_query_array );
-	abstract protected function db_update ( $meta_query_array );
+	abstract protected function db_save ( &$meta_query_array );
+	abstract protected function db_update ( &$meta_query_array );
 	abstract protected function db_delete_by_id ( $id );
 	
 }

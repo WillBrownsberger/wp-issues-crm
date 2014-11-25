@@ -8,7 +8,7 @@
 
 class WIC_DB_Access_WIC Extends WIC_DB_Access {
 
-	protected function db_save ( $save_update_array ) {
+	protected function db_save ( &$save_update_array ) {
 		global $wpdb;
 		$table  = $wpdb->prefix . 'wic_' . $this->entity;  
 		
@@ -32,7 +32,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		return;
 	}
 	
-	protected function db_update ( $save_update_array ) {
+	protected function db_update ( &$save_update_array ) {
 		global $wpdb;
 		$table  = $wpdb->prefix . 'wic_' . $this->entity;  
 		
