@@ -231,7 +231,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return self::post_status_formatter ( $value );	
 	}
 	
-	public static function tags_sanitizor ( $value ) {
+	public static function tags_input_sanitizor ( $value ) {
 		return wic_sanitize_textcsv( $value );	
 	}	
 }

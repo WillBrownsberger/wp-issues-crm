@@ -31,7 +31,7 @@ protected function format_rows( &$wic_query, &$fields ) {
 						if ( method_exists ( $class_name, $formatter ) ) { 
 							// note:  formatter MUST include esc_html on value unless known sanitized field like phone
 							$display_value = $class_name::$formatter (  $row_array->{$field->field_slug} );
-						} elseif ( 'categories' == $field->field_slug ) {
+						} elseif ( 'post_category' == $field->field_slug ) {
 							$display_value =  esc_html( $class_name::get_post_categories( $row_array->ID ) );		
 						} else {
 							$display_value =  esc_html( $row_array->{$field->field_slug} );		

@@ -73,11 +73,10 @@ Class WIC_Entity_Issue_Open_Metabox {
 	   }
 	
 	   if ( isset($_POST['wic_live_issue_metabox_noncename']) && 
-	   		wp_verify_nonce($_POST['wic_live_issue_metabox_noncename'], site_url(__FILE__)) && check_admin_referer(site_url(__FILE__), 'wic_live_issue_metabox_noncename'))   
-	   		{
-	           update_post_meta($post_id, 'wic_data_wic_live_issue', $_POST['wic_data_wic_live_issue'] );
-			   }
-	   
+   		wp_verify_nonce($_POST['wic_live_issue_metabox_noncename'], site_url(__FILE__)) && check_admin_referer(site_url(__FILE__), 'wic_live_issue_metabox_noncename')) {
+           	update_post_meta($post_id, 'wic_data_wic_live_issue', $_POST['wic_data_wic_live_issue'] );
+		   }
+   
 	   return;
 	}
 

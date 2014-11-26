@@ -48,27 +48,24 @@ class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 //	}	
 	
 	public static function get_issue_options() {
-	/*	
-		global $wic_database_utilities;		
-				
-		$wic_issues_query = $wic_database_utilities->get_open_issues();
+		
+		$open_posts = WIC_DB_Access_WP::get_wic_live_issues();
 
 		$issues_array = array();
-		
-		if ( $wic_issues_query->have_posts() ) {		
-			while ( $wic_issues_query->have_posts() ) {
-				$wic_issues_query->the_post();
+			
+		if ( $open_posts->have_posts() ) {		
+			while ( $open_posts->have_posts() ) {
+				$open_posts->the_post();
 				$issues_array[] = array(
-					'value'	=> $wic_issues_query->post->ID,
-					'label'	=>	$wic_issues_query->post->post_title,
+					'value'	=> $open_posts->post->ID,
+					'label'	=>	$open_posts->post->post_title,
 				);
 			}
 		}
 		
 		wp_reset_postdata();
 		return $issues_array;
-	*/
-		return self::$activity_type_options; 
+
 	}
 
 	private static $pro_con_options = array ( 

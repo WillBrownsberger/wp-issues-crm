@@ -58,10 +58,9 @@ abstract class WIC_Entity_Parent {
 			$this->data_object_array[$field->field_slug] = WIC_Control_Factory::make_a_control( $field->field_type );
 			$this->data_object_array[$field->field_slug]->initialize_default_values(  $this->entity, $field->field_slug, $this->entity_instance  );
 			if ( isset ( $_POST[$field->field_slug] ) ) {		
-				$this->data_object_array[$field->field_slug]->set_value ( $_POST[$field->field_slug] );
+				$this->data_object_array[$field->field_slug]->set_value( $_POST[$field->field_slug] );
 			}	
 		} 
-		var_dump ($_POST['post_category']);
 	}	
 
 	protected function populate_data_object_array_from_found_record( &$wic_query, $offset=0 ) {

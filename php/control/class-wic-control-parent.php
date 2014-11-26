@@ -64,7 +64,6 @@ abstract class WIC_Control_Parent {
 		$this->value = $value;	
 	}
 	
-		
 	public function get_value () {
 		return $this->value;	
 	}

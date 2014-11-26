@@ -68,11 +68,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 					$query_args['s'] = $search_clause['value'];
 					break;
 				case 'cat':
-					$cats = array();
-					foreach ( $search_clause['value'] as $cat => $value ) {
-						$cats[] = $cat;				
-					}
-					$query_args['category__in'] = $cats;
+					$query_args['category__in'] = self::reformat_cat_array_form_to_db ( $search_clause['value'] );  
 					break;
 				case 'date':
 					$date_array = array();
@@ -144,11 +140,23 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		}
 	}
 
+	// converts array in screen form -- array( $value1=>1, $value2=>2 ) 
+	// to array in db form ($value1, $value2)
+	private static function reformat_cat_array_form_to_db ( $form_array_of_cats ) {
+		$cats = array();		
+		foreach ( $form_array_of_cats as $cat => $value ) {
+			$cats[] = $cat;				
+		}
+		return ( $cats ); 
+	}
+
+
 	private static function get_the_categories_ids ( $id ) {
 		$category_object_array = get_the_category ( $id );
 		$categories_ids = array();
 		foreach ( $category_object_array as $category_object ) {
-			$categories_ids[] = $category_object->term_id;		
+		//	$categories_ids[] = $category_object->term_id;		
+		$categories_ids[$category_object->term_id] = 1;
 		}
 		return ( $categories_ids );
 	}
@@ -188,7 +196,13 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 				// note, as a policy decision, the following fields are treated as always readonly and ignored on update:
 				// post_author, post_date, post_status -- these can be updated through the backend, but no good reason to update here
 				// ( on save, use wp defaults for post_author, post_date but set post_status = 'private')
-				$post_args[ $update_clause['key'] ] = $update_clause['value'];				
+				if ( 'post_category' == $update_clause['key'] ) {
+					$cat_array = self::reformat_cat_array_form_to_db ( $update_clause['value'] );
+					$cat_array = ( 0 == count ( $cat_array ) ) ? array ( 1 ) : $cat_array; // always save at least 1 cat ( cat 1 ) 
+					$post_args[ $update_clause['key'] ] = $cat_array; 				
+				} else {				
+					$post_args[ $update_clause['key'] ] = $update_clause['value'];
+				}				
 			} else {
 				$meta_args[] = $update_clause;			
 			} 	
@@ -204,7 +218,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 			$this->insert_id = $check_id;
 			$current_user = wp_get_current_user();
 			$this->post_author = $current_user->ID;
-			$this->post_date = now();
+			$this->post_date = current_time ('timestamp' ); // date('Y-m-d H:i:s') ;
 			$this->post_status = 'private';
 		}
 		if ( 0 == $check_id ) {
@@ -239,6 +253,29 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 	}
 
 	protected function db_delete_by_id ($id){ // not implemented for posts -- use the WP backend
+	}
+
+	public static function get_wic_live_issues () {
+		
+		$meta_query_args = array(
+			'relation' => 'AND',
+			array(
+				'meta_key' => self::WIC_METAKEY . 'wic_live_issue',
+				'value' => 'open',
+				'compare' => '=',
+			)
+		);
+		$list_query_args = array (
+			'ignore_sticky_posts'	=> true,
+			'post_type'	=>	'post',
+			'posts_per_page' => 100,
+			'meta_query' => $meta_query_args,
+			'order'	=> 'DESC',
+		);
+
+		$open_posts = new WP_Query ( $list_query_args );
+		
+		return ( $open_posts ); 
 	}
 
 }

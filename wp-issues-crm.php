@@ -156,8 +156,7 @@ function wic_value_label_lookup ( $value, $options_array ) {
 	*/
 	function wic_sanitize_textcsv ( $textcsv ) {
 		
-		$temp_tags = str_replace ( ',', ' ', $textcsv )	;	
-		$temp_tags = explode ( ' ', $textcsv );
+		$temp_tags = explode ( ',', $textcsv );
 		
 		$temp_tags2 = array();
 		foreach ( $temp_tags as $tag ) {
@@ -165,7 +164,7 @@ function wic_value_label_lookup ( $value, $options_array ) {
 				$temp_tags2[] = sanitize_text_field ( stripslashes ( $tag ) );
 			}			
 		}
-		$output_textcsv = implode ( ',', $temp_tags2 ); 		
+		$output_textcsv = implode ( ',', $temp_tags2 );
 		return ( $output_textcsv );
 	}	
 	
