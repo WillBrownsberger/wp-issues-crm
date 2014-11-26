@@ -43,4 +43,7 @@ class WIC_Entity_Email extends WIC_Entity_Multivalue {
 		return $error;	
 	}	
 
+	public function get_email_address() {
+		return ( $this->data_object_array['email_address']->get_value() );	
+	}
 }

@@ -35,7 +35,6 @@ class WIC_Control_Select extends WIC_Control_Parent {
 		$final_control_args = $this->default_control_args;
 		if( ! $final_control_args['readonly'] ) {
 			$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
-			$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );
 	    	$class_name = 'WIC_Entity_' . $this->field->entity_slug;
 			$set_default = $this->field->field_slug . '_set_default';
 			if ( method_exists ( $class_name, $set_default ) ) { 
@@ -43,6 +42,7 @@ class WIC_Control_Select extends WIC_Control_Parent {
 			} else {
 				$final_control_args['value'] = $this->value;
 			}
+			$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );
 			return  ( static::create_control( $final_control_args ) );	
 		}
 	}	
@@ -50,7 +50,7 @@ class WIC_Control_Select extends WIC_Control_Parent {
 	protected function create_options_array ( $control_args ) {
 
 		extract ( $control_args, EXTR_SKIP );
-
+		
 		$entity_class = 'WIC_Entity_' . $this->field->entity_slug;		
 		if ( ! isset ( $readonly_update ) ) { // the usual mode -- show drop down		
 			$not_selected_option = array (
@@ -58,7 +58,7 @@ class WIC_Control_Select extends WIC_Control_Parent {
 				'label'	=> $placeholder,
 			);  
 			$getter = 'get_' . $this->field->field_slug . '_options';
-			$option_array =  $entity_class::$getter();
+			$option_array =  $entity_class::$getter( $value ); // include the value parameter to allow the getter to add the value to the array if needed
 			if ( '' == $required && 0 == $blank_prohibited ) { // difference is that required is not a required setting on search, but blank_prohibited is 
 				array_push( $option_array, $not_selected_option );
 			}

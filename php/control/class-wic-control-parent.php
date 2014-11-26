@@ -24,7 +24,7 @@
 abstract class WIC_Control_Parent {
 	protected $field;
 	protected $default_control_args = array();
-	protected $value;	
+	protected $value = '';	
 
 
 	/***

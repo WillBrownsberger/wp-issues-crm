@@ -70,4 +70,11 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 		return ( ! ( 1 == $group->search_only ) );	
 	}
 	
+	protected function group_special ( $group ) {
+		return ( 'comment' == $group );	
+	}
+	
+	protected function group_special_comment ( &$doa ) {
+		echo WIC_Entity_Comment::create_comment_list ( $doa );					
+	}
 }

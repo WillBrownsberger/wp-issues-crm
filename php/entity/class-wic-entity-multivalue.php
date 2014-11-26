@@ -71,16 +71,4 @@ abstract class WIC_Entity_Multivalue extends WIC_Entity_Parent {
 		}		
 		return ( $error );
 	}
-
-/*	public function get_display_value() {
-		$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $this->entity );
-		$display_value = '';
-		foreach ( $fields as $field ) {
-			if ( $field->field_slug != 'ID' ) {
-				$display_value .= ( '' == $display_value ) ? '' : ', ';
-				$display_value .= $this->data_object_array[$field->field_slug]->get_display_value();
-			}
-		}	
-		return $display_value;	
-	} */
 }

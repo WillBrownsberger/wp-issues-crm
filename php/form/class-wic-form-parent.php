@@ -70,13 +70,20 @@ abstract class WIC_Form_Parent  {
 						$show_class = $group->initial_open ? 'visible-template' : 'hidden-template';
 						echo '<div class="' . $show_class . '" id = "wic-inner-field-group-' . esc_attr( $group->group_slug ) . '">' .					
 						'<p class = "wic-form-field-group-legend">' . esc_html ( $group->group_legend )  . '</p>';
-	
-						$group_fields =  WIC_DB_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
-						$this->the_controls ( $group_fields, $data_array );
+						
+						// here is the main content -- either   . . .
+						if ( $this->group_special ( $group->group_slug ) ) { // a hook to run a special group OR . . . 
+							$special_function = 'group_special_' . $group->group_slug;
+							$this->$special_function( $data_array );
+						} else {	// standard main form logic 	
+							$group_fields =  WIC_DB_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
+							$this->the_controls ( $group_fields, $data_array );
+						}
 							
 					echo '</div></div>';	
 					
-				}	   
+				} 
+  
 		   } // close foreach group
 		
 			$this->pre_button_messaging( $data_array );		
@@ -100,7 +107,7 @@ abstract class WIC_Form_Parent  {
 	}
 
 	protected function the_controls ( $fields, &$data_array ) {
-		foreach ( $fields as $field ) { 
+		foreach ( $fields as $field ) {
 			echo '<div class = "wic-control" id = "wic-control-' . str_replace( '_', '-' , $field ) . '">' . $this->get_the_formatted_control ( $data_array[$field] ) . '</div>';
 		}	
 
@@ -119,6 +126,10 @@ abstract class WIC_Form_Parent  {
 	
 	protected function group_screen( $group ) { // allows child forms to screen out groups
 		return ( true );	
+	}
+
+	protected function group_special( $group ) { // allows child forms to add special groups
+		return ( false );	
 	}
 
 	/*

@@ -17,7 +17,6 @@ class WIC_List_Parent {
 		
   public function format_entity_list( &$wic_query, $show_top_buttons ) {
 
-
 		// set up args for use in buttons -- each row is a button
   		$list_button_args = array(
 			'entity_requested'		=> $wic_query->entity,

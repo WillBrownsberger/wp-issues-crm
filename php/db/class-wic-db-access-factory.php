@@ -23,6 +23,7 @@ class WIC_DB_Access_Factory {
 		'address'	=> 'WIC_DB_Access_WIC',
 		'email'	=> 'WIC_DB_Access_WIC',
 		'issue' => 'WIC_DB_Access_WP',
+		'comment' => 'WIC_DB_Access_WIC',
 	);
 
 	public static function make_a_db_access_object ( $entity ) {

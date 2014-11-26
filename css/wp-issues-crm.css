@@ -657,6 +657,24 @@ button.wic-post-list-button
 	width: 100%;
 }
 
+li.constituent-comment-date,
+li.constituent-comment-issue {
+	display: inline-block;
+	color: #555;
+}
+
+li.constituent-comment-date {
+	margin-right: 4px; 
+}
+
+ul.constituent-comment-row,
+ul#constituent-comment-list {
+	list-style: none;
+}
+#constituent-comment-list {
+	margin-left: 120px; 
+}
+
 ul.wic-post-list-line {
  	
 	display: inline-block;

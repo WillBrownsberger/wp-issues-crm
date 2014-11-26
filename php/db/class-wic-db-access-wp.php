@@ -29,6 +29,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		// extract ( $search_parameters, EXTR_OVERWRITE ); set as blank and don't want to overwrite with this, so // for now.
 		
 		$allowed_statuses = array(
+			'draft',
 			'publish',
 			'private',
 		);		
@@ -43,8 +44,9 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 	     		'relation'=> 'AND',
 	   );
 	   
+	   
 	   foreach ( $meta_query_array as $search_clause ) {
-			switch ( $search_clause['wp_query_parameter'] ) {
+	   	switch ( $search_clause['wp_query_parameter'] ) {
 				case 'p':
 					$query_args = array (
 						'p' => $search_clause['value'],					
@@ -52,7 +54,8 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 					break( 2 ); // exit switch and foreach with just the ID search array
 									// supports call from ID search
 				case '':
-					$meta_query_array[] = $search_clause;
+					$search_clause['key'] = self::WIC_METAKEY . $search_clause['key'];
+					$meta_query_args[] = $search_clause;
 					break;
 				case 'author':
 				case 'tag' :
@@ -100,11 +103,11 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 					break;
 			}	// end switch   
 	   } // end foreach  	
-		
+
 		if ( count ( $meta_query_args ) > 1 && ! isset ( $query_args['p'] ) ) { // if have ID, go only for that
 			$query_args['meta_query'] 	= $meta_query_args;
 		}
-	
+
 		$wp_query = new WP_Query($query_args);
 
 		$this->sql = ' ' . __(' ( serialized WP_Query->query output ) ', 'wp-issues-crm' ) . serialize ( $wp_query->query );
@@ -260,7 +263,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		$meta_query_args = array(
 			'relation' => 'AND',
 			array(
-				'meta_key' => self::WIC_METAKEY . 'wic_live_issue',
+				'key' => self::WIC_METAKEY . 'wic_live_issue',
 				'value' => 'open',
 				'compare' => '=',
 			)

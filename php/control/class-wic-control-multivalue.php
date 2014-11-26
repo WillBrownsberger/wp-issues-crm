@@ -225,7 +225,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 				 ' ' . esc_attr( $field_slug_css ) . '" for="' . esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
 		// create division opening tag 		
 		$control_set .= '<div id = "' . $this->field->field_slug . '-control-set' . '" class = "wic-multivalue-control-set">';
-
+		$control_set .= $this->create_add_button ( $this->field->field_slug, sprintf ( __( 'Add %s ', 'wp-issues-crm' ), $this->field->field_label ) . ' ' . $field_label_suffix ) ;
 		// create a hidden template row for adding rows in wic-utilities.js through moreFields() 
 		// moreFields will replace the string 'row-template' with row-counter index value after creating the new row
 		
@@ -240,6 +240,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 
 		// now proceed to add rows for any existing records from database or previous form
 		// this looks like it could be wrong if there were a difference between save and update -- i.e., had readonly fields in subrow
+		// each row in $this->value is an entity object
 		if ( count ( $this->value ) > 0 ) {
 			foreach ( $this->value as $value_row ) {
 				$control_set .= $value_row->$form_to_call();
@@ -247,7 +248,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		}		
 
 		$control_set .= '<div class = "hidden-template" id = "' . $this->field->field_slug . '-row-counter">' . count( $this->value ) . '</div>';		
-		$control_set .= $this->create_add_button ( $this->field->field_slug, sprintf ( __( 'Add %s ', 'wp-issues-crm' ), $this->field->field_label ) . ' ' . $field_label_suffix ) ;
+
 		$control_set .= '</div>';
 
 		return ($control_set);	

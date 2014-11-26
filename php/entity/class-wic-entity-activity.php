@@ -9,6 +9,13 @@
 
 class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 
+	public function update_row() {
+		$new_update_row_object = new WIC_Form_Activity_Update ( $this->entity, $this->entity_instance );
+		$new_update_row = $new_update_row_object->layout_form( $this->data_object_array, null, null );
+		return $new_update_row;
+	}
+
+
 
 	protected function set_entity_parms( $args ) {
 		extract ( $args );
@@ -47,12 +54,13 @@ class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 //		return ( date ( 'Y-m-d' ) );
 //	}	
 	
-	public static function get_issue_options() {
+	public static function get_issue_options( $value ) {
 		
 		$open_posts = WIC_DB_Access_WP::get_wic_live_issues();
 
 		$issues_array = array();
-			
+
+		$value_in_option_list = false;			
 		if ( $open_posts->have_posts() ) {		
 			while ( $open_posts->have_posts() ) {
 				$open_posts->the_post();
@@ -60,13 +68,24 @@ class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 					'value'	=> $open_posts->post->ID,
 					'label'	=>	$open_posts->post->post_title,
 				);
+				if ( $value == $open_posts->post->ID ) {
+					$value_in_option_list = true;
+				}
 			}
 		}
+		
+		if ( ! $value_in_option_list ) {
+			$issues_array[] = array (
+				'value'	=> $value,			
+				'label'	=> get_the_title( $value ),
+			);
+		}		
 		
 		wp_reset_postdata();
 		return $issues_array;
 
 	}
+
 
 	private static $pro_con_options = array ( 
 		array(
