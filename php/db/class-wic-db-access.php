@@ -29,8 +29,6 @@ abstract class WIC_DB_Access {
 	*
 	*/
 
-	
-
 	public function search ( $meta_query_array, $search_parameters ) { // receives pre-assembled meta_query_array
 		$this->db_search( $meta_query_array, $search_parameters );
 		return;

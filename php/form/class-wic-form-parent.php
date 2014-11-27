@@ -96,6 +96,7 @@ abstract class WIC_Form_Parent  {
 				<?php echo $this->get_the_legends( $sql ); ?>
 			</div>								
 		</form>
+			<?php $this->post_form_hook( $data_array ); ?>
 		</div>
 		
 		<?php 
@@ -116,6 +117,11 @@ abstract class WIC_Form_Parent  {
 	protected function pre_button_messaging ( &$data_array ) {
 		// just a hook	
 	}
+
+	protected function post_form_hook ( &$data_array ) {
+		// just a hook	
+	}
+
 
 	protected function emit_debugging_information() {
 		echo '<span style="color:green;"> <br /> $_POST:';  		
