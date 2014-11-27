@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 23, 2014 at 08:31 PM
+-- Generation Time: Nov 26, 2014 at 09:38 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   PRIMARY KEY (`field_id`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=76 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=81 ;
 
 --
 -- Dumping data for table `wp_wic_data_dictionary`
@@ -123,8 +123,8 @@ INSERT INTO `wp_wic_data_dictionary` (`field_id`, `entity_slug`, `group_slug`, `
 (62, 'constituent', 'contact', 'mark_deleted', 'text', 0, 'Mark Deleted', 999, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', 'DELETED', 0, 0),
 (63, 'constituent', 'search_parms', 'show_deleted', 'checked', 0, 'Include Deleted', 50, 0, 0, '', 0, 0, 0, '', 0, 1, '', 'wic-input', 'wic-label', '', 0, 0),
 (64, 'issue', 'issue_content', 'post_content', 'textarea', 0, 'Issue Content', 20, 0, 0, '', 0, 0, 0, '', 0, 0, 'post_content', 'wic-input', 'wic-label', ' . . . issue content . . .', 0, 1),
-(65, 'issue', 'issue_classification', 'tags', 'text', 0, 'Tags', 10, 0, 0, '', 0, 0, 0, '', 0, 0, 'tag', 'wic-input', 'wic-label', '', 0, 0),
-(66, 'issue', 'issue_classification', 'categories', 'multiselect', 0, 'Categories', 20, 50, 0, 'individual', 0, 0, 0, '', 0, 0, 'cat', 'wic-input', 'wic-label', '', 0, 0),
+(65, 'issue', 'issue_classification', 'tags_input', 'text', 0, 'Tags', 10, 0, 0, '', 0, 0, 0, '', 0, 0, 'tag', 'wic-input', 'wic-label', '', 0, 0),
+(66, 'issue', 'issue_classification', 'post_category', 'multiselect', 0, 'Categories', 20, 50, 0, 'individual', 0, 0, 0, '', 0, 0, 'cat', 'wic-input', 'wic-label', '', 0, 0),
 (67, 'issue', 'issue_content', 'post_title', 'text', 0, 'Issue Title', 10, 40, 0, 'individual', 0, 0, 0, '', 0, 0, 'post_title', 'wic-input', 'wic-label', '', 0, 0),
 (68, 'issue', 'issue_management', 'issue_staff', 'select', 0, 'Staff', 10, 10, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
 (69, 'issue', 'issue_management', 'wic_live_issue', 'select', 0, 'Activities', 20, 20, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_form_field_groups` (
   `initial_open` tinyint(1) NOT NULL,
   `search_only` tinyint(1) NOT NULL,
   PRIMARY KEY (`group_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=22 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=24 ;
 
 --
 -- Dumping data for table `wp_wic_form_field_groups`
@@ -173,7 +173,9 @@ INSERT INTO `wp_wic_form_field_groups` (`group_id`, `entity_slug`, `group_slug`,
 (18, 'issue', 'issue_content', 'Issue Content', '', 10, 1, 0),
 (19, 'issue', 'issue_classification', 'Classification', '', 20, 0, 0),
 (20, 'issue', 'issue_management', 'Issue Management', '', 30, 0, 0),
-(21, 'issue', 'issue_creation', 'Issue Creation', 'These fields are not updateable except through the regular Wordpress admin screens.', 40, 0, 0);
+(21, 'issue', 'issue_creation', 'Issue Creation', 'These fields are not updateable except through the regular Wordpress admin screens.', 40, 0, 0),
+(22, 'constituent', 'comment', 'Online Comments', 'Note: If the online user''s email is not in WP-Issues-CRM, the online activity will not be shown here.  Online activity shown here can only be altered through the WP backend.  ', 20, 0, 0),
+(23, 'comment', 'comment', 'Online Comments', '', 10, 0, 0);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
