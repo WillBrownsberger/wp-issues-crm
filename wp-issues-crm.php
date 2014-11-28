@@ -96,6 +96,15 @@ function wic_utilities_script_setup() {
 add_action('wp_enqueue_scripts', 'wic_utilities_script_setup');
 
 
+add_action( 'template_redirect', 'do_download' );
+
+function do_download () {
+	
+	if ( isset( $_POST['post-export-button'] ) ) {
+		WIC_List_Constituent_Export::do_constituent_download( $_POST['post-export-button'] );	
+	}
+}
+
 function wic_generate_call_trace()
 { // from http://php.net/manual/en/function.debug-backtrace.php
     $e = new Exception();
@@ -151,23 +160,24 @@ function wic_value_label_lookup ( $value, $options_array ) {
 }
 
 
-	/*
-	* convert dirty string with various possible white spaces and commas into clean compressed comma separated	
-	*/
-	function wic_sanitize_textcsv ( $textcsv ) {
-		
-		$temp_tags = explode ( ',', $textcsv );
-		
-		$temp_tags2 = array();
-		foreach ( $temp_tags as $tag ) {
-			if ( sanitize_text_field ( stripslashes ( $tag ) ) > '' ) {
-				$temp_tags2[] = sanitize_text_field ( stripslashes ( $tag ) );
-			}			
-		}
-		$output_textcsv = implode ( ',', $temp_tags2 );
-		return ( $output_textcsv );
-	}	
+
+/*
+* convert dirty string with various possible white spaces and commas into clean compressed comma separated	
+*/
+function wic_sanitize_textcsv ( $textcsv ) {
 	
+	$temp_tags = explode ( ',', $textcsv );
+	
+	$temp_tags2 = array();
+	foreach ( $temp_tags as $tag ) {
+		if ( sanitize_text_field ( stripslashes ( $tag ) ) > '' ) {
+			$temp_tags2[] = sanitize_text_field ( stripslashes ( $tag ) );
+		}			
+	}
+	$output_textcsv = implode ( ',', $temp_tags2 );
+	return ( $output_textcsv );
+}	
+
 
 class WP_Issues_CRM {
 
@@ -182,7 +192,6 @@ class WP_Issues_CRM {
 			return;
 		} 
 
-		// here declare as global all the  classes that implement forms
 
 		$control_array = array(
 			'form_requested'			=> '',
@@ -192,6 +201,7 @@ class WP_Issues_CRM {
 
 		// use default control array to set up top row of buttons that always shows over dashboard and over main form 
 		echo '<form id = "top-level-form" method="POST" autocomplete = "on">';
+		wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); 
 		
 		$button_value = implode( ',' , $control_array );
 		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'Dashboard', 'wp-issues-crm' ) . '</button>';
@@ -214,6 +224,14 @@ class WP_Issues_CRM {
 		*   to an class entity class with an action request and arguments.
 		*/
 		if ( isset ( $_POST['wic_form_button'] ) ) {
+			// check nonces			
+			
+			if ( isset($_POST['wp_issues_crm_post_form_nonce_field']) &&
+				wp_verify_nonce($_POST['wp_issues_crm_post_form_nonce_field'], 'wp_issues_crm_post' ) && 
+				check_admin_referer( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field')) 
+				{ } else { die ('cheating, huh?'); }
+			
+			//
 			 $control_array = explode( ',', $_POST['wic_form_button'] ); 
 			if ( '' == $control_array[0] ) {
 				$this->show_dashboard();		

@@ -233,9 +233,8 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 			$simple_combined_array_of_ids[] = $id->constituent_id;		
 		}				
 		
-						
 		$unique_ids = array_unique ( $simple_combined_array_of_ids );
-			
+
 		foreach ( $unique_ids as $id ) {
 			$this->result[] = new WIC_Constituent_ID_Item ( $id );		
 		}

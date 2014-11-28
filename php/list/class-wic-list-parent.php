@@ -38,9 +38,9 @@ class WIC_List_Parent {
 		}
 
 		if ( $show_top_buttons ) {	
-			$output .=	'<h2>' . $header_message  . '</h2>' . 
+				$output .=	'<h2>' . $header_message  . '</h2>' . 
 				'<button id = "form-toggle-button-on-list" type="button" onclick = "history.go(-1);return true;">' . __( 'Revise Search', 'wp-issues-crm' ) . '</button>' .
-				'<button id = "post-export-button" class = "wic-form-button" type="button" >' . __( 'Export (not built yet)', 'wp-issues-crm' ) . '</button>' .
+				'<button id = "post-export-button" name = "post-export-button" class = "wic-form-button" type="submit" value = "' . $wic_query->search_id  .'" >' . __( 'Export All ', 'wp-issues-crm' ) . '</button>' .
 				'</div>';
 		}
 		// prepare the list fields for header set up and list formatting

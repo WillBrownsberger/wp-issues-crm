@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 26, 2014 at 09:37 PM
+-- Generation Time: Nov 28, 2014 at 03:54 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -97,13 +97,6 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   `case_assigned` int(10) unsigned NOT NULL,
   `case_review_date` date NOT NULL,
   `case_status` varchar(1) NOT NULL,
-  `street_number` varchar(7) NOT NULL,
-  `street_suffix` varchar(3) NOT NULL,
-  `street_name` varchar(25) NOT NULL,
-  `apartment` varchar(4) NOT NULL,
-  `city` varchar(20) NOT NULL,
-  `state` varchar(2) NOT NULL,
-  `zip` varchar(10) NOT NULL,
   `occupation` varchar(20) NOT NULL,
   `organization` varchar(50) NOT NULL,
   `party` varchar(2) NOT NULL,
@@ -120,11 +113,6 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `middle_name` (`middle_name`),
   KEY `title` (`title`),
   KEY `dob` (`date_of_birth`),
-  KEY `street_number` (`street_number`),
-  KEY `street_suffix` (`street_suffix`),
-  KEY `street_name` (`street_name`),
-  KEY `apartment` (`apartment`),
-  KEY `zip` (`zip`),
   KEY `occupation` (`occupation`),
   KEY `party` (`party`),
   KEY `gender` (`gender`),
@@ -141,7 +129,6 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `case_review_date` (`case_review_date`),
   KEY `case_status` (`case_status`),
   KEY `fnln` (`last_name`,`first_name`),
-  KEY `city` (`city`),
   KEY `first_name_soundex` (`first_name_soundex`),
   KEY `last_name_soundex` (`last_name_soundex`),
   KEY `middle_name_soundex` (`middle_name_soundex`),
@@ -239,6 +226,21 @@ CREATE TABLE IF NOT EXISTS `wp_wic_phone` (
   KEY `email_address` (`phone`),
   KEY `email_type` (`phone_type`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `wp_wic_search_log`
+--
+
+CREATE TABLE IF NOT EXISTS `wp_wic_search_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `time` text NOT NULL,
+  `entity` varchar(30) NOT NULL,
+  `serialized_search_array` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=238 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

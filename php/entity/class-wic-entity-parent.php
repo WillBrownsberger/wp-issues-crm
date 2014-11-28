@@ -1,7 +1,7 @@
 <?php
 /*
 *
-* class-wic-entity.php
+* class-wic-entity-parent.php
 *
 * base class for wic tables/entities
 *
@@ -267,9 +267,11 @@ abstract class WIC_Entity_Parent {
 			'match_level' => '0',
 			'dup_check' => false,
 			);
+
 		// assemble metaquery with match_level = 0 (strict match) and dup check set to false
 		$wic_query->search ( $this->assemble_meta_query_array( $search_clause_args ), $search_parameters ); 
 		// retrieve record if found, otherwise error
+
 		if ( 1 == $wic_query->found_count ) {
 			$message = __( 'Record found. You can update.', 'wp-issues-crm' );
 			$message_level =  'guidance';

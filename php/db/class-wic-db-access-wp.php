@@ -23,7 +23,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		$select_mode 		= 'id';
 		$sort_order 		= false;
 		$compute_total 	= true;
-		$retrieve_limit 	= '10';
+		$retrieve_limit 	= -1;
 		$show_deleted		= true;
 		
 		// extract ( $search_parameters, EXTR_OVERWRITE ); set as blank and don't want to overwrite with this, so // for now.
@@ -34,10 +34,16 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 			'private',
 		);		
 		
+		$allowed_types = array(
+			'post',	
+			'page',	
+		);		
+		
 		$query_args = array (
  			'posts_per_page' => $retrieve_limit,
  			'post_status'	=> $allowed_statuses,
  			'ignore_sticky_posts' => true,
+ 			'post_type' => $allowed_types,
 	 	);
 
 	   $meta_query_args = array( // will be inserted into $query_args below
@@ -48,8 +54,10 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 	   foreach ( $meta_query_array as $search_clause ) {
 	   	switch ( $search_clause['wp_query_parameter'] ) {
 				case 'p':
-					$query_args = array (
-						'p' => $search_clause['value'],					
+					$query_args = array ( // start clean array in case other search values persist 
+						'p' => $search_clause['value'],
+						'post_type' => $allowed_types, // reiterate these parameters because may broaden, rather than narrow
+						'post_status'	=> $allowed_statuses,
 					);
 					break( 2 ); // exit switch and foreach with just the ID search array
 									// supports call from ID search
@@ -109,7 +117,6 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		}
 
 		$wp_query = new WP_Query($query_args);
-
 		$this->sql = ' ' . __(' ( serialized WP_Query->query output ) ', 'wp-issues-crm' ) . serialize ( $wp_query->query );
 		$this->result = $wp_query->posts;
 	 	$this->showing_count = $wp_query->post_count;
@@ -270,7 +277,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		);
 		$list_query_args = array (
 			'ignore_sticky_posts'	=> true,
-			'post_type'	=>	'post',
+			'post_type'	=>	array( 'post', 'page' ),
 			'posts_per_page' => 100,
 			'meta_query' => $meta_query_args,
 			'order'	=> 'DESC',

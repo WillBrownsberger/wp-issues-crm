@@ -18,6 +18,7 @@ abstract class WIC_DB_Access {
 	public $explanation; // reason for outcome
 	public $found_count; // integer save/update/search # records found or acted on
 	public $insert_id;	// ID of newly saved entity
+	public $search_id;  //
 
 	public function __construct ( $entity ) { 
 		$this->entity = $entity;
@@ -29,7 +30,49 @@ abstract class WIC_DB_Access {
 	*
 	*/
 
+	private function search_log ( $meta_query_array ) {
+		$entity = $this->entity;
+		if ( "constituent" == $entity || 'issue' == $entity ) {	
+
+			global $wpdb;
+			$user_id = get_current_user_id();
+
+			$search = serialize( $meta_query_array );
+			
+			$sql = $wpdb->prepare(
+				"
+				INSERT INTO wp_wic_search_log
+				( user_id, time, entity, serialized_search_array )
+				VALUES ( $user_id, %s, %s, %s )
+				", 
+				array ( current_time( 'Y-m-d-H-i-s' ),  $entity, $search ) ); 
+			
+			$save_result = $wpdb->query( $sql );
+			
+			if ( 1 == $save_result ) {
+				$this->search_id = $wpdb->insert_id;	
+			} else {		
+				die ( __( 'Unknown database error in query_log. WIC_DB_Access::search_log.' , 'wp-issues-crm' ) );
+			}
+		}
+	}
+	 
+	public static function get_search_from_search_log ( $id ) {
+		global $wpdb;
+		$search_object = $wpdb->get_row ( "SELECT * from wp_wic_search_log where id = $id ");
+		
+		$return = array (
+			'user_id' => $search_object->user_id,
+			'entity' =>  $search_object->entity, 
+			'meta_query_array' =>  unserialize ( $search_object->serialized_search_array )
+		);
+
+		return ( $return );		
+	}
+
+
 	public function search ( $meta_query_array, $search_parameters ) { // receives pre-assembled meta_query_array
+		$this->search_log( $meta_query_array );
 		$this->db_search( $meta_query_array, $search_parameters );
 		return;
 	}

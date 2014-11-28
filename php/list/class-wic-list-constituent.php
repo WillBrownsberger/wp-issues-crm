@@ -65,5 +65,6 @@ class WIC_List_Constituent extends WIC_List_Parent {
 			}
 		return ( $output );		
 	}
+	
  }	
 
