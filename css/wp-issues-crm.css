@@ -19,6 +19,10 @@
 	width: 120px;
 }
 
+.wic-form-button.wic-form-button-selected {
+	background: #96928a;
+}
+
 .wic-form-button:hover
  {
 	background: #D2CEC6;
@@ -658,6 +662,63 @@ textarea#notes.wic-input.notes {
 .pl-even:hover {
 	background: #f5f5fa;
 }
+
+.pl-odd.case-assigned {
+	background: #e1e1ff;
+}
+
+.pl-even.case-assigned {
+	background: #d1d1ee;
+}
+
+.pl-odd.case-assigned:hover {
+	background: #eaeaff;
+}
+
+.pl-even.case-assigned:hover {
+	background: #dadaee;
+}
+
+
+.pl-odd.case-assigned.case-open {
+	background: #e1ffe1;
+}
+
+.pl-even.case-assigned.case-open {
+	background: #d1eed1;
+}
+
+.pl-odd.case-assigned.case-open:hover {
+	background: #eaffea;
+}
+
+.pl-even.case-assigned.case-open:hover {
+	background: #daeeda;
+}
+
+
+.pl-odd.case-assigned.case-open.overdue {
+	background: #ffe1e1;
+}
+
+.pl-even.case-assigned.case-open.overdue {
+	background: #eed1d1;
+}
+
+.pl-odd.case-assigned.case-open.overdue:hover {
+	background: #ffeaea;
+}
+
+.pl-even.case-assigned.case-open.overdue:hover {
+	background: #eedada;
+}
+
+.long-overdue {
+	font-weight: 700;
+}
+
+
+
 
 
 /* header (horizontal) list styling */

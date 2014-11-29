@@ -55,6 +55,11 @@ class WIC_List_Constituent_Export {
 
 	public static function do_constituent_download ( $id ) {
 		
+		if ( ! current_user_can ( 'activate_plugins' ) ) { 
+			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
+			die ('cheating on download, huh?');
+		} 		
+		
 		if ( isset($_POST['wp_issues_crm_post_form_nonce_field']) &&
 			wp_verify_nonce($_POST['wp_issues_crm_post_form_nonce_field'], 'wp_issues_crm_post') && 
 			check_admin_referer( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field')) 
@@ -62,10 +67,6 @@ class WIC_List_Constituent_Export {
 
 		$search = WIC_DB_Access::get_search_from_search_log( $id );	
 		$current_user = wp_get_current_user();		
-		
-		if ( $current_user->ID != $search['user_id'] ) {
-			die ( __( 'Illegal identity change in WIC_List_Constituent_Export::do constituent_download', 'wp-issues-crm' ) );		
-		}	
 
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $search['entity'] );
 		

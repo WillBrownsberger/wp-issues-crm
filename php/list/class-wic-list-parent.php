@@ -39,7 +39,7 @@ class WIC_List_Parent {
 
 		if ( $show_top_buttons ) {	
 				$output .=	'<h2>' . $header_message  . '</h2>' . 
-				'<button id = "form-toggle-button-on-list" type="button" onclick = "history.go(-1);return true;">' . __( 'Revise Search', 'wp-issues-crm' ) . '</button>' .
+				'<button id = "form-toggle-button-on-list" class= "wic-form-button" type="button" onclick = "history.go(-1);return true;">' . __( 'Redo Search', 'wp-issues-crm' ) . '</button>' .
 				'<button id = "post-export-button" name = "post-export-button" class = "wic-form-button" type="submit" value = "' . $wic_query->search_id  .'" >' . __( 'Export All ', 'wp-issues-crm' ) . '</button>' .
 				'</div>';
 		}
@@ -50,7 +50,7 @@ class WIC_List_Parent {
 			'<li class = "pl-odd">' .							// header is a list item with a ul within it
 				'<ul class = "wic-post-list-headers">';				
 					foreach ( $fields as $field ) {
-						if ( $field->field_slug != 'ID' ) {
+						if ( $field->field_slug != 'ID' && $field->listing_order > 0 ) {
 							$output .= '<li class = "wic-post-list-header pl-' . $wic_query->entity . '-' . $field->field_slug . '">' . $field->field_label . '</li>';
 						}			
 					}

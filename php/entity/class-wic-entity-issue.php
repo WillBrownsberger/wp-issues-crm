@@ -84,7 +84,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	private static $post_status_options = array (
  		array(
 			'value'	=> 'publish',
-			'label'	=>	'Publicly Published' ),
+			'label'	=>	'Public' ),
 		array(
 			'value'	=> 'private',
 			'label'	=>	'Private' ),

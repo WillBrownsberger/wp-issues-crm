@@ -129,8 +129,10 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 										// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results 
 		$this->explanation = ''; 
 
-		if ( 1 == $this->found_count ) { // let the list function do some wp database access directly 
-			$this->complete_wp_record( $this->result[0] );	
+		if ( 0 < $this->found_count ) { // let the list function do some wp database access directly 
+			foreach ( $this->result as $row ) {			
+				$this->complete_wp_record( $row );
+			}	
 		}
  	}
 

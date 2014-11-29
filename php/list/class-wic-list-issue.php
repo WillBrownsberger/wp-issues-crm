@@ -18,14 +18,41 @@ protected function format_rows( &$wic_query, &$fields ) {
 		$output = '';
 		$line_count = 1;
 
+		// check current user so can highlight assigned cases
+		$current_user_id = get_current_user_id();
+
 		foreach ( $wic_query->result as $row_array ) {
+			// var_dump ( $row_array ) ; die;
 			$row= '';
 			$line_count++;
 			$row_class = ( 0 == $line_count % 2 ) ? "pl-even" : "pl-odd";
-			// $control_array['id_requested'] =  $wic_query->post->ID;
+			
+			// add special row class to reflect case assigned status
+			if ( $current_user_id == $row_array->issue_staff ) {
+				$row_class .= " case-assigned ";
+				if ( 'open' == $row_array->follow_up_status ) {
+					$row_class .= " case-open ";
+					if ( '' == $row_array->review_date ) {	
+						$review_date = new DateTime ( '1900-01-01' );
+					} else {
+						$review_date = new DateTime ( $row_array->review_date );					
+					}
+					$today = new DateTime( current_time ( 'Y-m-d') );
+					$interval = date_diff ( $review_date, $today );
+					if ( 0 == $interval->invert ) {
+						$row_class .= " overdue ";				
+						if ( 7 < $interval->days ) {
+							$row_class .= " overdue long-overdue ";				
+						}
+					}
+				} elseif ( 0 == $row_array->follow_up_status ) {			
+					$row_class .= " case-closed ";
+				}	
+			}		
+
 			$row .= '<ul class = "wic-post-list-line">';			
 				foreach ( $fields as $field ) { 
-					if ( 'ID' != $field->field_slug ) {
+					if ( 'ID' != $field->field_slug && 0 < $field->listing_order ) {
 						$class_name = 'WIC_Entity_' . $wic_query->entity;
 						$formatter = $field->field_slug . '_formatter';
 						if ( method_exists ( $class_name, $formatter ) ) { 

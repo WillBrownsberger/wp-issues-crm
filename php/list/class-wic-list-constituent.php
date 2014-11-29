@@ -29,16 +29,43 @@ class WIC_List_Constituent extends WIC_List_Parent {
   		$wic_query2 = WIC_DB_Access_Factory::make_a_db_access_object( $wic_query->entity );
 		$wic_query2->list_by_id ( $id_list ); 
 
-
+		// check current user so can highlight assigned cases
+		$current_user_id = get_current_user_id();
+		
+		// loop through the rows and output a list item for each
 		foreach ( $wic_query2->result as $row_array ) {
 
 			$row= '';
 			$line_count++;
+			
+			// get row class alternating color marker
 			$row_class = ( 0 == $line_count % 2 ) ? "pl-even" : "pl-odd";
+
+			// add special row class to reflect case assigned status
+			if ( $current_user_id == $row_array->case_assigned ) {
+				$row_class .= " case-assigned ";
+				if ( 1 == $row_array->case_status ) {
+					$row_class .= " case-open ";	
+					$review_date = new DateTime ( $row_array->case_review_date );
+					$today = new DateTime( current_time ( 'Y-m-d') );
+					$interval = date_diff ( $review_date, $today );
+					if ( 0 == $interval->invert ) {
+						$row_class .= " overdue ";				
+						if ( 7 < $interval->days ) {
+							$row_class .= " overdue long-overdue ";				
+						}
+					}
+				} elseif ( 0 == $row_array->case_status ) {			
+					$row_class .= " case-closed ";
+				}	
+			}			
+			
 			// $control_array['id_requested'] =  $wic_query->post->ID;
 			$row .= '<ul class = "wic-post-list-line">';			
 				foreach ( $fields as $field ) {
-					if ( 'ID' != $field->field_slug ) {
+					// showing fields other than ID with positive listing order ( in left to right listing order )
+					if ( 'ID' != $field->field_slug && $field->listing_order > 0 ) {
+						// 						
 						$class_name = 'WIC_Entity_' . $wic_query->entity;
 						$formatter = $field->field_slug . '_formatter';
 						if ( method_exists ( $class_name, $formatter ) ) { 

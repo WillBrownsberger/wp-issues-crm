@@ -45,7 +45,7 @@ class WIC_DB_Dictionary {
 		$fields_array = array();
 		foreach ( $wp_issues_crm_field_rules_cache as $field_rule ) {
 			if ( $entity == $field_rule->entity_slug && $field_rule->group_slug > '' ) {
-				$fields_array[] = ( new WIC_DB_Field_List_Object ( $field_rule->field_slug, $field_rule->field_type, $field_rule->field_label ) );			
+				$fields_array[] = ( new WIC_DB_Field_List_Object ( $field_rule->field_slug, $field_rule->field_type, $field_rule->field_label, $field_rule->listing_order ) );			
 			}		
 		}
 		
@@ -158,6 +158,7 @@ class WIC_DB_Dictionary {
 				$sort_string[$field_rule->sort_clause_order] = $field_rule->field_slug;
 			}		
 		}
+		// note that ksort drops elements with identical sort_clause_order
 		ksort( $sort_string );
 		$sort_string_scalar = implode ( ',', $sort_string );
 		
@@ -176,13 +177,16 @@ class WIC_DB_Dictionary {
 			self::initialize_field_rules_cache();		
 		}
 		
+		// note: negative values for listing order will be included in field list for data retrieval and will be available for formatting
+		// but will not be displayed in list
 		$list_fields = array();
 		foreach ( $wp_issues_crm_field_rules_cache as $field_rule ) {
-			if ( $entity == $field_rule->entity_slug && ( $field_rule->listing_order > 0 || 'ID' == $field_rule->field_slug ) ) {
+			if ( $entity == $field_rule->entity_slug && ( $field_rule->listing_order != 0 || 'ID' == $field_rule->field_slug ) ) {
 				$list_fields[$field_rule->listing_order] = $field_rule;
 			}		
 		}
 		
+		// note that ksort drops elements with identical listing_order
 		ksort ( $list_fields );
 		
 		$list_fields_sorted = array();
