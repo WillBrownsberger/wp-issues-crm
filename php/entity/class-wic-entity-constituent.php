@@ -48,6 +48,13 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		$this->form_save_update_generic ( true, 'WIC_Form_Constituent_Save', 'WIC_Form_Constituent_Update' );
 		return;
 	}
+
+	//handle a search request coming search log
+	protected function redo_search_from_query ( $meta_query_array ) {
+		$this->redo_search_from_meta_query ( $meta_query_array, 'WIC_Form_Constituent_Save', 'WIC_Form_Constituent_Update' );
+		return;
+	}		
+	
 	
 	/***************************************************************************
 	*

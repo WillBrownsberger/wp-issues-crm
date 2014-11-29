@@ -67,7 +67,7 @@ class WIC_Dashboard_Main {
 			array ( 'constituent', 	'new_form',		0, 	__( 'Constituents', 'wp-issues-crm' ) ),
 			array ( 'issue', 			'new_form',		0, 	__( 'Issues', 'wp-issues-crm' ) ),
 			array ( 'issue', 			'new_issue',	0, 	__( 'New Issue', 'wp-issues-crm') ),
-			array ( 'dashboard', 	'search_history',0,	__( 'History', 'wp-issues-crm' ) ),		
+			array ( 'dashboard', 	'search_history',0,	__( 'Recent', 'wp-issues-crm' ) ),		
 			); 
 		
 		foreach ( $top_menu_buttons as $top_menu_button ) {
@@ -82,6 +82,8 @@ class WIC_Dashboard_Main {
 	public function show_dashboard( $action_requested ) {
 		
 		$this->show_top_menu_buttons ( 'dashboard', $action_requested );
+		
+		$user_ID = get_current_user_id();		
 		
 		switch ( $action_requested ) {
 			
@@ -101,7 +103,7 @@ class WIC_Dashboard_Main {
 					array (
 						 'table'	=> 'constituent',
 						 'key'	=> 'case_assigned',
-						 'value'	=> '15', 
+						 'value'	=>  $user_ID, 
 						 'compare'	=> '=', 
 						 'wp_query_parameter' => '',
 					),
@@ -141,7 +143,7 @@ class WIC_Dashboard_Main {
 					array (
 						 'table'	=> 'issue',
 						 'key'	=> 'issue_staff',
-						 'value'	=> '15', 
+						 'value'	=> $user_ID,
 						 'compare'	=> '=', 
 						 'wp_query_parameter' => '',
 					),
@@ -165,6 +167,43 @@ class WIC_Dashboard_Main {
 					echo $list;			
 				}
 				break;
+
+
+			case 'search_history':
+			
+				$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( 'search_log' );
+
+				$search_parameters= array(
+					'sort_order' => true,
+					'compute_total' 	=> false,
+					'retrieve_limit' 	=> 200,
+					'show_deleted' 	=> true,
+					'select_mode'		=> 'id',
+					'sort_direction'	=> 'DESC',
+				);
+
+				$search_array = array (
+					array (
+						 'table'	=> 'search_log',
+						 'key'	=> 'user_id',
+						 'value'	=> $user_ID,
+						 'compare'	=> '=', 
+						 'wp_query_parameter' => '',
+					),				
+				);
+		
+				$wic_query->search ( $search_array, $search_parameters ); // get a list of id's meeting search criteria
+				$sql = $wic_query->sql;
+				if ( 0 == $wic_query->found_count ) {
+					echo '<h3>' . __( 'Search logs purged since last search.', 'wp-issues-crm' ) . '</h3>';		
+				} else {
+					$lister_class = 'WIC_List_Search_Log' ;
+					$lister = new $lister_class;
+					$list = $lister->format_entity_list( $wic_query, false );
+					echo $list;			
+				}
+				break;
+
 			}
 
 	}

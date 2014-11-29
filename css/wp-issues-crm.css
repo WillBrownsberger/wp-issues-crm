@@ -790,6 +790,18 @@ ul.wic-post-list-line {
 .pl-issue-post_title{ width:40%;}
 .pl-issue-post_category{ width:17%;}
 .pl-issue-post_status{ width:8%;}
+.wic-post-list-header.pl-search_log-entity,
+.wic-post-list-field.pl-search_log-entity {
+	display: none;
+}
+.pl-search_log-user_id{ width:15%;}
+.pl-search_log-time{ width:20%;}
+.pl-search_log-serialized_search_array{ width:45%;}
+.pl-search_log-download-time{ width:20%;}
+
+
+
+
 .wic-dashboard-header {
 	color: #777;
 }

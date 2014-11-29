@@ -45,7 +45,7 @@ abstract class WIC_DB_Access {
 				( user_id, time, entity, serialized_search_array )
 				VALUES ( $user_id, %s, %s, %s )
 				", 
-				array ( current_time( 'Y-m-d-H-i-s' ),  $entity, $search ) ); 
+				array ( current_time( 'Y-m-d H:i:s' ),  $entity, $search ) ); 
 			
 			$save_result = $wpdb->query( $sql );
 			
@@ -137,8 +137,8 @@ abstract class WIC_DB_Access {
 	}
 
 
-	public function list_by_id ( $id_string ) {
-		$this->db_list_by_id ( $id_string ); 
+	public function list_by_id ( $id_string,  $sort_direction = 'ASC' ) {
+		$this->db_list_by_id ( $id_string, $sort_direction ); 
 	}
 
 	/*

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 28, 2014 at 03:54 PM
+-- Generation Time: Nov 29, 2014 at 02:52 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   `field_id` int(11) NOT NULL AUTO_INCREMENT,
   `entity_slug` varchar(20) NOT NULL,
   `group_slug` varchar(30) NOT NULL,
-  `field_slug` varchar(20) NOT NULL,
+  `field_slug` varchar(30) NOT NULL,
   `field_type` varchar(30) NOT NULL COMMENT 'name of entity supplying multiple rows for this field',
   `is_date` tinyint(1) NOT NULL,
   `field_label` varchar(30) NOT NULL,
@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   PRIMARY KEY (`field_id`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=81 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=88 ;
 
 -- --------------------------------------------------------
 
@@ -236,11 +236,13 @@ CREATE TABLE IF NOT EXISTS `wp_wic_phone` (
 CREATE TABLE IF NOT EXISTS `wp_wic_search_log` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
-  `time` text NOT NULL,
+  `time` varchar(20) NOT NULL,
   `entity` varchar(30) NOT NULL,
   `serialized_search_array` text NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=238 ;
+  `download_time` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user-time` (`user_id`,`time`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=30 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 28, 2014 at 03:55 PM
+-- Generation Time: Nov 29, 2014 at 02:54 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   `field_id` int(11) NOT NULL AUTO_INCREMENT,
   `entity_slug` varchar(20) NOT NULL,
   `group_slug` varchar(30) NOT NULL,
-  `field_slug` varchar(20) NOT NULL,
+  `field_slug` varchar(30) NOT NULL,
   `field_type` varchar(30) NOT NULL COMMENT 'name of entity supplying multiple rows for this field',
   `is_date` tinyint(1) NOT NULL,
   `field_label` varchar(30) NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   PRIMARY KEY (`field_id`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=81 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=88 ;
 
 --
 -- Dumping data for table `wp_wic_data_dictionary`
@@ -69,9 +69,9 @@ INSERT INTO `wp_wic_data_dictionary` (`field_id`, `entity_slug`, `group_slug`, `
 (7, 'constituent', 'contact', 'email', 'multivalue', 0, 'Emails', 50, 50, 0, 'group', 1, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
 (8, 'constituent', 'contact', 'address', 'multivalue', 0, 'Addresses', 60, 60, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
 (10, 'constituent', 'contact', 'activity', 'multivalue', 0, 'Activities', 80, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
-(11, 'constituent', 'case', 'case_assigned', 'select', 0, 'Staff', 110, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
-(12, 'constituent', 'case', 'case_status', 'select', 0, 'Status', 120, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
-(13, 'constituent', 'case', 'case_review_date', 'range', 1, 'Review Date', 130, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
+(11, 'constituent', 'case', 'case_assigned', 'select', 0, 'Staff', 110, -3, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
+(12, 'constituent', 'case', 'case_status', 'select', 0, 'Status', 120, -2, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
+(13, 'constituent', 'case', 'case_review_date', 'range', 1, 'Review Date', 130, -1, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
 (14, 'constituent', 'personal', 'date_of_birth', 'range', 1, 'Date of Birth', 210, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
 (15, 'constituent', 'personal', 'gender', 'select', 0, 'Gender', 220, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
 (16, 'constituent', 'personal', 'occupation', 'text', 0, 'Occupation', 230, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
@@ -129,11 +129,17 @@ INSERT INTO `wp_wic_data_dictionary` (`field_id`, `entity_slug`, `group_slug`, `
 (68, 'issue', 'issue_management', 'issue_staff', 'select', 0, 'Staff', 10, 10, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
 (69, 'issue', 'issue_management', 'wic_live_issue', 'select', 0, 'Activities', 20, 20, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
 (70, 'issue', 'issue_management', 'follow_up_status', 'select', 0, 'Follow-up', 30, 30, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
-(71, 'issue', 'issue_management', 'review_date', 'range', 1, 'Review Date', 40, 0, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
+(71, 'issue', 'issue_management', 'review_date', 'range', 1, 'Review Date', 40, -1, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
 (72, 'issue', 'issue_creation', 'post_author', 'select', 0, 'Created By', 10, 0, 0, '', 0, 1, 0, '', 0, 0, 'author', 'wic-input', 'wic-label', '', 0, 0),
 (73, 'issue', 'issue_creation', 'post_date', 'range', 1, 'Created Date', 20, 0, 10, '', 0, 1, 0, '', 0, 0, 'date', 'wic-input', 'wic-label', '', 0, 0),
 (74, 'issue', 'issue_creation', 'post_status', 'select', 0, 'Visibility', 30, 60, 0, '', 0, 1, 0, '', 0, 0, 'post_status', 'wic-input', 'wic-label', '', 0, 0),
-(75, 'issue', 'issue_creation', 'ID', 'text', 0, 'Post ID', 40, 1, 0, '', 0, 1, 0, '', 0, 0, 'p', 'wic-input', 'wic-label', '', 0, 0);
+(75, 'issue', 'issue_creation', 'ID', 'text', 0, 'Post ID', 40, 1, 0, '', 0, 1, 0, '', 0, 0, 'p', 'wic-input', 'wic-label', '', 0, 0),
+(81, 'search_log', 'search_log', 'id', 'text', 0, 'ID', 10, -1, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
+(82, 'search_log', 'search_log', 'user_id', 'text', 0, 'User ID', 15, 10, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
+(83, 'search_log', 'search_log', 'time', 'text', 0, 'SearchTime', 20, 20, 10, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
+(84, 'search_log', 'search_log', 'entity', 'text', 0, 'Entity', 30, 30, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
+(86, 'search_log', 'search_log', 'serialized_search_array', 'text', 0, 'Search Details', 40, 40, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0),
+(87, 'search_log', 'search_log', 'download_time', 'text', 0, 'Last Download', 50, 50, 0, '', 0, 0, 0, '', 0, 0, '', 'wic-input', 'wic-label', '', 0, 0);
 
 -- --------------------------------------------------------
 

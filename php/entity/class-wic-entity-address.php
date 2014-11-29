@@ -34,6 +34,14 @@ class WIC_Entity_Address extends WIC_Entity_Multivalue {
 		return self::$address_type_options; 
 	}
 
+	public static function get_address_type_label( $lookup ) {
+		foreach ( self::$address_type_options as $select_item_array ) {
+			if ( $lookup == $select_item_array['value'] ) {
+				return ( $select_item_array['label'] );			
+			} 
+		}
+	}
+
 	private static $state_options = array (
 		array(
 			'value'	=> 'MA',

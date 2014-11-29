@@ -23,6 +23,10 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		$this->new_form_generic( 'WIC_Form_Issue_Search' );
 		return;
 	}
+	
+	protected function new_issue() {
+		$this->new_form_generic ( 'WIC_Form_Issue_Save', __( 'Create a new issue and save.', 'wp-issues-crm' ) );	
+	}
 
 	// handle a search request coming from a standard form
 	protected function form_search () { 
@@ -48,6 +52,13 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		$this->form_save_update_generic ( true, 'WIC_Form_Issue_Save', 'WIC_Form_Issue_Update' );
 		return;
 	}
+
+	//handle a search request coming search log
+	protected function redo_search_from_query ( $meta_query_array ) {
+		$this->redo_search_from_meta_query ( $meta_query_array, 'WIC_Form_Issue_Save', 'WIC_Form_Issue_Update' );
+		return;
+	}	
+	
 	
 	protected function special_entity_value_hook ( &$wic_access_object ) {
 		$this->data_object_array['post_author']->set_value( $wic_access_object->post_author );

@@ -100,4 +100,12 @@ class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 		return self::$pro_con_options; 
 	}
 
+	public static function get_activity_type_label( $lookup ) {
+		foreach ( self::$activity_type_options as $select_item_array ) {
+			if ( $lookup == $select_item_array['value'] ) {
+				return ( $select_item_array['label'] );			
+			} 
+		}
+	}
+
 }

@@ -35,6 +35,14 @@ class WIC_Entity_Email extends WIC_Entity_Multivalue {
 		return self::$email_type_options; 
 	}
 
+	public static function get_email_type_label( $lookup ) {
+		foreach ( self::$email_type_options as $select_item_array ) {
+			if ( $lookup == $select_item_array['value'] ) {
+				return ( $select_item_array['label'] );			
+			} 
+		}
+	}
+
 	public static function email_address_validator ( $email ) { 
 		$error = '';
 		if ( $email > '' ) {	

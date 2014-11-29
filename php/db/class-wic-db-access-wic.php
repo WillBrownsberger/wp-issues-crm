@@ -59,6 +59,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		// default search parameters
 		$select_mode 		= 'id';
 		$sort_order 		= false;
+		$sort_direction	= 'ASC';
 		$compute_total 	= false;
 		$retrieve_limit 	= '10';
 		$show_deleted		= true;
@@ -73,7 +74,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			$select_list = $top_entity . '.' . '* '; 
 		}
 		$sort_clause = $sort_order ? WIC_DB_Dictionary::get_sort_order_for_entity( $this->entity ) : '';
-		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause ASC ";
+		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause $sort_direction ";
 		$deleted_clause = $show_deleted ? '' : 'AND ' . $top_entity . '.mark_deleted != \'deleted\'';
 		$found_rows = $compute_total ? 'SQL_CALC_FOUND_ROWS' : '';
 		// retrieve limit goes directly into SQL
@@ -204,7 +205,8 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		} 
 	}
 
-	protected function db_list_by_id ( $id_string ) {
+	protected function db_list_by_id ( $id_string, $sort_direction ) {
+
 		global $wpdb;	
 
 		$top_entity = $this->entity;
@@ -212,7 +214,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$where = $top_entity . '.ID IN ' . $id_string . ' ';
 		$join = $wpdb->prefix . 'wic_' . $this->entity . ' AS ' . $this->entity;
 		$sort_clause = WIC_DB_Dictionary::get_sort_order_for_entity( $this->entity );
-		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause ASC ";
+		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause $sort_direction ";
 		$select_list = '';	
 
 		$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $this->entity );

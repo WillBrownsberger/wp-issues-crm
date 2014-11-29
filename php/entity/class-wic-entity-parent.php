@@ -206,13 +206,14 @@ abstract class WIC_Entity_Parent {
 	*
 	**************************************************************************************/
 
-	protected function new_form_generic( $form ) {
+	protected function new_form_generic( $form, $guidance = '' ) {
+		if ( '' == $guidance ) {
+			$guidance = __( 'Enter data and search. If record not found, you will be able to save.', 'wp-issues-crm');		
+		}
 		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
 		$this->initialize_data_object_array();
 		$new_search = new $form;
-		$new_search->layout_form( $this->data_object_array, 
-			__( 'Enter data and search. If record not found, you will be able to save.', 'wp-issues-crm'),
-			 'guidance' );
+		$new_search->layout_form( $this->data_object_array, $guidance, 'guidance' );
 	}	
 
 	//handle an update request coming from a form ( $save is true or false )
@@ -303,7 +304,12 @@ abstract class WIC_Entity_Parent {
 			'dup_check' => false,
 			);
 		// note that the transient search parameter 'match_level' is needed by individual controls in create_search_clause()
+				
 		$wic_query->search ( $this->assemble_meta_query_array( $search_clause_args ), $search_parameters ); // get a list of id's meeting search criteria
+		$this->handle_search_results ( $wic_query, $save_form, $update_form );
+	}
+
+	protected function handle_search_results ( $wic_query, $save_form, $update_form ) {
 		$sql = $wic_query->sql;
 		if ( 0 == $wic_query->found_count ) {
 			$message = __( 'No matching record found -- try a save?', 'wp-issues-crm' );
@@ -318,7 +324,17 @@ abstract class WIC_Entity_Parent {
 			$lister = new $lister_class;
 			$list = $lister->format_entity_list( $wic_query,true );
 			echo $list;	
-		}						
+		}
+	}
+
+	public function redo_search_from_meta_query ( $meta_query_array, $save_form, $update_form ) {
+
+		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+		$this->initialize_data_object_array();
+		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		$search_parameters = array(); // use default parameters, since original unknown
+		$wic_query->search ( $meta_query_array, $search_parameters ); 
+		$this->handle_search_results ( $wic_query, $save_form, $update_form );
 	}
 
 	protected function special_entity_value_hook ( &$wic_access_object ) {
