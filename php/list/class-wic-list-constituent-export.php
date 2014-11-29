@@ -112,8 +112,10 @@ class WIC_List_Constituent_Export {
 		    fputcsv($fh, $data);
 		}
 		fclose($fh);
-		exit;
+
+		WIC_DB_Access::mark_search_as_downloaded( $id );
 		
+		exit;
 	}
 
 }	

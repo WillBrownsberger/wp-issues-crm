@@ -145,6 +145,10 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 
 		global $wpdb;	
 		
+		if ( 0 == count ( $id_array ) || ( 0 == $id_array[0] ) ) {
+			return;		
+		}		
+		
 		// test elements of array, protect against remote risk of SQL injection 
 		foreach ( $id_array as $id ) {
 			if ( $id != absint ($id) ) {

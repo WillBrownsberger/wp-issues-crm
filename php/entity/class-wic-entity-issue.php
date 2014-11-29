@@ -155,7 +155,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	
 
 	public static function wic_live_issue_formatter( $value ) {
-		return wic_value_label_lookup ( $value,  self::$wic_live_issue_options );	
+		return WIC_Function_Utilities::value_label_lookup ( $value,  self::$wic_live_issue_options );	
 	} 
 
 
@@ -165,7 +165,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 
 	
 	public static function get_issue_staff_options() {
-		return wic_get_administrator_array();
+		return WIC_Function_Utilities::get_administrator_array();
 	}
 
 		
@@ -175,7 +175,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 
 		
   	public static function follow_up_status_formatter( $value ) {
-		return wic_value_label_lookup ( $value,  self::$follow_up_status_options );	 
+		return WIC_Function_Utilities::value_label_lookup ( $value,  self::$follow_up_status_options );	 
 	} 
 
 
@@ -224,7 +224,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	} 
 	
 	public static function post_status_formatter( $value ) {
-		return wic_value_label_lookup ( $value,  self::$post_status_options ); 
+		return WIC_Function_Utilities::value_label_lookup ( $value,  self::$post_status_options ); 
 	} 
 	
 	public static function get_post_status_label ( $value ) {
@@ -232,6 +232,6 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	}
 	
 	public static function tags_input_sanitizor ( $value ) {
-		return wic_sanitize_textcsv( $value );	
+		return WIC_Function_Utilities::sanitize_textcsv( $value );	
 	}	
 }

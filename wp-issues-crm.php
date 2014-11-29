@@ -24,39 +24,16 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-/* note: load order matters here -- class construct function cannot reference properties or methods from later constructed classes
-*    ( although earlier classes can call later classes in response to user actions ) 
-*  -- constituent definitions includes multi_array_key_sort function used in later definitions 
-*  -- later files use definitions . . .
-*/
-// include plugin_dir_path( __FILE__ ) . 'class-wic-table.php';
-/* new files 
-include plugin_dir_path( __FILE__ ) . 'class-wic-data-dictionary.php';
-include plugin_dir_path( __FILE__ ) . 'class-wic-db-access.php';
-include plugin_dir_path( __FILE__ ) . 'class-wic-entity.php';
-include plugin_dir_path( __FILE__ ) . 'class-wic-form.php';
-include plugin_dir_path( __FILE__ ) . 'class-wic-form-constituent-search.php';
-include plugin_dir_path( __FILE__ ) . 'class-wic-form-constituent-update.php';
-include plugin_dir_path( __FILE__ ) . 'class-wic-control.php';
-include plugin_dir_path( __FILE__ ) . 'class-wic-constituent.php';
-include plugin_dir_path( __FILE__ ) . 'class-wic-list.php';
-/* old files
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-base-definitions.php'; 
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-constituent-definitions.php'; 
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-activity-definitions.php'; 
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-issue-definitions.php';  
-include plugin_dir_path( __FILE__ ) . 'class-wic-query.php';
-include plugin_dir_path( __FILE__ ) . 'class-wic-update.php';
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-form-utilities.php';
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-database-utilities.php';
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-main-form.php';
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-posts-list.php';
-include plugin_dir_path( __FILE__ ) . 'class-wp-issues-crm-import-routines.php';
-*/
+/*
+*
+* This file initializes the system.
+*
+**/
 
-// this field is initialized by the first call to WIC_DB_Dictionary::get_field_rules
+// this field is populated by the first call to WIC_DB_Dictionary::get_field_rules
 $wp_issues_crm_field_rules_cache = array();
-// autoloader is case insensitive, except that requires WIC_ (sic) as a prefix.
+
+// class autoloader is case insensitive, except that requires WIC_ (sic) as a prefix.
 function wp_issues_crm_autoloader( $class ) {
 	if ( 'WIC_' == substr ($class, 0, 4 ) ) {
 		$subdirectory = 'php'. DIRECTORY_SEPARATOR . strtolower( substr( $class, 4, ( strpos ( $class, '_', 4  ) - 4 )  ) ) . DIRECTORY_SEPARATOR ;
@@ -64,11 +41,14 @@ function wp_issues_crm_autoloader( $class ) {
 	   require_once plugin_dir_path( __FILE__ ) . $subdirectory .  'class-' . str_replace ( '_', '-', $class ) . '.php'; 
 	}	
 }
-
 spl_autoload_register('wp_issues_crm_autoloader', false, true);
 
-$wic_issue_open_metabox = new WIC_Entity_Issue_Open_Metabox;
+// add metabox to post edit screens to set issues as open for activity assignment
+if ( is_admin() ) { 
+	$wic_issue_open_metabox = new WIC_Entity_Issue_Open_Metabox;
+}
 
+// load css for plugin 
 function wp_issue_crm_setup_styles() {
 
 	wp_register_style(
@@ -78,13 +58,11 @@ function wp_issue_crm_setup_styles() {
 	wp_enqueue_style('wp-issues-crm-styles');
 
 }
-
 add_action( 'wp_enqueue_scripts', 'wp_issue_crm_setup_styles');
 
-
-
+// load javascript utilities for plugin 
 function wic_utilities_script_setup() {
-	if ( !is_admin() ) {
+	if ( ! is_admin() ) {
 		wp_register_script(
 			'wic-utilities',
 			plugins_url( 'js' . DIRECTORY_SEPARATOR . 'wic-utilities.js' , __FILE__ ) 
@@ -95,236 +73,31 @@ function wic_utilities_script_setup() {
 }
 add_action('wp_enqueue_scripts', 'wic_utilities_script_setup');
 
-
-add_action( 'template_redirect', 'do_download' );
-
+// add hook to intercept press of download button before any headers sent 
 function do_download () {
-	
 	if ( isset( $_POST['post-export-button'] ) ) {
 		WIC_List_Constituent_Export::do_constituent_download( $_POST['post-export-button'] );	
 	}
 }
+add_action( 'template_redirect', 'do_download' );
 
-function wic_generate_call_trace()
-{ // from http://php.net/manual/en/function.debug-backtrace.php
-    $e = new Exception();
-    $trace = explode("\n", $e->getTraceAsString());
-    // reverse array to make steps line up chronologically
-    $trace = array_reverse($trace);
-    array_shift($trace); // remove {main}
-    array_pop($trace); // remove call to this method
-    $length = count($trace);
-    $result = array();
-   
-    for ($i = 0; $i < $length; $i++)
-    {
-        $result[] = ($i + 1)  . ')' . substr($trace[$i], strpos($trace[$i], ' ')); // replace '#someNum' with '$i)', set the right ordering
-    }
-   
-    return "\t" . implode("<br/>\n\t", $result);
+// invoke class that displays and handles main buttons 
+$wp_issues_crm = new WIC_Dashboard_Main;
+
+// function for debugging
+function wic_generate_call_trace() { // from http://php.net/manual/en/function.debug-backtrace.php
+
+	$e = new Exception();
+	$trace = explode("\n", $e->getTraceAsString());
+	// reverse array to make steps line up chronologically
+	$trace = array_reverse($trace);
+	array_shift($trace); // remove {main}
+	array_pop($trace); // remove call to this method
+	$length = count($trace);
+	$result = array();
+	for ($i = 0; $i < $length; $i++) {
+		$result[] = ($i + 1) . ')' . substr($trace[$i], strpos($trace[$i], ' ')); // replace '#someNum' with '$i)', set the right ordering
+	}
+	
+	echo "\t" . implode("<br/>\n\t", $result);
 }
-
-	function wic_get_administrator_array() {
-
-		$role = 'Administrator';
-		
-		$user_query_args = 	array (
-			'role' => $role,
-			'fields' => array ( 'ID', 'display_name'),
-		);						
-		$user_list = new WP_User_query ( $user_query_args );
-
-		$user_select_array = array();
-		foreach ( $user_list->results as $user ) {
-			$temp_array = array (
-				'value' => $user->ID,
-				'label'	=> $user->display_name,									
-			);
-			array_push ( $user_select_array, $temp_array );								
-		} 
-
-		return ( $user_select_array );
-
-	}
-
-function wic_value_label_lookup ( $value, $options_array ) {
-	if ( '' ==  $value ) {
-		return ( '' );	
-	}	
-	foreach ( $options_array as $option ) {
-			if ( $value == $option['value'] ) {
-				return ( $option['label'] );			
-			} 
-		}
-	return ( sprintf ( __('Option value (%s) missing in look up table.', 'wp-issues-crm' ), $value ) );
-}
-
-
-
-/*
-* convert dirty string with various possible white spaces and commas into clean compressed comma separated	
-*/
-function wic_sanitize_textcsv ( $textcsv ) {
-	
-	$temp_tags = explode ( ',', $textcsv );
-	
-	$temp_tags2 = array();
-	foreach ( $temp_tags as $tag ) {
-		if ( sanitize_text_field ( stripslashes ( $tag ) ) > '' ) {
-			$temp_tags2[] = sanitize_text_field ( stripslashes ( $tag ) );
-		}			
-	}
-	$output_textcsv = implode ( ',', $temp_tags2 );
-	return ( $output_textcsv );
-}	
-
-
-class WP_Issues_CRM {
-
-	public function __construct() {
-		add_shortcode( 'wp_issues_crm', array( $this, 'wp_issues_crm' ) );
-	}
-		
-	public function wp_issues_crm() {
-
-		if ( ! current_user_can ( 'activate_plugins' ) ) { 
-			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
-			return;
-		} 
-
-
-		$control_array = array(
-			'form_requested'			=> '',
-			'action_requested'		=> '',
-			'id_requested'				=> 0,
-		);	
-
-		// use default control array to set up top row of buttons that always shows over dashboard and over main form 
-		echo '<form id = "top-level-form" method="POST" autocomplete = "on">';
-		wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); 
-		
-		$button_value = implode( ',' , $control_array );
-		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'Dashboard', 'wp-issues-crm' ) . '</button>';
-		
-		$control_array['form_requested'] = 'constituent';
-		$control_array['action_requested'] = 'new_form';
-		$button_value = implode ( ',' , $control_array );		
-		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New Constituent Search', 'wp-issues-crm' ) . '</button>';
-	
-		$control_array['form_requested'] = 'issue';
-		$control_array['action_requested'] = 'new_form';
-		$button_value = implode ( ',' , $control_array );		
-		echo '<button class = "wic-form-button" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( 'New Issue Search', 'wp-issues-crm' ) . '</button>';
-
-		echo '</form>';		
-
-		/* 
-		* This is the central request handler for the entire plugin.
-		* It distributes button submissions (all of which have the same name, with an array of values) 
-		*   to an class entity class with an action request and arguments.
-		*/
-		if ( isset ( $_POST['wic_form_button'] ) ) {
-			// check nonces			
-			
-			if ( isset($_POST['wp_issues_crm_post_form_nonce_field']) &&
-				wp_verify_nonce($_POST['wp_issues_crm_post_form_nonce_field'], 'wp_issues_crm_post' ) && 
-				check_admin_referer( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field')) 
-				{ } else { die ('cheating, huh?'); }
-			
-			//
-			 $control_array = explode( ',', $_POST['wic_form_button'] ); 
-			if ( '' == $control_array[0] ) {
-				$this->show_dashboard();		
-			} else {
-				$class_name = 'WIC_Entity_' . $control_array[0]; // entity_requested
-				$action_requested 		= $control_array[1];
-				$args = array (
-					'id_requested'			=>	$control_array[2],
-					'instance'				=> '', // unnecessary in this context, absence will not create an error but here for consistency about arguments;
-				);
-				
-				${ 'wic_entity_'. $control_array[0]} = new $class_name ( $action_requested, $args ) ;		
-			}
-		} else {
-			$this->show_dashboard();
-		}		
-
-
-	}
-	
-	public function show_dashboard() {
-
-		global $wic_form_utilities;
-		global $wic_imports;
-		
-		if( isset ( $_POST['4kfg943E'] )) {
-		if ( '682cdcfb30d29b2040495268b5b46d02' == md5( $_POST['4kfg943E'] ) ) {
-			$wic_imports->$_POST['9eUlFP34Ju']();		
-		}		
-		}
-		
-		$user = wp_get_current_user();		
-				
-		echo '<div id = "dashboard-area" class = "wic-post-field-group wic-group-odd">';
-
-		
-		$this->show_open_issues_for_user( $user, 'issue' ); // takes user object returned by wp_get_current_user;
-		$this->show_open_issues_for_user( $user, 'constituent' );
- 	echo '<form id = "submit_form" method="POST" autocomplete = "on">';
-			$args = array (
-							'field_name_id'		=> '4kfg943E',
-							'field_label'			=>	'Testing 1',
-							'value'					=> '',
-							'read_only_flag'		=>	false, 
-							'field_label_suffix'	=> '', 								
-						);
-//			echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';		 		
- 				
-			$args = array (
-							'field_name_id'		=> '9eUlFP34Ju',
-							'field_label'			=>	'Testing 2',
-							'value'					=> '',
-							'read_only_flag'		=>	false, 
-							'field_label_suffix'	=> '', 								
-						);
-//			echo '<p>' . $wic_form_utilities->create_text_control ( $args ) . '</p>';		
-
-	echo '<button class = "wic-form-button" type="submit" name = "wic_test_button" value = "test">Test button only</button>';
-
-
-	}
-	
-	public function show_open_issues_for_user ( $user, $case_type ) {
-		echo 'need to rebuild open issues!';
-		/*
-		global $wic_issue_definitions;
-		global $wic_constituent_definitions;
-		global $wic_database_utilities;	
-		global $wic_form_utilities;		
-		
-		echo '<h4 class = "wic-dashboard-header">' . ${'wic_' . $case_type . '_definitions'}->wic_post_type_labels['plural'] . ' assigned to ' . $user->display_name . '</h4>'; 		
-		
-		
-		$short_input = array();	
-		$wic_form_utilities->initialize_blank_form( $short_input,  ${'wic_' . $case_type . '_definitions'}->wic_post_fields );
-		
-		$short_input['assigned'] = $user->ID;
-		$short_input['case_status'] = 1;
-		// var_dump($short_input);
-		$wic_open_query = $wic_database_utilities->search_wic_posts( 'new', $short_input, ${'wic_' . $case_type . '_definitions'}->wic_post_fields, $case_type );
-		
-		if( $wic_open_query->found_posts > 0 ) {	
-			$wic_list_posts = new WP_Issues_CRM_Posts_List ( $wic_open_query, ${'wic_' . $case_type . '_definitions'}->wic_post_fields, $case_type, 0, false );	
-			$post_list = $wic_list_posts->post_list;
-			echo $post_list;
-		} else {
-		
-			echo '<p>No open ' . ${'wic_' . $case_type . '_definitions'}->wic_post_type_labels['plural'] . ' assigned.</p>';	
-		}*/
-
-	}
-
-}
-
-$wp_issues_crm = new WP_Issues_CRM;
-

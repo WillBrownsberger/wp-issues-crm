@@ -70,6 +70,23 @@ abstract class WIC_DB_Access {
 		return ( $return );		
 	}
 
+	public static function mark_search_as_downloaded ( $id ) {
+		global $wpdb;
+		$sql = $wpdb->prepare (
+			"
+			UPDATE wp_wic_search_log
+			SET download_time = %s
+			WHERE id = %s
+			",
+			array( current_time( 'Y-m-d-H-i-s' ), $id ) );
+		
+		$update_result = $wpdb->query( $sql );
+			
+		if ( 1 != $update_result ) {
+			die ( __( 'Unknown database error in query_log. WIC_DB_Access::mark_search_as_downloaded.' , 'wp-issues-crm' ) );
+		}	
+	}		
+
 
 	public function search ( $meta_query_array, $search_parameters ) { // receives pre-assembled meta_query_array
 		$this->search_log( $meta_query_array );

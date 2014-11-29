@@ -4,6 +4,59 @@
 *
 */
 
+
+
+/* top-level form and button styling  */
+.wic-form-button {
+	background: #C6C2BA;
+	border: 0px;
+	color: white;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 1em;
+	margin-right: 8px;
+	padding: 0px 8px;
+	width: 120px;
+}
+
+.wic-form-button:hover
+ {
+	background: #D2CEC6;
+	color: black;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*********************************************************************************************/
+
 /* main form layout */
 
 #full-width-content-wrapper .wic-post-list li {
@@ -80,21 +133,6 @@ p.wic-form-field-group-legend {
 	margin: 0 0 0 200px; 
 }
 
-/* buttons to show hide form */
-.wic-form-button,
-#form-toggle-button,
-#form-toggle-button-on-list  {
-	background: #C6C2BA;
-	border: 0px;
-	color: white;
-	cursor: pointer;
-	display: inline-block;
-	font-size: 1em;
-	margin-right: 8px;
-	padding: 0px 8px;
-	
-}
-
 .wic-post-form .wic-form-button {
 	margin-left: 200px;
 }
@@ -104,18 +142,6 @@ p.wic-form-field-group-legend {
 }
 
 
-
-#form-toggle-button-on-list, 
-#form-toggle-button {
-	margin-left: 20px; 
-}
-
-.wic-form-button:hover,
-#form-toggle-button:hover,
-#form-toggle-button-on-list:hover {
-	background: #D2CEC6;
-	color: black;
-}
 
 /* message box and notices */
 #post-form-message-box {
