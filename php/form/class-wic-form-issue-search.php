@@ -20,8 +20,8 @@ class WIC_Form_issue_Search extends WIC_Form_Parent  {
 		return ( $this->create_wic_form_button ( $button_args_main ) ) ;
 	}
 	
-	protected function get_the_header ( &$data_array ) {
-		return ( __('Search Issues', 'wp-issues-crm') );
+	protected function format_message ( &$data_array, $message ) {
+		return ( __('Search issues. ', 'wp-issues-crm') . $message );
 	}
 
 	protected function get_the_formatted_control ( $control ) {

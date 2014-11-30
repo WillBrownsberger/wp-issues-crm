@@ -194,7 +194,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 				 ' ' . esc_attr( $field_slug_css ) . '" for="' . esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . '</label>' : '' ;		
 		
 		$control .= $this->value[0]->search_row();
-	 	echo $control;
+	 	return ( $control );
 	}
 
 	public function update_control () {

@@ -213,7 +213,7 @@ class WIC_DB_Dictionary {
 		$groups = $wpdb->get_results( 
 			$wpdb->prepare (
 				"
-				SELECT group_slug, group_label, group_legend, initial_open, search_only
+				SELECT group_slug, group_label, group_legend, initial_open, search_only, sidebar_location
 				FROM $table
 				WHERE entity_slug = %s
 				ORDER BY group_order

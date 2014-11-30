@@ -17,7 +17,7 @@ abstract class WIC_Form_Parent  {
 
 	abstract protected function get_the_entity();
 	abstract protected function get_the_buttons();
-	abstract protected function get_the_header( &$data_array );
+	abstract protected function format_message ( &$data_array, $message );
 	abstract protected function get_the_formatted_control( $control_args );
 	abstract protected function get_the_legends( $sql = '' );
 	
@@ -34,28 +34,28 @@ abstract class WIC_Form_Parent  {
 
 		<form id = "<?php echo $this->get_the_form_id(); ?>" class="wic-post-form" method="POST" autocomplete = "on">
 
-			<div class = "wic-form-field-group wic-group-odd">
-			
-				<h2><?php echo esc_html( $this->get_the_header( $data_array ) ) ?></h2> 
+			<?php 
+			$message = $this->format_message ( $data_array, $message ); 
+			?>
 				
-				<div id="post-form-message-box" class = "<?php echo $this->message_level_to_css_convert[$message_level]; ?>" ><?php echo esc_html( $message ); ?></div>
+			<div id="post-form-message-box" class = "<?php echo $this->message_level_to_css_convert[$message_level]; ?>" ><?php echo esc_html( $message ); ?></div>
 			   
-			   <?php $buttons = $this->get_the_buttons(); 
-			   		echo $buttons;	?>			   
-			</div>   
+		   <?php $buttons = $this->get_the_buttons(); 
+		   		echo $buttons;	?>			   
 		
 			<?php
 			
-			$group_count = 0;
+			// set up buffers for field output[='] in two areas of the screen
+			$main_groups = '';
+			$sidebar_groups = '';
 			$groups = $this->get_the_groups();
 		   foreach ( $groups as $group ) {
+		   	// set up buffer for all group content
+				$group_output = '';
 				
 				if ( $this->group_screen( $group ) ) {				
-						   	
-					$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
-					$group_count++;
-					
-					echo '<div class = "wic-form-field-group ' . $row_class . '" id = "wic-field-group-' . esc_attr( $group->group_slug  ) . '">';				
+
+					$group_output .= '<div class = "wic-form-field-group" id = "wic-field-group-' . esc_attr( $group->group_slug  ) . '">';				
 					
 						$button_args = array (
 							'class'			=> 	'field-group-show-hide-button',		
@@ -65,32 +65,38 @@ abstract class WIC_Form_Parent  {
 							'show_initial' => 	$group->initial_open,
 						);
 				
-						echo $this->output_show_hide_toggle_button( $button_args );			
+						$group_output .= $this->output_show_hide_toggle_button( $button_args );			
 					
 						$show_class = $group->initial_open ? 'visible-template' : 'hidden-template';
-						echo '<div class="' . $show_class . '" id = "wic-inner-field-group-' . esc_attr( $group->group_slug ) . '">' .					
+						$group_output .= '<div class="' . $show_class . '" id = "wic-inner-field-group-' . esc_attr( $group->group_slug ) . '">' .					
 						'<p class = "wic-form-field-group-legend">' . esc_html ( $group->group_legend )  . '</p>';
 						
 						// here is the main content -- either   . . .
 						if ( $this->group_special ( $group->group_slug ) ) { // a hook to run a special group OR . . . 
 							$special_function = 'group_special_' . $group->group_slug;
-							$this->$special_function( $data_array );
+							$group_output .= $this->$special_function( $data_array );
 						} else {	// standard main form logic 	
 							$group_fields =  WIC_DB_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
-							$this->the_controls ( $group_fields, $data_array );
+							$group_output .= $this->the_controls ( $group_fields, $data_array );
 						}
 							
-					echo '</div></div>';	
+					$group_output .= '</div></div>';	
 					
 				} 
-  
+  				if ( $group->sidebar_location ) {
+					$sidebar_groups .= $group_output;  				
+  				} else {
+  					$main_groups .= $group_output;
+  				}
 		   } // close foreach group
+		
+			echo 	'<div id="wic-form-body">' . '<div id="wic-form-main-groups">' . $main_groups . '</div>' .
+					'<div id="wic-form-sidebar-groups">' . $sidebar_groups . '</div>' . '</div>';		
 		
 			$this->pre_button_messaging( $data_array );		
 		
 			// final button group div
-			$row_class = ( 0 == $group_count % 2 ) ? "wic-group-even" : "wic-group-odd";
-			echo '<div class = "wic-form-field-group ' . $row_class . '" id = "bottom-button-group">';?>
+			echo '<div class = "wic-form-field-group" id = "bottom-button-group">';?>
 				<?php	echo $buttons; // output second instance of buttons ?>  		 		
 		 		<?php wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); ?>
 				<?php echo $this->get_the_legends( $sql ); ?>
@@ -108,10 +114,11 @@ abstract class WIC_Form_Parent  {
 	}
 
 	protected function the_controls ( $fields, &$data_array ) {
+		$controls_output = '';
 		foreach ( $fields as $field ) {
-			echo '<div class = "wic-control" id = "wic-control-' . str_replace( '_', '-' , $field ) . '">' . $this->get_the_formatted_control ( $data_array[$field] ) . '</div>';
+			$controls_output .= '<div class = "wic-control" id = "wic-control-' . str_replace( '_', '-' , $field ) . '">' . $this->get_the_formatted_control ( $data_array[$field] ) . '</div>';
 		}	
-
+		return ( $controls_output );
 	}
 
 	protected function pre_button_messaging ( &$data_array ) {

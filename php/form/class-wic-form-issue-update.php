@@ -20,9 +20,9 @@ class WIC_Form_Issue_Update extends WIC_Form_Parent  {
 		return ( $this->create_wic_form_button ( $button_args_main ) ) ;
 	}
 	
-	protected function get_the_header ( &$data_array ) {
+	protected function format_message ( &$data_array, $message ) {
 		$title = $this->format_name_for_title ( $data_array );
-		return ( sprintf ( __('Update %1$s' , 'wp-issues-crm'), $title ) );
+		return ( sprintf ( __('Update %1$s. ' , 'wp-issues-crm'), $title ) . $message );
 	}
 
 	protected function get_the_formatted_control ( $control ) {

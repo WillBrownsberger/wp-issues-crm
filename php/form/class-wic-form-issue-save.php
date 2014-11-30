@@ -16,8 +16,8 @@ class WIC_Form_Issue_Save extends WIC_Form_Issue_Update  {
 		return ( $this->create_wic_form_button ( $button_args_main ) ) ;
 	}
 	
-	protected function get_the_header ( &$data_array ) {
-		return ( __('Save New Issue' , 'wp-issues-crm') );
+	protected function format_message ( &$data_array, $message ) {
+		return ( __('Save new issue. ' , 'wp-issues-crm') . $message );
 	}
 
 	protected function get_the_formatted_control ( $control ) {

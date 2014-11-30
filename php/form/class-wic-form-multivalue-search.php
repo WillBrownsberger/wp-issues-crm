@@ -25,7 +25,7 @@ class WIC_Form_Multivalue_Search extends WIC_Form_Parent  {
 	}
 	
 	protected function get_the_buttons(){}
-	protected function get_the_header ( &$data_array ) {}	
+	protected function format_message ( &$data_array, $message ) {}	
 	protected function get_the_formatted_control ( $control ) {
 		$args = array();
 		return ( $control->search_control( $args ) ); 
