@@ -184,13 +184,14 @@ abstract class WIC_Form_Parent  {
 		$new_form 					= 'n'; // go straight to a save
 		$button_class				= 'wic-form-button';
 		$button_label				= '';
+		$title						= '';
 	
 
 		extract ( $control_array_plus_class, EXTR_OVERWRITE );
 
 		$button_value = $entity_requested . ',' . $action_requested  . ',' . $id_requested  . ',' . $referring_parent . ',' . $new_form;
 	
-		$button =  '<button class = "' . $button_class . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . $button_label . '</button>';
+		$button =  '<button class = "' . $button_class . '" title = "' . $title . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . $button_label . '</button>';
 		return ( $button );
 	}
 

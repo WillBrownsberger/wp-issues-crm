@@ -15,14 +15,15 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 		$button_args_main = array(
 			'entity_requested'			=> 'constituent',
 			'action_requested'			=> 'form_update',
-			'button_label'					=> __('Update Constituent', 'wp-issues-crm')
+			'button_label'					=> __('Update', 'wp-issues-crm')
 		);	
 		return ( $this->create_wic_form_button ( $button_args_main ) ) ;
 	}
 	
 	protected function format_message ( &$data_array, $message ) {
 		$title = $this->format_name_for_title ( $data_array );
-		$formatted_message = sprintf ( __('Update %1$s. ' , 'wp-issues-crm'), $title ) ) . $message;
+		$formatted_message = sprintf ( __('Update %1$s. ' , 'wp-issues-crm'), $title )  . $message;
+		return ( $formatted_message );
 	}
 
 	protected function get_the_formatted_control ( $control ) {
@@ -31,16 +32,23 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 
 	protected function get_the_legends( $sql = '' ) {
 
-		$elements = WIC_DB_Dictionary::get_field_suffix_elements( $this->get_the_entity() );
 		$legend = '';
-		if ( reset( $elements )->required_individual ) {
-			$legend =  '<p class = "wic-form-legend">' . '* ' . __('Required field.', 'wp-issues-crm' )	 . '</p>';
-		}
-		if ( reset( $elements )->required_group ) {
-			$legend .=  '<p class = "wic-form-legend">' . '(+) ' . __('At least one among these fields must be supplied.', 'wp-issues-crm' )	 . '</p>';
+	
+		$individual_required_string = WIC_DB_Dictionary::get_required_string( "constituent", "individual" );
+		if ( '' < $individual_required_string ) {
+			$legend =   __('Required for save/update: ', 'wp-issues-crm' ) . $individual_required_string . '. ';
 		}
 		
-		if ( $sql > '' ) {
+		$group_required_string = WIC_DB_Dictionary::get_required_string( "constituent", "group" );
+		if ( '' < $group_required_string ) {
+			$legend .=   __('At least one among these fields must be supplied: ', 'wp-issues-crm' ) . $group_required_string . '. ';
+		}
+
+		if ( '' < $legend ) {
+			$legend = '<p class = "wic-form-legend">' . $legend . '</p>';		
+		}
+		
+		if ( '' < $sql ) {
 			$legend .= 	'<p class = "wic-form-legend">' . __('Search SQL was:', 'wp-issues-crm' )	 .  $sql . '</p>';	
 		}
 		return  $legend;
@@ -48,20 +56,16 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 	
 	protected function format_name_for_title ( &$data_array ) {
 		
-		// for title, use group email if have it, otherwise use individual email 
-	/*	$email_for_title = '';
-		if ( isset( $data_array['email_group'] ) ) {
-			$email_for_title = isset( $data_array['email_group'][0][1] ) ? $data_array['email_group'][0][1]  : '';
+		// construct title starting with first name
+		$title = 	$data_array['first_name']->get_value(); 
+		// if present, add last name, with a space if also have first name		
+		$title .= 	( '' == $data_array['last_name']->get_value() ) ? '' : ( ( $title > '' ? ' ' : '' ) . $data_array['last_name']->get_value() );
+		// if still empty and email may be available, add email 	
+		if ( '' == $title && isset( $data_array['email']->get_value()[0] ) ) {
+			$title = $data_array['email']->get_value()[0]->get_email_address();
 		} 
-		if ( '' == $email_for_title ) {
-			$email_for_title = isset( $data_array['email'] ) ? $data_array['email_group']  : ''; 
-		} */
-		
-   	// title is ln OR ln,fn OR fn OR email -- one of these is required in validation to be non-blank.	
-		$title = 	$data_array['last_name']->get_value();
-		$title .= 	$data_array['first_name']->get_value() > '' ? ( $title > '' ? ', ' : '' ) . $data_array['first_name']->get_value() : '';
-	//	$title =		( '' == $title ) ? $email_for_title : $title;
-		$title =		( '' == $title ) ? 'Constituent ' : $title;
+		// if still empty, insert word constitent
+		$title =		( '' == $title ) ? __( 'Constituent', 'wp-issues-crm' ) : $title;
 		
 		return  ( $title );
 	}

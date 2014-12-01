@@ -187,9 +187,6 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		$this->set_blank_first_row(); // needed for searching
 		$final_control_args = $this->default_control_args;
 		extract ( $final_control_args );
-		$field_label_suffix = $like_search_enabled ? '(%)' : '';
-		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' . $field_label_suffix . '</span>' : '';
-		 
 		$control = ( $field_label > '' && ! ( 1 == $hidden ) ) ? '<label class="' . esc_attr ( $label_class ) .
 				 ' ' . esc_attr( $field_slug_css ) . '" for="' . esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . '</label>' : '' ;		
 		
@@ -217,7 +214,6 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	private function save_update_control ( $save ) { // true/false corresponds to save/update
 		$final_control_args = $this->default_control_args;
 		extract ( $final_control_args );
-		$field_label_suffix = $this->set_required_values_marker ( $required );		
 		 
 		$form_to_call = ( $save ) ? 'save_row' : 'update_row';		 
 		 
@@ -225,7 +221,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 				 ' ' . esc_attr( $field_slug_css ) . '" for="' . esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
 		// create division opening tag 		
 		$control_set .= '<div id = "' . $this->field->field_slug . '-control-set' . '" class = "wic-multivalue-control-set">';
-		$control_set .= $this->create_add_button ( $this->field->field_slug, sprintf ( __( 'Add %s ', 'wp-issues-crm' ), $this->field->field_label ) . ' ' . $field_label_suffix ) ;
+		$control_set .= $this->create_add_button ( $this->field->field_slug, sprintf ( __( 'Add %s ', 'wp-issues-crm' ), $this->field->field_label )  ) ;
 		// create a hidden template row for adding rows in wic-utilities.js through moreFields() 
 		// moreFields will replace the string 'row-template' with row-counter index value after creating the new row
 		
@@ -261,11 +257,12 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 			'<button ' . 
 			' class = "row-add-button" ' .
 			' id = "' . esc_attr( $base ) . '-add-button" ' .
+			' title ="' . esc_attr(  $button_label ) . '"' .
 			' type = "button" ' .
 			' onclick="moreFields(\'' . esc_attr( $base ) . '\')" ' .
-			' >' . esc_html(  $button_label ) . '</button>'; 
+			' >+</button>'; 
 
-		return ($button);
+		return ( $button );
 	}
 
 	/*************************************************************************************

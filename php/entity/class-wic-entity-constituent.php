@@ -112,31 +112,31 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	private static $retrieve_limit_options = array ( 
 		array(
 			'value'	=> '10',
-			'label'	=>	'Up to 10 Records' ),
+			'label'	=>	'Up to 10' ),
 		array(
 			'value'	=> '50',
-			'label'	=>	'Up to 50 Records' ),
+			'label'	=>	'Up to 50' ),
 		array(
 			'value'	=> '100',
-			'label'	=>	'Up to 100 Records' ),
+			'label'	=>	'Up to 100' ),
 		array(
 			'value'	=> '500',
-			'label'	=>	'Up to 500 Records' ),
+			'label'	=>	'Up to 500' ),
 		array(
 			'value'	=> '1000',
-			'label'	=>	'Up to 1000 Records' ),
+			'label'	=>	'Up to 1000' ),
 		);
 
 	private static $match_level_options = array ( 
 		array(
 			'value'	=> '2',
-			'label'	=>	'Soundex matching permitted for names.' ),
+			'label'	=>	'Soundex' ),
 		array(
 			'value'	=> '1',
-			'label'	=>	'Right wild card for names.' ),
+			'label'	=>	'Right wild card' ),
 		array(
 			'value'	=> '0',
-			'label'	=>	'Strict match for all fields. ' ),
+			'label'	=>	'Strict' ),
 		);
 
 	private static $voter_status_options = array ( 

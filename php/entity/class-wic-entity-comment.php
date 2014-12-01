@@ -39,7 +39,7 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 			$known_emails_array[] = $email_entity->get_email_address();		
 		}
 		if (  0 == count ( $known_emails_array ) ) {
-			$output = '<h4>' . __( 'Cannot retrieve online activity without an email address', 'wp-issues-crm' ) . '</h4>';	
+			$output = '<br/><p class = "wic-form-field-group-legend">' . __( 'No online activity found for this constiutent.', 'wp-issues-crm' ) . '</p><br/>';	
 			return ( $output );	
 		}
 
@@ -53,7 +53,7 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 			)
 		);
 		$args = array (
-			'posts_per_page' =>-1,
+			'posts_per_page' =>25,
 			'ignore_sticky_posts' => true,
 			'meta_query' => $meta_query_args
 			);		
@@ -71,14 +71,15 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 			FROM wp_comments 
 			WHERE comment_author_email IN ( $where_string ) 
 			GROUP BY comment_post_ID
-			ORDER BY max( comment_date ) DESC			
+			ORDER BY max( comment_date ) DESC
+			LIMIT 0, 25			
 			", $known_emails_array ); 
 
 		$result = $wpdb->get_results ( $sql );
 		
 		// if neither posts nor comments, quit 
 		if ( 0 == count ( $result ) && ! $guest_post_list->have_posts() ) {
-			$output = '<h4>' . __( 'No online activity found.', 'wp-issues-crm' ) . '</h4>';
+			$output = '<br/><p class = "wic-form-field-group-legend">' . __( 'No online activity found for this constiutent.', 'wp-issues-crm' ) . '</p><br/>';
 			return ( $output );		
 		}
 
@@ -94,7 +95,7 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 							'<li class = "constituent-comment-date"> ' . 
 								date_i18n( 'Y-m-d', strtotime( $guest_post_list->post->post_date ) ) .', ' .
 							'</li>' . 
-							'<li class = "constituent-comment-issue">' . __( ' re ', 'wp-issues-crm' ) . 
+							'<li class = "constituent-comment-issue">' .
 								'<a href="' . esc_url( get_permalink( $guest_post_list->post->ID) ) .
 									 '" title = "' . __('View Comment in Issue Context', 'wp-issues-crm' ) .'">' . 
 										get_the_title( $guest_post_list->post->ID ) . 
@@ -111,9 +112,9 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 			$output .= '<li class = "constituent-comment-row">' . 
 				'<ul class = "constituent-comment-row" >' .
 					'<li class = "constituent-comment-date"> ' . 
-						date_i18n( 'Y-m-d', strtotime( $comment->comment_date ) ) . ', ' .
+						date_i18n( 'Y-m-d', strtotime( $comment->comment_date ) ) .
 					'</li>' . 
-					'<li class = "constituent-comment-issue">' . __( ' on ', 'wp-issues-crm' ) . 
+					'<li class = "constituent-comment-issue">' . 
 						'<a href="' . esc_url( get_comment_link( $comment->comment_ID ) ) .
 							 '" title = "' . __('View Comment in Issue Context', 'wp-issues-crm' ) .'">' . 
 								get_the_title( $comment->comment_post_ID ) . 
@@ -132,9 +133,10 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 		$list_button_args = array(
 			'entity_requested'	=> 'issue',
 			'action_requested'	=> 'id_search',
-			'button_class' 		=> 'wic-issue-link-button',
+			'button_class' 		=> 'wic-form-button wic-comment-issue-link-button',
 			'id_requested'			=> $id,
-			'button_label' 		=> __( 'View Issue', 'wp-issues-crm' )				
+			'button_label' 		=> __( 'Issue', 'wp-issues-crm' ),
+			'title'					=> __( 'View associated WIC issue (i.e., post).', 'wp-issues-crm' ),				
 			);			
 		return ( WIC_Form_Parent::create_wic_form_button( $list_button_args ) );		
 	}

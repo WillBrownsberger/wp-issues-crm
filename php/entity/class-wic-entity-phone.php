@@ -39,7 +39,7 @@ class WIC_Entity_Phone extends WIC_Entity_Multivalue {
 			'label'	=>	'Home' ),
 		array(
 			'value'	=> '1',
-			'label'	=>	'Mobile' ),
+			'label'	=>	'Cell' ),
 		array(
 			'value'	=> '2',
 			'label'	=>	'Work' ),

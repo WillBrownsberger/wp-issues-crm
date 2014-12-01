@@ -18,15 +18,12 @@ class WIC_Entity_Email extends WIC_Entity_Multivalue {
 	private static $email_type_options = array(	
 		array(
 			'value'	=> '0',
-			'label'	=>	'Personal' ),
+			'label'	=>	'Home' ),
 		array(
 			'value'	=> '1',
 			'label'	=>	'Work' ),
 		array(
 			'value'	=> '2',
-			'label'	=>	'Shared' ),
-		array(
-			'value'	=> '3',
 			'label'	=>	'Other' ),
 		);
 

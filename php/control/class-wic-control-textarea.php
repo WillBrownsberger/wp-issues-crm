@@ -12,7 +12,6 @@ class WIC_Control_Textarea extends WIC_Control_Parent {
 		$final_control_args = $this->default_control_args;
 		if ( ! $final_control_args['suppress_on_search'] ) {
 			$final_control_args['readonly'] = false;
-			$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
 			$final_control_args['value'] = $this->value;
 			$final_control_args['placeholder'] = '';
 			$control =  parent::create_control( $final_control_args ) ;
@@ -27,11 +26,10 @@ class WIC_Control_Textarea extends WIC_Control_Parent {
 		extract ( $control_args, EXTR_SKIP ); 
 	
 		$readonly = $readonly ? 'readonly' : '';
-		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 		 
 		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . esc_attr( $field_label ) . '</label>' : '' ;
 		$control .= '<textarea class="' . $input_class . ' ' .  esc_attr( $field_slug_css ) . '" id="' . esc_attr( $field_slug ) . '" name="' . esc_attr( $field_slug ) . '" type="text" placeholder = "' . 
-			esc_attr( $placeholder ) . '" ' . $readonly  . '/>' . esc_textarea( $value ) . '</textarea>' . $field_label_suffix_span;
+			esc_attr( $placeholder ) . '" ' . $readonly  . '/>' . esc_textarea( $value ) . '</textarea>';
 			
 		return ( $control );
 

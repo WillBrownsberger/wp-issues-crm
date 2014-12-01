@@ -24,7 +24,7 @@ class WIC_List_Parent {
 		);	
   	
   		// set up form
-		$output = '<div id="wid-post-list"><form method="POST">' . 
+		$output = '<div id="wic-post-list"><form method="POST">' . 
 			'<div class = "wic-post-field-group wic-group-odd">';
 			
 		if ( $wic_query->found_count < $wic_query->retrieve_limit ) {

@@ -52,7 +52,6 @@ function moreFields( base ) {
 	var newFields = document.getElementById( base + '[row-template]' ).cloneNode(true);
 	
 	/* set up row paragraph with  id and class */
-//	newFields.id = base + '-' + counter ;
 	newFields.id = base + '[' + counter + ']' ;
 	newFieldsClass = newFields.className; 
 	newFields.className = newFieldsClass.replace('hidden-template', 'visible-templated-row') ;
@@ -60,7 +59,10 @@ function moreFields( base ) {
 	/* walk child nodes of template and insert current counter value as index*/
 	replaceInDescendants ( newFields, 'row-template', counter, base);	
 
-	var insertHere = document.getElementById( base + '-row-counter' );
+//	var insertHere = document.getElementById( base + '-row-counter' );
+//	insertHere.parentNode.insertBefore( newFields, insertHere );
+
+	var insertHere = document.getElementById( base + '[row-template]' );
 	insertHere.parentNode.insertBefore( newFields, insertHere );
 }
 

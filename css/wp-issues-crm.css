@@ -2,15 +2,32 @@
 *
 *	Styling for wp-issues-crm output
 *
+*
 */
 
-/* override styling from responsive-tabs */
-#full-width-content-wrapper .wic-post-list li {
-	max-width: 100%;
+/*
+*
+* first, styles for main search/update/save form, from top to bottom
+*
+*/
+
+/* override browser system styling */
+input,
+button {
+	font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
 }
 
-#full-width-content-wrapper #wic-forms p {
-	max-width: 100%;
+/* override styling from responsive-tabs */
+#full-width-content-wrapper .wic-post-list li,
+#full-width-content-wrapper #wic-forms p,
+#full-width-content-wrapper p.wic-list-legend {
+	max-width: 1200px;
+}
+
+
+#wic-top-level-form {
+	/* assumes that containing theme will provide a little padding */
+	margin: 0;
 }
 
 /* top-level form button styling ( look like horizontal menu tabs )  */
@@ -30,15 +47,16 @@
 	background: #96928a;
 }
 
-.wic-form-button:hover
- {
+.wic-form-button:hover {
 	background: #D2CEC6;
 	color: black;
 }
 
 /* main form div wrapper -- wic-forms */
+/* set to live within 920px */
 #wic-forms {
 	border-bottom: 2px solid #999;
+	width: 920px;
 	max-width: 100%;
 	font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
 }
@@ -51,29 +69,28 @@
 	padding: 10px 0 10px 128px;
 }
 
+/* semantic colors for message */
 #post-form-message-box.wic-form-routine-guidance {
 	background: transparent;
 }
-
 #post-form-message-box.wic-form-errors-found {
 	background: #fae0e0;
 }
-
 #post-form-message-box.wic-form-search-notices {
 	background: #fff0aa;
 }
-
 #post-form-message-box.wic-form-good-news {
 	background: #e0fae0;
 }		
 
-/* form buttons */		
+/* positioning action buttons within form */
+/* 128 px is width of button plus button right margin, so this is a one button indent */		
 .wic-post-form .wic-form-button {
-	margin-left: 128px;
+	margin: 0 0 10px 128px;
 }
 
 #wic-post-form .second-position {
-	margin-left: 10px;
+	margin: 0 0 10px 10px;
 }
 
 
@@ -85,90 +102,48 @@
  
 #wic-form-main-groups {
 	display: inline-block;
-	width: 50%;
+	min-height: 640px;
+	overflow-x: hidden;
+	width: 640px;
 }
 #wic-form-sidebar-groups {
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
-	border-left: 1px solid red;
+	border-left: 1px solid #777;
 	display: inline-block;
-	padding: 0 10px;
+	height: 640px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding: 0 30px;
 	vertical-align: top;
-	width: 50%;	
-}
-
-/* headers for field groups */
-#wic-inner-field-group-contact-toggle-button {
-	display: none;
+	width: 280px;	
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*********************************************************************************************/
-
-
-#wic-post-list {
-	max-width: 100%;
-}
-
-
-
+/* field groups formatting */
 .wic-form-field-group {
-	padding: 0px 8px; 
+	margin: 0; 
 	max-width: 100%;
-}
-
-.wic-form-field-group h2 {
-	margin: 20px 0 0 200px;
-}
-
-h3.wic-form-field-group-label {
-	margin: 0 0 0 200px;
+	padding: 0;
 }
 
 .field-group-show-hide-button {
 	background: none;
 	border: 0;
-	color: #777;
+	color: #aaa;
 	cursor: pointer;
 	font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
 	font-size: 1.1em;
 	font-weight: 700;
-	margin: 0;
-	padding: 10px 0 10px 196px;
+	margin: 0 0 10px -3px;
+	padding: 0 0 0 0;
 	text-align: left;	
 	width: 100%
 }
 
 .field-group-show-hide-button:hover {
-	color: #aaa;
+	color: #777;
 }
 
 .show-hide-legend {
@@ -177,49 +152,42 @@ h3.wic-form-field-group-label {
 }
 p.wic-form-field-group-legend {
 	color: #777;
-	margin: 0 0 0 200px; 
+	font-size: 0.8em;
+	margin: 0 0 10px 0;
 }
 
+.wic-form-field-group-label {
+ 	color: #777;
+}
 
+/* no need for header for contact group */
+#wic-inner-field-group-contact-toggle-button {
+	display: none;
+}
 
+/* basic field styling */
 
+/* wrapper around each label/control pair */
+.wic-control {
+	margin: 0 0 10px 0; 
+}
 
-/* individual field formatting */
-.wic-label {
+.wic-multivalue-field-subgroup {
+	margin: 0 0 0 0;
+}
+
+label.wic-label {
+	color: #777;
 	display: inline-block;
+	font-size: 0.8em;
 	min-width: 120px;
-	color: #333;
+	margin-right: 8px;
+	padding: 0;
 	text-align: right;
 	vertical-align: top;
-	padding-right: 20px;
 }
 
-.wic-input-deleted {
-    display: none;
-}
-
-.wic-input-deleted-label {
-	background: #f6f6f6;
-	border: none;
-	color: #333;
-	cursor: pointer;
-	font-size: 0.8em;
-	margin: 0 8px 0 0; 
-}
-
-.wic-input-deleted-label:hover {
-	background: red;
-	color: white;
-	font-size: 1em;
-	font-weight: 700;
-	padding: 0 20px;
-}
-
-.add-button-spacer {
-	min-width: 180px;
-	display: inline-block;
-}
-
+/* as in the label between range of dates */
 .wic-label-2 {
 	display: inline-block;
 	color: #aaa;
@@ -230,27 +198,15 @@ p.wic-form-field-group-legend {
 .wic-multi-select-label:hover,
 .wic-label-2:hover,
 .wic-label:hover {
-	color: #999;
+	color: #333;
 	cursor: pointer;
 }
 
-.wic-legend {
-	color: #333;
-	margin: 0;
-	padding: 0;
-}
-
-.wic-control {
-	margin: 10px 0; 
-}
-.wic-multivalue-control-set {
-	display: inline-block;
-}
 .wic-input {
 	background: #ffffff;
 	border: 1px solid #f0f0f0;
-	min-width: 300px;
-	margin: 0 8px 4px 0;
+	font-size: 1.1em;
+	margin: 0 8px 0 0;
 } 
 
 select.wic-input {
@@ -274,10 +230,35 @@ select.wic-input:hover {
 }
 
 :-ms-input-placeholder {  
-   color: red;  
+   color: #aaa;  
 }
 
+/* style to line up with labels above it */
+.row-add-button {
+	background: #e0fae0;
+	border: none;
+	border-radius: 50%;
+	color: white;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 1.0em;
+	font-weight: 900;
+	margin: 0 0 0px -3px;
+	padding: 0 5px;
 
+}
+
+.row-add-button:hover {
+	background: green;
+	color: white;
+	font-size: 1.0em;
+} 
+
+/********************************************************
+* Individual field styling in constituent form
+*********************************************************/
+/* rows sized to add up to 540px in main area */
+/* name row */
 #wic-control-first-name,
 #wic-control-middle-name,
 #wic-control-last-name {
@@ -289,22 +270,60 @@ select.wic-input:hover {
 	display: none;
 }
 
-.wic-input.first-name,
+/* fn sized to lineup under second standard button */
+.wic-input.first-name {
+	width: 116px;
+	margin-bottom: 20px; /* spaces whole name row */
+}
+
 .wic-input.last-name {
-	min-width: 0;
-	width: 100px;
+	width: 236px;
 }
 
 .wic-input.middle-name {
-	min-width: 0;
-	width: 40px;
+	width: 114px;
 }
 
-.wic-input.email-address{
-	min-width: 0;
-	width: 240px;
+
+.wic-multivalue-block {
+	margin-bottom: 10px;
 }
 
+/* delete button for multi-rows  ( really a label )  */
+.wic-input-deleted-label {
+	background: #fae0e0;;
+	border: none;
+	color: #333;
+	cursor: pointer;
+	font-size: 1em;
+	font-weight: 700;
+	margin: 0 8px 0 0; 
+	padding: 0 2px 0 6px;
+}
+
+.wic-input-deleted-label:hover {
+	background: red;
+	color: white;
+
+}
+/* note -- this is a check box, manipulated by its label, the deleted 'x' */
+.wic-input-deleted {
+    display: none;
+}
+
+/* styling of field rows for fields that are added and removed */
+.hidden-template {
+	display: none;
+}
+
+.visible-template {
+	display: block;
+}
+
+
+
+
+/* standardize drop down width to a button width */
 .wic-input.mark-deleted,
 .wic-input.party,
 .wic-input.voter-status,
@@ -315,104 +334,76 @@ select.wic-input:hover {
 .wic-input.phone-type, 
 .wic-input.email-type {
 	cursor: pointer;
-	width: 75px;
-	min-width: 0px; 
+	width: 120px;
 } 
 
-.wic-input.post-author,
-.wic-label.post-author {
-	font-style: normal;
-}	
-
+/* make these a little smaller on update/save forms 
+* to allow room for delete button (27px) 
+*/
+#wic-form-constituent-save .wic-input.phone-type,
+#wic-form-constituent-save .wic-input.activity-type,
+#wic-form-constituent-save .wic-input.address-type,
+#wic-form-constituent-save .wic-input.email-type,
+#wic-form-constituent-update .wic-input.phone-type,
+#wic-form-constituent-update .wic-input.activity-type,
+#wic-form-constituent-update .wic-input.address-type,
+#wic-form-constituent-update .wic-input.email-type {
+	width: 93px;
+} 
 
 .wic-input.phone {
-	width: 120px;
-	min-width: 0px; 
+	width: 238px;
 }
 
+#wic-form-constituent-search .wic-input.phone {
+	margin-bottom: 20px; /* space row on search form */
+}
 
-.wic-input.extension,
-.wic-input.street-number,
-.wic-input.apartment {
-	width: 45px;
-	min-width: 0px; 
+.wic-input.extension {
+	width: 114px;
 } 
 
+.wic-input.address-line,
+.wic-input.email-address {
+	width: 362px;
+}
 
+#wic-form-constituent-search .wic-input.email-address,
+#wic-form-constituent-search .wic-input.city {
+	margin-bottom: 20px; /* space row on search form */
+}
 
-/*
-* Note: these display choices go along with decision in class-wic-db-access-wp.php
-*   not to support search by post-content.  The s parm in WP_Query searches title and content, so redundant. 
-*/
-
-#wic-form-issue-search .wic-label.post-title  {
+.wic-label.address-line {
 	display: none;
 }
-#wic-form-issue-search .wic-input.post-title  {
-	margin-left: 200px;
-}
 
-
-.wic-input.street-suffix {
-	width: 25px;
-	min-width: 0px;
-
-} 
-
-.wic-input.street-name {
-	width: 200px;
-	min-width: 0;
-}
-
-
-.wic-field-subgroup-activity_issue,
-.wic-field-subgroup-activity_note,
-.wic-field-subgroup-address_line_2 {
-	margin: 0 0 0 101px;
-}
-
+#wic-field-subgroup-activity,
+.wic-field-subgroup-activity,
 #wic-field-subgroup-activity_issue,
+.wic-field-subgroup-activity_issue,
 #wic-field-subgroup-activity_note,
-#wic-field-subgroup-address_line_2 {
-	margin: 0 0 0 83px;
+#wic-field-subgroup-address_line_1,
+.wic-field-subgroup-address_line_1 {
+	margin: 0 0 10px 0;
 }
- 
-.wic-input.city, 
-.wic-input.case-review-date,
-.wic-input.date-of-birth,
-.wic-input.reg-date, 
-.wic-input.activity-date {
-	width: 82px;
-	min-width: 0;
+
+
+.wic-field-subgroup-activity_note {
+	border-bottom: 1px dashed #ccc;
+	padding-bottom: 10px;
+	margin-bottom: 20px;
 }
- 
+
+
+/* with border and input padding = 120 */
+.wic-input.state,
 .wic-input.zip {
-	width: 80px;
-	min-width: 0;
-}
-
-
-/*
-.wic-multivalue-field-subgroup .wic-form-legend-flag {
-	 display: none;
-}*/
-
-.wic-multivalue-field-subgroup .wic-label {
-	 color: #777;
-	 font-size: 0.9em;
-	 vertical-align: bottom;
-}
-
-
-.wic-input.state {
-	width: 50px;
-	min-width: 0;
-}
-
-.wic-input.pro-con {
-	width: 80px;
-	min-width: 0px; 
+	width: 114px;
 } 
+/* plus 128 extends one further across grid */
+.wic-input.city {
+	width: 242px;
+}
 
 label.wic-label.activity-date {
 	display: inline-block;
@@ -422,72 +413,203 @@ label.wic-label.activity-date {
 	padding: 0 3px;
 }
 
+.wic-input.activity-date {
+	width: 135px;
+	min-width: 0;
+}
+
+/* widen it on update form since lose range and want to line up issue link button */
+#wic-form-constituent-update .wic-input.activity-date {
+	width: 188px;
+}
+
+.wic-field-subgroup-activity_issue .wic-input.issue,
+#wic-field-subgroup-activity_issue .wic-input.issue {
+	width: 366px;
+}
+
+.wic-form-button.wic-activity-issue-link-button {
+	margin: 0;
+}
+
+.wic-input.pro-con {
+	width: 120px;
+	min-width: 0px; 
+} 
+
 input.wic-input.activity-note, 
 textarea.wic-input.activity-note {
-	width: 384px;
+	width: 488px;
 	min-width: 0px;
 }
 
-.wic-input-checked:hover, 
-.wic-input:hover {
-	border: 1px solid #ccc;
+/* only show mark deleted on update form */
+#wic-form-constituent-save .mark-deleted,
+#wic-form-constituent-search .mark-deleted {
+	display: none;
 }
 
-.wic-input-checked {
-	background: #fcfcfc;
-	border: none;
+/* no need to show online comments group in search mode */ 
+#wic-form-constituent-search #wic-field-group-comment {
+	display: none;
+} 
+
+#wic-field-group-comment {
+	margin: 10px 0 10px 128px;
 }
 
-
-.wic-address-type-dropdown,
-.wic-phone-type-dropdown,  
-.wic-email-type-dropdown {
-	min-width: 180px;
-	background: none;
-	cursor: pointer;
-	font-size: 1em;
-	padding-right: 10px;
-	text-align: right;
+/* format comment list, shown only on update screen */
+li.comment-issue-link,
+li.constituent-comment-date,
+li.constituent-comment-issue {
+	display: inline-block;
+	color: #777;
 }
 
-.wic-address-type-dropdown:hover,
-.wic-phone-type-dropdown:hover,  
-.wic-email-type-dropdown:hover {
-	background:none; 
+li.constituent-comment-date {
+	vertical-align: top;
+	width: 120px;
+}
+
+li.constituent-comment-issue {
+	width: 320px;
+}
+
+li.constituent-comment-date {
+	margin-right: 8px; 
+}
+
+ul.constituent-comment-row,
+ul#constituent-comment-list {
+	list-style: none;
+	margin: 10px 0 0 0 ;
+	padding: 0;
+}
+
+.wic-form-button.wic-comment-issue-link-button {
+	font-size: 0.8em;
+	line-height: 16px;
+	margin: 0 0 0 2px;	
+	width: initial;
+}
+
+/* bottom of screen legends */
+.wic-form-legend,
+.wic-list-legend {
 	color: #999;
-	
+	font-size: .8em;
+}
+.wic-form-legend {
+	margin: 10px 0 10px 128px;
 }
 
 
-#wic-issue-post-edit-link {
-	
+/*******************************************************
+*
+* Styling of sidebar controls area 
+*
+********************************************************/
+
+#wic-form-sidebar-groups .field-group-show-hide-button {
+	font-size: 1em;
+	margin: 10px 0 10px -3px;
 }
 
-.wic-input.post-content{
-	height: 200px;
-	width: 600px;
+#wic-form-sidebar-groups #wic-inner-field-group-search_parms-toggle-button {
+	margin: 0 0 10px -3px;
+	padding: 0;
 }
 
+#wic-field-group-search_parms {
+	margin: 0;
+}
+
+
+#wic-form-sidebar-groups .wic-label {
+	color: #777;
+	display: block;
+	font-size: 0.8em;
+	margin: 0;
+	padding: 0;
+	text-align: left;
+}
+
+#wic-form-sidebar-groups .wic-label:hover {
+	color: #333;
+	cursor: pointer;
+}
+
+
+#wic-form-sidebar-groups .wic-input {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	background: #ffffff;
+	border: 1px solid #f0f0f0;
+	font-size: 0.9em;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+} 
+
+#wic-form-sidebar-groups select {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	width: 100%;
+}
+
+#wic-form-issue-search #wic-form-sidebar-groups .wic-input.post-date,
+#wic-form-issue-search #wic-form-sidebar-groups .wic-input.review-date,
+#wic-form-constituent-search #wic-form-sidebar-groups .wic-input.case-review-date,
+#wic-form-constituent-search #wic-form-sidebar-groups .wic-input.date-of-birth,
+#wic-form-constituent-search #wic-form-sidebar-groups .wic-input.reg-date {
+	width: 82px;
+	min-width: 0;
+}
+
+/*******************************************************
+*
+* Additional styling for issues forms
+*
+*******************************************************/
+#wic-inner-field-group-issue_content-toggle-button,
+#wic-inner-field-group-issue_classification-toggle-button {
+	display: none;
+}
+
+/*
+* Note: these display choices go along with decision in class-wic-db-access-wp.php
+*   not to support search by post-content.  The s parm in WP_Query searches title and content, so redundant. 
+*/
+
+#wic-form-issue-search .wic-label.post-title  {
+	display: none;
+}
+
+#wic-form-issue-search #post_title {
+	margin: 0 0 0 128px;
+}
+
+.wic-input.post-title,
+.wic-input.tags-input {
+	width: 360px;
+}
+
+/* styling for multiselect category controls */
+.wic-multivalue-control-set {
+	display: inline-block;
+}
 
 div.wic_multi_select {
 	display: inline-block;
 	background: #ffffff;
-	height: 150px;
+	border: 1px solid #f0f0f0;
+	height: 300px;
 	overflow-y: scroll;
 	margin: 0 0 0 0;
-	padding:0;
-}
-
-textarea#notes.wic-input.notes {
-	background: #f0f0f0;
-	width: 800px;
-}
-.wic-multi-select-group-label {
-	display: inline-block;
-	min-width: 180px;
-	color: #333;
-	text-align: right;
-	vertical-align: top;
+	padding: 20px 0;
+	width:  360px;
 }
 
 .wic_multi_select_item {
@@ -504,7 +626,7 @@ textarea#notes.wic-input.notes {
 	color: #333;	
 	cursor: pointer;
 	display: inline-block;
-	width: 250px;
+	width: 280px;
 	vertical-align: top;
 	padding-left: 20px;
 	-webkit-box-sizing: border-box;
@@ -513,11 +635,9 @@ textarea#notes.wic-input.notes {
 
 }
 
-
 .wic-multi-select-depth-1 {
 	padding-left: 20px;
 }
-
 
 .wic-multi-select-depth-2 {
 	padding-left: 40px;
@@ -541,124 +661,32 @@ textarea#notes.wic-input.notes {
 
 #wic-issue-post-edit-link {
 	display: block;
-	margin: 10px 0 20px 208px;
+	margin: 10px 0 20px 128px;
 	font-size: 0.8em;
 
 }
 
+/* prevent generic styling from overriding wic styling */
+.wic-input.post-author,
+.wic-label.post-author {
+	font-style: normal;
+}	
 
-
-#wic-post-content {
-	 
-}
-.wic-wic-post-content {
-		height: 100px; 
-		width: 600px;
-}
-
-#wic-old-wic-post-content {
-		background: #f6f6f6;
-		margin-left: 200px;
-		width: 600px; 
-}
-
-.wic-notes-entry {
-	padding: 20px 10px 40px 10px;
-} 
-
-.wic-notes-entry:nth-of-type(2n+1){
-	background: #fafafa;
-}
-
-.wic-notes-entry:nth-of-type(2n){
-	background: #f3f3f3;
-}
-
-.wic-notes-header {
-	background: #eee
-	color: #333;
-}
-
-.wic-notes-author,
-.wic-notes-date {
-	display: inline;
-}
-
-.wic-notes-date {
-	padding-left: 4px;
-}
-.wic-notes-content{
-	margin: 20px 0 0 0px;
-}
-
-.wic-back-end-link {
-	margin: 0 0 0 200px; 
-}
-
-/* style to line up with labels above it */
-.row-add-button {
-	background: none;
-	border: none;
-	color: #333;
-	cursor: pointer;
-	display: inline-block;
-	font-size: 0.7em;
-	margin: 0 0 4px -3px;
-	padding: 0;
-}
-
-.row-add-button:hover {
-	background: #C6C2BA;
-	color: white;
-	font-size: 1.0em;
-	font-weight: 700;	
-} 
-
-
-.wic-form-field-group-label {
- 	color: #777;
-}
-
-.wic-form-field-group-legend {
-	font-size: 0.8em;
-}
-
-.wic-form-legend-flag,
-.wic-form-legend,
-.wic-list-legend {
-	color: #999;
-	font-size: .8em;
-}
-.wic-form-legend {
-	margin: 10px 0 10px 200px;
+.wic-input.post-content{
+	height: 300px;
+	width: 360px;
 }
 
 
-.wic-list-legend {
-	margin: 10px 0;
-}
-
-#full-width-content-wrapper p.wic-list-legend {
-	max-width: 1200px;
-}
-
-/* styling of field rows */
-.hidden-template {
-	display: none;
-}
-
-.visible-template {
-	display: block;
-}
-
-/* 
+/***************************************************************** 
 *
-* constituent list styling 
+* constituent and issue list styling 
 *
-*/
+******************************************************************/
 
 /* outer ul for whole list */
 .wic-post-list {
+	font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
 	list-style: none;
 	margin: 0;
 	padding-left: 0px;
@@ -762,24 +790,6 @@ button.wic-post-list-button
 	width: 100%;
 }
 
-li.comment-issue-link,
-li.constituent-comment-date,
-li.constituent-comment-issue {
-	display: inline-block;
-	color: #555;
-}
-
-li.constituent-comment-date {
-	margin-right: 4px; 
-}
-
-ul.constituent-comment-row,
-ul#constituent-comment-list {
-	list-style: none;
-}
-#constituent-comment-list {
-	margin-left: 120px; 
-}
 
 ul.wic-post-list-line {
  	
@@ -817,6 +827,11 @@ ul.wic-post-list-line {
 .pl-search_log-serialized_search_array{ width:45%;}
 .pl-search_log-download-time{ width:20%;}
 
+
+
+.wic-list-legend {
+	margin: 10px 0;
+}
 
 
 

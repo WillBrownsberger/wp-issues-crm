@@ -98,7 +98,6 @@ abstract class WIC_Control_Parent {
 		$final_control_args = $this->default_control_args;
 		if ( ! $final_control_args['suppress_on_search'] ) {
 			$final_control_args['readonly'] = false;
-			$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
 			$final_control_args['value'] = $this->value;
 			$control =  static::create_control( $final_control_args ) ;
 			return ( $control ) ;
@@ -108,7 +107,6 @@ abstract class WIC_Control_Parent {
 	public function save_control () {
 		$final_control_args = $this->default_control_args;
 		if( ! $final_control_args['readonly'] ) {
-			$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
 	    	$class_name = 'WIC_Entity_' . $this->field->entity_slug;
 			$set_default = $this->field->field_slug . '_set_default';
 			if ( method_exists ( $class_name, $set_default ) ) { 
@@ -122,7 +120,6 @@ abstract class WIC_Control_Parent {
 	
 	public function update_control () { 
 		$final_control_args = $this->default_control_args;
-		$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
 		$final_control_args['value'] = $this->value;
 		return ( static::create_control( $final_control_args )  );	
 	}
@@ -141,23 +138,15 @@ abstract class WIC_Control_Parent {
 
 		$readonly = $readonly ? 'readonly' : '';
 		$type = ( 1 == $hidden ) ? 'hidden' : 'text';
-		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' . $field_label_suffix . '</span>' : '';
 		 
 		$control = ( $field_label > '' && ! ( 1 == $hidden ) ) ? '<label class="' . esc_attr ( $label_class ) .
 				 ' ' . esc_attr( $field_slug_css ) . '" for="' . esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . '</label>' : '' ;
 		$control .= '<input class="' . esc_attr( $input_class ) . ' ' .  esc_attr( $field_slug_css ) . '" id="' . esc_attr( $field_slug )  . 
 			'" name="' . esc_attr( $field_slug ) . '" type="' . $type . '" placeholder = "' .
-			 esc_attr( $placeholder ) . '" value="' . esc_attr ( $value ) . '" ' . $readonly  . '/>' . $field_label_suffix_span; 
+			 esc_attr( $placeholder ) . '" value="' . esc_attr ( $value ) . '" ' . $readonly  . '/>'; 
 			
 		return ( $control );
 
-	}
-
-	protected function set_required_values_marker ( $required ) {
-		$required_individual = ( 'individual' == $required ) ? '*' : '';
-		$required_group = ( 'group' == $required ) ? '(+)' : '';
-		// won't actually be both, but may be one or the other
-		return ( $required_individual . $required_group );  
 	}
 
 
@@ -315,6 +304,12 @@ abstract class WIC_Control_Parent {
 				 $this->field->field_slug ) ); 		
 		}				
  
+		if ( '' < $this->field->secondary_alpha_search ) { // exists to support address_line search by street name without full text scanning 
+ 			if ( ! is_numeric ( $this->value[0] ) ) {
+				$key = $this->field->secondary_alpha_search; 			
+ 			}
+		} 
+ 
 		$query_clause =  array ( // double layer array to standardize a return that allows multivalue fields
 				array (
 					'table'	=> $this->field->entity_slug,
@@ -341,6 +336,7 @@ abstract class WIC_Control_Parent {
 					'value'	=> $this->value,
 					'wp_query_parameter' => $this->field->wp_query_parameter,
 					'soundex_enabled' => ( 2 == $this->field->like_search_enabled ),
+					'secondary_alpha_search' => $this->field->secondary_alpha_search,
 			);
 			return ( $update_clause );
 		}

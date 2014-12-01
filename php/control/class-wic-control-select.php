@@ -9,7 +9,6 @@ class WIC_Control_Select extends WIC_Control_Parent {
 		$final_control_args = $this->default_control_args;
 		if ( ! $final_control_args['suppress_on_search'] ) {
 			$final_control_args['readonly'] = false;
-			$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
 			$final_control_args['value'] = $this->value;
 			$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );
 			$final_control_args['required'] = ''; // fields never required on search; set explicitly here for correct result in create_options_array
@@ -20,7 +19,6 @@ class WIC_Control_Select extends WIC_Control_Parent {
 	
 	public function update_control () {
 		$final_control_args = $this->default_control_args;
-		$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
 		$final_control_args['value'] = $this->value;
 		if ( $this->field->readonly ) {	
 			$final_control_args['readonly_update'] = 1 ; // lets control know to only show the already set value if readonly
@@ -34,7 +32,6 @@ class WIC_Control_Select extends WIC_Control_Parent {
 	public function save_control () {
 		$final_control_args = $this->default_control_args;
 		if( ! $final_control_args['readonly'] ) {
-			$final_control_args['field_label_suffix'] = $this->set_required_values_marker ( $final_control_args['required'] );
 	    	$class_name = 'WIC_Entity_' . $this->field->entity_slug;
 			$set_default = $this->field->field_slug . '_set_default';
 			if ( method_exists ( $class_name, $set_default ) ) { 
@@ -80,8 +77,6 @@ class WIC_Control_Select extends WIC_Control_Parent {
 		
 		extract ( $control_args, EXTR_SKIP ); 
 
-		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
-
 		$control = '';
 		
 		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . 
@@ -99,7 +94,7 @@ class WIC_Control_Select extends WIC_Control_Parent {
 				$r .= '<option value="' . esc_attr( $option['value'] ) . '">' . esc_html( $label ) . '</option>';
 			}
 		}
-		$control .=	$p . $r .	'</select>' . $field_label_suffix_span;
+		$control .=	$p . $r .	'</select>';
 		return ( $control );
 	
 	}

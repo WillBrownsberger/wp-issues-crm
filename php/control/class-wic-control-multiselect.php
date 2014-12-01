@@ -14,8 +14,6 @@ class WIC_Control_Multiselect extends WIC_Control_Select {
 		// expects multivalue $value in form of array with $value1 => 1, $value2 => 1 . . . as will come back from form
 
 		extract ( $control_args, EXTR_OVERWRITE ); 
-		
-		$field_label_suffix_span = ( $field_label_suffix > '' ) ? '<span class="wic-form-legend-flag">' .$field_label_suffix . '</span>' : '';
 
 		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . esc_attr( $field_label ) . '</label>' : '' ;
 
@@ -31,7 +29,6 @@ class WIC_Control_Multiselect extends WIC_Control_Select {
 					'input_class'			=> 'wic-multi-select-checkbox ', 
 					'value'					=> isset ( $value[$option['value']] ), 	
 					'readonly'				=>	false,
-					'field_label_suffix'	=> '',						
 				);	
 				if ( isset ( $value[$option['value']] ) ) {
 					$control .= '<p class = "wic_multi_select_item" >' . WIC_Control_Checked::create_control($args) . '</p>';

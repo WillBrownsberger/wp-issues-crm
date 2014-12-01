@@ -58,7 +58,7 @@ class WIC_Dashboard_Main {
 	}
 
 	private function show_top_menu_buttons ( $class_requested, $action_requested ) {
-		echo '<form id = "top-level-form" method="POST" autocomplete = "on">';
+		echo '<form id = "wic-top-level-form" method="POST" autocomplete = "on">';
 		wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); 
 
 		$top_menu_buttons = array (

@@ -85,9 +85,13 @@ abstract class WIC_Entity_Parent {
 	private function update_ready( $save ) { // true is save, false is update
 		// runs all four sanitize/validate functions
 		$this->sanitize_values();
-		$this->dup_check ( $save );
 		$this->validate_values();
 		$this->required_check();
+		// do dup check last -- required fields are part of dup check
+		// outcome starts as empty string, set to false if validation or required errors
+		if ( '' === $this->outcome ) {		
+			$this->dup_check ( $save );
+		}
 	}
 	
 	public function sanitize_values() {
@@ -128,7 +132,7 @@ abstract class WIC_Entity_Parent {
 						// for save, dups are never OK
 				$this->outcome = false;
 				$dup_check_string = WIC_DB_Dictionary::get_dup_check_string ( $this->entity );
-				$this->explanation .= sprintf ( __( 'Other records found with same combination of %s' , 'wp-issues-crm' ), $dup_check_string );
+				$this->explanation .= sprintf ( __( 'Other records found with same combination of %s.' , 'wp-issues-crm' ), $dup_check_string );
 				$this->outcome_dups = true;
 				$this->outcome_dups_query_object = $wic_query;		
 			}
@@ -144,7 +148,7 @@ abstract class WIC_Entity_Parent {
 		if ( $validation_errors > '' ) {
 			$this->outcome = false;		
 			$this->explanation .= $validation_errors;
-			return ( $validation_errors . sprintf( __( ' (Message from %1$s object, instance %2$s.) ', 'wp-issues-crm' ), 
+			return ( $validation_errors . sprintf( __( ' ( Message from %1$s object, instance %2$s. ) ', 'wp-issues-crm' ), 
 				$this->entity, $this->entity_instance + 1 ) );		
 		} else {
 			return ('');		
@@ -164,8 +168,8 @@ abstract class WIC_Entity_Parent {
 			}
 		}
 		// report cross-control group required result
-		if ( $there_is_a_required_group && ! $a_required_group_member_is_present ) {		
-			$required_errors .= sprintf ( __( ' At least one among %s is required. ', 'wp-issues-crm' ), WIC_DB_Dictionary::get_group_required_string( $this->entity ) );
+		if ( $there_is_a_required_group && ! $a_required_group_member_is_present ) {	
+			$required_errors .= sprintf ( __( ' At least one among %s is required. ', 'wp-issues-crm' ), WIC_DB_Dictionary::get_required_string( $this->entity, "group" ) );
 		}
 		if ( $required_errors > '' ) {
 			$this->outcome = false;
@@ -208,7 +212,7 @@ abstract class WIC_Entity_Parent {
 
 	protected function new_form_generic( $form, $guidance = '' ) {
 		if ( '' == $guidance ) {
-			$guidance = __( 'Enter data and search. If record not found, you will be able to save.', 'wp-issues-crm');		
+			$guidance = __( 'If record not found, you will be able to save.', 'wp-issues-crm');		
 		}
 		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
 		$this->initialize_data_object_array();
@@ -274,7 +278,7 @@ abstract class WIC_Entity_Parent {
 		// retrieve record if found, otherwise error
 
 		if ( 1 == $wic_query->found_count ) {
-			$message = __( 'Record found. You can update.', 'wp-issues-crm' );
+			$message = __( '', 'wp-issues-crm' );
 			$message_level =  'guidance';
 			$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
 			$this->initialize_data_object_array();	
@@ -312,7 +316,7 @@ abstract class WIC_Entity_Parent {
 	protected function handle_search_results ( $wic_query, $save_form, $update_form ) {
 		$sql = $wic_query->sql;
 		if ( 0 == $wic_query->found_count ) {
-			$message = __( 'No matching record found -- try a save?', 'wp-issues-crm' );
+			$message = __( 'No matching record found.', 'wp-issues-crm' );
 			$message_level =  'guidance';
 			$form = new $save_form;
 			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );			

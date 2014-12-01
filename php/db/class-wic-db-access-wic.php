@@ -110,7 +110,8 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 				$where .= " AND $table.$field_name like %s ";
 				$values[] = '%' . $wpdb->esc_like ( $where_item['value'] )  . '%';
 			} elseif ( 'sound' == $compare ) {
-				$where .= " AND $table.$field_name like concat(soundex( %s ), '%%') ";
+//				$where .= " AND $table.$field_name like concat(soundex( %s ), '%%') ";
+				$where .= " AND $table.$field_name = soundex( %s ) ";
 				$values[] = $wpdb->esc_like ( $where_item['value'] );
 			} elseif ( 'BETWEEN' == $compare ) { // date range
 				$where .= " AND $table.$field_name >= %s AND $table.$field_name <= %s" ;  			
@@ -176,6 +177,14 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 				if ( $save_update_clause['soundex_enabled'] ) {
 					$set_clause_with_placeholders .= ', ' . $save_update_clause['key'] . '_soundex = soundex( %s ) '; 		
 					$set_value_array[] = $save_update_clause['value'];
+				}
+				if ( ''< $save_update_clause['secondary_alpha_search'] ) {
+					// this supports address line being indexed by street name -- assumes address line begins with number/suffix and then a space
+					// may entrain apartment number, but not a problem if searching this field on a right wild card basis.
+					$set_clause_with_placeholders .= ', ' . $save_update_clause['secondary_alpha_search'] . ' = %s ';
+					$first_space = strpos( $save_update_clause['value'], ' ' );	
+					$probable_alpha_value = trim ( substr ( $save_update_clause['value'], $first_space ) );
+					$set_value_array[] = $probable_alpha_value;
 				}
 			} else { 
 				$entity_id = $save_update_clause['value'];

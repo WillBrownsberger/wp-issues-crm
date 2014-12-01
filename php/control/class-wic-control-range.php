@@ -12,7 +12,6 @@ class WIC_Control_Range extends WIC_Control_Parent {
 	public function search_control () { // no option to suppress on search -- don't use a range control if suppressing on search
 		$final_control_args = $this->default_control_args;
 		$final_control_args['readonly'] = false;
-		$final_control_args['field_label_suffix'] = $final_control_args['like_search_enabled'] ? '(%)' : '';
 		$final_control_args['value'] = $this->value;
 		$field_slug_base = $final_control_args['field_slug'];
 		$final_control_args['field_slug'] = $field_slug_base . '[lo]';	
@@ -74,6 +73,7 @@ class WIC_Control_Range extends WIC_Control_Parent {
 						$this->value_hi,
 						),
 					'compare'=> 'BETWEEN',
+					'wp_query_parameter' => $this->field->wp_query_parameter,
 					)
 				);
 		} elseif ( $this->value_lo > '' ) {
@@ -83,6 +83,7 @@ class WIC_Control_Range extends WIC_Control_Parent {
 					'key' => $this->field->field_slug,
 					'value'	=> $this->value_lo,
 					'compare'=> '>',
+					'wp_query_parameter' => $this->field->wp_query_parameter,
 					)
 				);
 		} elseif ( $this->value_hi > '' ) {
@@ -92,6 +93,7 @@ class WIC_Control_Range extends WIC_Control_Parent {
 					'key' => $this->field->field_slug,
 					'value'	=> $this->value_hi,
 					'compare'=> '<',
+					'wp_query_parameter' => $this->field->wp_query_parameter,
 					)
 				);
 		}

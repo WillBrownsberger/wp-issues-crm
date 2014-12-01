@@ -29,15 +29,27 @@ class WIC_Form_Constituent_Search extends WIC_Form_Parent  {
 	}
 
 	protected function get_the_legends( $sql = '' ) {
-		$elements = WIC_DB_Dictionary::get_field_suffix_elements( $this->get_the_entity() );
+
 		$legend = '';
-		// selects single first array, the key for which may be 0, 1 or 2 -- same as the first value in the row
-		if ( reset( $elements)->like_search_enabled ) {
-			$legend = '<p class = "wic-form-legend">' . '(%) ' .  __( 'Soundex and/or wildcard search enabled for these fields -- you can require strict match under search options. ' , 'wp-issues-crm' ) . '</p>';
-		}	
-		if ( $sql > '' ) {
-			$legend .= 	'<p class = "wic-form-legend">' . __('Search SQL was:', 'wp-issues-crm' )	 .  $sql . '</p>';	
-		}		
-		return ( $legend );
+	
+		$soundex_string = WIC_DB_Dictionary::get_match_type_string( "constituent", "2" );
+		if ( '' < $soundex_string ) {
+			$legend =  sprintf ( __( '%s will be searched using Soundex matching. ', 'wp-issues-crm' ), $soundex_string );
+		}
+		
+		$like_string = WIC_DB_Dictionary::get_match_type_string( "constituent", "1" );
+		if ( '' < $like_string ) {
+			$legend .=  sprintf ( __( '%s will be searched using right wild card matching. ', 'wp-issues-crm' ), $like_string );
+		}
+
+		if ( '' < $legend ) {
+			$legend = '<p class = "wic-form-legend">' . $legend . 
+					__( 'These settings may be overridden -- set search options on this screen. 
+						Text area fields ( like activity notes ) are	always searched using a full text scan.', 
+						'wp-issues-crm') 
+			. '</p>';		
+		}
+
+		return  $legend;
 	}
 }

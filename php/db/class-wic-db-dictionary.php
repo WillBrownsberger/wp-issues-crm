@@ -294,21 +294,43 @@ class WIC_DB_Dictionary {
 	}
 
 	// return string of required fields for required error message
-	public static function get_group_required_string ( $entity ) {
-		global $wpdb;
-		$table = $wpdb->prefix . 'wic_data_dictionary';
-		$group_required_string = $wpdb->get_row( 
-			$wpdb->prepare (
-					"
-					SELECT group_concat( field_label SEPARATOR ', ' ) AS group_require_string
-					FROM $table 
-					WHERE entity_slug = %s and required = 'group' 
-					"				
-					, array ( $entity )
-					)
-				, OBJECT );
+	public static function get_required_string ( $entity, $type ) {
+
+		global $wp_issues_crm_field_rules_cache;
+		
+		$required_string = array();
+		foreach ( $wp_issues_crm_field_rules_cache as $field_rule ) {
+			if ( $entity == $field_rule->entity_slug && $type == $field_rule->required )  {
+				$required_string[] = $field_rule->field_label;
+			}		
+		}
+		$required_string_scalar = implode ( ', ', $required_string );
+		
+		return ( $required_string_scalar );	
+		
+	}	
 	
-		return ( trim( $group_required_string->group_required_string, "," ) ); 
-	}
+	public static function get_match_type_string ( $entity, $type ) {
+
+		global $wp_issues_crm_field_rules_cache;
+		
+		$match_type_string = array();
+		foreach ( $wp_issues_crm_field_rules_cache as $field_rule ) {
+			if ( $entity == $field_rule->entity_slug && $type == $field_rule->like_search_enabled )  {
+				$match_type_string[] = $field_rule->field_label;
+			}	
+			if ( $entity == $field_rule->entity_slug && 'multivalue' == $field_rule->field_type )  {
+				foreach ( $wp_issues_crm_field_rules_cache as $field_rule2 ) {
+					if ( $field_rule->field_slug == $field_rule2->entity_slug && $type == $field_rule2->like_search_enabled )  {
+						$match_type_string[] = $field_rule2->field_label;
+					}
+				}
+			}	
+		}
+		$match_type_string_scalar = implode ( ', ', $match_type_string );
+		
+		return ( $match_type_string_scalar );	
+		
+	}	
 
 }

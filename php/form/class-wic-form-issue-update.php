@@ -31,16 +31,23 @@ class WIC_Form_Issue_Update extends WIC_Form_Parent  {
 
 	protected function get_the_legends( $sql = '' ) {
 
-		$elements = WIC_DB_Dictionary::get_field_suffix_elements( $this->get_the_entity() );
 		$legend = '';
-		if ( reset( $elements )->required_individual ) {
-			$legend =  '<p class = "wic-form-legend">' . '* ' . __('Required field.', 'wp-issues-crm' )	 . '</p>';
-		}
-		if ( reset( $elements )->required_group ) {
-			$legend .=  '<p class = "wic-form-legend">' . '(+) ' . __('At least one among these fields must be supplied.', 'wp-issues-crm' )	 . '</p>';
+	
+		$individual_required_string = WIC_DB_Dictionary::get_required_string( "issue", "individual" );
+		if ( '' < $individual_required_string ) {
+			$legend =   __('Required for save/update: ', 'wp-issues-crm' ) . $individual_required_string . '. ';
 		}
 		
-		if ( $sql > '' ) {
+		$group_required_string = WIC_DB_Dictionary::get_required_string( "issue", "group" );
+		if ( '' < $group_required_string ) {
+			$legend .=   __('At least one among these fields must be supplied: ', 'wp-issues-crm' ) . $group_required_string . '. ';
+		}
+
+		if ( '' < $legend ) {
+			$legend = '<p class = "wic-form-legend">' . $legend . '</p>';		
+		}
+		
+		if ( '' < $sql ) {
 			$legend .= 	'<p class = "wic-form-legend">' . __('Search SQL was:', 'wp-issues-crm' )	 .  $sql . '</p>';	
 		}
 		return  $legend;

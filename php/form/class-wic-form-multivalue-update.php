@@ -28,7 +28,7 @@ class WIC_Form_Multivalue_Update extends WIC_Form_Multivalue_Search  {
 		$groups = $this->get_the_groups();
 		$class = ( 'row-template' == $this->entity_instance ) ? 'hidden-template' : 'visible-templated-row';
 		$search_row = '<div class = "'. $class . '" id="' . $this->entity . '[' . $this->entity_instance . ']">';
-		$search_row .= '<div id="wic-multivalue-block">';
+		$search_row .= '<div class="wic-multivalue-block">';
 			foreach ( $groups as $group ) { 
 				 $search_row .= '<div class = "wic-multivalue-field-subgroup wic-field-subgroup-' . esc_attr( $group->group_slug ) . '">';
 						$group_fields = WIC_DB_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
