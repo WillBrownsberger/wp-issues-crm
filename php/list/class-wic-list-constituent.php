@@ -12,6 +12,7 @@ class WIC_List_Constituent extends WIC_List_Parent {
 	/*
 	*
 	*
+	*
 	*/
 	protected function format_rows( &$wic_query, &$fields ) {
 		$output = '';
@@ -92,6 +93,38 @@ class WIC_List_Constituent extends WIC_List_Parent {
 			}
 		return ( $output );		
 	}
+
+	protected function format_message( &$wic_query ) {
 	
+		if ( $wic_query->found_count < $wic_query->retrieve_limit ) {
+			$header_message = sprintf ( __( 'Found %1$s constituents.', 'wp-issues-crm'), $wic_query->found_count );		
+		} elseif ( $wic_query->found_count_real ) {
+			$header_message = sprintf ( __( 'Found total of %1$s constituents, showing selected search maximum -- %2$s.', 'wp-issues-crm'),
+				 $wic_query->found_count, $wic_query->showing_count ); 		
+		} else {
+			$header_message = sprintf ( __( 'Showing %1$s records -- changing search options may show more records.', 'wp-issues-crm' ),
+				 $wic_query->showing_count );		
+		}
+		return $header_message;
+	}
+
+	protected function get_the_buttons( &$wic_query ) {
+		$button = '<div id = "wic-list-button-row">' .
+			'<button id = "wic-post-export-button" 
+				name = "wic-post-export-button" 
+				class = "wic-form-button" 
+				type="submit" 
+				value = "' . $wic_query->search_id  .'" >' . 
+					__( 'Export All', 'wp-issues-crm' ) . 
+			'</button>' . 
+			'<button 	id = "wic-list-back-button" 
+				class= "wic-form-button" 
+				type="button" 
+				onclick = "history.go(-1);return true;">' .
+					 __( 'Go Back', 'wp-issues-crm' ) . 
+				'</button>' .
+			'</div>';
+		return ( $button );
+	}
  }	
 

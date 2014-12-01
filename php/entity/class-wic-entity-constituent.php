@@ -119,12 +119,6 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		array(
 			'value'	=> '100',
 			'label'	=>	'Up to 100' ),
-		array(
-			'value'	=> '500',
-			'label'	=>	'Up to 500' ),
-		array(
-			'value'	=> '1000',
-			'label'	=>	'Up to 1000' ),
 		);
 
 	private static $match_level_options = array ( 

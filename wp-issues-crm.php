@@ -75,8 +75,8 @@ add_action('wp_enqueue_scripts', 'wic_utilities_script_setup');
 
 // add hook to intercept press of download button before any headers sent 
 function do_download () {
-	if ( isset( $_POST['post-export-button'] ) ) {
-		WIC_List_Constituent_Export::do_constituent_download( $_POST['post-export-button'] );	
+	if ( isset( $_POST['wic-post-export-button'] ) ) {
+		WIC_List_Constituent_Export::do_constituent_download( $_POST['wic-post-export-button'] );	
 	}
 }
 add_action( 'template_redirect', 'do_download' );

@@ -19,14 +19,15 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 	
 	protected function db_search( $meta_query_array, $search_parameters ) {
 
-		// default search parameters supplied -- these need to be added to form elements or other call if to be varied
-		$select_mode 		= 'id';
-		$sort_order 		= false;
-		$compute_total 	= true;
-		$retrieve_limit 	= -1;
-		$show_deleted		= true;
+		// default search parameters supplied -- not all apply in the WP context
+		$select_mode 		= 'id'; 		// not used
+		$sort_order 		= false; 	// not used
+		$compute_total 	= true; 		// not used
+		$retrieve_limit 	= -1;			// USED
+		$show_deleted		= true; 		// not used
+		$category_search_mode = 'category__in'; // USED		
 		
-		// extract ( $search_parameters, EXTR_OVERWRITE ); set as blank and don't want to overwrite with this, so // for now.
+		extract ( $search_parameters, EXTR_OVERWRITE ); 
 		
 		$allowed_statuses = array(
 			'draft',
@@ -79,7 +80,11 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 					$query_args['s'] = $search_clause['value'];
 					break;
 				case 'cat':
-					$query_args['category__in'] = self::reformat_cat_array_form_to_db ( $search_clause['value'] );  
+					if ( 'cat' == $search_clause['compare'] ) {
+						$query_args['cat'] = implode( ',' , self::reformat_cat_array_form_to_db ( $search_clause['value'] ) );
+					} else {
+						$query_args[$search_clause['compare']] = self::reformat_cat_array_form_to_db ( $search_clause['value'] );
+					}  
 					break;
 				case 'date':
 					$date_array = array();
@@ -115,7 +120,6 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		if ( count ( $meta_query_args ) > 1 && ! isset ( $query_args['p'] ) ) { // if have ID, go only for that
 			$query_args['meta_query'] 	= $meta_query_args;
 		}
-
 		$wp_query = new WP_Query($query_args);
 		$this->sql = ' ' . __(' ( serialized WP_Query->query output ) ', 'wp-issues-crm' ) . serialize ( $wp_query->query );
 		$this->result = $wp_query->posts;
@@ -123,7 +127,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		// only do sql_calc_found_rows on id searches; in other searches, found count will always equal showing count
 		$this->found_count = $wp_query->found_posts;
 		// set value to say whether found_count is known
-		$this->found_count_real = $compute_total;
+		$this->found_count_real = true;
 		$this->retrieve_limit = $retrieve_limit;
 		$this->outcome = true;  // wpdb get_results does not return errors for searches, so assume zero return is just a none found condition (not an error)
 										// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results 

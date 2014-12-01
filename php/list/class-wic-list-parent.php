@@ -8,41 +8,32 @@
 *
 */ 
 
-class WIC_List_Parent {
+abstract class WIC_List_Parent {
 	/*
 	*
 	* field definitions for ready reference array 
 	*
 	*/
+	
+	protected abstract function get_the_buttons( &$wic_query );	
+	protected abstract function format_message( &$wic_query );
 		
-  public function format_entity_list( &$wic_query, $show_top_buttons ) {
+	public function format_entity_list( &$wic_query, $show_top_buttons ) {
 
-		// set up args for use in buttons -- each row is a button
+  		// set up form
+		$output = '<div id="wic-post-list"><form method="POST">' . 
+			'<div class = "wic-post-field-group wic-group-odd">';
+
+		$message = $this->format_message ( $wic_query ); 
+		$output .= '<div id="post-form-message-box" class = "wic-form-routine-guidance" >' . esc_html( $message ) . '</div>';
+		$output .=  $this->get_the_buttons( $wic_query );	
+
+		// set up args for use in row buttons -- each row is a button
   		$list_button_args = array(
 			'entity_requested'		=> $wic_query->entity,
 			'action_requested'		=> 'id_search',
 		);	
-  	
-  		// set up form
-		$output = '<div id="wic-post-list"><form method="POST">' . 
-			'<div class = "wic-post-field-group wic-group-odd">';
-			
-		if ( $wic_query->found_count < $wic_query->retrieve_limit ) {
-			$header_message = sprintf ( __( 'Found total of %1$s records', 'wp-issues-crm'), $wic_query->found_count );		
-		} elseif ( $wic_query->found_count_real ) {
-			$header_message = sprintf ( __( 'Found total of %1$s records, showing search optional maximum -- %2$s.', 'wp-issues-crm'),
-				 $wic_query->found_count, $wic_query->showing_count  ); 		
-		} else {
-			$header_message = sprintf ( __( 'Showing %1$s records -- changing search options may show more records.', 'wp-issues-crm' ),
-				 $wic_query->showing_count );		
-		}
 
-		if ( $show_top_buttons ) {	
-				$output .=	'<h2>' . $header_message  . '</h2>' . 
-				'<button id = "form-toggle-button-on-list" class= "wic-form-button" type="button" onclick = "history.go(-1);return true;">' . __( 'Redo Search', 'wp-issues-crm' ) . '</button>' .
-				'<button id = "post-export-button" name = "post-export-button" class = "wic-form-button" type="submit" value = "' . $wic_query->search_id  .'" >' . __( 'Export All ', 'wp-issues-crm' ) . '</button>' .
-				'</div>';
-		}
 		// prepare the list fields for header set up and list formatting
   		$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $wic_query->entity );
 	

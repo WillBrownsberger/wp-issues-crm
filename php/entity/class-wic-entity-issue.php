@@ -66,12 +66,50 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		$this->data_object_array['post_status']->set_value( $wic_access_object->post_status );		
 	}	
 	
+	protected function list_after_form  ( &$wic_query ) {
+		
+		// extract $post_id	
+		$post_id = $this->data_object_array['ID']->get_value();
+		
+		// retrieve ID's of constituents referencing this issue in activities or comments
+		$args = array(
+			'id_array' => array ( $post_id ),
+			'search_id' => $wic_query->search_id,
+			); 
+		$wic_comment_query = new WIC_Entity_Comment ( 'get_constituents_by_issue_id', $args ) ;
+		
+		// append the list to the form
+		if ( 0 < $wic_comment_query->found_count ) {
+			$lister = new WIC_List_Constituent;
+			$list = $lister->format_entity_list( $wic_comment_query, true );
+		echo $list;			 
+		}	else {
+			echo '<div id="no-activities-found-message">' . __( 'No comments or activities found for issue.', 'wp-issue-crm' ) . '</div>';
+		} 
+	}		
+	
+	
 	
 	/***************************************************************************
 	*
 	* Constituent properties, setters and getters
 	*
 	****************************************************************************/ 	
+
+	private static $category_search_mode_options = array (
+		array(
+			'value'	=> 'cat',
+			'label'	=>	'Post must have ANY of selected categories and child categories will be included.' ),
+		array(
+			'value'	=> 'category__in',
+			'label'	=>	'Post must have ANY of selected categories and child categories will NOT be included.' ),
+		array(
+			'value'	=> 'category__and',
+			'label'	=>	'Post must have ALL selected categories.' ),
+		array(
+			'value'	=> 'category__not_in',
+			'label'	=>	'Post must have NONE of selected categories.' ),
+ 	);
 
 	private static $wic_live_issue_options = array (
 		array(
@@ -106,6 +144,18 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 			'value'	=> 'trash',
 			'label'	=>	'Trash' ),
 	);	
+
+	private static $retrieve_limit_options = array ( 
+		array(
+			'value'	=> '10',
+			'label'	=>	'Up to 10' ),
+		array(
+			'value'	=> '50',
+			'label'	=>	'Up to 50' ),
+		array(
+			'value'	=> '100',
+			'label'	=>	'Up to 100' ),
+		);
 
 	
 	/*
@@ -153,8 +203,6 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return ( $wic_category_select_array );
 	} 	
 
-
-
 	public static function get_post_categories ( $post_id ) {
 		$categories = get_the_category ( $post_id );
 		$return_list = '';
@@ -164,6 +212,9 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return ( $return_list ) ;	
 	}	
 	
+	public static function get_category_search_mode_options() {
+		return self::$category_search_mode_options;
+	} 
 
 	public static function wic_live_issue_formatter( $value ) {
 		return WIC_Function_Utilities::value_label_lookup ( $value,  self::$wic_live_issue_options );	
@@ -241,6 +292,10 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	public static function get_post_status_label ( $value ) {
 		return self::post_status_formatter ( $value );	
 	}
+	
+	public static function get_retrieve_limit_options() {
+		return self::$retrieve_limit_options; 
+	}	
 	
 	public static function tags_input_sanitizor ( $value ) {
 		return WIC_Function_Utilities::sanitize_textcsv( $value );	

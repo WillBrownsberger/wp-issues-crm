@@ -141,9 +141,19 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 		return ( WIC_Form_Parent::create_wic_form_button( $list_button_args ) );		
 	}
 	
-	public function get_constituents_by_issue_id ( &$id_array ) {
+	/********
+	*
+	*
+	* $id_array of issue ID's from issue query
+	* $search_id is just a pass through for use in download link
+	*   in WIC_List_Constituent
+	*
+	*********/
+	public function get_constituents_by_issue_id ( $args ) {
 		
 		// designed to mimic return from a constituent search so it can be fed to constituent list
+		
+		extract ( $args );
 
 		global $wpdb;	
 		
@@ -245,12 +255,12 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 			$this->result[] = new WIC_Constituent_ID_Item ( $id );		
 		}
 
-		$this->search_id;
+		$this->search_id = $search_id; // just a pass through from primary searches for issues
 		$this->entity = 'constituent';
-		$this->retrieve_limit = count ( $unique_ids );
+		$this->retrieve_limit = 9999999999;
 		$this->found_count = count ( $unique_ids );
-		$this->found_count_real;
-		$this->showing_count;
+		$this->found_count_real = true;
+		$this->showing_count = $this->found_count;
 		$this->sql = '(1) ' . $sql1 . '; (2) ' . $sql2 . '; (3) ' . $sql3 . ';'; 
 	} 
 }

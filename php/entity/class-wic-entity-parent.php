@@ -33,6 +33,8 @@ abstract class WIC_Entity_Parent {
 	* args is an associative array, which MAY be populated as follows:
 	*		'id_requested'			=>	$control_array[2] passed by wp-issues-crm from form button for an ID search
 	*		'instance'				=> passed in the case of the object being initialized as a row in multi-value field:	
+	*		'id_array'				=> array of id's -- used when passed from issue form to comment entity for conversion to constituent listing
+	*		'search_id'				=> pass through of issue search log id that will be used to reconstruct constituent search 
 	*
 	*/
 	public function __construct ( $action_requested, $args ) {
@@ -122,6 +124,7 @@ abstract class WIC_Entity_Parent {
 			$search_clause_args = array(
 				'match_level' => '0',
 				'dup_check' => true,
+				'category_search_mode' => '',
 			);
 			// assembling meta_query with strict match and dedup requested
 			$wic_query->search ( $this->assemble_meta_query_array( $search_clause_args ), $search_parameters );  // true indicates a dedup search
@@ -271,6 +274,7 @@ abstract class WIC_Entity_Parent {
 		$search_clause_args = array(
 			'match_level' => '0',
 			'dup_check' => false,
+			'category_search_mode' => '',
 			);
 
 		// assemble metaquery with match_level = 0 (strict match) and dup check set to false
@@ -285,6 +289,7 @@ abstract class WIC_Entity_Parent {
 			$this->populate_data_object_array_from_found_record ( $wic_query );			
 			$update_form = new $success_form;
 			$update_form->layout_form ( $this->data_object_array, $message, $message_level, $sql );	
+			$this->list_after_form ( $wic_query );
 		} else {
 			die ( sprintf ( __( 'Data base corrupted for record ID: %1$s in id_search_generic.', 'wp-issues-crm' ) , $id ) );		
 		} 
@@ -306,6 +311,7 @@ abstract class WIC_Entity_Parent {
 		$search_clause_args = array(
 			'match_level' =>  isset ( $this->data_object_array['match_level'] ) ? $this->data_object_array['match_level']->get_value() : '',
 			'dup_check' => false,
+			'category_search_mode' => isset ( $this->data_object_array['category_search_mode'] ) ? $this->data_object_array['category_search_mode']->get_value() : '',
 			);
 		// note that the transient search parameter 'match_level' is needed by individual controls in create_search_clause()
 				
@@ -320,9 +326,9 @@ abstract class WIC_Entity_Parent {
 			$message_level =  'guidance';
 			$form = new $save_form;
 			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );			
-		} elseif ( 1 == $wic_query->found_count) {
+		} elseif ( 1 == $wic_query->found_count) { 
 			$this->data_object_array = array(); // discard possibly soft matching array values before doing straight id retrieval
-			$this->id_search_generic ( $wic_query->result[0]-> ID, $update_form, $sql );			
+			$this->id_search_generic ( $wic_query->result[0]-> ID, $update_form, $sql );	
 		} else {
 			$lister_class = 'WIC_List_' . $this->entity ;
 			$lister = new $lister_class;
@@ -344,6 +350,10 @@ abstract class WIC_Entity_Parent {
 	protected function special_entity_value_hook ( &$wic_access_object ) {
 		// available to bring back values from save/update for entity if necessary
 		// not required.
+	}
+	
+	protected function list_after_form ( &$wic_query ) {
+		// hook for use with list of constituents after issue display -- see WIC_Entity_Issue	
 	}
 }
 

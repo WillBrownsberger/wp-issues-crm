@@ -278,7 +278,8 @@ abstract class WIC_Control_Parent {
 		
 		// expecting $match_level and $dup_check, but want errors if not supplied, so no defaults
 		// match level is 0 for strict, 1 for like, 2 for soundex like
-		// dedup is true or false		
+		// dedup is true or false	
+		// added $category_search_mode == '' if not set on screen, but see WIC_DB_Access_WP for allowed values	
 		
 		extract ( $search_clause_args, EXTR_OVERWRITE );
 		
@@ -302,7 +303,11 @@ abstract class WIC_Control_Parent {
 		} else {
 			die ( sprintf( __( 'Incorrect match_level settings for field %1$s reported by WIC_Control_Parent::create_search_clause.', 'WP_Issues_CRM' ),
 				 $this->field->field_slug ) ); 		
-		}				
+		}	
+		
+		if ( 'cat' == $this->field->wp_query_parameter && '' < $category_search_mode ) {
+			$compare = $category_search_mode; // this will actually be parsed in as a $query argument with = as compare 		
+		} 			
  
 		if ( '' < $this->field->secondary_alpha_search ) { // exists to support address_line search by street name without full text scanning 
  			if ( ! is_numeric ( $this->value[0] ) ) {

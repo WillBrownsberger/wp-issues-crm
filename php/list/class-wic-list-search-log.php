@@ -80,5 +80,31 @@ class WIC_List_Search_Log extends WIC_List_Parent {
 		return ( $output );		
 	}
 	
+	protected function format_message( &$wic_query ) {
+	
+		$header_message = sprintf ( __( 'Showing your most recent %1$s database searches with downloads highlighted.  
+				You can rerun prior searches.', 'wp-issues-crm'), $wic_query->found_count );		
+		return $header_message;
+	}
+
+	protected function get_the_buttons( &$wic_query ) {
+		$button = '<div id = "wic-list-button-row">' .
+			'<button id = "wic-post-export-button" 
+				name = "wic-post-export-button" 
+				class = "wic-form-button" 
+				type="submit" 
+				value = "' . $wic_query->search_id  .'" >' . 
+					__( 'Export All', 'wp-issues-crm' ) . 
+			'</button>' . 
+			'<button 	id = "wic-list-back-button" 
+				class= "wic-form-button" 
+				type="button" 
+				onclick = "history.go(-1);return true;">' .
+					 __( 'Go Back', 'wp-issues-crm' ) . 
+				'</button>' .
+			'</div>';
+		return ( $button );
+	}
+	
  }	
 

@@ -67,7 +67,7 @@ class WIC_Dashboard_Main {
 			array ( 'constituent', 	'new_form',		0, 	__( 'Constituents', 'wp-issues-crm' ) ),
 			array ( 'issue', 			'new_form',		0, 	__( 'Issues', 'wp-issues-crm' ) ),
 			array ( 'issue', 			'new_issue',	0, 	__( 'New Issue', 'wp-issues-crm') ),
-			array ( 'dashboard', 	'search_history',0,	__( 'Recent', 'wp-issues-crm' ) ),		
+			array ( 'dashboard', 	'search_history',0,	__( 'My Recent', 'wp-issues-crm' ) ),		
 			); 
 		
 		foreach ( $top_menu_buttons as $top_menu_button ) {
@@ -123,7 +123,7 @@ class WIC_Dashboard_Main {
 				} else {
 					$lister_class = 'WIC_List_Constituent' ;
 					$lister = new $lister_class;
-					$list = $lister->format_entity_list( $wic_query, false );
+					$list = $lister->format_entity_list( $wic_query, true );
 					echo $list;			
 				}
 				break;
@@ -163,7 +163,7 @@ class WIC_Dashboard_Main {
 				} else {
 					$lister_class = 'WIC_List_Issue' ;
 					$lister = new $lister_class;
-					$list = $lister->format_entity_list( $wic_query, false );
+					$list = $lister->format_entity_list( $wic_query, true );
 					echo $list;			
 				}
 				break;
@@ -199,7 +199,7 @@ class WIC_Dashboard_Main {
 				} else {
 					$lister_class = 'WIC_List_Search_Log' ;
 					$lister = new $lister_class;
-					$list = $lister->format_entity_list( $wic_query, false );
+					$list = $lister->format_entity_list( $wic_query, true );
 					echo $list;			
 				}
 				break;

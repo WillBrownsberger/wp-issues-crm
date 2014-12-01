@@ -76,14 +76,18 @@ class WIC_List_Constituent_Export {
 		$wic_query->search ( $search['meta_query_array'], $search_parameters );
 	
 		if ( 'constituent' == $search['entity'] ) {
-			$results = WIC_List_Constituent_Export::assemble_list_for_export( $wic_query ); 
+			$results = self::assemble_list_for_export( $wic_query ); 
 		} elseif ( 'issue' ==  $search['entity'] ) {
 			$issue_array = array();
 			foreach ( $wic_query->result as $issue ) {
 				$issue_array[] = $issue->ID;
 			}
-			$comment_query = new WIC_Entity_Comment ( 'get_constituents_by_issue_id', $issue_array );
-			$results = WIC_List_Constituent_Export::assemble_list_for_export( $comment_query ); 
+			$args = array (			
+				'id_array' => $issue_array,
+				'search_id' => $id,
+				);
+			$comment_query = new WIC_Entity_Comment ( 'get_constituents_by_issue_id', $args );
+			$results = self::assemble_list_for_export( $comment_query ); 
 		} 
 
 		$fileName = 'wic-export-' . $current_user->user_firstname . '-' .  current_time( 'Y-m-d-H-i-s' )  .  '.csv' ; 

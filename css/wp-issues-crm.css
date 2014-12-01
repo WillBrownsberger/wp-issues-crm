@@ -68,7 +68,7 @@ select {
 	background: #f8f8f8;
 	color: #777;
 	margin:  10px 0;
-	padding: 10px 0 10px 128px;
+	padding: 10px 128px;
 }
 
 /* semantic colors for message */
@@ -678,6 +678,18 @@ div.wic_multi_select {
 	width: 360px;
 }
 
+p.wic-radio-button {
+	width: 100%;
+	font-size: 0.9em;
+}
+
+#wic-form-sidebar-groups .wic-input.wic-radio-button {
+	font-size: 0.9em;
+	padding-right: 4px;
+	width: initial;
+}
+
+
 
 /***************************************************************** 
 *
@@ -692,6 +704,11 @@ div.wic_multi_select {
 	margin: 0;
 	padding-left: 0px;
 }
+
+#wic-list-button-row {
+	margin-left: 128px; 
+}
+
 
 /* alternating row colors applied to li's in outer list */
 .pl-odd {

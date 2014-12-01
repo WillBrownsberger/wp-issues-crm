@@ -69,24 +69,4 @@ class WIC_Form_Issue_Update extends WIC_Form_Parent  {
 		return ( ! ( 1 == $group->search_only ) );	
 	}
 	
-	protected function post_form_hook ( &$data_array ) {
-		
-		// extract $post_id	
-		$post_id = $data_array['ID']->get_value();
-		
-		// retrieve ID's of constituents referencing this issue in activities or comments
-		$args = array ( $post_id ); 
-		$wic_comment_query = new WIC_Entity_Comment ( 'get_constituents_by_issue_id', $args ) ;
-		
-		// append the list to the form
-		if ( 0 < $wic_comment_query->found_count ) {
-			$lister = new WIC_List_Constituent;
-			$list = $lister->format_entity_list( $wic_comment_query, true );
-			echo $list;			 
-		}	else {
-			echo '<div id="no-activities-found-message">' . __( 'No comments or activities found for issue.', 'wp-issue-crm' ) . '</div>';
-		} 
-	}	
-	
-	
 }
