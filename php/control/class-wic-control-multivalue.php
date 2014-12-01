@@ -88,6 +88,8 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 		$search_parameters = array(  
 			'select_mode' => '*',
 			'show_deleted' => true,  // get all values for each		
+			'sort_order' => true,
+			'sort_direction' => 'DESC' // this basically serves the Activities order by date reverse
 			); 
 		$wic_query->search ( 		
 			array ( // double layer array to standardize a return that allows multivalue fields

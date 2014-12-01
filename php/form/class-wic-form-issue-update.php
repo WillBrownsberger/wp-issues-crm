@@ -81,7 +81,7 @@ class WIC_Form_Issue_Update extends WIC_Form_Parent  {
 		// append the list to the form
 		if ( 0 < $wic_comment_query->found_count ) {
 			$lister = new WIC_List_Constituent;
-			$list = $lister->format_entity_list( $wic_comment_query, false );
+			$list = $lister->format_entity_list( $wic_comment_query, true );
 			echo $list;			 
 		}	else {
 			echo '<div id="no-activities-found-message">' . __( 'No comments or activities found for issue.', 'wp-issue-crm' ) . '</div>';

@@ -1,20 +1,37 @@
-function togglePostForm() {
-	var constituentForm = document.getElementById ( "wic-forms" );
-	var display = constituentForm.style.display;
-	var toggleButton	= document.getElementById ( "form-toggle-button" );
-	var toggleButtonOnList = document.getElementById ( "form-toggle-button-on-list" );
-	if ( "block" == display ) {
-		constituentForm.style.display = "none";
-		toggleButton.innerHTML = "Show Search";
-		toggleButtonOnList.innerHTML = "Show Search";
-	} else {
-		constituentForm.style.display = "block";
-		toggleButton.innerHTML = "Hide Search Form";
-		toggleButtonOnList.innerHTML = "Hide Search Form";
+/*
+*
+* wic-utilities.js
+*
+*/
+
+
+function changeCaseStatus() {
+	// set case_status to Open if Assigned	 
+	if( document.getElementById('case_assigned') != undefined && undefined == document.getElementById('wic-form-constituent-search') ) {
+		var assigned = document.getElementById('case_assigned');				
+		var assignedStaff = assigned.options[assigned.selectedIndex].value;
+		
+		if ( assignedStaff > 0 ) {
+			var caseStatus = document.getElementById('case_status');	
+				caseStatus.value = '1';	
+		}
 	}
 }
 
-function togglePostFormSection( section ) {
+
+function changeFollowUpStatus() {
+	// set issue follow_up_status to Open if Assigned	 
+	if( document.getElementById('issue_staff') != undefined && undefined == document.getElementById('wic-form-issue-search') ) {
+		var assigned = document.getElementById('issue_staff');				
+		var assignedStaff = assigned.options[assigned.selectedIndex].value;
+		if ( assignedStaff > '' ) {
+			var caseStatus = document.getElementById('follow_up_status');	
+				caseStatus.value = 'open';	
+		}
+	}
+}
+
+function togglePostFormSection( section ) { 
 	var constituentFormSection = document.getElementById ( section );
 	var display = constituentFormSection.style.display;
 	if ('' == display) {

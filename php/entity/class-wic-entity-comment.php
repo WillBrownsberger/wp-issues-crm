@@ -245,8 +245,12 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 			$this->result[] = new WIC_Constituent_ID_Item ( $id );		
 		}
 
-		$this->found_count = count ( $unique_ids );
+		$this->search_id;
 		$this->entity = 'constituent';
+		$this->retrieve_limit = count ( $unique_ids );
+		$this->found_count = count ( $unique_ids );
+		$this->found_count_real;
+		$this->showing_count;
 		$this->sql = '(1) ' . $sql1 . '; (2) ' . $sql2 . '; (3) ' . $sql3 . ';'; 
 	} 
 }

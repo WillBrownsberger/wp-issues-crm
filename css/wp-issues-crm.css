@@ -13,7 +13,9 @@
 
 /* override browser system styling */
 input,
-button {
+button,
+textarea,
+select {
 	font-family: Arial,"Helvetica Neue",Helvetica,sans-serif;
 }
 
@@ -102,7 +104,6 @@ button {
  
 #wic-form-main-groups {
 	display: inline-block;
-	min-height: 640px;
 	overflow-x: hidden;
 	width: 640px;
 }
@@ -110,7 +111,7 @@ button {
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
-	border-left: 1px solid #777;
+	border-left: 1px solid #aaa;
 	display: inline-block;
 	height: 640px;
 	overflow-y: scroll;
