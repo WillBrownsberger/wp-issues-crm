@@ -23,7 +23,10 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 				
 		if ( 1 == $save_result ) {
 			$this->outcome = true;		
-			$this->insert_id = $wpdb->insert_id;	
+			$this->insert_id = $wpdb->insert_id;
+			$this->last_updated_time = $this->get_mysql_time();
+			$this->last_updated_by = get_current_user_id();
+	
 		} else {		
 			$this->outcome = false;
 			$this->explanation = __( 'Unknown database error. Update may not have been successful', 'wp-issues-crm' );
@@ -47,9 +50,10 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			$set['set_value_array'] );
 
 		$update_result = $wpdb->query( $sql );
-		$this->outcome = ( 1 == $update_result );
 		$this->outcome = ! ( false === $update_result );
 		$this->explanation = ( $this->outcome ) ? '' : __( 'Unknown database error. Update may not have been successful', 'wp-issues-crm' );
+		$this->last_updated_time = $this->get_mysql_time();
+		$this->last_updated_by = get_current_user_id();
 		$this->sql = $sql;
 		return;
 	}
@@ -144,7 +148,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 				$values );	
 		// $sql group by always returns single row, even if multivalues for some records 
 
-		$sql_found = "SELECT FOUND_ROWS()";
+		$sql_found = "SELECT FOUND_ROWS() as found_count";
 		$this->sql = $sql; 
 		
 		// do search
@@ -152,7 +156,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 	 	$this->showing_count = count ( $this->result );
 		// only do sql_calc_found_rows on id searches; in other searches, found count will always equal showing count
 		$found_count_object_array = $wpdb->get_results( $sql_found );
-		$this->found_count = get_object_vars( $found_count_object_array[0] )["FOUND_ROWS()"];
+		$this->found_count = $found_count_object_array[0]->found_count;
 		// set value to say whether found_count is known
 		$this->found_count_real = $compute_total;
 		$this->retrieve_limit = $retrieve_limit;

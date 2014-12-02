@@ -61,9 +61,13 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	
 	
 	protected function special_entity_value_hook ( &$wic_access_object ) {
-		$this->data_object_array['post_author']->set_value( $wic_access_object->post_author );
-		$this->data_object_array['post_date']->set_value( $wic_access_object->post_date );
-		$this->data_object_array['post_status']->set_value( $wic_access_object->post_status );		
+		$control = $this->data_object_array['post_date'];
+		$post_date = $control->get_value();
+		if ( '' == $post_date ) { 
+			$this->data_object_array['post_author']->set_value( $wic_access_object->post_author );
+			$this->data_object_array['post_date']->set_value( $wic_access_object->post_date );
+			$this->data_object_array['post_status']->set_value( $wic_access_object->post_status );
+		}		
 	}	
 	
 	protected function list_after_form  ( &$wic_query ) {

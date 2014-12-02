@@ -55,6 +55,11 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		return;
 	}		
 	
+	protected function special_entity_value_hook ( &$wic_access_object ) {
+		$this->data_object_array['last_updated_time']->set_value( $wic_access_object->last_updated_time );
+		$this->data_object_array['last_updated_by']->set_value( $wic_access_object->last_updated_by );		
+	}
+	
 	
 	/***************************************************************************
 	*
@@ -197,6 +202,18 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	public static function address_formatter ( $address_list ) {
 		return self::email_formatter ( $address_list );	
 	}	
+
+	public static function get_last_updated_by_options() {
+		return ( WIC_Function_Utilities::get_administrator_array() );
+	}
+
+	public static function get_last_updated_by_label( $user_id ) {
+		if ( '' < $user_id && 0 < $user_id ) {
+			$user = get_user_by ( 'id', $user_id );
+			return ( $user->display_name );
+		}
+		else return ( '' );
+	}
 
 	public static function mark_deleted_validator ( $value ) {
 		if ( $value > '' && trim( strtolower( $value ) ) != 'deleted' ) {

@@ -55,14 +55,20 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 	}
 	
 	protected function format_name_for_title ( &$data_array ) {
-		
+
 		// construct title starting with first name
 		$title = 	$data_array['first_name']->get_value(); 
 		// if present, add last name, with a space if also have first name		
 		$title .= 	( '' == $data_array['last_name']->get_value() ) ? '' : ( ( $title > '' ? ' ' : '' ) . $data_array['last_name']->get_value() );
-		// if still empty and email may be available, add email 	
-		if ( '' == $title && isset( $data_array['email']->get_value()[0] ) ) {
-			$title = $data_array['email']->get_value()[0]->get_email_address();
+		// if still empty and email may be available, add email
+			// note, the following phrase is broken down for older version of php:
+			// if ( '' == $title && isset( $data_array['email']->get_value()[0] ) ) {
+			$control = $data_array['email'];
+			$result = $control->get_value();
+			$email_available = isset( $result[0] ); 	
+		if ( '' == $title && $email_available ) {
+			// $title = $data_array['email']->get_value()[0]->get_email_address();
+			$title = $result[0]->get_email_address;
 		} 
 		// if still empty, insert word constitent
 		$title =		( '' == $title ) ? __( 'Constituent', 'wp-issues-crm' ) : $title;

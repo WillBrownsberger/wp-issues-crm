@@ -243,6 +243,8 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 				Do new search on same record to check for possible partial results.', 'wp-issues-crm' );
 		} else {
 			$this->outcome = true;
+			$this->last_updated_time = current_time ( 'timestamp' ); // note that these values not shown in ui for posts anyway
+			$this->last_updated_by = get_current_user_id();				// 
 			// proceed to update meta values -- convention is blank value represented by absence of meta record
 			$result = true; // start with true so that this is the result in no action case;
 			foreach ( $meta_args as $meta_arg ) {

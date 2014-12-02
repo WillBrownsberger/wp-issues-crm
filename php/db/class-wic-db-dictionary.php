@@ -52,25 +52,7 @@ class WIC_DB_Dictionary {
 		return ( $fields_array );		
 		
 	}	
-	/*	
-		
-		global $wpdb;		
-		$table1 = $wpdb->prefix . 'wic_data_dictionary';
-		$table2 = $wpdb->prefix . 'wic_form_field_groups';
-		$fields = $wpdb->get_results( 
-			$wpdb->prepare (
-				"
-				SELECT field_slug, field_type 
-				FROM $table1 t1 inner join $table2 t2 on t1.entity_slug = t2.entity_slug and t1.group_slug = t2.group_slug
-				WHERE t1.entity_slug = %s
-				"				
-				, array ( $entity )
-				)
-			, OBJECT );
 
-		return ( $fields );
-	}
-*/
 	// expose the rules for all fields for an entity -- only called in control initialization;
 	// rules are passed to each control that is in the data object array directly -- no processing;
 	// the set retrieved by this method is not limited to group members and might support a data dump function, 
@@ -102,13 +84,10 @@ class WIC_DB_Dictionary {
 		
 		$table = $wpdb->prefix . 'wic_data_dictionary';
 		$wp_issues_crm_field_rules_cache = $wpdb->get_results( 
-			$wpdb->prepare (
 				"
 				SELECT * 
 				FROM $table
 				"				
-				, array ( )
-				)
 			, OBJECT );
 	}
 	/*************************************************************************

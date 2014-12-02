@@ -18,7 +18,9 @@ abstract class WIC_DB_Access {
 	public $explanation; // reason for outcome
 	public $found_count; // integer save/update/search # records found or acted on
 	public $insert_id;	// ID of newly saved entity
-	public $search_id;  //
+	public $search_id;  // ID of search completed -- search log
+	public $last_updated_time; // for pass back to screen
+	public $last_updated_by; // for pass back to screen
 
 	public function __construct ( $entity ) { 
 		$this->entity = $entity;
@@ -158,6 +160,14 @@ abstract class WIC_DB_Access {
 		}	
 		return ( $save_update_array );
 	}
+
+	public static function get_mysql_time() {
+		global $wpdb;
+		$now_object = $wpdb->get_results ( "SELECT NOW() AS now " );
+		$now = $now_object[0]->now;
+		return ( $now );	
+	}
+
 
 	abstract protected function db_search ( $meta_query_array, $search_parameters );
 	abstract protected function db_save ( &$meta_query_array );

@@ -252,8 +252,8 @@ abstract class WIC_Entity_Parent {
 		} else {
 			if ( $save ) {
 				$this->data_object_array['ID']->set_value( $wic_access_object->insert_id );
-				$this->special_entity_value_hook( $wic_access_object );		
 			}
+			$this->special_entity_value_hook( $wic_access_object ); // done on both save and updates, but hook may test values
 			$message = __( 'Successful.  You can update further. ', 'wp-issues-crm' );
 			$message_level = 'good_news';
 			$form = new $success_form;
