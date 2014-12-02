@@ -78,13 +78,13 @@ select {
 	background: transparent;
 }
 #post-form-message-box.wic-form-errors-found {
-	background: #fae0e0;
+	background: #ffd0db;
+	color: #555;
 }
-#post-form-message-box.wic-form-search-notices {
-	background: #fff0aa;
-}
+
 #post-form-message-box.wic-form-good-news {
-	background: #e0fae0;
+	background: #ebf8e4;
+	color: #555;
 }		
 
 /* positioning action buttons within form */
@@ -93,7 +93,7 @@ select {
 	margin: 0 0 10px 14.222%;
 }
 
-#wic-post-form .second-position {
+.wic-post-form .second-position {
 	margin: 0 0 10px .88888%;
 }
 
@@ -308,7 +308,7 @@ label.wic-label.first-name{
 
 /* fn sized to lineup under second standard button */
 .wic-input.first-name {
-	width: 116px;
+	width: 46.875%;
 	margin-bottom: 20px; /* spaces whole name row */
 }
 
@@ -662,7 +662,7 @@ div.wic_multi_select {
 	display: inline-block;
 	background: #ffffff;
 	border: 1px solid #f0f0f0;
-	height: 300px;
+	height: 500px;
 	overflow-y: scroll;
 	margin: 0 0 0 0;
 	padding: 20px 0;
@@ -778,71 +778,40 @@ p.wic-radio-button input{
 	width: 15.544%;
 }
 
-/* alternating row colors applied to li's in outer list */
+/* alternating row colors can be applied to li's in outer list */
 .pl-odd {
-	background: #f1f1f1;
-}
-
-.pl-odd:hover {
 	background: #ececec;
+	border-bottom: none;
 }
 
-.pl-even {
-	background: #f0f0fa;
+/* spec button to override responsive tabs styling */
+.pl-even.wic-post-list-button,
+.pl-odd.wic-post-list-button {
+	background: #ffffff;
+	border-bottom: 1px solid #ddd;
 }
 
-.pl-even:hover {
-	background: #f5f5fa;
+.wic-post-list-button:hover {
+	background: #f1f1f1;
+	font-size: 1.0em;
 }
 
+.pl-even.case-assigned,
 .pl-odd.case-assigned {
-	background: #e1e1ff;
+	background: #f5f5ff;
+	border-bottom: 1px solid #ddd;
 }
 
-.pl-even.case-assigned {
-	background: #d1d1ee;
-}
-
-.pl-odd.case-assigned:hover {
-	background: #eaeaff;
-}
-
-.pl-even.case-assigned:hover {
-	background: #dadaee;
-}
-
-
+.pl-even.case-assigned.case-open, 
 .pl-odd.case-assigned.case-open {
-	background: #e1ffe1;
+	background: #ebf8e4;
+	border-bottom: 1px solid #a2d246;
 }
 
-.pl-even.case-assigned.case-open {
-	background: #d1eed1;
-}
-
-.pl-odd.case-assigned.case-open:hover {
-	background: #eaffea;
-}
-
-.pl-even.case-assigned.case-open:hover {
-	background: #daeeda;
-}
-
-
+.pl-even.case-assigned.case-open.overdue, 
 .pl-odd.case-assigned.case-open.overdue {
-	background: #ffe1e1;
-}
-
-.pl-even.case-assigned.case-open.overdue {
-	background: #eed1d1;
-}
-
-.pl-odd.case-assigned.case-open.overdue:hover {
-	background: #ffeaea;
-}
-
-.pl-even.case-assigned.case-open.overdue:hover {
-	background: #eedada;
+	background: #ffd0db;
+	border-bottom: 1px solid #faa;
 }
 
 .long-overdue {
@@ -907,8 +876,8 @@ ul.wic-post-list-line {
 .wic-post-list-field.pl-search_log-entity {
 	display: none;
 }
-.pl-search_log-user_id{ width:15%;}
-.pl-search_log-time{ width:20%;}
+.pl-search_log-user_id{ width:14%;}
+.pl-search_log-time{ width:14%;}
 .pl-search_log-serialized_search_array{ width:45%;}
 .pl-search_log-download-time{ width:20%;}
 

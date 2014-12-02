@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Dec 01, 2014 at 09:55 PM
+-- Generation Time: Dec 02, 2014 at 08:06 AM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_activity` (
   KEY `constituent_id` (`constituent_id`),
   KEY `email_address` (`activity_type`),
   KEY `email_type` (`activity_date`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=62 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=65 ;
 
 -- --------------------------------------------------------
 
@@ -85,7 +85,6 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   `first_name_soundex` varchar(10) NOT NULL,
   `middle_name` varchar(20) NOT NULL,
   `middle_name_soundex` varchar(10) NOT NULL,
-  `title` varchar(3) NOT NULL,
   `date_of_birth` date NOT NULL,
   `is_deceased` tinyint(1) NOT NULL,
   `mark_deleted` varchar(7) NOT NULL,
@@ -106,7 +105,6 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `ssid` (`ssid`),
   KEY `last_name` (`last_name`),
   KEY `middle_name` (`middle_name`),
-  KEY `title` (`title`),
   KEY `dob` (`date_of_birth`),
   KEY `occupation` (`occupation`),
   KEY `party` (`party`),
@@ -126,7 +124,10 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `first_name_soundex` (`first_name_soundex`),
   KEY `last_name_soundex` (`last_name_soundex`),
   KEY `middle_name_soundex` (`middle_name_soundex`),
-  KEY `soundex` (`mark_deleted`,`last_name_soundex`,`first_name_soundex`)
+  KEY `soundex` (`mark_deleted`,`last_name_soundex`,`first_name_soundex`),
+  KEY `organization` (`organization`),
+  KEY `last_updated_time` (`last_updated_time`),
+  KEY `last_updated_by` (`last_updated_by`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171508 ;
 
 -- --------------------------------------------------------
@@ -162,6 +163,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   `blank_prohibited` tinyint(1) NOT NULL DEFAULT '0',
   `suppress_on_search` tinyint(1) NOT NULL,
   `onchange` varchar(40) NOT NULL,
+  `zero_is_null` tinyint(1) NOT NULL COMMENT 'do not include 0 values in search clause array',
   PRIMARY KEY (`field_id`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
@@ -184,7 +186,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_email` (
   KEY `constituent_id` (`constituent_id`),
   KEY `email_address` (`email_address`),
   KEY `email_type` (`email_type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10596 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10599 ;
 
 -- --------------------------------------------------------
 
@@ -204,7 +206,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_form_field_groups` (
   `sidebar_location` tinyint(1) NOT NULL,
   `save_update_only` tinyint(1) NOT NULL,
   PRIMARY KEY (`group_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=27 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
 
 -- --------------------------------------------------------
 
@@ -241,7 +243,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_search_log` (
   `download_time` varchar(20) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user-time` (`user_id`,`time`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=873 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=997 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

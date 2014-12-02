@@ -71,11 +71,27 @@ class WIC_Dashboard_Main {
 			); 
 		
 		foreach ( $top_menu_buttons as $top_menu_button ) {
-			$selected_class = ( $top_menu_button[0] == $class_requested && $top_menu_button[1] == $action_requested ) ? 'wic-form-button-selected' : '';
+			// $selected_class = ( $top_menu_button[0] == $class_requested && $top_menu_button[1] == $action_requested ) ? 'wic-form-button-selected' : '';
+			$selected_class = $this->is_selected ( $class_requested, $action_requested, $top_menu_button[0], $top_menu_button[1] ) ? 'wic-form-button-selected' : '';
 			$button_value = $top_menu_button[0] . ',' . $top_menu_button[1] . ',' . $top_menu_button[2];
 			echo '<button class = "wic-form-button ' . $selected_class . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( $top_menu_button[3], 'wp-issues-crm' ) . '</button>';
 		}				
 		echo '</form>';		
+	}
+
+	private function is_selected ( $class_requested, $action_requested, $button_class, $button_action ) {
+		if ( $class_requested == $button_class && $action_requested == $button_action ) {
+			return true; 		
+		}
+		if ( 'constituent' == $class_requested  && 'constituent' == $button_class ) {
+			return true;		
+		}
+		if ( 'issue' == $class_requested  && 'issue' == $button_class && 'new_issue' != $button_action ) {
+			return true;		
+		}
+		if ( 'search_log' == $class_requested  && 'dashboard' == $button_class && 'search_history' == $button_action ) {
+			return true;		
+		}
 	}
 
 	

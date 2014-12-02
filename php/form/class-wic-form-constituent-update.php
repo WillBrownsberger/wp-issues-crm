@@ -17,7 +17,7 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 			'action_requested'			=> 'form_update',
 			'button_label'					=> __('Update', 'wp-issues-crm')
 		);	
-		return ( $this->create_wic_form_button ( $button_args_main ) ) ;
+		return ( $this->create_wic_form_button ( $button_args_main ) . parent::backbutton (' second-position'  ) ) ;
 	}
 	
 	protected function format_message ( &$data_array, $message ) {

@@ -13,7 +13,7 @@ class WIC_Form_Issue_Save extends WIC_Form_Issue_Update  {
 			'action_requested'			=> 'form_save',
 			'button_label'					=> __('Save', 'wp-issues-crm')
 		);	
-		return ( $this->create_wic_form_button ( $button_args_main ) ) ;
+		return ( $this->create_wic_form_button ( $button_args_main ) . parent::backbutton (' second-position' ) ) ;
 	}
 	
 	protected function format_message ( &$data_array, $message ) {

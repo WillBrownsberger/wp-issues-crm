@@ -288,7 +288,7 @@ abstract class WIC_Control_Parent {
 				 $this->field->field_slug  ) );
 		}
 		
-		if ( '' == $this->value || 1 == $this->field->transient ) {
+		if ( '' == $this->value || 1 == $this->field->transient || ( 0 == $this->value && $this->field->zero_is_null ) ) {
 			return ('');		
 		}
 		if ( 0 == $match_level || $dup_check || 0 == $this->field->like_search_enabled )  {

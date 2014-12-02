@@ -76,10 +76,8 @@ function moreFields( base ) {
 	/* walk child nodes of template and insert current counter value as index*/
 	replaceInDescendants ( newFields, 'row-template', counter, base);	
 
-//	var insertHere = document.getElementById( base + '-row-counter' );
-//	insertHere.parentNode.insertBefore( newFields, insertHere );
-
-	var insertHere = document.getElementById( base + '[row-template]' );
+	var insertBase = document.getElementById( base + '[row-template]' );
+	var insertHere = insertBase.nextSibling;
 	insertHere.parentNode.insertBefore( newFields, insertHere );
 }
 
