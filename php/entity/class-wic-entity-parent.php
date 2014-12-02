@@ -91,7 +91,8 @@ abstract class WIC_Entity_Parent {
 		$this->required_check();
 		// do dup check last -- required fields are part of dup check
 		// outcome starts as empty string, set to false if validation or required errors
-		if ( '' === $this->outcome ) {		
+		// check that dup checking not overriden
+		if ( '' === $this->outcome && ! isset ( $_POST['no_dupcheck'] ) ) {		
 			$this->dup_check ( $save );
 		}
 	}

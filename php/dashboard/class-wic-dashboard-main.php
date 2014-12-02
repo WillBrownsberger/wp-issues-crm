@@ -176,7 +176,7 @@ class WIC_Dashboard_Main {
 				$search_parameters= array(
 					'sort_order' => true,
 					'compute_total' 	=> false,
-					'retrieve_limit' 	=> 200,
+					'retrieve_limit' 	=> 100,
 					'show_deleted' 	=> true,
 					'select_mode'		=> 'id',
 					'sort_direction'	=> 'DESC',

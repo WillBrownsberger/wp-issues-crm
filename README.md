@@ -7,6 +7,10 @@ php file naming conventions:
 	class-name will WP_Issues_CRM_Class_Name
 	php subdirectory is first segment of class name -- e.g. form in WP_Issues_CRM_Form_Constituent_Search
 		for forms, name the entity, then the action
+		
+		
+email icon https://www.iconfinder.com/Lexter
+Honza Dousek // License free for commercial use, include link to author's website.		
 
 
 

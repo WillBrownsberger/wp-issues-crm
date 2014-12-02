@@ -52,4 +52,10 @@ class WIC_Form_Constituent_Search extends WIC_Form_Parent  {
 
 		return  $legend;
 	}
+	
+	protected function group_screen( $group ) {
+		return ( ! ( 1 == $group->save_update_only ) );	
+	}	
+	
+	
 }

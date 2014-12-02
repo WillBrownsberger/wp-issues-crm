@@ -22,6 +22,8 @@ class WIC_Control_Checked extends WIC_Control_Parent {
 
 	}	
 
+	// note that setting this to zero cause the checked value to be included in search clauses with value 0
+	// currently this behavior supports use of the flag for "is deceased"
 	public function reset_value() {
 		$this->value = 0;	
 	}

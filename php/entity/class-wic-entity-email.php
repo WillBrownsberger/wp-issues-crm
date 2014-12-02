@@ -15,6 +15,17 @@ class WIC_Entity_Email extends WIC_Entity_Multivalue {
 		$this->entity_instance = $instance;
 	} 
 
+	public function update_row() {
+		$message = '<a id = "wic-email-icon-link" title = "' . __( 'Send email to email address.', 'wp-issues-crm' ) . 
+			 '" href="mailto:'. $this->get_email_address() .'"> ' .
+				 // <img src="' . plugin_dir_path( dirname ( dirname ( __FILE__ ) )  ) . 'img'. DIRECTORY_SEPARATOR . 'email-icon.png">' . 
+				 '<img id = "wic-email-icon" src="' . plugins_url() . '/wp-issues-crm/img/email-icon.png">' .
+				 '</a>';
+		$new_update_row_object = new WIC_Form_Email_Update ( $this->entity, $this->entity_instance );
+		$new_update_row = $new_update_row_object->layout_form( $this->data_object_array, $message, null );
+		return $new_update_row;
+	}
+
 	private static $email_type_options = array(	
 		array(
 			'value'	=> '0',
