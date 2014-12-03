@@ -13,7 +13,7 @@ class WIC_Control_Checked extends WIC_Control_Parent {
 	
 		$readonly = $readonly ? 'readonly' : '';
 				 
-		$control = ( $field_label > '' ) ?  '<label class="' . $label_class . '" for="' . 
+		$control = ( $field_label > '' ) ?  '<label class="' . $label_class .  ' ' . esc_attr( $field_slug_css ) . '" for="' . 
 				esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . ' ' . '</label>' : '';
 		$control .= '<input class="' . $input_class . '"  id="' . esc_attr( $field_slug ) . '" name="' . esc_attr( $field_slug ) . 
 			'" type="checkbox"  value="1"' . checked( $value, 1, false) . $readonly  .'/>';	

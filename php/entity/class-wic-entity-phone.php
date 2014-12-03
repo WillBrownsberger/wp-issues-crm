@@ -15,11 +15,11 @@ class WIC_Entity_Phone extends WIC_Entity_Multivalue {
 		$this->entity_instance = $instance;
 	} 
 
-	public static function phone_sanitizor ( $raw_phone ) {
+	public static function phone_number_sanitizor ( $raw_phone ) { 
 		return ( preg_replace("/[^0-9]/", '', $raw_phone) ) ;
 	}
 	
-	public static function phone_formatter ( $raw_phone ) {
+	public static function phone_number_formatter ( $raw_phone ) {
 		   	
 		$phone = preg_replace( "/[^0-9]/", '', $raw_phone );
    	

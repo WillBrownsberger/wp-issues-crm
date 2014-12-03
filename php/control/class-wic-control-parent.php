@@ -43,6 +43,8 @@ abstract class WIC_Control_Parent {
 		$this->field = WIC_DB_Dictionary::get_field_rules( $entity, $field_slug );
 		$this->default_control_args =  array_merge( $this->default_control_args, get_object_vars ( $this->field ) );
 		$this->default_control_args['field_slug_css'] = str_replace( '_', '-', $field_slug );
+		$this->default_control_args['field_slug_stable'] = $field_slug; 
+		// retain this value arg so don't need to parse out instance in static create control function where don't have $this->field->field_slug to refer to
 		$this->default_control_args['field_slug'] = ( '' == $instance ) ? // ternary
 				// if no instance supplied, this is just a field in a main form, and use field slug for field name and field id
 				$field_slug :
@@ -129,9 +131,9 @@ abstract class WIC_Control_Parent {
 		extract ( $control_args, EXTR_OVERWRITE );  
 		
 		$value = ( '0000-00-00' == $value ) ? '' : $value; // don't show date fields with non values; 
-
-     	$class_name = 'WIC_Entity_' . $entity_slug;
-		$formatter = $field_slug . '_formatter';
+		
+     	$class_name = 'WIC_Entity_' . $entity_slug; 
+		$formatter = $field_slug_stable . '_formatter'; // ( field slug has instance args in it )
 		if ( method_exists ( $class_name, $formatter ) ) { 
 			$value = $class_name::$formatter ( $value );
 		}
@@ -239,7 +241,7 @@ abstract class WIC_Control_Parent {
 	* report whether field fails individual requirement
 	*
 	*********************************************************************************/
-	public function required_check() {
+	public function required_check() { 
 		if ( "individual" == $this->field->required && ! $this->is_present() ) {
 			return ( sprintf ( __( ' %s is required. ', 'wp-issues-crm' ), $this->field->field_label ) ) ;		
 		} else {

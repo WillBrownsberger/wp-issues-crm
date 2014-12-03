@@ -185,7 +185,7 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		$phone_array = explode ( ',', $phone_list );
 		$formatted_phone_array = array();
 		foreach ( $phone_array as $phone ) {
-			$formatted_phone_array[] = WIC_Entity_Phone::phone_formatter ( $phone );		
+			$formatted_phone_array[] = WIC_Entity_Phone::phone_number_formatter ( $phone );		
 		}
 		return ( implode ( '<br />', $formatted_phone_array ) );
 	}

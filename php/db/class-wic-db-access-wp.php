@@ -67,9 +67,21 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 					$meta_query_args[] = $search_clause;
 					break;
 				case 'author':
-				case 'tag' :
 				case 'post_status':
 					$query_args[$search_clause['wp_query_parameter']] = $search_clause['value'];
+					break;
+				case 'tag' :
+					$tag_name_array = explode ( ',' , $search_clause['value'] );
+					$tag_id_array = array();
+					foreach ( $tag_name_array as $tag_name ) {
+						$tag_object = get_term_by( 'name', esc_html( $tag_name ), 'post_tag' );
+						if ( false === $tag_object ) { 
+							$tag_id_array[] = 999999;
+						} else {
+							$tag_id_array[] = $tag_object->term_id;
+						} 			
+					}
+					$query_args['tag__in'] = $tag_id_array;
 					break;
 				case 'post_title': 
 							// note -- hiding post_content as a search field by css 
@@ -120,6 +132,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		if ( count ( $meta_query_args ) > 1 && ! isset ( $query_args['p'] ) ) { // if have ID, go only for that
 			$query_args['meta_query'] 	= $meta_query_args;
 		}
+
 		$wp_query = new WP_Query($query_args);
 		$this->sql = ' ' . __(' ( serialized WP_Query->query output ) ', 'wp-issues-crm' ) . serialize ( $wp_query->query );
 		$this->result = $wp_query->posts;

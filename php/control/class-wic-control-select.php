@@ -56,8 +56,8 @@ class WIC_Control_Select extends WIC_Control_Parent {
 			);  
 			$getter = 'get_' . $this->field->field_slug . '_options';
 			$option_array =  $entity_class::$getter( $value ); // include the value parameter to allow the getter to add the value to the array if needed
-			if ( '' == $required && 0 == $blank_prohibited ) { // difference is that required is not a required setting on search, but blank_prohibited is 
-				array_push( $option_array, $not_selected_option );
+			if ( 0 == $blank_prohibited ) { //  blank_prohibited goes with transient settings on search 
+				array_push( $option_array, $not_selected_option ); // note -- allowing a blank value on required -- let the validator force the user to decide
 			}
 		} else { // show just the already set option if a readonly field, but in update mode 
 					// (if were to show as a readonly text, would lose the variable for later use)
@@ -79,7 +79,7 @@ class WIC_Control_Select extends WIC_Control_Parent {
 
 		$control = '';
 		
-		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . 
+		$control = ( $field_label > '' ) ? '<label class="' . $label_class . ' ' .  esc_attr( $field_slug_css ) . '" for="' . esc_attr( $field_slug ) . '">' . 
 				esc_html( $field_label ) . '</label>' : '';
 		$control .= '<select class="' . esc_attr( $input_class ) . ' ' .  esc_attr( $field_slug_css ) .'" onchange ="' . $onchange . '"id="' . esc_attr( $field_slug ) . '" name="' . esc_attr( $field_slug ) 
 				. '" >' ;

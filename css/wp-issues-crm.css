@@ -225,7 +225,7 @@ label.wic-label {
 .wic-input {
 	background: #ffffff;
 	border: 1px solid #f0f0f0;
-	font-size: 1.1em;
+	font-size: 1em;
 	margin: 0 1.25% 0 0;
 } 
 
@@ -454,6 +454,11 @@ a#wic-email-icon-link {
 	width: 47.2656%;
 }
 
+label.wic-label.activity-type, 
+label.wic-label.issue {
+	display: none;
+}
+
 label.wic-label.activity-date {
 	display: inline-block;
 	min-width: 0px;
@@ -616,7 +621,8 @@ ul#constituent-comment-list {
 #wic-form-issue-search #wic-form-sidebar-groups .wic-input.review-date,
 #wic-form-constituent-search #wic-form-sidebar-groups .wic-input.case-review-date,
 #wic-form-constituent-search #wic-form-sidebar-groups .wic-input.date-of-birth,
-#wic-form-constituent-search #wic-form-sidebar-groups .wic-input.reg-date {
+#wic-form-constituent-search #wic-form-sidebar-groups .wic-input.reg-date, 
+#wic-form-constituent-search #wic-form-sidebar-groups .wic-input.last-updated-time {
 	width: 40%;
 	min-width: 0;
 }

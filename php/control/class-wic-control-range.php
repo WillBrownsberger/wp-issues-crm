@@ -56,7 +56,9 @@ class WIC_Control_Range extends WIC_Control_Parent {
 		
 		extract ( $args, EXTR_OVERWRITE );
 
-		if ( $dup_check ) { echo 'i am dup checking'; var_dump ($args);
+
+
+		if ( $dup_check ) { 
 			$query_clause = parent::create_search_clause ( $args );
 			return ( $query_clause );		
 		}

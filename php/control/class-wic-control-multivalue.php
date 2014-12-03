@@ -57,15 +57,23 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 						$wic_access_object->delete_by_id( $form_row_array['ID'] ); 
 					}
 				} else { // not deleted rows -- may be blank
+					// need to test whether row coming back has anything in it.
 					$values_set = false;
+					// test each value in the row
 					foreach ( $form_row_array as $value ){
-						if ( '' != $value && 
-								! is_array ( $value ) ) { 
-								// the second half of this condition keeps blank date search ranges and multiselect fields from automatically looking like values
-								// it limits future flexibility to create multivalue fields within multivalue fields -- probably OK
-							$values_set = true;
-							break;						
-						}	
+						if ( is_array ( $value ) ) { // if value is array, need to see if array has anything in it ( blank array is not an empty string )
+							if ( count ( $value > 0 ) ) {  // theoretically?, it could be a zero length array, in which case, ignore 
+								foreach ( $value as $array_item ) { // could definitely have blank values, so need to see at least one
+									if ( '' < $array_item ) {
+										$values_set = true;			
+									}								
+								}							
+							}							
+						} else { // if value is scalar, then nonblank is enough
+							if ( '' < $value ) {
+								$values_set = true;							
+							}						
+						} 
 					}
 					if ( $values_set ) {					
 						$this->value[$instance_counter] = new $class_name( 'populate_from_form', $args );

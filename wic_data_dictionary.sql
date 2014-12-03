@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Dec 02, 2014 at 08:06 AM
+-- Generation Time: Dec 02, 2014 at 09:16 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -60,6 +60,11 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=91 ;
 
 --
+-- Truncate table before insert `wp_wic_data_dictionary`
+--
+
+TRUNCATE TABLE `wp_wic_data_dictionary`;
+--
 -- Dumping data for table `wp_wic_data_dictionary`
 --
 
@@ -89,13 +94,13 @@ INSERT INTO `wp_wic_data_dictionary` (`field_id`, `entity_slug`, `group_slug`, `
 (24, 'constituent', 'registration', 'ssid', 'text', 0, 0, 'Secretary of State ID', 360, 0, 0, '', 0, 1, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (25, 'constituent', 'registration', 'civi_id', 'text', 0, 0, 'CiviCRM ID', 410, 0, 0, '', 0, 1, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (26, 'constituent', 'registration', 'van_id', 'text', 0, 0, 'VAN ID', 420, 0, 0, '', 0, 1, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
-(27, 'constituent', 'registration', 'last_updated_time', 'text', 0, 0, 'Last Updated Time', 430, 0, 0, '', 0, 1, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
-(28, 'constituent', 'registration', 'last_updated_by', 'text', 0, 0, 'Last Updated User', 440, 0, 0, '', 0, 1, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
+(27, 'constituent', 'registration', 'last_updated_time', 'range', 1, 0, 'Last Updated Time', 430, 0, 0, '', 0, 1, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
+(28, 'constituent', 'registration', 'last_updated_by', 'select', 0, 1, 'Last Updated User', 440, 0, 0, '', 0, 1, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 1),
 (29, 'activity', 'activity', 'ID', 'text', 0, 0, 'Internal ID for Activity', 400, 0, 0, '', 0, 0, 1, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (30, 'activity', 'activity', 'constituent_id', 'text', 0, 0, 'Constituent ID for Activity', 10, 0, 0, '', 0, 0, 1, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
-(31, 'activity', 'activity', 'activity_date', 'range', 1, 0, 'Date', 30, 0, 10, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
-(32, 'activity', 'activity', 'activity_type', 'select', 0, 0, '', 20, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Type', 0, 0, '', 0),
-(33, 'activity', 'activity_issue', 'issue', 'select', 0, 0, '', 40, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Issue', 0, 0, '', 0),
+(31, 'activity', 'activity', 'activity_date', 'range', 1, 0, 'Date', 30, 0, 10, 'individual', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Date', 0, 0, '', 0),
+(32, 'activity', 'activity', 'activity_type', 'select', 0, 0, 'Type', 20, 0, 0, 'individual', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Type', 0, 0, '', 0),
+(33, 'activity', 'activity_issue', 'issue', 'select', 0, 0, 'Issue', 40, 0, 0, 'individual', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Issue', 0, 0, '', 0),
 (34, 'activity', 'activity_issue', 'pro_con', 'select', 0, 0, '', 50, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Pro/Con', 0, 0, '', 0),
 (35, 'activity', 'activity_note', 'activity_note', 'textarea', 0, 0, '', 60, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', ' . . . notes . . .', 0, 0, '', 0),
 (36, 'address', 'address_line_1', 'ID', 'text', 0, 0, 'Internal ID for Address', 0, 0, 0, '', 0, 0, 1, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
@@ -114,12 +119,12 @@ INSERT INTO `wp_wic_data_dictionary` (`field_id`, `entity_slug`, `group_slug`, `
 (52, 'phone', 'phone_row', 'ID', 'text', 0, 0, 'Internal ID for Phone', 0, 0, 0, '', 0, 0, 1, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (53, 'phone', 'phone_row', 'constituent_id', 'text', 0, 0, 'Constituent ID for Phone', 10, 0, 0, '', 0, 0, 1, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (54, 'phone', 'phone_row', 'phone_type', 'select', 0, 0, '', 20, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Type', 0, 0, '', 0),
-(55, 'phone', 'phone_row', 'phone', 'text', 0, 0, 'Phone Number', 30, 100, 0, 'individual', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'hidden-template', '', 0, 0, '', 0),
+(55, 'phone', 'phone_row', 'phone_number', 'text', 0, 0, 'Phone Number', 30, 100, 0, 'individual', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'hidden-template', '', 0, 0, '', 0),
 (56, 'phone', 'phone_row', 'extension', 'text', 0, 0, '', 40, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Ext.', 0, 1, '', 0),
 (57, 'phone', 'phone_row', 'screen_deleted', 'deleted', 0, 0, 'x', 1, 0, 0, '', 0, 0, 0, '', 0, '', 1, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (58, 'constituent', 'search_parms', 'retrieve_limit', 'select', 0, 0, '# of Constituents to Show', 10, 0, 0, '', 0, 0, 0, '', 0, '', 1, '', 'wic-input', 'wic-label', '', 1, 0, '', 0),
 (59, 'constituent', 'search_parms', 'compute_total', 'checked', 0, 0, 'Show Total Count', 30, 0, 0, '', 0, 0, 0, '', 0, '', 1, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
-(60, 'constituent', 'search_parms', 'sort_order', 'checked', 0, 0, 'Sort Records', 40, 0, 0, '', 0, 0, 0, '', 0, '', 1, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
+(60, 'constituent', 'search_parms', 'sort_order', 'checked', 0, 0, 'Sort records before retrieval', 40, 0, 0, '', 0, 0, 0, '', 0, '', 1, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (61, 'constituent', 'search_parms', 'match_level', 'select', 0, 0, 'Name Match', 20, 0, 0, '', 0, 0, 0, '', 0, '', 1, '', 'wic-input', 'wic-label', '', 1, 0, '', 0),
 (62, 'constituent', 'contact', 'mark_deleted', 'text', 0, 0, 'Mark Deleted', 999, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'DELETED', 0, 0, '', 0),
 (63, 'constituent', 'search_parms', 'show_deleted', 'checked', 0, 0, 'Include Deleted', 50, 0, 0, '', 0, 0, 0, '', 0, '', 1, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
@@ -166,6 +171,11 @@ CREATE TABLE IF NOT EXISTS `wp_wic_form_field_groups` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
 
 --
+-- Truncate table before insert `wp_wic_form_field_groups`
+--
+
+TRUNCATE TABLE `wp_wic_form_field_groups`;
+--
 -- Dumping data for table `wp_wic_form_field_groups`
 --
 
@@ -188,7 +198,7 @@ INSERT INTO `wp_wic_form_field_groups` (`group_id`, `entity_slug`, `group_slug`,
 (21, 'issue', 'issue_creation', 'Codes', 'These fields are not updateable except through the regular Wordpress admin screens.', 40, 0, 0, 1, 0),
 (22, 'constituent', 'comment', 'Latest Online Comments', 'Note: If the online user''s email is not in WP-Issues-CRM, the online activity will not be shown here.  Online activity shown here can only be altered through the WP backend.  ', 20, 0, 0, 0, 0),
 (23, 'comment', 'comment', 'Online Comments', '', 10, 0, 0, 0, 0),
-(24, 'issue', 'search_parms', 'Search Options', 'Other conditions are always joined by ''AND'', but you can select options for the categories search.', 25, 10, 1, 1, 0),
+(24, 'issue', 'search_parms', 'Search Options', 'You can select options for the categories search. Note: Tags are always joined by OR. Conditions collectively are always joined by ''AND''.', 25, 10, 1, 1, 0),
 (25, 'constituent', 'save_options', 'Save Options', '', 27, 1, 0, 1, 1);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

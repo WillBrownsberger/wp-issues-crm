@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Dec 02, 2014 at 08:06 AM
+-- Generation Time: Dec 02, 2014 at 09:17 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_activity` (
   KEY `constituent_id` (`constituent_id`),
   KEY `email_address` (`activity_type`),
   KEY `email_type` (`activity_date`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=65 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=71 ;
 
 -- --------------------------------------------------------
 
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_address` (
   KEY `constituent_id` (`constituent_id`),
   KEY `city` (`city`),
   KEY `state` (`state`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171499 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171500 ;
 
 -- --------------------------------------------------------
 
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `organization` (`organization`),
   KEY `last_updated_time` (`last_updated_time`),
   KEY `last_updated_by` (`last_updated_by`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171508 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171509 ;
 
 -- --------------------------------------------------------
 
@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_email` (
   KEY `constituent_id` (`constituent_id`),
   KEY `email_address` (`email_address`),
   KEY `email_type` (`email_type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10599 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10601 ;
 
 -- --------------------------------------------------------
 
@@ -218,15 +218,15 @@ CREATE TABLE IF NOT EXISTS `wp_wic_phone` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique Email ID',
   `constituent_id` int(10) unsigned NOT NULL,
   `phone_type` smallint(10) unsigned DEFAULT NULL,
-  `phone` varchar(254) DEFAULT NULL COMMENT 'Email address',
-  `extension` varchar(20) NOT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `extension` varchar(10) NOT NULL,
   `last_updated_time` date NOT NULL,
   `last_updated_by` int(11) NOT NULL,
   PRIMARY KEY (`ID`),
   KEY `constituent_id` (`constituent_id`),
-  KEY `email_address` (`phone`),
+  KEY `email_address` (`phone_number`),
   KEY `email_type` (`phone_type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=21 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=23 ;
 
 -- --------------------------------------------------------
 
@@ -243,7 +243,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_search_log` (
   `download_time` varchar(20) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user-time` (`user_id`,`time`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=997 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1320 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

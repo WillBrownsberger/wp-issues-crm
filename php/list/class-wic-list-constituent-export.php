@@ -29,7 +29,7 @@ class WIC_List_Constituent_Export {
 
 		$sql = 	"SELECT last_name, first_name, middle_name, 
 						GROUP_CONCAT( DISTINCT email_address SEPARATOR ';' ) as emails, 
-						GROUP_CONCAT( DISTINCT phone SEPARATOR ';' ) as phones,
+						GROUP_CONCAT( DISTINCT phone_number SEPARATOR ';' ) as phones,
 						max( 	
 							if ( address_type = 1, address_line, ' '	) ) as address_line_1,
 						max( if ( address_type = 1, concat ( city, ', ', state, ' ',  zip), ' ' ) ) as address_line_2, 

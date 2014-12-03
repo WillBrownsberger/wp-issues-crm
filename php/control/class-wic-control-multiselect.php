@@ -25,6 +25,7 @@ class WIC_Control_Multiselect extends WIC_Control_Select {
 				$args = array(
 					'field_slug' 			=> $field_slug . '[' . $option['value'] . ']',
 					'field_label'			=>	$option['label'],
+					'field_slug_css'		=> $field_slug_css,
 					'label_class'			=> 'wic-multi-select-label '  . $option ['class'],
 					'input_class'			=> 'wic-multi-select-checkbox ', 
 					'value'					=> isset ( $value[$option['value']] ), 	
