@@ -34,16 +34,23 @@ class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 			'label'	=>	'eMail' ),
 		array(
 			'value'	=> '1',
-			'label'	=>	'Call' ),
+			'label'	=>	'Call' ), 
 		array(
 			'value'	=> '2',
-			'label'	=>	'Petition' ),
+			'label'	=>	'Petition' ), 
 		array(
 			'value'	=> '3',
 			'label'	=>	'Meeting' ),
 		array(
 			'value'	=> '4',
-			'label'	=>	'Letter' ),
+			'label'	=>	'Letter' ), 
+		array(
+			'value'	=> '5',
+			'label'	=>	'Web Contact' ),
+		array(
+			'value'	=> '6',
+			'label'	=>	'Conversion' ), 
+
 		);
 
 	public static function get_activity_type_options() {
