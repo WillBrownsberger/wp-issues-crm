@@ -82,7 +82,7 @@ class WIC_List_Search_Log extends WIC_List_Parent {
 	
 	protected function format_message( &$wic_query ) {
 	
-		$header_message = sprintf ( __( 'Showing your most recent %1$s database searches with downloads highlighted.  
+		$header_message = sprintf ( __( 'Showing your most recent %1$s searches (downloads highlighted).  
 				You can rerun prior searches.', 'wp-issues-crm'), $wic_query->found_count );		
 		return $header_message;
 	}

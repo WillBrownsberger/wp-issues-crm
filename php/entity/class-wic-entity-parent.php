@@ -209,20 +209,26 @@ abstract class WIC_Entity_Parent {
 
 	/*************************************************************************************
 	*
-	*  REQUEST HANDLERS: new form, id search, general search, save/update
+	*  REQUEST HANDLERS: new form, save from search, save/update,  id search, general search, redo search from metaquery
 	*     Child class functions are wrap arounds to choose next forms
 	*
 	**************************************************************************************/
 
 	protected function new_form_generic( $form, $guidance = '' ) {
-		if ( '' == $guidance ) {
-			$guidance = __( 'If record not found, you will be able to save.', 'wp-issues-crm');		
-		}
 		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
 		$this->initialize_data_object_array();
 		$new_search = new $form;
 		$new_search->layout_form( $this->data_object_array, $guidance, 'guidance' );
 	}	
+
+	// handle a save request coming from search -- 
+	// need to lose readonly fields from search form, so show save form, rather than proceeding directly
+	protected function save_from_search ( $entity_save_form, $message = '', $message_level = 'good_news', $sql = ''  ) {
+		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+		$this->populate_data_object_array_from_submitted_form();
+		$save_form = new $entity_save_form;
+		$save_form->layout_form ( $this->data_object_array, $message, $message_level, $sql );		
+	}
 
 	//handle an update request coming from a form ( $save is true or false )
 	protected function form_save_update_generic ( $save, $fail_form, $success_form ) {
@@ -297,7 +303,8 @@ abstract class WIC_Entity_Parent {
 	}
 	
 	// handle a search request coming from a full form
-	protected function form_search_generic ( $save_form, $update_form ) { 
+	// the first form passed will be 
+	protected function form_search_generic ( $not_found_form, $found_form ) { 
 		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
 		$this->populate_data_object_array_from_submitted_form();
 		$this->sanitize_values();
@@ -317,19 +324,20 @@ abstract class WIC_Entity_Parent {
 		// note that the transient search parameter 'match_level' is needed by individual controls in create_search_clause()
 				
 		$wic_query->search ( $this->assemble_meta_query_array( $search_clause_args ), $search_parameters ); // get a list of id's meeting search criteria
-		$this->handle_search_results ( $wic_query, $save_form, $update_form );
+		$this->handle_search_results ( $wic_query, $not_found_form, $found_form );
 	}
 
-	protected function handle_search_results ( $wic_query, $save_form, $update_form ) {
+	// takes action depending on outcome of search
+	protected function handle_search_results ( $wic_query, $not_found_form, $found_form ) {
 		$sql = $wic_query->sql;
 		if ( 0 == $wic_query->found_count ) {
-			$message = __( 'No matching record found.', 'wp-issues-crm' );
-			$message_level =  'guidance';
-			$form = new $save_form;
+			$message = __( 'No matching record found -- search again, save new or start over.', 'wp-issues-crm' );
+			$message_level =  'error';
+			$form = new $not_found_form;
 			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );			
 		} elseif ( 1 == $wic_query->found_count) { 
 			$this->data_object_array = array(); // discard possibly soft matching array values before doing straight id retrieval
-			$this->id_search_generic ( $wic_query->result[0]-> ID, $update_form, $sql );	
+			$this->id_search_generic ( $wic_query->result[0]-> ID, $found_form, $sql );	
 		} else {
 			$lister_class = 'WIC_List_' . $this->entity ;
 			$lister = new $lister_class;

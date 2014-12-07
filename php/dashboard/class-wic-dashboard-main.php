@@ -2,16 +2,9 @@
 /**
 *
 * class-wic-dashboard-main.php
-*
-
-* This is the central request handler for the entire plugin.
-* It distributes button submissions (all of which have the same name, with an array of values) 
-*   to an class entity class with an action request and arguments.
-*
-* Only other entry is at WIC_List_Constituent_Export 
-*	 same security tests there -- is logged in and, other than for dashboard first screen (my cases) have nonce?
-*
 */
+
+
 class WIC_Dashboard_Main {
 
 	// construct registers short code; this class instantiated in wp-issues-crm.php
@@ -19,7 +12,18 @@ class WIC_Dashboard_Main {
 		add_shortcode( 'wp_issues_crm', array( $this, 'wp_issues_crm' ) );
 	}
 
-	// short code handler
+	/* 
+	*  This is the central request handler for the entire plugin -- all requests are button submits named wic_form_button.
+	*	
+	*  It distributes button submissions (all of which have the same name, with a string of values)
+	*  to an class entity class with an action request and arguments.
+	*
+	*	See WIC_Form_Parent::create_wic_form_button for button interface (exclusive main form button creator for system)
+	*
+	*  Only other entry is at WIC_List_Constituent_Export 
+	*	 same security tests there -- is logged in and, other than for dashboard first screen (my cases) have nonce?
+	*
+	*/
 	public function wp_issues_crm() {
 
 		// is user logged in as administrator; if not, return
@@ -42,7 +46,7 @@ class WIC_Dashboard_Main {
 				$this->show_dashboard( $control_array [1] );		
 			} else {
 				$class_name = 'WIC_Entity_' . $control_array[0]; // entity_requested
-				$action_requested 		= $control_array[1];
+				$action_requested 		= $control_array[1]; 
 				$args = array (
 					'id_requested'			=>	$control_array[2],
 					'instance'				=> '', // unnecessary in this context, absence will not create an error but here for consistency about arguments;
@@ -62,39 +66,49 @@ class WIC_Dashboard_Main {
 		wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); 
 
 		$top_menu_buttons = array (
-			array ( 'dashboard', 	'my_cases',		0, 	__( 'My Cases', 'wp-issues-crm' ) ),
-			array ( 'dashboard', 	'my_issues',	0, 	__( 'My Issues', 'wp-issues-crm' ) ),
-			array ( 'constituent', 	'new_form',		0, 	__( 'Constituents', 'wp-issues-crm' ) ),
-			array ( 'issue', 			'new_form',		0, 	__( 'Issues', 'wp-issues-crm' ) ),
-			array ( 'issue', 			'new_issue',	0, 	__( 'New Issue', 'wp-issues-crm') ),
-			array ( 'dashboard', 	'search_history',0,	__( 'My Recent', 'wp-issues-crm' ) ),		
+			array ( 'dashboard', 	'my_cases',		__( 'My Cases', 'wp-issues-crm' ), __( 'Display list of cases assigned to me.', 'wp-issues-crm' ),  ),
+			array ( 'dashboard', 	'my_issues',	__( 'My Issues', 'wp-issues-crm' ), __( 'Display list of issues assigned to me.', 'wp-issues-crm' ) ),
+			array ( 'constituent', 	'new_form',		__( 'Constituents', 'wp-issues-crm' ), __( 'Search for constituents.', 'wp-issues-crm' ) ),
+			array ( 'issue', 			'new_form',		__( 'Issues', 'wp-issues-crm' ), __( 'Search for issues.', 'wp-issues-crm' ) ),
+			array ( 'constituent',	'new_constituent',	__( '+Constituent', 'wp-issues-crm'), __( 'Add a new constituent.', 'wp-issues-crm' ) ),
+			array ( 'issue', 			'new_issue',	__( '+Issue', 'wp-issues-crm'), __( 'Add a new issue.', 'wp-issues-crm' )),
+			array ( 'dashboard', 	'search_history',	__( 'My Recent', 'wp-issues-crm' ), __( 'Review or repeat my recent searches.', 'wp-issues-crm' ) ),		
 			); 
 		
 		foreach ( $top_menu_buttons as $top_menu_button ) {
-			// $selected_class = ( $top_menu_button[0] == $class_requested && $top_menu_button[1] == $action_requested ) ? 'wic-form-button-selected' : '';
 			$selected_class = $this->is_selected ( $class_requested, $action_requested, $top_menu_button[0], $top_menu_button[1] ) ? 'wic-form-button-selected' : '';
-			$button_value = $top_menu_button[0] . ',' . $top_menu_button[1] . ',' . $top_menu_button[2];
-			echo '<button class = "wic-form-button ' . $selected_class . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . __( $top_menu_button[3], 'wp-issues-crm' ) . '</button>';
+			$button_args = array (
+				'entity_requested'	=> $top_menu_button[0],
+				'action_requested'	=> $top_menu_button[1],
+				'button_class'			=> 'wic-form-button ' . $selected_class,	
+				'button_label'			=>	$top_menu_button[2],
+				'title'					=>	$top_menu_button[3],
+			);
+			echo WIC_Form_Parent::create_wic_form_button( $button_args );
 		}				
 		echo '</form>';		
 	}
 
+	// for semantic highlight of top buttons
 	private function is_selected ( $class_requested, $action_requested, $button_class, $button_action ) {
+		// if last pressed the button, show it as selected 
 		if ( $class_requested == $button_class && $action_requested == $button_action ) {
-			return true; 		
-		}
-		if ( 'constituent' == $class_requested  && 'constituent' == $button_class ) {
-			return true;		
-		}
-		if ( 'issue' == $class_requested  && 'issue' == $button_class && 'new_issue' != $button_action ) {
-			return true;		
-		}
-		if ( 'search_log' == $class_requested  && 'dashboard' == $button_class && 'search_history' == $button_action ) {
-			return true;		
+			return true; 
+			// also show the search buttons as headers for other actions below the top menu		
+		} else { 
+			if ( 'constituent' == $button_class  && 'new_form' == $button_action && 'new_constituent' != $action_requested ) {
+					if ( 'constituent' == $class_requested ) {
+						return true;
+					}		
+			} elseif ( 'issue' == $button_class  && 'new_form' == $button_action && 'new_issue' != $action_requested ) {
+					if ( 'issue' == $class_requested ) {
+						return true;
+					}		
+			}
 		}
 	}
 
-	
+	// show top menu buttons and requested list
 	public function show_dashboard( $action_requested ) {
 		
 		$this->show_top_menu_buttons ( 'dashboard', $action_requested );
@@ -220,11 +234,7 @@ class WIC_Dashboard_Main {
 				}
 				break;
 
-			}
-
+		}
 	}
-	
-
-
 }
 

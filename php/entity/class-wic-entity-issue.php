@@ -5,8 +5,7 @@
 *
 *  This class is instantiated and takes control from the parent class in the parent constructor
 *  It takes action on user requests which are the named functions.
-*  It receives the $args passed from the button ( via WP_Issues_CRM and the parent )  
-*		BUT only $arg actually used is in the ID requested function.
+*  It receives the $args passed from the button ( via the dashboard ).  
 *	It is able to use generic functions from the parent.
 *
 */
@@ -14,23 +13,24 @@
 class WIC_Entity_Issue extends WIC_Entity_Parent {
 
 	protected function set_entity_parms( $args ) { // 
-		// accepts args to comply with abstract function definition, but as a parent does not process them -- no instance
+		// accepts args to comply with abstract function definition, but as a top level entity does not process them -- no instance arg
 		$this->entity = 'issue';
 	} 
 
-	// handle a request for a new standard form
+	// handle a request for a new search form
 	protected function new_form() { 
 		$this->new_form_generic( 'WIC_Form_Issue_Search' );
 		return;
 	}
 	
+	// handle a request for a blank new issue form
 	protected function new_issue() {
 		$this->new_form_generic ( 'WIC_Form_Issue_Save', __( 'Create a new issue and save.', 'wp-issues-crm' ) );	
 	}
 
 	// handle a search request coming from a standard form
 	protected function form_search () { 
-		$this->form_search_generic ( 'WIC_Form_Issue_Save', 'WIC_Form_Issue_Update');
+		$this->form_search_generic ( 'WIC_Form_Issue_Search_Again', 'WIC_Form_Issue_Update');
 		return;				
 	}
 	
@@ -151,16 +151,15 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 
 	private static $retrieve_limit_options = array ( 
 		array(
-			'value'	=> '10',
-			'label'	=>	'Up to 10' ),
-		array(
 			'value'	=> '50',
 			'label'	=>	'Up to 50' ),
 		array(
 			'value'	=> '100',
 			'label'	=>	'Up to 100' ),
+		array(
+			'value'	=> '500',
+			'label'	=>	'Up to 500' ),
 		);
-
 	
 	/*
 	*	option array get functions

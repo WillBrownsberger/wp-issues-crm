@@ -7,51 +7,85 @@
 */
 
 abstract class WIC_Form_Parent  {
-
-	protected $message_level_to_css_convert = array(
-		'guidance' 	=> 'wic-form-routine-guidance',
-		'error' 		=> 'wic-form-errors-found',	
-		'good_news'	=> 'wic-form-good-news',
-	);
-
-	abstract protected function get_the_entity();
-	abstract protected function get_the_buttons();
-	abstract protected function format_message ( &$data_array, $message );
-	abstract protected function get_the_formatted_control( $control_args );
-	abstract protected function get_the_legends( $sql = '' );
 	
+	/* 
+	*
+	*	This class standardizes all the forms that accept input in wp-issues-crm.
+	*
+	*  One public function -- layout form
+	*	Abstract protected functions for child forms to fill in form details 
+	*
+	*	Also includes two public static functions for button creation -- create_wic_form_button and back_button
+	*
+	*/
+
+
+	// associate form with entity in data dictionary
+	abstract protected function get_the_entity();
+	// get the field groups for the entity from the data dictionary	
 	protected function get_the_groups () {
 		$groups = WIC_DB_Dictionary::get_form_field_groups( $this->get_the_entity() );
 		return ($groups );
 	}
 
-	public function layout_form ( &$data_array, $message, $message_level, $sql = '' ) {
+	// define the top row of buttons (return a row of wic_form_button s)
+	abstract protected function get_the_buttons();
+	// define the form message (return a message)
+	abstract protected function format_message ( &$data_array, $message );
+	// coloring of message box
+	protected $message_level_to_css_convert = array(
+		'guidance' 	=> 'wic-form-routine-guidance',
+		'error' 		=> 'wic-form-errors-found',	
+		'good_news'	=> 'wic-form-good-news',
+	);
+	// chose search, save or update controls
+	abstract protected function get_the_formatted_control( $control_args );
+	// (return legends)
+	abstract protected function get_the_legends( $sql = '' );
+	// screen out some groups of fields (return true or false)
+	abstract protected function group_screen( $group );
+	// add any special groups of fields 
+	abstract protected function group_special( $group );
+	// add material before last row of buttons	
+	abstract	protected function pre_button_messaging ( &$data_array );
+	// add material ( e.g., list ) after the form (not presently implemented in any child form)
+	abstract protected function post_form_hook ( &$data_array ); 
 
-		// $this->emit_debugging_information();
+
+	/* 
+	* layout_form -- main form function
+	* 	references data_dictionary for grouping of variables, but gets all values from passed array of controls $data_array
+	*  
+	*	arguments expected:
+	*		$data_array, formatted as field_slug => control object
+	*		$message, to be appended to generic form header
+	*		$message_level -- determines color of message box -- according to $message_level_to_css_convert property of the form
+	*			default options set in this abstract class are: guidance, error, good_news
+	*		$sql = search sql to display in legend area as info 
+	*/
+	public function layout_form ( &$data_array, $message, $message_level, $sql = '' ) {
 
 		?><div id='wic-forms'>
 
 		<form id = "<?php echo $this->get_the_form_id(); ?>" class="wic-post-form" method="POST" autocomplete = "on">
 
-			<?php 
-			$message = $this->format_message ( $data_array, $message ); 
-			?>
+			<?php // child class must define message, possibly using the $message in calling parameters of layout form			
+			$message = $this->format_message ( $data_array, $message );	?>
 				
 			<div id="post-form-message-box" class = "<?php echo $this->message_level_to_css_convert[$message_level]; ?>" ><?php echo esc_html( $message ); ?></div>
-			   
-		   <?php $buttons = $this->get_the_buttons(); 
+			
+			<?php // child class must define buttons, without receiving the calling parameters of layout form  
+		   $buttons = $this->get_the_buttons(); 
 		   		echo $buttons;	?>			   
 		
-			<?php
-			
-			// set up buffers for field output[='] in two areas of the screen
+			<?php	// set up buffers for field output[.=] in two areas of the screen
 			$main_groups = '';
 			$sidebar_groups = '';
 			$groups = $this->get_the_groups();
 		   foreach ( $groups as $group ) {
 		   	// set up buffer for all group content
 				$group_output = '';
-				
+				// child class must define a group screen ( return true or false )
 				if ( $this->group_screen( $group ) ) {				
 
 					$group_output .= '<div class = "wic-form-field-group" id = "wic-field-group-' . esc_attr( $group->group_slug  ) . '">';				
@@ -71,8 +105,8 @@ abstract class WIC_Form_Parent  {
 						'<p class = "wic-form-field-group-legend">' . esc_html ( $group->group_legend )  . '</p>';
 						
 						// here is the main content -- either   . . .
-						if ( $this->group_special ( $group->group_slug ) ) { // a hook to run a special group OR . . . 
-							$special_function = 'group_special_' . $group->group_slug;
+						if ( $this->group_special ( $group->group_slug ) ) { 				// if implemented returns true -- run special function 
+							$special_function = 'group_special_' . $group->group_slug; 	// must define the special function too 
 							$group_output .= $this->$special_function( $data_array );
 						} else {	// standard main form logic 	
 							$group_fields =  WIC_DB_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
@@ -92,6 +126,7 @@ abstract class WIC_Form_Parent  {
 			echo 	'<div id="wic-form-body">' . '<div id="wic-form-main-groups">' . $main_groups . '</div>' .
 					'<div id="wic-form-sidebar-groups">' . $sidebar_groups . '</div>' . '</div>';		
 		
+			// child class may insert material here
 			$this->pre_button_messaging( $data_array );		
 		
 			// final button group div
@@ -101,17 +136,20 @@ abstract class WIC_Form_Parent  {
 				<?php echo $this->get_the_legends( $sql ); ?>
 			</div>								
 		</form>
-			<?php $this->post_form_hook( $data_array ); ?>
+		<?php // child class may insert messaging here 
+		$this->post_form_hook( $data_array ); ?>
 		</div>
 		
 		<?php 
 		
 	}
 
+	// return form identity in css form
 	protected function get_the_form_id() {
 		return( strtolower( str_replace( '_', '-', get_class( $this ) ) ) ); 
 	}
 
+	// prepare controls allowing child form to define arguments selected for control ( save, update, search ) 
 	protected function the_controls ( $fields, &$data_array ) {
 		$controls_output = '';
 		foreach ( $fields as $field ) {
@@ -120,37 +158,13 @@ abstract class WIC_Form_Parent  {
 		return ( $controls_output );
 	}
 
-	protected function pre_button_messaging ( &$data_array ) {
-		// just a hook	
-	}
-
-	protected function post_form_hook ( &$data_array ) {
-		// just a hook	
-	}
-
-
-	protected function emit_debugging_information() {
-		echo '<span style="color:green;"> <br /> $_POST:';  		
-			var_dump ($_POST);
-  		echo '</span>';  
-
-	}	
-	
-	protected function group_screen( $group ) { // allows child forms to screen out groups
-		return ( true );	
-	}
-
-	protected function group_special( $group ) { // allows child forms to add special groups
-		return ( false );	
-	}
-
 	/*
 	*
-	*	output show-hide-button
+	*	output show-hide-button ( field group headers are set up as buttons that show/hide field groups)
 	*  calls togglePostFormSection in wic-utilities.js
 	*
 	*/
-	public function output_show_hide_toggle_button( $args ) {
+	protected function output_show_hide_toggle_button( $args ) {
 
 		$class 			= 'field-group-show-hide-button';		
 		$name_base 		= 'wic-inner-field-group-'  ;
@@ -174,13 +188,19 @@ abstract class WIC_Form_Parent  {
 		return ($button);
 	}
 
+
+	/*
+	*
+	*	All buttons named wic_form_button are answered by the button handler in WIC_Dashboard_Main
+	*	This function is the exclusive creator of submit buttons in the system.  
+	*	It defines the interface to the button handler.  
+	*
+	*/
 	static public function create_wic_form_button ( $control_array_plus_class ) { 
 	
 		$entity_requested			= '';
 		$action_requested			= '';
 		$id_requested				= 0 ;
-		$referring_parent			= 0 ;
-		$new_form 					= 'n'; // go straight to a save
 		$button_class				= 'wic-form-button';
 		$button_label				= '';
 		$title						= '';
@@ -188,14 +208,14 @@ abstract class WIC_Form_Parent  {
 
 		extract ( $control_array_plus_class, EXTR_OVERWRITE );
 
-		$button_value = $entity_requested . ',' . $action_requested  . ',' . $id_requested  . ',' . $referring_parent . ',' . $new_form;
+		$button_value = $entity_requested . ',' . $action_requested  . ',' . $id_requested;
 	
 		$button =  '<button class = "' . $button_class . '" title = "' . $title . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . $button_label . '</button>';
 		return ( $button );
 	}
 
-
-	public static function backbutton ( $class ) {
+	// just a back button 
+	static public function backbutton ( $class ) {
 		return ( '<button 
 				class= "wic-form-button ' . $class . '" 
 				type="button" 

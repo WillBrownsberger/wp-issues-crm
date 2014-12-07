@@ -7,10 +7,12 @@
 
 class WIC_Form_Issue_Update extends WIC_Form_Parent  {
 	
+	// associate form with entity in data dictionary
 	protected function get_the_entity() {
 		return ( 'issue' );	
 	}
 
+	// define form buttons
 	protected function get_the_buttons () {
 		$button_args_main = array(
 			'entity_requested'			=> 'issue',
@@ -20,15 +22,38 @@ class WIC_Form_Issue_Update extends WIC_Form_Parent  {
 		return ( $this->create_wic_form_button ( $button_args_main ) . parent::backbutton (' second-position' ) ) ;
 	}
 	
+	// define form message
 	protected function format_message ( &$data_array, $message ) {
 		$title = $this->format_name_for_title ( $data_array );
 		return ( sprintf ( __('Update %1$s. ' , 'wp-issues-crm'), $title ) . $message );
 	}
 
+	// overriding the parent function here to make special handling for public posts
+	protected function the_controls ( $fields, &$data_array ) {
+		$public_post = false;
+		if ( isset ( $data_array['post_status'] ) ) {
+			if ( 'publish' == $data_array['post_status']->get_value() ) {
+				$public_post = true;
+			}
+		}
+		$controls_output = '';
+		foreach ( $fields as $field ) { 
+			if ( $field == 'post_content' && $public_post) {
+				$control = apply_filters ( 'the_content', $data_array['post_content']->get_value() );
+			} else {
+				$control = $this->get_the_formatted_control ( $data_array[$field] );			
+			}
+			$controls_output .= '<div class = "wic-control" id = "wic-control-' . str_replace( '_', '-' , $field ) . '">' . $control . '</div>';
+		}	
+		return ( $controls_output );
+	}
+
+	// choose update controls
 	protected function get_the_formatted_control ( $control ) {
 		return ( $control->update_control() ); 
 	}
 
+	// define form legends
 	protected function get_the_legends( $sql = '' ) {
 
 		$legend = '';
@@ -66,7 +91,10 @@ class WIC_Form_Issue_Update extends WIC_Form_Parent  {
 	
 	
 	protected function group_screen( $group ) {
-		return ( ! ( 1 == $group->search_only ) );	
+		return ( 'search_parms' != $group->group_slug );	
 	}
 	
+	// hooks not implemented
+	protected function group_special( $group ) {}
+   protected function post_form_hook ( &$data_array ) {} 
 }

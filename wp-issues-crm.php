@@ -38,7 +38,14 @@ function wp_issues_crm_autoloader( $class ) {
 	if ( 'WIC_' == substr ($class, 0, 4 ) ) {
 		$subdirectory = 'php'. DIRECTORY_SEPARATOR . strtolower( substr( $class, 4, ( strpos ( $class, '_', 4  ) - 4 )  ) ) . DIRECTORY_SEPARATOR ;
 		$class = strtolower( str_replace( '_', '-', $class ) );
-	   require_once plugin_dir_path( __FILE__ ) . $subdirectory .  'class-' . str_replace ( '_', '-', $class ) . '.php'; 
+		$class_file = plugin_dir_path( __FILE__ ) . $subdirectory .  'class-' . str_replace ( '_', '-', $class ) . '.php';
+		if ( file_exists ( $class_file ) ) {  
+   		require_once $class_file;
+   	} else {
+	   	wic_generate_call_trace();
+	   	echo 
+			die ( '<h3>' . sprintf(  __( 'Fatal configuration error -- missing file %s; failed in autoload in wp-issues-crm.php, line 43.', 'wp_issues_crm' ), $class_file ) . '</h3>' );   
+	   } 
 	}	
 }
 spl_autoload_register('wp_issues_crm_autoloader', false, true);
@@ -81,10 +88,11 @@ function do_download () {
 }
 add_action( 'template_redirect', 'do_download' );
 
-// invoke class that displays and handles main buttons 
+// invoke principal class that displays and handles main buttons 
 $wp_issues_crm = new WIC_Dashboard_Main;
 
-// function for debugging
+// function for catching bad class definitions; 
+// here only to support work of people adding new entity classes
 function wic_generate_call_trace() { // from http://php.net/manual/en/function.debug-backtrace.php
 
 	$e = new Exception();

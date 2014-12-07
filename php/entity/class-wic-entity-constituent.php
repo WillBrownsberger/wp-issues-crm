@@ -5,28 +5,43 @@
 *
 *  This class is instantiated and takes control from the parent class in the parent constructor
 *  It takes action on user requests which are the named functions.
-*  It receives the $args passed from the button ( via WP_Issues_CRM and the parent )  
-*		BUT only $arg actually used is in the ID requested function.
-*	It is able to use generic functions from the parent.
+*  It receives the $args passed from the button ( via the dashboard )  
+*	It is mostly able to use generic functions from the parent.
 *
 */
 
 class WIC_Entity_Constituent extends WIC_Entity_Parent {
+	
+	/*
+	*
+	* Request handlers
+	*
+	*/
 
 	protected function set_entity_parms( $args ) { // 
 		// accepts args to comply with abstract function definition, but as a parent does not process them -- no instance
 		$this->entity = 'constituent';
 	} 
 
-	// handle a request for a new standard form
+	// handle a request for a new search form
 	protected function new_form() { 
-		$this->new_form_generic( 'WIC_Form_Constituent_Search' );
+		$this->new_form_generic( 'WIC_Form_Constituent_Search',  __( 'If constituent not found, you will be able to save.', 'wp-issues-crm') );
 		return;
 	}
 
-	// handle a search request coming from a standard form
-	protected function form_search () { 
-		$this->form_search_generic ( 'WIC_Form_Constituent_Save', 'WIC_Form_Constituent_Update');
+	// show a constituent save form using values from a completed search form (search again)
+	protected function save_from_search() { 
+		parent::save_from_search ( 'WIC_Form_Constituent_Save',  $message = '', $message_level = 'good_news', $sql = '' );	
+	}
+
+	// handle a request for a blank new constituent form
+	protected function new_constituent() {
+		$this->new_form_generic ( 'WIC_Form_Constituent_Save' );	
+	}
+
+	// handle a search request coming from a completed search ( or search again ) form
+	protected function form_search () { // show new search if not found, otherwise show update (or list)
+		$this->form_search_generic ( 'WIC_Form_Constituent_Search_Again', 'WIC_Form_Constituent_Update');
 		return;				
 	}
 	
@@ -37,13 +52,13 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		return;		
 	}
 
-	//handle an update request coming from a standard form
+	//handle an update request coming from an update form
 	protected function form_update () {
 		$this->form_save_update_generic ( false, 'WIC_Form_Constituent_Update', 'WIC_Form_Constituent_Update' );
 		return;
 	}
 	
-	//handle a save request coming from a standard form
+	//handle a save request coming from a save form
 	protected function form_save () {
 		$this->form_save_update_generic ( true, 'WIC_Form_Constituent_Save', 'WIC_Form_Constituent_Update' );
 		return;
@@ -55,6 +70,7 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		return;
 	}		
 	
+	// set values from update process to be visible on form after save or update
 	protected function special_entity_value_hook ( &$wic_access_object ) {
 		$this->data_object_array['last_updated_time']->set_value( $wic_access_object->last_updated_time );
 		$this->data_object_array['last_updated_by']->set_value( $wic_access_object->last_updated_by );		
@@ -116,23 +132,23 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 
 	private static $retrieve_limit_options = array ( 
 		array(
-			'value'	=> '10',
-			'label'	=>	'Up to 10' ),
-		array(
 			'value'	=> '50',
 			'label'	=>	'Up to 50' ),
 		array(
 			'value'	=> '100',
 			'label'	=>	'Up to 100' ),
+		array(
+			'value'	=> '500',
+			'label'	=>	'Up to 500' ),
 		);
 
 	private static $match_level_options = array ( 
 		array(
-			'value'	=> '2',
-			'label'	=>	'Soundex' ),
-		array(
 			'value'	=> '1',
 			'label'	=>	'Right wild card' ),
+		array(
+			'value'	=> '2',
+			'label'	=>	'Soundex' ),
 		array(
 			'value'	=> '0',
 			'label'	=>	'Strict' ),
@@ -157,7 +173,6 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	public static function get_case_assigned_options() {
 		return ( WIC_Function_Utilities::get_administrator_array() );
 	}
-
 		
   	public static function get_case_status_options() {
 		return self::$case_status_options; 
@@ -225,7 +240,6 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		return self::$retrieve_limit_options; 
 	}
 
-
 	public static function get_voter_status_options() {
 		return self::$voter_status_options; 
 	}
@@ -233,56 +247,5 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	public static function get_voter_status_label( $lookup ) {
 		return WIC_Function_Utilities::value_label_lookup ( $lookup,  self::$voter_status_options );
 	}
-
-	/*	public function drop_down_issues() {
-		
-		global $wic_database_utilities;		
-				
-		$wic_issues_query = $wic_database_utilities->get_open_issues();
-
-		$issues_array = array();
-		
-		if ( $wic_issues_query->have_posts() ) {		
-			while ( $wic_issues_query->have_posts() ) {
-				$wic_issues_query->the_post();
-				$issues_array[] = array(
-					'value'	=> $wic_issues_query->post->ID,
-					'label'	=>	$wic_issues_query->post->post_title,
-				);
-			}
-		}
-		
-		wp_reset_postdata();
-		return $issues_array;
-
-	}
-	
-		public function get_open_issues() {
-			
-		$meta_query_args = array(
-			'relation' => 'AND',
-			array(
-				'meta_key'     => 'wic_live_issues',
-				'value'   => 'open',
-				'compare' => '=',
-			)
-		);
-		
-		$list_query_args = array (
-			'ignore_sticky_posts'	=> true,
-			'post_type'		=>	'post',
- 			'posts_per_page' => 100,
- 			'meta_query' 	=> $meta_query_args, 
- 			'order'			=> 'DESC',
-	 		);	
-	 		
-	 	$open_posts = new WP_Query ( $list_query_args );
-	 	
-	 	return ( $open_posts );	
-		
-	}
-
-*/
-	
 	
 }

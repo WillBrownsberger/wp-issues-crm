@@ -39,7 +39,7 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 			$known_emails_array[] = $email_entity->get_email_address();		
 		}
 		if (  0 == count ( $known_emails_array ) ) {
-			$output = '<br/><p class = "wic-form-field-group-legend">' . __( 'No online activity found for this constiutent.', 'wp-issues-crm' ) . '</p><br/>';	
+			$output = '<br/><p class = "wic-form-field-group-legend">' . __( 'No online activity found for this constituent.', 'wp-issues-crm' ) . '</p><br/>';	
 			return ( $output );	
 		}
 

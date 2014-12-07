@@ -1,16 +1,18 @@
 <?php
 /*
 *
-*  class-wic-search-form.php
+*  class-wic-constituent-update-form.php
 *
 */
 
 class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
-	
+
+	// associate form with entity in data dictionary
 	protected function get_the_entity() {
 		return ( 'constituent' );	
 	}
 
+	// define the top row of buttons (return a row of wic_form_button s)
 	protected function get_the_buttons () {
 		$button_args_main = array(
 			'entity_requested'			=> 'constituent',
@@ -20,16 +22,19 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 		return ( $this->create_wic_form_button ( $button_args_main ) . parent::backbutton (' second-position'  ) ) ;
 	}
 	
+	// define the form message (return a message)
 	protected function format_message ( &$data_array, $message ) {
 		$title = $this->format_name_for_title ( $data_array );
 		$formatted_message = sprintf ( __('Update %1$s. ' , 'wp-issues-crm'), $title )  . $message;
 		return ( $formatted_message );
 	}
 
+	// choose update controls for form
 	protected function get_the_formatted_control ( $control ) {
 		return ( $control->update_control() ); 
 	}
 
+	// legends
 	protected function get_the_legends( $sql = '' ) {
 
 		$legend = '';
@@ -54,6 +59,7 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 		return  $legend;
 	}
 	
+	// support function for message
 	protected function format_name_for_title ( &$data_array ) {
 
 		// construct title starting with first name
@@ -76,15 +82,23 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 		return  ( $title );
 	}
 	
+	// group screen
 	protected function group_screen( $group ) {
-		return ( ! ( 1 == $group->search_only ) );	
+		return ( 'search_parms' != $group->group_slug ) ;	
 	}
 	
+	// special group handling for the comment group
 	protected function group_special ( $group ) {
 		return ( 'comment' == $group );	
 	}
 	
+	// function to be called for special group
 	protected function group_special_comment ( &$doa ) {
 		return ( WIC_Entity_Comment::create_comment_list ( $doa ) ); 					
 	}
+	
+	// hooks not implemented
+	protected function pre_button_messaging ( &$data_array ){}
+	protected function post_form_hook ( &$data_array ) {}
+	 	
 }

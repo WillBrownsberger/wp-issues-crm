@@ -24,8 +24,6 @@ class WIC_Form_Multivalue_Search extends WIC_Form_Parent  {
 		return ( $this->entity );	
 	}
 	
-	protected function get_the_buttons(){}
-	protected function format_message ( &$data_array, $message ) {}	
 	protected function get_the_formatted_control ( $control ) {
 		$args = array();
 		return ( $control->search_control( $args ) ); 
@@ -53,4 +51,11 @@ class WIC_Form_Multivalue_Search extends WIC_Form_Parent  {
 		return $controls;
 	}
 	
+	// hooks not implemented
+	protected function get_the_buttons(){}
+	protected function format_message ( &$data_array, $message ) {}	
+	protected function group_special( $group ) {}
+	protected function group_screen ( $group ) {}
+	protected function pre_button_messaging ( &$data_array ){}
+   protected function post_form_hook ( &$data_array ) {} 
 }
