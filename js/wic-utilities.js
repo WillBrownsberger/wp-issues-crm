@@ -18,6 +18,36 @@ function changeCaseStatus() {
 	}
 }
 
+// function changes the activity issue link on change of the selected issue
+function changeActivityIssueButtonDestination() {
+	// since can't point to button that should change, just update them all
+	var activities = document.getElementsByClassName( 'wic-multivalue-block activity' );
+	var numActivities = activities.length; 
+	for ( i = 0; i < numActivities; i++ ) {
+		var activity_with_button = activities[i].getElementsByClassName ( 'wic-form-button wic-activity-issue-link-button');
+		var activity_with_issue = activities[i].getElementsByClassName ( 'wic-input issue');
+		var activity_issue = activity_with_issue[0];
+		if ( activity_with_button.length > 0 ) {
+			var activity_link_button = activity_with_button[0];
+			if ( activity_issue.value > '' ) {		
+				activity_link_button.value = 'issue,id_search,' + activity_issue.value;
+			} else {
+				activity_link_button.parentNode.removeChild( activity_link_button );			
+			}		
+		} else { // no link button -- create one if have an issue value
+			if ( activity_issue.value > '' ) {	
+				var btn = document.createElement("BUTTON");
+				btn.innerHTML = 'View Issue';
+				btn.className = 'wic-form-button wic-activity-issue-link-button';
+				btn.value = 'issue,id_search,' + activity_issue.value;
+				btn.name  = 'wic_form_button';
+				previousGroup = activity_issue.parentNode.previousSibling;
+				previousGroup.appendChild(btn);	
+				// activity_link_button.value = 'issue,id_search,' + activity_issue.value;
+			} 
+		}
+	}
+}
 
 function changeFollowUpStatus() {
 	// set issue follow_up_status to Open if Assigned	 

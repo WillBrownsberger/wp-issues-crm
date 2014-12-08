@@ -247,7 +247,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 			$this->insert_id = $check_id;
 			$current_user = wp_get_current_user();
 			$this->post_author = $current_user->ID;
-			$this->post_date = current_time ('timestamp' ); // date('Y-m-d H:i:s') ;
+			$this->post_date = current_time ('Y-m-d H:i:s' ); // date('Y-m-d H:i:s') ;
 			$this->post_status = 'private';
 		}
 		if ( 0 == $check_id ) {

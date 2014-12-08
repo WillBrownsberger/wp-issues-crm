@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Dec 02, 2014 at 09:16 PM
+-- Generation Time: Dec 07, 2014 at 09:34 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -60,11 +60,6 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=91 ;
 
 --
--- Truncate table before insert `wp_wic_data_dictionary`
---
-
-TRUNCATE TABLE `wp_wic_data_dictionary`;
---
 -- Dumping data for table `wp_wic_data_dictionary`
 --
 
@@ -76,7 +71,7 @@ INSERT INTO `wp_wic_data_dictionary` (`field_id`, `entity_slug`, `group_slug`, `
 (5, 'constituent', 'contact', 'last_name', 'text', 0, 0, 'Last Name', 30, 30, 20, 'group', 1, 0, 0, '', 2, '', 0, '', 'wic-input', 'wic-label', 'Last', 0, 0, '', 0),
 (6, 'constituent', 'contact', 'phone', 'multivalue', 0, 0, 'Phones', 40, 40, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (7, 'constituent', 'contact', 'email', 'multivalue', 0, 0, 'Emails', 50, 50, 0, 'group', 1, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
-(8, 'constituent', 'contact', 'address', 'multivalue', 0, 0, 'Addresses', 60, 60, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
+(8, 'constituent', 'contact', 'address', 'multivalue', 0, 0, 'Addresses', 60, 60, 0, '', 1, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (10, 'constituent', 'contact', 'activity', 'multivalue', 0, 0, 'Activities', 80, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (11, 'constituent', 'case', 'case_assigned', 'select', 0, 1, 'Staff', 110, -3, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, 'changeCaseStatus()', 1),
 (12, 'constituent', 'case', 'case_status', 'select', 0, 0, 'Status', 120, -2, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
@@ -100,7 +95,7 @@ INSERT INTO `wp_wic_data_dictionary` (`field_id`, `entity_slug`, `group_slug`, `
 (30, 'activity', 'activity', 'constituent_id', 'text', 0, 0, 'Constituent ID for Activity', 10, 0, 0, '', 0, 0, 1, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (31, 'activity', 'activity', 'activity_date', 'range', 1, 0, 'Date', 30, 0, 10, 'individual', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Date', 0, 0, '', 0),
 (32, 'activity', 'activity', 'activity_type', 'select', 0, 0, 'Type', 20, 0, 0, 'individual', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Type', 0, 0, '', 0),
-(33, 'activity', 'activity_issue', 'issue', 'select', 0, 0, 'Issue', 40, 0, 0, 'individual', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Issue', 0, 0, '', 0),
+(33, 'activity', 'activity_issue', 'issue', 'select', 0, 0, 'Issue', 40, 0, 0, 'individual', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Issue', 0, 0, 'changeActivityIssueButtonDestination()', 0),
 (34, 'activity', 'activity_issue', 'pro_con', 'select', 0, 0, '', 50, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Pro/Con', 0, 0, '', 0),
 (35, 'activity', 'activity_note', 'activity_note', 'textarea', 0, 0, '', 60, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', ' . . . notes . . .', 0, 0, '', 0),
 (36, 'address', 'address_line_1', 'ID', 'text', 0, 0, 'Internal ID for Address', 0, 0, 0, '', 0, 0, 1, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
@@ -164,42 +159,35 @@ CREATE TABLE IF NOT EXISTS `wp_wic_form_field_groups` (
   `group_legend` text NOT NULL,
   `group_order` smallint(6) NOT NULL DEFAULT '0',
   `initial_open` tinyint(1) NOT NULL,
-  `search_only` tinyint(1) NOT NULL,
   `sidebar_location` tinyint(1) NOT NULL,
-  `save_update_only` tinyint(1) NOT NULL,
   PRIMARY KEY (`group_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
 
 --
--- Truncate table before insert `wp_wic_form_field_groups`
---
-
-TRUNCATE TABLE `wp_wic_form_field_groups`;
---
 -- Dumping data for table `wp_wic_form_field_groups`
 --
 
-INSERT INTO `wp_wic_form_field_groups` (`group_id`, `entity_slug`, `group_slug`, `group_label`, `group_legend`, `group_order`, `initial_open`, `search_only`, `sidebar_location`, `save_update_only`) VALUES
-(1, 'constituent', 'contact', 'Contact', '', 10, 1, 0, 0, 0),
-(5, 'constituent', 'case', 'Case Management', '', 30, 1, 0, 1, 0),
-(6, 'constituent', 'personal', 'Personal Info', '', 40, 0, 0, 1, 0),
-(7, 'constituent', 'registration', 'Codes', 'These fields are read only -- searchable, but not updateable.', 50, 0, 0, 1, 0),
-(10, 'activity', 'activity_note', 'Activity Note', '', 20, 0, 0, 0, 0),
-(11, 'address', 'address_line_1', 'Address Line 1', '', 10, 1, 0, 0, 0),
-(12, 'address', 'address_line_2', 'Address Line 2', '', 20, 0, 0, 0, 0),
-(13, 'email', 'email_row', 'Email Row', '', 10, 1, 0, 0, 0),
-(14, 'phone', 'phone_row', 'Phone Row', '', 10, 1, 0, 0, 0),
-(15, 'constituent', 'search_parms', 'Search Options', '\n\n', 25, 1, 1, 1, 0),
-(16, 'activity', 'activity', '', '', 10, 0, 0, 0, 0),
-(17, 'activity', 'activity_issue', '', '', 15, 0, 0, 0, 0),
-(18, 'issue', 'issue_content', 'Issue Content', '', 10, 1, 0, 0, 0),
-(19, 'issue', 'issue_classification', 'Classification', '', 20, 1, 0, 0, 0),
-(20, 'issue', 'issue_management', 'Issue Management', '', 30, 1, 0, 1, 0),
-(21, 'issue', 'issue_creation', 'Codes', 'These fields are not updateable except through the regular Wordpress admin screens.', 40, 0, 0, 1, 0),
-(22, 'constituent', 'comment', 'Latest Online Comments', 'Note: If the online user''s email is not in WP-Issues-CRM, the online activity will not be shown here.  Online activity shown here can only be altered through the WP backend.  ', 20, 0, 0, 0, 0),
-(23, 'comment', 'comment', 'Online Comments', '', 10, 0, 0, 0, 0),
-(24, 'issue', 'search_parms', 'Search Options', 'You can select options for the categories search. Note: Tags are always joined by OR. Conditions collectively are always joined by ''AND''.', 25, 10, 1, 1, 0),
-(25, 'constituent', 'save_options', 'Save Options', '', 27, 1, 0, 1, 1);
+INSERT INTO `wp_wic_form_field_groups` (`group_id`, `entity_slug`, `group_slug`, `group_label`, `group_legend`, `group_order`, `initial_open`, `sidebar_location`) VALUES
+(1, 'constituent', 'contact', 'Contact', '', 10, 1, 0),
+(5, 'constituent', 'case', 'Case Management', '', 30, 1, 1),
+(6, 'constituent', 'personal', 'Personal Info', '', 40, 0, 1),
+(7, 'constituent', 'registration', 'Codes', 'These fields are read only -- searchable, but not updateable.', 50, 0, 1),
+(10, 'activity', 'activity_note', 'Activity Note', '', 20, 0, 0),
+(11, 'address', 'address_line_1', 'Address Line 1', '', 10, 1, 0),
+(12, 'address', 'address_line_2', 'Address Line 2', '', 20, 0, 0),
+(13, 'email', 'email_row', 'Email Row', '', 10, 1, 0),
+(14, 'phone', 'phone_row', 'Phone Row', '', 10, 1, 0),
+(15, 'constituent', 'search_parms', 'Search Options', '\n\n', 25, 1, 1),
+(16, 'activity', 'activity', '', '', 10, 0, 0),
+(17, 'activity', 'activity_issue', '', '', 15, 0, 0),
+(18, 'issue', 'issue_content', 'Issue Content', '', 10, 1, 0),
+(19, 'issue', 'issue_classification', 'Classification', '', 20, 1, 0),
+(20, 'issue', 'issue_management', 'Issue Management', '', 30, 1, 1),
+(21, 'issue', 'issue_creation', 'Codes', 'These fields are not updateable except through the regular Wordpress admin screens.', 40, 0, 1),
+(22, 'constituent', 'comment', 'Latest Online Comments', 'Note: If the online user''s email is not in WP-Issues-CRM, the online activity will not be shown here.  Online activity shown here can only be altered through the WP backend.  ', 20, 0, 0),
+(23, 'comment', 'comment', 'Online Comments', '', 10, 0, 0),
+(24, 'issue', 'search_parms', 'Search Options', 'You can select options for the categories search. Note: Tags are always joined by OR. Conditions collectively are always joined by ''AND''.', 25, 10, 1),
+(25, 'constituent', 'save_options', 'Save Options', '', 27, 1, 1);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

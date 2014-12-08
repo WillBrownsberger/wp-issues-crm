@@ -30,7 +30,7 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	}
 
 	// show a constituent save form using values from a completed search form (search again)
-	protected function save_from_search() { 
+	protected function save_from_search_request() { 
 		parent::save_from_search ( 'WIC_Form_Constituent_Save',  $message = '', $message_level = 'good_news', $sql = '' );	
 	}
 

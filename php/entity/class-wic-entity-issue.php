@@ -28,11 +28,16 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		$this->new_form_generic ( 'WIC_Form_Issue_Save', __( 'Create a new issue and save.', 'wp-issues-crm' ) );	
 	}
 
-	// handle a search request coming from a standard form
+	// handle a search request coming from a search form
 	protected function form_search () { 
 		$this->form_search_generic ( 'WIC_Form_Issue_Search_Again', 'WIC_Form_Issue_Update');
 		return;				
 	}
+
+	// show a constituent save form using values from a completed search form (search again)
+	protected function save_from_search_request() { 
+		parent::save_from_search ( 'WIC_Form_Issue_Save',  $message = '', $message_level = 'good_news', $sql = '' );	
+	}	
 	
 	// handle a search request for an ID coming from anywhere
 	protected function id_search ( $args ) {
@@ -41,13 +46,13 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return;		
 	}
 
-	//handle an update request coming from a standard form
+	//handle an update request coming from an update form
 	protected function form_update () {
 		$this->form_save_update_generic ( false, 'WIC_Form_Issue_Update', 'WIC_Form_Issue_Update' );
 		return;
 	}
 	
-	//handle a save request coming from a standard form
+	//handle a save request coming from a save form
 	protected function form_save () {
 		$this->form_save_update_generic ( true, 'WIC_Form_Issue_Save', 'WIC_Form_Issue_Update' );
 		return;

@@ -21,18 +21,27 @@ class WIC_Control_Textarea extends WIC_Control_Parent {
 
 
 	
-	protected static function create_control ( $control_args ) {
+	public static function create_control ( $control_args ) {
 		
 		extract ( $control_args, EXTR_SKIP ); 
 	
 		$readonly = $readonly ? 'readonly' : '';
+		$hidden	 = $hidden ? 'hidden' : ''; 
 		 
 		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . esc_attr( $field_label ) . '</label>' : '' ;
-		$control .= '<textarea class="' . $input_class . ' ' .  esc_attr( $field_slug_css ) . '" id="' . esc_attr( $field_slug ) . '" name="' . esc_attr( $field_slug ) . '" type="text" placeholder = "' . 
+		$control .= '<textarea ' .  $hidden . ' class="' . $input_class . ' ' .  esc_attr( $field_slug_css ) . '" id="' . esc_attr( $field_slug ) . '" name="' . esc_attr( $field_slug ) . '" type="text" placeholder = "' . 
 			esc_attr( $placeholder ) . '" ' . $readonly  . '/>' . esc_textarea( $value ) . '</textarea>';
 			
 		return ( $control );
 
+	}	
+
+	// text area cannot sanitize with sanitize_text -- loses formatting
+	// will be sanitized anyway before saving to database -- issue is on retrieval
+	// 		* esc_textarea on output to field -- this should be adequate.  
+	// 		* just also need to protect on retrieval as display in public post issues update
+	public function sanitize () {
+		$this->value = stripslashes( $this->value );
 	}	
 	
 	// when searching, submit compare type = scan which is interpreted as double wildcards, front and back

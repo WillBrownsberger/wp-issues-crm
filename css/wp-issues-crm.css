@@ -376,6 +376,11 @@ label.wic-label.first-name{
 	width: 23.4375%;
 } 
 
+/* part of ugly vertical spacing plan */
+.wic-input.email-type {
+	margin-bottom: 10px;
+}
+
 /* make these a little smaller on update/save forms 
 * to allow room for delete button (27px) 
 */
@@ -414,8 +419,13 @@ label.wic-label.first-name{
 
 a#wic-email-icon-link {
 	text-decoration: none;	
+	color: #777;
 }
 
+a#wic-email-icon-link:hover {
+	color: #77f;
+	font-weight: 700;
+}
 
 #wic-form-constituent-search .wic-input.email-address,
 #wic-form-constituent-search .wic-input.city {
@@ -659,6 +669,15 @@ ul#constituent-comment-list {
 
 }
 
+/* styling for displayed post text */
+#wic-post-content-visible {
+	height: 300px;
+	margin: 0 0 20px 20%;
+	overflow-y: scroll;
+	width: 60%;
+
+}
+
 /* styling for multiselect category controls */
 .wic-multivalue-control-set {
 	display: inline-block;
@@ -727,7 +746,7 @@ div.wic_multi_select {
 
 #wic-issue-post-edit-link {
 	display: block;
-	margin: 10px 0 20px 128px;
+	margin: 10px 0 20px 14.222222%;
 	font-size: 0.8em;
 
 }

@@ -22,7 +22,7 @@ class WIC_Form_Constituent_Search_Again extends WIC_Form_Constituent_Search  {
 
 		$button_args_main = array(
 			'entity_requested'			=> 'constituent',
-			'action_requested'			=> 'save_from_search',
+			'action_requested'			=> 'save_from_search_request',
 			'button_class'					=> 'wic-form-button second-position',
 			'button_label'					=> __('Save New', 'wp-issues-crm')
 		);	

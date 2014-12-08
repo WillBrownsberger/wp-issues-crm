@@ -25,15 +25,19 @@ class WIC_Form_Activity_Update extends WIC_Form_Multivalue_Update  {
 		
 	
 	public function layout_form ( &$data_array, $message, $message_level, $sql = '' ) { 
+		// extract value of activity issue for testing to show button
+		$issue_control = $data_array['issue'];
+		$issue = $issue_control->get_value();
+		// iterate through activity groups as rows of subform
 		$groups = $this->get_the_groups();
 		$class = ( 'row-template' == $this->entity_instance ) ? 'hidden-template' : 'visible-templated-row';
 		$search_row = '<div class = "'. $class . '" id="' . $this->entity . '[' . $this->entity_instance . ']">';
-		$search_row .= '<div id="wic-multivalue-block">';
+		$search_row .= '<div class="wic-multivalue-block activity">';
 			foreach ( $groups as $group ) { 
 				 $search_row .= '<div class = "wic-multivalue-field-subgroup wic-field-subgroup-' . esc_attr( $group->group_slug ) . '">';
 						$group_fields = WIC_DB_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
 						$search_row .= $this->the_controls ( $group_fields, $data_array );
-						if ( 'activity' == $group->group_slug ) {
+						if ( 'activity' == $group->group_slug && $issue > 0 ) {
 							$list_button_args = array(
 								'entity_requested'	=> 'issue',
 								'action_requested'	=> 'id_search',

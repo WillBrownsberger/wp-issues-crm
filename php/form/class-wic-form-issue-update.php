@@ -30,23 +30,55 @@ class WIC_Form_Issue_Update extends WIC_Form_Parent  {
 
 	// overriding the parent function here to make special handling for public posts
 	protected function the_controls ( $fields, &$data_array ) {
+		// determine whether current issues is a public post
 		$public_post = false;
 		if ( isset ( $data_array['post_status'] ) ) {
 			if ( 'publish' == $data_array['post_status']->get_value() ) {
 				$public_post = true;
 			}
 		}
+		// prepare controls normally but with an exception for the post content in a public post
 		$controls_output = '';
 		foreach ( $fields as $field ) { 
-			if ( $field == 'post_content' && $public_post) {
-				$control = apply_filters ( 'the_content', $data_array['post_content']->get_value() );
+			if ( $field == 'post_content' && $public_post) { 
+				// show as public posts as text output, but carry a hidden text area to preserve content on save
+				$controls_output  .= '<div id="wic-post-content-visible">' . 
+						apply_filters( 'the_content', balancetags ( wp_kses_post ( $data_array['post_content']->get_value() ) ) ). 
+					'</div>';
+				$textarea_control_args = array (
+					'readonly' 	=> true,
+					'hidden'		=> true, // will not work in older browsers, so make it tolerably well formatted with css
+					'field_label' => '',
+					'label_class' => '',
+					'field_slug' => 'post_content',
+					'input_class' => 'wic-post-content-hidden',
+					'field_slug_css' => '',
+					'placeholder' =>'',
+					'value' => $data_array['post_content']->get_value(), // will be escaped with esc_textarea
+				);
+				// note that text area control only does input sanitization of strip slashes
+				$control = WIC_Control_Textarea::create_control ( $textarea_control_args ); 
 			} else {
 				$control = $this->get_the_formatted_control ( $data_array[$field] );			
 			}
 			$controls_output .= '<div class = "wic-control" id = "wic-control-' . str_replace( '_', '-' , $field ) . '">' . $control . '</div>';
-		}	
+		} 	
 		return ( $controls_output );
+		
 	}
+	/**
+	* Note regarding options considered for output sanitization of post_content in routine above.
+	* (1) esc_html not an option since shows html characters instead of using them format
+	* (2) sanitize_text_field strips tags entirely
+	* (3) apply_filters('the_content', -- ) necessary to do autop.  Will run shortcodes possibly a mixed blessing. 
+	* (4) wp_kses_post leaves tags unbalanced but handles stray quotes
+	* (5) balancetags (with force set to true) still gets hurt by stray quotes
+	* CONCLUSION COMBINE 3, 4 AND 5 -- EXPENSIVE, BUT APPROPRIATE, GIVEN RAW CONTENT BEING SERVED --
+	* NOTE: Wordpress does not bother to clean post_content up in this way (even through the admin interface) -- so conclude not necessary on save
+	* -- only do it here for display; assume properly escaped for storage although not clean display
+	**/
+
+
 
 	// choose update controls
 	protected function get_the_formatted_control ( $control ) {
