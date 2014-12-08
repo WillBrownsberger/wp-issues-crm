@@ -446,6 +446,25 @@ a#wic-email-icon-link:hover {
 	margin: 0 0 10px 0;
 }
 
+ 
+/* for multivalue fields, down size them and them magnify on hover */ 
+.wic-multivalue-block input,
+.wic-multivalue-block select,
+.wic-multivalue-block textarea,
+div.wic-multivalue-block {
+	background: #fafafa;
+	font-size: 0.9em;
+}
+
+
+.wic-multivalue-block:hover input,
+.wic-multivalue-block:hover select,
+.wic-multivalue-block:hover textarea, 
+div.wic-multivalue-block:hover {
+	background: #fff;
+	font-size: 1em;
+}
+
 
 .wic-field-subgroup-activity_note {
 	border-bottom: 1px dashed #ccc;
