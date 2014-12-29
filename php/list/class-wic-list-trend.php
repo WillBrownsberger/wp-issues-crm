@@ -1,6 +1,6 @@
 <?php
 /*
-* File: class-wic-list-parent.php
+* File: class-wic-list-trend.php
 *
 * Description: lists entities (posts) passed as query 
 * 
@@ -8,11 +8,49 @@
 *
 */ 
 
-class WIC_List_Issue extends WIC_List_Parent {
+class WIC_List_Trend extends WIC_List_Parent {
 	/*
-	* return from wp_query actually has the full post content already, so not two-stepping through lists
+	* Need to two step list and also to format header for this hybrid entity, so can't use much of parent functions
 	*
 	*/
+	
+	public function format_entity_list( &$wic_query, $show_top_buttons ) {
+
+  		// set up form
+		$output = '<div id="wic-post-list"><form method="POST">' . 
+			'<div class = "wic-post-field-group wic-group-odd">';
+
+
+		// prepare the custom/mixed list fields for header set up and list formatting
+  		$fields = array (
+			array ( __( 'Issue', 'wp-issues-crm' ), 'id' ),
+			array ( __( 'Constituents: Total', 'wp-issues-crm' ), 'total' ),   		
+			array ( __( 'Pro', 'wp-issues-crm' ), 'pro' ),
+			array ( __( 'Con', 'wp-issues-crm' ), 'con' ),
+			array ( __( 'Categories', 'wp-issues-crm' ), 'cats' ),
+  		)
+	
+		$output .= '<ul class = "wic-post-list">' .  // open ul for the whole list
+			'<li class = "pl-odd">' .							// header is a list item with a ul within it
+				'<ul class = "wic-post-list-headers">';				
+					foreach ( $fields as $field ) {
+							$output .= '<li class = "wic-post-list-header pl-' . $wic_query->entity . '-' . $field[1] . '">' . $field[0] . '</li>';
+						}			
+					}
+			$output .= '</ul></li>'; // header complete
+		$output .= $this->format_rows( $wic_query, $fields ); // format list item rows from child class	
+		$output .= '</ul>'; // close ul for the whole list
+		$output .= 	wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ) .
+		'</form></div>'; 
+		
+		$output .= 	'<p class = "wic-list-legend">' . __('Search SQL was:', 'wp-issues-crm' )	 .  $wic_query->sql . '</p>';	
+
+		return $output;
+   } // close function 	
+	
+	
+	
+next: rewrite this to track field list and output actions based on slug (if cats, else)
 protected function format_rows( &$wic_query, &$fields ) {
 
 		$output = '';
@@ -21,8 +59,9 @@ protected function format_rows( &$wic_query, &$fields ) {
 		// check current user so can highlight assigned cases
 		$current_user_id = get_current_user_id();
 
-		foreach ( $wic_query->result as $row_array ) {
 
+		foreach ( $wic_query->result as $row_array ) {
+			var_dump ($row_array);
 			$row= '';
 			$line_count++;
 			$row_class = ( 0 == $line_count % 2 ) ? "pl-even" : "pl-odd";
@@ -82,40 +121,8 @@ protected function format_rows( &$wic_query, &$fields ) {
 		return ( $output );		
 	} // close function 
 
-	protected function format_message( &$wic_query ) {
+	protected function format_message( &$wic_query ) {}
+	protected function get_the_buttons( &$wic_query ) {}
 
-		if ( $wic_query->found_count < $wic_query->retrieve_limit ) {
-			$header_message = sprintf ( __( 'Found %1$s issues. 
-				Export will select all constituents with activities for any of these issues.', 'wp-issues-crm'), 
-					$wic_query->found_count );		
-		} else {
-			$header_message = sprintf ( __( 'Found total of %1$s issues, showing selected search maximum -- %2$s.  
-				Export will select all constituents with activities for any of the total %1$s issues.', 'wp-issues-crm'),
-					$wic_query->found_count, $wic_query->showing_count ); 		
-		}
-		return $header_message;
-
-	}
-
-	protected function get_the_buttons( &$wic_query ) {
-		$button = '<div id = "wic-list-button-row">' .
-			'<button id = "wic-post-export-button" 
-				name = "wic-post-export-button" 
-				class = "wic-form-button" 
-				type="submit" 
-				value = "' . $wic_query->search_id  .'" >' . 
-					__( 'Export ', 'wp-issues-crm' ) . 
-			'</button>' . 
-			'<button 	id = "wic-list-back-button" 
-				class= "wic-form-button" 
-				type="button" 
-				onclick = "history.go(-1);return true;">' .
-					 __( 'Go Back', 'wp-issues-crm' ) . 
-				'</button>' .
-			'</div>';
-		return ( $button );
-	}
- 
- 
  }	
 

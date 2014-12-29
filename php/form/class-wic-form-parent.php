@@ -64,7 +64,6 @@ abstract class WIC_Form_Parent  {
 	*		$sql = search sql to display in legend area as info 
 	*/
 	public function layout_form ( &$data_array, $message, $message_level, $sql = '' ) {
-
 		?><div id='wic-forms'>
 
 		<form id = "<?php echo $this->get_the_form_id(); ?>" class="wic-post-form" method="POST" autocomplete = "on">

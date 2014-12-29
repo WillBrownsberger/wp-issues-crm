@@ -1,44 +1,34 @@
 <?php
 /*
 *
-*  class-wic-form-issue-search.php
+*  class-wic-form-trend-search.php
 *
 */
 
-class WIC_Form_issue_Search extends WIC_Form_Parent  {
+class WIC_Form_Trend_Search extends WIC_Form_Parent  {
 	
 	// associate form with entity in data dictionary
 	protected function get_the_entity() {
-		return ( 'issue' );	
+		return ( 'trend' );	
 	}
 
 	// choose form buttons
 	protected function get_the_buttons () {
 		
 		$button_args_main = array(
-			'entity_requested'			=> 'issue',
+			'entity_requested'			=> 'trend',
 			'action_requested'			=> 'form_search',
 			'button_label'					=> __('Search', 'wp-issues-crm')
 		);	
 		
 		$buttons =  $this->create_wic_form_button ( $button_args_main ) . parent::backbutton (' second-position' );
 		
-		$button_args_main = array(
-			'entity_requested'			=> 'issue',
-			'action_requested'			=> 'new_issue',
-			'button_label'					=> __( 'Go to Add New', 'wp-issues-crm'),
-			'button_class'					=> 'wic-form-button second-position',
-			'title'							=> __( 'Add a new issue.', 'wp-issues-crm' ),
-		);
-
-		$buttons .= $this->create_wic_form_button ( $button_args_main );
-		
 		return ( $buttons );
 	}
 	
 	// define message
 	protected function format_message ( &$data_array, $message ) {
-		return ( __('Search issues. ', 'wp-issues-crm') . $message );
+		return ( __('Retrieve Issue/activity counts. ', 'wp-issues-crm') . $message );
 	}
 
 	// show search controls
@@ -48,7 +38,7 @@ class WIC_Form_issue_Search extends WIC_Form_Parent  {
 
 	// define legend
 	protected function get_the_legends( $sql = '' ) {
-		$legend = '<p class = "wic-form-legend">' .  __( 'Issue content (body and title) is searched using Word Press full text scan.' , 'wp-issues-crm' ) . '</p>';
+		$legend = '';				
 		return ( $legend );
 	}
 

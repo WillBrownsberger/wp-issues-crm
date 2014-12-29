@@ -362,7 +362,7 @@ abstract class WIC_Entity_Parent {
 	}
 	
 	protected function list_after_form ( &$wic_query ) {
-		// hook for use with list of constituents after issue display -- see WIC_Entity_Issue	
+		// hook for use with list of constituents after issue display -- see WIC_Entity_Issue 	
 	}
 }
 

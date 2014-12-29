@@ -30,9 +30,10 @@ class WIC_List_Constituent_Export {
 		$sql = 	"SELECT last_name, first_name, middle_name, 
 						GROUP_CONCAT( DISTINCT email_address SEPARATOR ';' ) as emails, 
 						GROUP_CONCAT( DISTINCT phone_number SEPARATOR ';' ) as phones,
-						max( 	
-							if ( address_type = 1, address_line, ' '	) ) as address_line_1,
-						max( if ( address_type = 1, concat ( city, ', ', state, ' ',  zip), ' ' ) ) as address_line_2, 
+						max( if ( address_type = 1, address_line, ' '	) ) as address_line_1,
+						max( if ( address_type = 1, concat ( city, ', ', state, ' ',  zip ), ' ' ) ) as address_line_2,
+						max( if ( address_type = 1, city, ' ' ) ) as city,
+						max( if ( address_type = 1, zip, ' ' ) ) as zip, 
 						c.* 
 					FROM wp_wic_constituent c
 					left join wp_wic_email e on e.constituent_id = c.Id

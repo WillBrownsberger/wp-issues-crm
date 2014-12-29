@@ -114,7 +114,6 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 				$where .= " AND $table.$field_name like %s ";
 				$values[] = '%' . $wpdb->esc_like ( $where_item['value'] )  . '%';
 			} elseif ( 'sound' == $compare ) {
-//				$where .= " AND $table.$field_name like concat(soundex( %s ), '%%') ";
 				$where .= " AND $table.$field_name = soundex( %s ) ";
 				$values[] = $wpdb->esc_like ( $where_item['value'] );
 			} elseif ( 'BETWEEN' == $compare ) { // date range
