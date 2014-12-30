@@ -66,28 +66,29 @@ protected function format_rows( &$wic_query, &$fields ) {
 			$issue_staff = get_post_meta ( $row_array->id, 'wic_data_issue_staff' );
 			$issue_status = get_post_meta ( $row_array->id, 'wic_data_follow_up_status' );
 			$issue_review_date = get_post_meta ( $row_array->id, 'wic_data_review_date' );
-			
-			if ( $current_user_id == $issue_staff[0] ) { 
-				$row_class .= " case-assigned ";
-				if ( 'open' == $issue_status[0] ) {
-					$row_class .= " case-open ";
-					if ( '' == $issue_review_date[0] ) {	
-						$review_date = new DateTime ( '1900-01-01' );
-					} else {
-						$review_date = new DateTime ( $issue_review_date[0] );					
-					}
-					$today = new DateTime( current_time ( 'Y-m-d') );
-					$interval = date_diff ( $review_date, $today );
-					if ( 0 == $interval->invert ) {
-						$row_class .= " overdue ";				
-						if ( 7 < $interval->days ) {
-							$row_class .= " overdue long-overdue ";				
+			if ( isset ( $issue_staff[0] ) ) {
+				if ( $current_user_id == $issue_staff[0] ) { 
+					$row_class .= " case-assigned ";
+					if ( 'open' == $issue_status[0] ) {
+						$row_class .= " case-open ";
+						if ( '' == $issue_review_date[0] ) {	
+							$review_date = new DateTime ( '1900-01-01' );
+						} else {
+							$review_date = new DateTime ( $issue_review_date[0] );					
 						}
-					}
-				} elseif ( 0 == $issue_status[0] ) {			
-					$row_class .= " case-closed ";
+						$today = new DateTime( current_time ( 'Y-m-d') );
+						$interval = date_diff ( $review_date, $today );
+						if ( 0 == $interval->invert ) {
+							$row_class .= " overdue ";				
+							if ( 7 < $interval->days ) {
+								$row_class .= " overdue long-overdue ";				
+							}
+						}
+					} elseif ( 0 == $issue_status[0] ) {			
+						$row_class .= " case-closed ";
+					}	
 				}	
-			}		
+			}	
 
 			$row .= '<ul class = "wic-post-list-line">';			
 				foreach ( $fields as $field ) { 

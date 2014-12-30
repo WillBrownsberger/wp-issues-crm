@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Dec 07, 2014 at 09:34 PM
+-- Generation Time: Dec 30, 2014 at 08:01 AM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   PRIMARY KEY (`field_id`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=91 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=94 ;
 
 --
 -- Dumping data for table `wp_wic_data_dictionary`
@@ -128,7 +128,7 @@ INSERT INTO `wp_wic_data_dictionary` (`field_id`, `entity_slug`, `group_slug`, `
 (66, 'issue', 'issue_classification', 'post_category', 'multiselect', 0, 0, 'Categories', 20, 50, 0, 'individual', 0, 0, 0, '', 0, '', 0, 'cat', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (67, 'issue', 'issue_content', 'post_title', 'text', 0, 0, 'Issue Title', 10, 40, 0, 'individual', 0, 0, 0, '', 0, '', 0, 'post_title', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (68, 'issue', 'issue_management', 'issue_staff', 'select', 0, 0, 'Staff', 10, 10, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, 'changeFollowUpStatus()', 0),
-(69, 'issue', 'issue_management', 'wic_live_issue', 'select', 0, 0, 'Activity', 20, 20, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
+(69, 'issue', 'activity_open', 'wic_live_issue', 'select', 0, 0, 'Activity Assignment', 20, 20, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (70, 'issue', 'issue_management', 'follow_up_status', 'select', 0, 0, 'Status', 30, 30, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (71, 'issue', 'issue_management', 'review_date', 'range', 1, 0, 'Review Date', 40, -1, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (72, 'issue', 'issue_creation', 'post_author', 'select', 0, 0, 'Created By', 10, 0, 0, '', 0, 1, 0, '', 0, '', 0, 'author', 'wic-input', 'wic-label', '', 0, 0, '', 0),
@@ -143,7 +143,10 @@ INSERT INTO `wp_wic_data_dictionary` (`field_id`, `entity_slug`, `group_slug`, `
 (87, 'search_log', 'search_log', 'download_time', 'text', 0, 0, 'Last Download', 50, 50, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (88, 'issue', 'search_parms', 'category_search_mode', 'radio', 0, 0, 'Category Search Mode', 10, 0, 0, '', 0, 0, 0, '', 0, '', 1, '', 'wic-input', 'wic-label', '', 1, 0, '', 0),
 (89, 'issue', 'search_parms', 'retrieve_limit', 'select', 0, 0, '# of Issues to Show', 20, 0, 0, '', 0, 0, 0, '', 0, '', 1, '', 'wic-input', 'wic-label', '', 1, 0, '', 0),
-(90, 'constituent', 'save_options', 'no_dupcheck', 'checked', 0, 0, 'Suppress Dup Checking', 10, 0, 0, '', 0, 0, 0, '', 0, '', 1, '', 'wic-input', 'wic-label', '', 0, 1, '', 0);
+(90, 'constituent', 'save_options', 'no_dupcheck', 'checked', 0, 0, 'Suppress Dup Checking', 10, 0, 0, '', 0, 0, 0, '', 0, '', 1, '', 'wic-input', 'wic-label', '', 0, 1, '', 0),
+(91, 'trend', 'trend', 'activity_date', 'range', 1, 0, 'Trend Period', 10, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
+(92, 'trend', 'trend', 'activity_type', 'select', 0, 0, 'Activity Type', 20, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
+(93, 'trend', 'trend', 'last_updated_by', 'select', 0, 0, 'Activity Last Updated By', 30, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0);
 
 -- --------------------------------------------------------
 
@@ -161,7 +164,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_form_field_groups` (
   `initial_open` tinyint(1) NOT NULL,
   `sidebar_location` tinyint(1) NOT NULL,
   PRIMARY KEY (`group_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=28 ;
 
 --
 -- Dumping data for table `wp_wic_form_field_groups`
@@ -183,11 +186,13 @@ INSERT INTO `wp_wic_form_field_groups` (`group_id`, `entity_slug`, `group_slug`,
 (18, 'issue', 'issue_content', 'Issue Content', '', 10, 1, 0),
 (19, 'issue', 'issue_classification', 'Classification', '', 20, 1, 0),
 (20, 'issue', 'issue_management', 'Issue Management', '', 30, 1, 1),
-(21, 'issue', 'issue_creation', 'Codes', 'These fields are not updateable except through the regular Wordpress admin screens.', 40, 0, 1),
+(21, 'issue', 'issue_creation', 'Codes', 'These fields are not updateable except through the regular Wordpress admin screens.', 40, 1, 1),
 (22, 'constituent', 'comment', 'Latest Online Comments', 'Note: If the online user''s email is not in WP-Issues-CRM, the online activity will not be shown here.  Online activity shown here can only be altered through the WP backend.  ', 20, 0, 0),
 (23, 'comment', 'comment', 'Online Comments', '', 10, 0, 0),
 (24, 'issue', 'search_parms', 'Search Options', 'You can select options for the categories search. Note: Tags are always joined by OR. Conditions collectively are always joined by ''AND''.', 25, 10, 1),
-(25, 'constituent', 'save_options', 'Save Options', '', 27, 1, 1);
+(25, 'constituent', 'save_options', 'Save Options', '', 27, 1, 1),
+(26, 'issue', 'activity_open', 'Activity Tracking', 'Set issue as open for assignment of activities to make the issue appear on the issue drop down for activities.', 25, 1, 1),
+(27, 'trend', 'trend', 'Activity Trends', '', 10, 1, 0);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

@@ -33,7 +33,7 @@ class WIC_Entity_Trend extends WIC_Entity_Parent {
 	protected function handle_search_results ( $wic_query, $not_found_form, $found_form ) {
 		$sql = $wic_query->sql;
 		if ( 0 == $wic_query->found_count ) {
-			$message = __( 'No activity found matching search criteria matching record found -- you can search again.', 'wp-issues-crm' );
+			$message = __( 'No activity found matching search criteria.', 'wp-issues-crm' );
 			$message_level =  'error';
 			$form = new $not_found_form;
 			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );			

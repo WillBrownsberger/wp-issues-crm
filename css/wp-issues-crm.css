@@ -545,6 +545,10 @@ textarea.wic-input.activity-note {
 }
 
 /* format comment list, shown only on update screen */
+#wic-form-issue-update #bottom-button-group {
+	display: none;
+}
+
 li.comment-issue-link,
 li.constituent-comment-date,
 li.constituent-comment-issue {
