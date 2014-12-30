@@ -915,6 +915,11 @@ ul.wic-post-list-line {
 .pl-issue-post_title{ width:40%;}
 .pl-issue-post_category{ width:17%;}
 .pl-issue-post_status{ width:8%;}
+.pl-trend-id { width: 40%; }
+.pl-trend-total { width: 10%; }
+.pl-trend-pro { width: 10%; }
+.pl-trend-con { width: 10%; }
+.pl-trend-post_category { width: 30%; }
 .wic-post-list-header.pl-search_log-entity,
 .wic-post-list-field.pl-search_log-entity {
 	display: none;
@@ -930,8 +935,35 @@ ul.wic-post-list-line {
 	margin: 10px 14.22222%;
 }
 
+/***
+* Trend form/list styling
+*
+*/
+#wic-form-trend-search-again #wic-form-sidebar-groups,
+#wic-form-trend-search-again #bottom-button-group {
+	display: none;
+}
 
+#wic-form-trend-search label.wic-label.activity-type, 
+#wic-form-trend-search-again label.wic-label.activity-type,
+#wic-form-trend-search label.wic-label.activity-date, 
+#wic-form-trend-search-again label.wic-label.activity-date {
+	color: #777;
+	display: inline-block;
+	font-size: 0.8em;
+	min-width: 18.75%;
+	margin-right: 1.25%;
+	padding: 0;
+	text-align: right;
+	vertical-align: top;
+}
 
+#wic-inner-field-group-trend select.wic-input.activity-type, 
+#wic-inner-field-group-trend input.wic-input.activity-date, 
+#wic-inner-field-group-trend select.wic-input.last-updated-by {
+	padding: 0; 
+	width: 18.1641%;
+}
 
 @media only screen and (max-width: 960px) {
 	#wic-form-main-groups, 

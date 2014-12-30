@@ -23,12 +23,12 @@ class WIC_List_Trend extends WIC_List_Parent {
 
 		// prepare the custom/mixed list fields for header set up and list formatting
   		$fields = array (
-			array ( __( 'Issue', 'wp-issues-crm' ), 'id' ),
-			array ( __( 'Constituents: Total', 'wp-issues-crm' ), 'total' ),   		
+			array ( __( 'Constituents with Activities by Issue', 'wp-issues-crm' ), 'id' ),
+			array ( __( 'Total', 'wp-issues-crm' ), 'total' ),   		
 			array ( __( 'Pro', 'wp-issues-crm' ), 'pro' ),
 			array ( __( 'Con', 'wp-issues-crm' ), 'con' ),
-			array ( __( 'Categories', 'wp-issues-crm' ), 'cats' ),
-  		)
+			array ( __( 'Categories', 'wp-issues-crm' ), 'post_category' ),
+  		);
 	
 		$output .= '<ul class = "wic-post-list">' .  // open ul for the whole list
 			'<li class = "pl-odd">' .							// header is a list item with a ul within it
@@ -36,8 +36,7 @@ class WIC_List_Trend extends WIC_List_Parent {
 					foreach ( $fields as $field ) {
 							$output .= '<li class = "wic-post-list-header pl-' . $wic_query->entity . '-' . $field[1] . '">' . $field[0] . '</li>';
 						}			
-					}
-			$output .= '</ul></li>'; // header complete
+		$output .= '</ul></li>'; // header complete
 		$output .= $this->format_rows( $wic_query, $fields ); // format list item rows from child class	
 		$output .= '</ul>'; // close ul for the whole list
 		$output .= 	wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ) .
@@ -49,8 +48,6 @@ class WIC_List_Trend extends WIC_List_Parent {
    } // close function 	
 	
 	
-	
-next: rewrite this to track field list and output actions based on slug (if cats, else)
 protected function format_rows( &$wic_query, &$fields ) {
 
 		$output = '';
@@ -59,22 +56,25 @@ protected function format_rows( &$wic_query, &$fields ) {
 		// check current user so can highlight assigned cases
 		$current_user_id = get_current_user_id();
 
-
 		foreach ( $wic_query->result as $row_array ) {
-			var_dump ($row_array);
+
 			$row= '';
 			$line_count++;
 			$row_class = ( 0 == $line_count % 2 ) ? "pl-even" : "pl-odd";
 			
 			// add special row class to reflect case assigned status
-			if ( $current_user_id == $row_array->issue_staff ) {
+			$issue_staff = get_post_meta ( $row_array->id, 'wic_data_issue_staff' );
+			$issue_status = get_post_meta ( $row_array->id, 'wic_data_follow_up_status' );
+			$issue_review_date = get_post_meta ( $row_array->id, 'wic_data_review_date' );
+			
+			if ( $current_user_id == $issue_staff[0] ) { 
 				$row_class .= " case-assigned ";
-				if ( 'open' == $row_array->follow_up_status ) {
+				if ( 'open' == $issue_status[0] ) {
 					$row_class .= " case-open ";
-					if ( '' == $row_array->review_date ) {	
+					if ( '' == $issue_review_date[0] ) {	
 						$review_date = new DateTime ( '1900-01-01' );
 					} else {
-						$review_date = new DateTime ( $row_array->review_date );					
+						$review_date = new DateTime ( $issue_review_date[0] );					
 					}
 					$today = new DateTime( current_time ( 'Y-m-d') );
 					$interval = date_diff ( $review_date, $today );
@@ -84,40 +84,36 @@ protected function format_rows( &$wic_query, &$fields ) {
 							$row_class .= " overdue long-overdue ";				
 						}
 					}
-				} elseif ( 0 == $row_array->follow_up_status ) {			
+				} elseif ( 0 == $issue_status[0] ) {			
 					$row_class .= " case-closed ";
 				}	
 			}		
 
 			$row .= '<ul class = "wic-post-list-line">';			
 				foreach ( $fields as $field ) { 
-					if ( 'ID' != $field->field_slug && 0 < $field->listing_order ) {
-						$class_name = 'WIC_Entity_' . $wic_query->entity;
-						$formatter = $field->field_slug . '_formatter';
-						if ( method_exists ( $class_name, $formatter ) ) { 
-							// note:  formatter MUST include esc_html on value unless known sanitized field like phone
-							$display_value = $class_name::$formatter (  $row_array->{$field->field_slug} );
-						} elseif ( 'post_category' == $field->field_slug ) {
-							$display_value =  esc_html( $class_name::get_post_categories( $row_array->ID ) );		
+					if ( 'id' != $field[1] && 'post_category' != $field[1] ) {
+							$display_value = $row_array->$field[1];
+						} elseif ( 'post_category' == $field[1] ) {
+							$display_value =  esc_html( WIC_Entity_Issue::get_post_categories( $row_array->id ) );		
 						} else {
-							$display_value =  esc_html( $row_array->{$field->field_slug} );		
+							$display_value =  get_the_title ( $row_array->id );		
 						}
-						$row .= '<li class = "wic-post-list-field pl-' . $wic_query->entity . '-' . $field->field_slug . ' "> ';
+						$row .= '<li class = "wic-post-list-field pl-' . $wic_query->entity . '-' . $field[1] . ' "> ';
 							$row .=  $display_value ;
 						$row .= '</li>';			
 					}	
-				}
+
 			$row .='</ul>';				
 			
 			$list_button_args = array(
-					'entity_requested'	=> $wic_query->entity,
+					'entity_requested'	=> 'Issue',
 					'action_requested'	=> 'id_search',
 					'button_class' 		=> 'wic-post-list-button ' . $row_class,
-					'id_requested'			=> $row_array->ID,
+					'id_requested'			=> $row_array->id,
 					'button_label' 		=> $row,				
 			);			
 			$output .= '<li>' . WIC_Form_Parent::create_wic_form_button( $list_button_args ) . '</li>';	
-			}
+		} // close for each row
 		return ( $output );		
 	} // close function 
 

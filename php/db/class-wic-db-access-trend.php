@@ -61,6 +61,7 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 					SELECT p.id, count(constituent_id) as total, sum( if (pro_con = 0, 1, 0) ) as pro,  sum( if (pro_con = 1, 1, 0) ) as con  
 					FROM ( $activity_sql ) as a 
 					INNER JOIN $wpdb->posts p on a.issue = p.ID
+					GROUP BY p.ID
 					ORDER BY count(constituent_id) DESC
 					";
 		$sql_found = "SELECT FOUND_ROWS() as found_count";
@@ -73,7 +74,6 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 		$this->outcome = true;  // wpdb get_results does not return errors for searches, so assume zero return is just a none found condition (not an error)
 										// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results 
 		$this->explanation = ''; 
-		$this->sql = $activity_sql;
 	}	
 
 	/* required functions not implemented */

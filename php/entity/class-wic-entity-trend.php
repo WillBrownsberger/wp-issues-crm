@@ -35,13 +35,11 @@ class WIC_Entity_Trend extends WIC_Entity_Parent {
 		if ( 0 == $wic_query->found_count ) {
 			$message = __( 'No activity found matching search criteria matching record found -- you can search again.', 'wp-issues-crm' );
 			$message_level =  'error';
-			var_dump ( $this->data_object_array );
-			die;
 			$form = new $not_found_form;
 			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );			
 		} else { 
-			$message = sprintf( __( 'Showing %s issues with activity matching selection criteria -- you can search again.' , 'wp-issues-crm' ), $wic_query->found_count );
-			$message_level = 'notice';	
+			$message = sprintf( __( 'Issues with activity matching selection criteria -- found %s.' , 'wp-issues-crm' ), $wic_query->found_count );
+			$message_level = 'guidance';	
 			$form = new $found_form;
 			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );
 			$lister_class = 'WIC_List_Trend' ;
