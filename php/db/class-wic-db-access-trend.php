@@ -48,14 +48,14 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 		$join = $wpdb->prefix . 'wic_activity activity inner join ' . $wpdb->prefix . 'wic_constituent c on c.id = activity.constituent_id';
 
 		// prepare SQL
-		$activity_sql = $wpdb->prepare( "
+		$activity_sql = "
 					SELECT constituent_id, issue, max(pro_con) as pro_con
 					FROM 	$join
 					WHERE 1=1 $deleted_clause $where 
 					GROUP BY $top_entity.constituent_ID, $top_entity.issue
 					LIMIT 0, 9999999
-					",
-				$values );	
+					";	
+		$activity_sql = ( $where > '' ) ? $wpdb->prepare( $activity_sql, $values ) : $activity_sql;					
 		// $sql group by always returns single row, even if multivalues for some records 
 		$sql =  	"
 					SELECT p.id, count(constituent_id) as total, sum( if (pro_con = 0, 1, 0) ) as pro,  sum( if (pro_con = 1, 1, 0) ) as con  
