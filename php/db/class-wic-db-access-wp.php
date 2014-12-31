@@ -286,28 +286,32 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 	protected function db_delete_by_id ($id){ // not implemented for posts -- use the WP backend
 	}
 
-	public static function get_wic_live_issues () {
-		
-		$meta_query_args = array(
-			'relation' => 'AND',
-			array(
-				'key' => self::WIC_METAKEY . 'wic_live_issue',
-				'value' => 'open',
-				'compare' => '=',
-			)
-		);
-		$list_query_args = array (
-			'ignore_sticky_posts'	=> true,
-			'post_type'	=>	array( 'post', 'page' ),
-			'posts_per_page' => 100,
-			'meta_query' => $meta_query_args,
-			'order'	=> 'DESC',
-		);
 
-		$open_posts = new WP_Query ( $list_query_args );
+	public static function get_wic_live_issues () {
+
+		// using direct wpdb query here because wp_query documentation is not consistent with  		
+		//	wp_query behavior on showing private posts to logged in users (shows only to author, even if admin)
+		
+		global $wpdb;		
+		
+		$metakey = 	self::WIC_METAKEY . 'wic_live_issue';	
+		
+		$sql = "
+			SELECT p.ID, p.post_title  
+			FROM $wpdb->posts p INNER JOIN $wpdb->postmeta pm on p.ID = pm.post_id
+			WHERE pm.meta_key = '$metakey' and pm.meta_value = 'open' AND
+			( p.post_status = 'publish' or p.post_status = 'private' ) AND
+			( p.post_type = 'post' or p.post_type = 'page' )
+			ORDER BY p.post_title 
+			";
+
+		$open_posts = $wpdb->get_results( $sql );
 		
 		return ( $open_posts ); 
 	}
+
+
+
 
 }
 

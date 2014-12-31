@@ -68,16 +68,13 @@ class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 		$issues_array = array();
 
 		$value_in_option_list = false;			
-		if ( $open_posts->have_posts() ) {		
-			while ( $open_posts->have_posts() ) {
-				$open_posts->the_post();
-				$issues_array[] = array(
-					'value'	=> $open_posts->post->ID,
-					'label'	=>	$open_posts->post->post_title,
-				);
-				if ( $value == $open_posts->post->ID ) {
-					$value_in_option_list = true;
-				}
+		foreach ( $open_posts as $open_post ) {		
+			$issues_array[] = array(
+				'value'	=> $open_post->ID,
+				'label'	=>	esc_html ( $open_post->post_title ),
+			);
+			if ( $value == $open_post->ID ) {
+				$value_in_option_list = true;
 			}
 		}
 		
@@ -88,7 +85,6 @@ class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 			);
 		}		
 		
-		wp_reset_postdata();
 		return $issues_array;
 
 	}

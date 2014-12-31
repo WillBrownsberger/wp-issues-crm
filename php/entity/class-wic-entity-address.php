@@ -68,9 +68,9 @@ class WIC_Entity_Address extends WIC_Entity_Multivalue {
 			if ( !empty( $result ) ) {
 				$xml = new SimpleXMLElement( $result );
 				if( ! isset($xml->Address[0]->Error)) {
-					$this->data_object_array['address_line']->set_value( $xml->Address[0]->Address2 );
-					$this->data_object_array['city']->set_value( $xml->Address[0]->City );	
-					$this->data_object_array['zip']->set_value( $xml->Address[0]->Zip5 ); 		 		 
+					$this->data_object_array['address_line']->set_value( (string) $xml->Address[0]->Address2 );
+					$this->data_object_array['city']->set_value( (string) $xml->Address[0]->City );	
+					$this->data_object_array['zip']->set_value( (string) $xml->Address[0]->Zip5 ); 		 		 
 				}
 			} else {
 				echo '<h4>' . __( 'Check settings -- non-fatal error: Empty return from USPS ZipCode Validator.', 'wp-issues-crm' )  . '</h4>';

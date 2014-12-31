@@ -80,13 +80,39 @@ function wic_utilities_script_setup() {
 }
 add_action('wp_enqueue_scripts', 'wic_utilities_script_setup');
 
-// add hook to intercept press of download button before any headers sent 
+// add action to intercept press of download button before any headers sent 
 function do_download () {
 	if ( isset( $_POST['wic-post-export-button'] ) ) {
 		WIC_List_Constituent_Export::do_constituent_download( $_POST['wic-post-export-button'] );	
 	}
 }
 add_action( 'template_redirect', 'do_download' );
+
+// add action to allow caching of non-save pages to facilitate back navigation in IE 
+// while still forcing reload for new record save screens to avoid duping
+function wic_change_cache_header() {
+	if ( isset ( $_POST['wic_form_button'] ) ) {
+		$control_array = explode( ',', $_POST['wic_form_button'] );
+		$revalidate_always = array (
+			'new_constituent',
+			'save_from_search',
+			'new_issue',
+			'save_from_search_request',
+		);  
+		if ( in_array( $control_array[1], $revalidate_always ) ) {
+			header( "Cache-Control: no-cache, no-store, must-revalidate" );	
+			// http://blogs.msdn.com/b/ie/archive/2010/07/14/caching-improvements-in-internet-explorer-9.aspx
+			// http://www.mobify.com/blog/beginners-guide-to-http-cache-headers/
+			// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9.3
+			// http://blog.httpwatch.com/2008/10/15/two-important-differences-between-firefox-and-ie-caching/
+		} else {
+			header( "Cache-Control: private, max-age=0" );			
+		}
+	}
+}
+add_action( 'send_headers', 'wic_change_cache_header' );
+// https://core.trac.wordpress.org/browser/tags/4.1/src//wp-includes/class-wp.php#L0 (line 448)
+// fires after other headers sent, so can override previously sent Cache-Control header
 
 // invoke principal class that displays and handles main buttons 
 $wp_issues_crm = new WIC_Dashboard_Main;

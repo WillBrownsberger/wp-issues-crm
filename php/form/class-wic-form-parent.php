@@ -218,7 +218,7 @@ abstract class WIC_Form_Parent  {
 		return ( '<button 
 				class= "wic-form-button ' . $class . '" 
 				type="button" 
-				onclick = "history.go(-1);return true;">' .
+				onclick = "history.go(-1); return true;">' .
 					 __( 'Go Back', 'wp-issues-crm' ) . 
 				'</button>'
 				);

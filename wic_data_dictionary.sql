@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Dec 30, 2014 at 08:01 AM
+-- Generation Time: Dec 31, 2014 at 04:19 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -101,10 +101,10 @@ INSERT INTO `wp_wic_data_dictionary` (`field_id`, `entity_slug`, `group_slug`, `
 (36, 'address', 'address_line_1', 'ID', 'text', 0, 0, 'Internal ID for Address', 0, 0, 0, '', 0, 0, 1, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (37, 'address', 'address_line_1', 'constituent_id', 'text', 0, 0, 'Constituent ID for Address', 20, 0, 0, '', 0, 0, 1, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (38, 'address', 'address_line_1', 'address_type', 'select', 0, 0, '', 30, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Type', 0, 0, '', 0),
-(39, 'address', 'address_line_1', 'address_line', 'text', 0, 0, 'Street Address', 40, 0, 0, '', 0, 0, 0, '', 1, 'street_name', 0, '', 'wic-input', 'wic-label', '123', 0, 0, '', 0),
-(43, 'address', 'address_line_2', 'city', 'text', 0, 0, 'City', 80, 100, 0, 'individual', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'hidden-template', 'City', 0, 0, '', 0),
-(44, 'address', 'address_line_2', 'state', 'select', 0, 0, '', 90, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'State', 0, 0, '', 0),
-(45, 'address', 'address_line_2', 'zip', 'text', 0, 0, '', 100, 0, 0, '', 0, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Zip', 0, 0, '', 0),
+(39, 'address', 'address_line_1', 'address_line', 'text', 0, 0, 'Street Address', 40, 0, 0, '', 1, 0, 0, '', 1, 'street_name', 0, '', 'wic-input', 'wic-label', '123', 0, 0, '', 0),
+(43, 'address', 'address_line_2', 'city', 'text', 0, 0, 'City', 80, 100, 0, 'individual', 1, 0, 0, '', 0, '', 0, '', 'wic-input', 'hidden-template', 'City', 0, 0, '', 0),
+(44, 'address', 'address_line_2', 'state', 'select', 0, 0, '', 90, 0, 0, '', 1, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'State', 0, 0, '', 0),
+(45, 'address', 'address_line_2', 'zip', 'text', 0, 0, '', 100, 0, 0, '', 1, 0, 0, '', 0, '', 0, '', 'wic-input', 'wic-label', 'Zip', 0, 0, '', 0),
 (46, 'address', 'address_line_1', 'screen_deleted', 'deleted', 0, 0, 'x', 1, 0, 0, '', 0, 0, 0, '', 0, '', 1, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (47, 'email', 'email_row', 'ID', 'text', 0, 0, 'Internal ID for Email', 0, 0, 0, '', 0, 0, 1, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
 (48, 'email', 'email_row', 'constituent_id', 'text', 0, 0, 'Constituent ID for Email', 10, 0, 0, '', 0, 0, 1, '', 0, '', 0, '', 'wic-input', 'wic-label', '', 0, 0, '', 0),
