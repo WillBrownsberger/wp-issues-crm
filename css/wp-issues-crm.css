@@ -836,6 +836,7 @@ p.wic-radio-button input{
 .pl-odd.wic-post-list-button {
 	background: #ffffff;
 	border-bottom: 1px solid #ddd;
+	color: #555;
 }
 
 .wic-post-list-button:hover {

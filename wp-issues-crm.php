@@ -135,3 +135,44 @@ function wic_generate_call_trace() { // from http://php.net/manual/en/function.d
 	
 	echo "\t" . implode("<br/>\n\t", $result);
 }
+
+function wic_set_up_roles_and_capabilities() {
+	
+	 // give administrators access to the plugin 
+    $role = get_role( 'administrator' );
+    $role->add_cap( 'manage_wic_constituents' ); 
+
+	// give editors access to the plugin 
+   $role = get_role( 'editor' );
+   $role->add_cap( 'manage_wic_constituents' ); 
+
+	// define a role that has limited author privileges and access to the plugin
+	
+	// first remove the role in case the capabilities array below has been revised  	
+	remove_role('wic_constituent_manager');
+
+	// now add the role
+	$result = add_role(
+   	'wic_constituent_manager',
+    	__( 'Constituent Manager', 'wp-issues-crm' ),
+	   array(
+	   		// capacities to add
+			  'manage_wic_constituents' 	=> true, // grants access to plugin and all constituent functions
+	        'read_private_posts' 			=> true, // necessary for viewing (and so editing) individual private issues through wic interface
+	        'upload_files'					=> true,
+	        // capacities explicitly (and perhaps unnecessarily) denied
+	        'read'								=> false, // denies access to dashboard
+           'edit_posts'  					=> false, // limits wp backend access -- can still edit private issues through the wic interface
+	        'edit_others_posts'  			=> false, // limits wp backend access -- can still edit private issues through the wic interface 
+	        'delete_posts'					=> false,
+           'delete_published_posts' 	=> false,
+	        'edit_published_posts' 		=> false,
+	        'publish_posts'					=> false,
+	        'read_private_pages' 			=> false,
+	        'edit_private_posts' 			=> false,
+	        'edit_private_pages' 			=> false, 
+	    )
+	);
+	
+}
+register_activation_hook ( __FILE__, 'wic_set_up_roles_and_capabilities' );

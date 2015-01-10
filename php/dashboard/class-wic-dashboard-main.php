@@ -27,8 +27,8 @@ class WIC_Dashboard_Main {
 	public function wp_issues_crm() {
 
 		// is user logged in as administrator; if not, return
-		if ( ! current_user_can ( 'activate_plugins' ) ) { 
-			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
+		if ( ! current_user_can ( 'manage_wic_constituents' ) ) { 
+			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators and constituent managers.', 'wp-issues-crm' ) . '<h3>';
 			return;
 		} 
 

@@ -30,14 +30,12 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		extract ( $search_parameters, EXTR_OVERWRITE ); 
 		
 		$allowed_statuses = array(
-			'draft',
 			'publish',
 			'private',
 		);		
 		
 		$allowed_types = array(
 			'post',	
-			'page',	
 		);		
 		
 		$query_args = array (
