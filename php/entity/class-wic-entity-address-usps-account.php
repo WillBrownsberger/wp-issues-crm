@@ -8,7 +8,7 @@
 class WIC_Entity_Address_USPS_Account {
  
 	public static function get_usps_account() {
-		return '565MASSA1058'; 
+		return 'put your 12 character account number in here'; 
 	} 
  
 }
