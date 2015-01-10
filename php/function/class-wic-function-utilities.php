@@ -13,23 +13,28 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 	*/	
 	public static function get_administrator_array() {
 	
-		$role = 'Administrator';
+		$user_select_array = array();	
+	
+		$roles = array( 'Administrator', 'Editor', 'wic_constituent_manager' ) ;
 		
-		$user_query_args = 	array (
-			'role' => $role,
-			'fields' => array ( 'ID', 'display_name'),
-		);						
-		$user_list = new WP_User_query ( $user_query_args );
+			foreach ( $roles as $role ) {
+			$user_query_args = 	array (
+				'role' => $role,
+				'fields' => array ( 'ID', 'display_name'),
+			);						
+			$user_list = new WP_User_query ( $user_query_args );
+	
+	
+			foreach ( $user_list->results as $user ) {
+				$temp_array = array (
+					'value' => $user->ID,
+					'label'	=> $user->display_name,									
+				);
+				array_push ( $user_select_array, $temp_array );								
+			} 
 
-		$user_select_array = array();
-		foreach ( $user_list->results as $user ) {
-			$temp_array = array (
-				'value' => $user->ID,
-				'label'	=> $user->display_name,									
-			);
-			array_push ( $user_select_array, $temp_array );								
-		} 
-
+		}
+		
 		return ( $user_select_array );
 
 	}

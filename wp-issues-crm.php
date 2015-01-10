@@ -176,3 +176,13 @@ function wic_set_up_roles_and_capabilities() {
 	
 }
 register_activation_hook ( __FILE__, 'wic_set_up_roles_and_capabilities' );
+
+  
+function keep_private_posts_off_front_end_even_for_administrators( $query ) {
+	if ( ! is_admin()  &&  $query->is_main_query() ) { 
+		// note that this does not prevent this plugin or widgets from showing private posts to which logged in user has access
+   	$query->set( 'post_status', array( 'publish' ) );			
+	}
+}
+
+add_action( 'pre_get_posts', 'keep_private_posts_off_front_end_even_for_administrators' );
