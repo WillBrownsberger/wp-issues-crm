@@ -7,14 +7,12 @@ class WIC_Control_Select extends WIC_Control_Parent {
 	
 	public function search_control () {
 		$final_control_args = $this->default_control_args;
-		if ( ! $final_control_args['suppress_on_search'] ) {
-			$final_control_args['readonly'] = false;
-			$final_control_args['value'] = $this->value;
-			$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );
-			$final_control_args['required'] = ''; // fields never required on search; set explicitly here for correct result in create_options_array
-			$control = $this->create_control( $final_control_args ) ;
-			return ( $control ) ;
-		}
+		$final_control_args['readonly'] = false;
+		$final_control_args['value'] = $this->value;
+		$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );
+		$final_control_args['required'] = ''; // fields never required on search; set explicitly here for correct result in create_options_array
+		$control = $this->create_control( $final_control_args ) ;
+		return ( $control ) ;
 	}	
 	
 	public function update_control () {
@@ -32,13 +30,7 @@ class WIC_Control_Select extends WIC_Control_Parent {
 	public function save_control () {
 		$final_control_args = $this->default_control_args;
 		if( ! $final_control_args['readonly'] ) {
-	    	$class_name = 'WIC_Entity_' . $this->field->entity_slug;
-			$set_default = $this->field->field_slug . '_set_default';
-			if ( method_exists ( $class_name, $set_default ) ) { 
-				$final_control_args['value'] = $class_name::$set_default ( $this->value );
-			} else {
-				$final_control_args['value'] = $this->value;
-			}
+			$final_control_args['value'] = $this->get_default_value();
 			$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );
 			return  ( static::create_control( $final_control_args ) );	
 		}
@@ -46,28 +38,43 @@ class WIC_Control_Select extends WIC_Control_Parent {
 	
 	protected function create_options_array ( $control_args ) {
 
+		global $wic_db_dictionary;
 		extract ( $control_args, EXTR_SKIP );
+				
 		
-		$entity_class = 'WIC_Entity_' . $this->field->entity_slug;		
-		if ( ! isset ( $readonly_update ) ) { // the usual mode -- show drop down		
-			$not_selected_option = array (
-				'value' 	=> $this->field->is_int ? 0 : '',
-				'label'	=> $placeholder,
-			);  
-			$getter = 'get_' . $this->field->field_slug . '_options';
-			$option_array =  $entity_class::$getter( $value ); // include the value parameter to allow the getter to add the value to the array if needed
-			if ( 0 == $blank_prohibited ) { //  blank_prohibited goes with transient settings on search 
-				array_push( $option_array, $not_selected_option ); // note -- allowing a blank value on required -- let the validator force the user to decide
-			}
-		} else { // show just the already set option if a readonly field, but in update mode 
-					// (if were to show as a readonly text, would lose the variable for later use)
-			$getter = 'get_' . $this->field->field_slug . '_label';
-			$option_array = array (
-				array (
-					'value' => $value,
-					'label' => $entity_class::$getter( $value )
+		$entity_class = 'WIC_Entity_' . $this->field->entity_slug;
+		$function_class = 'WIC_Function_Utilities';
+		$getter = $this->field->option_group; 
+	
+		// look for option array in a sequence of possible sources
+		$option_array = $wic_db_dictionary->lookup_option_values( $getter );
+		// look first for getter as an option_group value in option values cache
+		if ( $option_array > '' ) {
+			// if found, then already done -- look no further
+		} elseif ( method_exists ( $entity_class, $getter ) ) { 
+			// look second for getter as a static function built in to the current entity
+			$option_array = $entity_class::$getter ( $value );
+			// note: including the value parameter to allow the getter to inject the value into the array if needed			
+		} elseif ( method_exists ( $function_class, $getter ) ) {
+			// look third for getter as a static function in the utility class
+			$option_array = $function_class::$getter( $value );			
+		} elseif ( function_exists ( $getter ) ) {
+			// look finally for getter as a function in the global name space
+			$option_array = $getter( $value );			
+		} else {
+			// if not found, die with configuration error
+			die( '<h3>' . sprintf ( __( 'WP-Issues-CRM Fatal Error: Option field "%s" created with undefined or bad option_group entry -- "%s".<br /> WIC_Control_Select::create_options_array reporting.', 
+				'wp-issues-crm' ), $this->field->field_slug, $getter ) . '</h3>' ) ;			
+		}
+		
+		if ( isset ( $readonly_update ) ) { 
+			// if readonly on update, extract just the already set option if a readonly field, but in update mode 
+			// (if were to show as a readonly text, would lose the variable for later use)
+			$option_array = array( array ( 
+				'value' => $value,				
+				'label' => WIC_Function_Utilities::value_label_lookup ( $value,  $option_array ),
 				)
-			);			
+			);
 		} 	
 	
 		return ( $option_array );	

@@ -33,33 +33,4 @@ class WIC_Entity_Phone extends WIC_Entity_Multivalue {
 
 	}
 
-	private static $phone_type_options = array(	
-		array(
-			'value'	=> '0',
-			'label'	=>	'Home' ),
-		array(
-			'value'	=> '1',
-			'label'	=>	'Cell' ),
-		array(
-			'value'	=> '2',
-			'label'	=>	'Work' ),
-		array(
-			'value'	=> '3',
-			'label'	=>	'Fax' ),					
-		array(
-			'value'	=> '4',
-			'label'	=>	'Other' ),
-		);
-
-	public static function get_phone_type_options() {
-		return self::$phone_type_options; 
-	}
-
-	public static function get_phone_type_label( $lookup ) {
-		foreach ( self::$phone_type_options as $select_item_array ) {
-			if ( $lookup == $select_item_array['value'] ) {
-				return ( $select_item_array['label'] );			
-			} 
-		}
-	}
 }

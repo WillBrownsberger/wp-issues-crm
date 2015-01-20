@@ -10,7 +10,11 @@
 abstract class WIC_Entity_Multivalue extends WIC_Entity_Parent {
 
 	protected function initialize() {
-		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+		
+		global $wic_db_dictionary;
+
+
+		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->initialize_data_object_array();
 	}
 	

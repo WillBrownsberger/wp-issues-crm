@@ -51,10 +51,13 @@ class WIC_Form_Constituent_Search extends WIC_Form_Parent  {
 	// legends for like and soundex searching, driven by control fields in data dictionary
 	protected function get_the_legends( $sql = '' ) {
 
+		global $wic_db_dictionary;
+
+
 		$legend = '';
 	
-		$like_string = WIC_DB_Dictionary::get_match_type_string( "constituent", "1" );
-		$soundex_string = WIC_DB_Dictionary::get_match_type_string( "constituent", "2" );
+		$like_string = $wic_db_dictionary->get_match_type_string( "constituent", "1" );
+		$soundex_string = $wic_db_dictionary->get_match_type_string( "constituent", "2" );
 		$joined_string = $like_string . ( $like_string > '' && $soundex_string > ''  ? ', ' : '' ) . $soundex_string;
 		
 		if ( '' < $like_string || '' < $soundex_string ) {

@@ -10,13 +10,11 @@ class WIC_Control_Textarea extends WIC_Control_Parent {
 	// when searching, offer a straight text control
 	public function search_control () {
 		$final_control_args = $this->default_control_args;
-		if ( ! $final_control_args['suppress_on_search'] ) {
-			$final_control_args['readonly'] = false;
-			$final_control_args['value'] = $this->value;
-			$final_control_args['placeholder'] = '';
-			$control =  parent::create_control( $final_control_args ) ;
-			return ( $control ) ;
-		}
+		$final_control_args['readonly'] = false;
+		$final_control_args['value'] = $this->value;
+		$final_control_args['placeholder'] = '';
+		$control =  parent::create_control( $final_control_args ) ;
+		return ( $control ) ;
 	}
 
 

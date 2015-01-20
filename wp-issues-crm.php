@@ -3,9 +3,10 @@
  * Plugin Name: WP Issues CRM
  * Plugin URI: 
  * Description: Constituent Relationship Management for organizations that respond to constituents primarily on issues (e.g., legislators); does support basic case management as well. 
- * Version: 1.0
+ * Version: 01.00
  * Author: Will Brownsberger
- 
+ * Author URI: http://willbrownsberger.com
+ * Text Domain: wp-issues-crm
  * License: GPL2
  *
  *  Copyright 2014  WILL BROWNSBERGER  (email : willbrownsberger@gmail.com)
@@ -29,9 +30,6 @@
 * This file initializes the system.
 *
 **/
-
-// this field is populated by the first call to WIC_DB_Dictionary::get_field_rules
-$wp_issues_crm_field_rules_cache = array();
 
 // class autoloader is case insensitive, except that requires WIC_ (sic) as a prefix.
 function wp_issues_crm_autoloader( $class ) {
@@ -114,7 +112,8 @@ add_action( 'send_headers', 'wic_change_cache_header' );
 // https://core.trac.wordpress.org/browser/tags/4.1/src//wp-includes/class-wp.php#L0 (line 448)
 // fires after other headers sent, so can override previously sent Cache-Control header
 
-// invoke principal class that displays and handles main buttons 
+// set up data dictionary and invoke principal class that displays and handles main buttons 
+$wic_db_dictionary = new WIC_DB_Dictionary; 
 $wp_issues_crm = new WIC_Dashboard_Main;
 
 // function for catching bad class definitions; 

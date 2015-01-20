@@ -27,12 +27,13 @@ class WIC_List_Constituent_Export {
 
 		global $wpdb;	
 
-		$sql = 	"SELECT last_name, first_name, middle_name, 
+		$sql = 	"SELECT first_name, last_name,  
 						GROUP_CONCAT( DISTINCT email_address SEPARATOR ';' ) as emails, 
+						max( if ( address_type = 0, city, ' ' ) ) as city, 
+						occupation,
 						GROUP_CONCAT( DISTINCT phone_number SEPARATOR ';' ) as phones,
 						max( if ( address_type = 0, address_line, ' '	) ) as address_line_1,
 						max( if ( address_type = 0, concat ( city, ', ', state, ' ',  zip ), ' ' ) ) as address_line_2,
-						max( if ( address_type = 0, city, ' ' ) ) as city,
 						max( if ( address_type = 0, zip, ' ' ) ) as zip, 
 						c.* 
 					FROM wp_wic_constituent c

@@ -6,8 +6,8 @@
 
 class WIC_Control_Range extends WIC_Control_Parent {
 	
-	private $value_lo = '';
-	private $value_hi = '';	
+	protected $value_lo = '';
+	protected $value_hi = '';	
 	
 	public function search_control () { // no option to suppress on search -- don't use a range control if suppressing on search
 		$final_control_args = $this->default_control_args;
@@ -35,6 +35,7 @@ class WIC_Control_Range extends WIC_Control_Parent {
 	}
 
 	public function sanitize() {  
+	
 		$class_name = 'WIC_Entity_' . $this->field->entity_slug;
 		$sanitizor = $this->field->field_slug . '_sanitizor';
 		if ( method_exists ( $class_name, $sanitizor ) ) { 
@@ -46,11 +47,7 @@ class WIC_Control_Range extends WIC_Control_Parent {
 			$this->value_lo 	= sanitize_text_field ( stripslashes ( $this->value_lo ) );		
 			$this->value_hi 	= sanitize_text_field ( stripslashes ( $this->value_hi ) );
 		} 
-		if ( $this->field->is_date ) { 				
-			$this->value 		= $this->value 	> '' ? $this->sanitize_date ( $this->value ) 	: '';
-			$this->value_lo 	= $this->value_lo > '' ? $this->sanitize_date ( $this->value_lo ) : '';
-			$this->value_hi	= $this->value_hi > '' ? $this->sanitize_date ( $this->value_hi ) : '';	
-		}
+		
 	}
 
 	public function create_search_clause ( $args ) {

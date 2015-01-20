@@ -20,6 +20,8 @@ abstract class WIC_List_Parent {
 		
 	public function format_entity_list( &$wic_query, $show_top_buttons ) {
 
+		global $wic_db_dictionary;
+
   		// set up form
 		$output = '<div id="wic-post-list"><form method="POST">' . 
 			'<div class = "wic-post-field-group wic-group-odd">';
@@ -35,7 +37,7 @@ abstract class WIC_List_Parent {
 		);	
 
 		// prepare the list fields for header set up and list formatting
-  		$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $wic_query->entity );
+  		$fields =  $wic_db_dictionary->get_list_fields_for_entity( $wic_query->entity );
 	
 		$output .= '<ul class = "wic-post-list">' .  // open ul for the whole list
 			'<li class = "pl-odd">' .							// header is a list item with a ul within it

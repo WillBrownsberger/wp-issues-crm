@@ -24,7 +24,8 @@ abstract class WIC_Form_Parent  {
 	abstract protected function get_the_entity();
 	// get the field groups for the entity from the data dictionary	
 	protected function get_the_groups () {
-		$groups = WIC_DB_Dictionary::get_form_field_groups( $this->get_the_entity() );
+		global $wic_db_dictionary;
+		$groups = $wic_db_dictionary->get_form_field_groups( $this->get_the_entity() );
 		return ($groups );
 	}
 
@@ -64,6 +65,9 @@ abstract class WIC_Form_Parent  {
 	*		$sql = search sql to display in legend area as info 
 	*/
 	public function layout_form ( &$data_array, $message, $message_level, $sql = '' ) {
+		
+		global $wic_db_dictionary;		
+		
 		?><div id='wic-forms'>
 
 		<form id = "<?php echo $this->get_the_form_id(); ?>" class="wic-post-form" method="POST" autocomplete = "on">
@@ -108,7 +112,7 @@ abstract class WIC_Form_Parent  {
 							$special_function = 'group_special_' . $group->group_slug; 	// must define the special function too 
 							$group_output .= $this->$special_function( $data_array );
 						} else {	// standard main form logic 	
-							$group_fields =  WIC_DB_Dictionary::get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
+							$group_fields =  $wic_db_dictionary->get_fields_for_group ( $this->get_the_entity(), $group->group_slug );
 							$group_output .= $this->the_controls ( $group_fields, $data_array );
 						}
 							

@@ -25,6 +25,7 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 	
 	public static function serialized_search_array_formatter ( $serialized ) {
 		
+		global $wic_db_dictionary;
 		$search_array = unserialize ( $serialized );
 		$search_phrase = '';
 
@@ -50,11 +51,8 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 				} elseif ( is_array( $value ) ) {
 					$value = implode ( ',', $value );		
 				} else {
-					$class_name = 'WIC_Entity_' . $search_clause['table'];
-					$method_name = 'get_' . $search_clause['key'] . '_label'; 
-					if ( method_exists ( $class_name, $method_name ) ) {
-						$value = $class_name::$method_name ( $value );
-					}
+					$label = $wic_db_dictionary->get_option_label( $search_clause['table'], $search_clause['key'], $value );
+					$value = ( $label > '' ) ? $label : $value;
 				}
 				
 				if ( $show_item )	{			

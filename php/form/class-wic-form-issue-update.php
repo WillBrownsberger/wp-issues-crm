@@ -88,14 +88,16 @@ class WIC_Form_Issue_Update extends WIC_Form_Parent  {
 	// define form legends
 	protected function get_the_legends( $sql = '' ) {
 
+		global $wic_db_dictionary;
+
 		$legend = '';
 	
-		$individual_required_string = WIC_DB_Dictionary::get_required_string( "issue", "individual" );
+		$individual_required_string = $wic_db_dictionary->get_required_string( "issue", "individual" );
 		if ( '' < $individual_required_string ) {
 			$legend =   __('Required for save/update: ', 'wp-issues-crm' ) . $individual_required_string . '. ';
 		}
 		
-		$group_required_string = WIC_DB_Dictionary::get_required_string( "issue", "group" );
+		$group_required_string = $wic_db_dictionary->get_required_string( "issue", "group" );
 		if ( '' < $group_required_string ) {
 			$legend .=   __('At least one among these fields must be supplied: ', 'wp-issues-crm' ) . $group_required_string . '. ';
 		}

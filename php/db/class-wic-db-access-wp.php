@@ -152,7 +152,10 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
  	}
 
 	protected function complete_wp_record ( &$post_object ) {
-		$entity_fields = WIC_DB_Dictionary::get_field_list_with_wp_query_parameters( $this->entity ); 	
+		
+		global $wic_db_dictionary;		
+		
+		$entity_fields = $wic_db_dictionary->get_field_list_with_wp_query_parameters( $this->entity ); 	
 		foreach ( $entity_fields as $entity_field => $wp_query_parameter ) {
 			if ( $wp_query_parameter > '' ) { // otherwise, field slugs in data dictionary should match wp field table names
 				if ( 'cat' == $wp_query_parameter ) {

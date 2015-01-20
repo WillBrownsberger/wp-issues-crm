@@ -17,7 +17,7 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 	
 		$roles = array( 'Administrator', 'Editor', 'wic_constituent_manager' ) ;
 		
-			foreach ( $roles as $role ) {
+		foreach ( $roles as $role ) {
 			$user_query_args = 	array (
 				'role' => $role,
 				'fields' => array ( 'ID', 'display_name'),
@@ -33,10 +33,49 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 				array_push ( $user_select_array, $temp_array );								
 			} 
 
-		}
-		
-		return ( $user_select_array );
 
+		}
+
+	array_push ( $user_select_array,  array ( 'value' => '' , 'label' => '' ) );
+	
+	return ( $user_select_array );
+		
+	}
+	
+	private static function get_last_updated_by_array( $table ) {
+		global $wpdb;
+		$table = $wpdb->prefix . $table;
+		$updaters = $wpdb->get_results(
+			"
+			SELECT last_updated_by
+			FROM $table
+			GROUP BY last_updated_by
+			"
+		);
+
+		$user_select_array = array( array ( 'value' => '' , 'label' => '' ) );
+		foreach ( $updaters as $updater ) {
+			if ( $updater->last_updated_by > 0 ) { 
+				$user = get_user_by ( 'id', $updater->last_updated_by );
+				$display_name = isset ( $user->display_name ) ? $user->display_name : '';
+				$temp_array = array (
+					'value' => $updater->last_updated_by,
+					'label' => $display_name				
+				);
+				array_push ($user_select_array, $temp_array);
+			}		
+		}
+
+		return ( $user_select_array );
+		
+	}
+
+	public static function constituent_last_updated_by () {
+		return ( self::get_last_updated_by_array( 'wic_constituent' ) );		
+	}
+
+	public static function activity_last_updated_by () {
+		return ( self::get_last_updated_by_array( 'wic_activity' ) );		
 	}
 
 	/*
@@ -46,6 +85,7 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 		if ( '' ==  $value ) {
 			return ( '' );	
 		}	
+
 		foreach ( $options_array as $option ) {
 				if ( $value == $option['value'] ) {
 					return ( $option['label'] );			
@@ -69,6 +109,10 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 		}
 		$output_textcsv = implode ( ',', $temp_tags2 );
 		return ( $output_textcsv );
+	}	
+
+	public static function get_today ( )  {
+		return ( date ( 'Y-m-d' ) );
 	}	
 
 }

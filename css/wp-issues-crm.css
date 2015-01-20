@@ -377,7 +377,12 @@ label.wic-label.first-name{
 	display: block;
 }
 
-
+/* certain labels hidden */
+label.wic-label.city,
+label.wic-label.email-address,
+label.wic-label.phone-number {
+	display: none;
+}
 
 
 /* standardize drop down width to a button width */
@@ -419,6 +424,13 @@ label.wic-label.first-name{
 .wic-input.extension {
 	width: 22.2656%;
 } 
+
+
+/* extension suppressed on search */
+#wic-form-constituent-search .wic-input.extension {
+	display: none;
+}
+
 
 .wic-input.address-line,
 .wic-input.email-address {
@@ -684,9 +696,11 @@ ul#constituent-comment-list {
 
 /*
 * Note: these display choices go along with decision in class-wic-db-access-wp.php
-*   not to support search by post-content.  The s parm in WP_Query searches title and content, so redundant. 
+*   not to seperately support search by post-content.  The s parm in WP_Query searches title and content, so redundant. 
 */
 
+#wic-form-issue-search .wic-input.post-content,
+#wic-form-issue-search .wic-label.post-content,
 #wic-form-issue-search .wic-label.post-title  {
 	display: none;
 }

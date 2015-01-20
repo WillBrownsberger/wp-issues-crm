@@ -58,7 +58,7 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 		$activity_sql = ( $where > '' ) ? $wpdb->prepare( $activity_sql, $values ) : $activity_sql;					
 		// $sql group by always returns single row, even if multivalues for some records 
 		$sql =  	"
-					SELECT p.id, count(constituent_id) as total, sum( if (pro_con = 0, 1, 0) ) as pro,  sum( if (pro_con = 1, 1, 0) ) as con  
+					SELECT p.id, count(constituent_id) as total, sum( if (pro_con = '0', 1, 0) ) as pro,  sum( if (pro_con = '1', 1, 0) ) as con  
 					FROM ( $activity_sql ) as a 
 					INNER JOIN $wpdb->posts p on a.issue = p.ID
 					GROUP BY p.ID

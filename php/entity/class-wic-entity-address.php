@@ -15,42 +15,6 @@ class WIC_Entity_Address extends WIC_Entity_Multivalue {
 		$this->entity_instance = $instance;
 	} 
 
-	private static $address_type_options	= array(	
-		array(
-			'value'	=> '0',
-			'label'	=>	'Home' ),
-		array(
-			'value'	=> '1',
-			'label'	=>	'Work' ),
-		array(
-			'value'	=> '2',
-			'label'	=>	'Mail' ),
-		array(
-			'value'	=> '3',
-			'label'	=>	'Other' ),
-		);
-
-	public static function get_address_type_options() {
-		return self::$address_type_options; 
-	}
-
-	public static function get_address_type_label( $lookup ) {
-		foreach ( self::$address_type_options as $select_item_array ) {
-			if ( $lookup == $select_item_array['value'] ) {
-				return ( $select_item_array['label'] );			
-			} 
-		}
-	}
-
-	private static $state_options = array (
-		array(
-			'value'	=> 'MA',
-			'label'	=>	'MA'),
-		);		
-
-	public static function get_state_options() {
-		return self::$state_options; 
-	}
 
 	private function get_zip_from_usps () {
 		
@@ -62,12 +26,13 @@ class WIC_Entity_Address extends WIC_Entity_Multivalue {
 		$uspsRequest->zip = '';
  
 		if ( $uspsRequest->address2 > '' && $uspsRequest->city > '' && $uspsRequest->state > '' ) {	
-		
+
 			$result = $uspsRequest->submit_request();
- 		
+
 			if ( !empty( $result ) ) {
 				$xml = new SimpleXMLElement( $result );
-				if( ! isset($xml->Address[0]->Error)) {
+				if( ! isset($xml->Address[0]->Error) && ! isset($xml->Number) ) {
+				// if not an address lookup error and also not a basic access error, then overlay entered data
 					$this->data_object_array['address_line']->set_value( (string) $xml->Address[0]->Address2 );
 					$this->data_object_array['city']->set_value( (string) $xml->Address[0]->City );	
 					$this->data_object_array['zip']->set_value( (string) $xml->Address[0]->Zip5 ); 		 		 

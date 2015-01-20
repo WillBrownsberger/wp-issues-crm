@@ -2,14 +2,8 @@
 /*
 * class-wic-control-parent.php
 *
-* This file contains WIC_Control base class and child classes with names of the form WIC_Control_{Type} 
-* This is the list of valid Types for WIC Fields:
-*		-- Checked
-*		--	Date
-*		-- Select
-*		-- Text
+* WIC_Control_Parent is extended by classes for each of the field types  
 * 
-* It also includes validation and sanitization and db query element functions that depend on control structure 
 *   
 *
 *
@@ -34,16 +28,21 @@ abstract class WIC_Control_Parent {
 	*		Rules specified in the named control function (search_control, update_control) 
 	*		In child controls, may allow direct passage of arguments -- see checked and multivalue.
 	*		Note that have potential to get css specified to them based on their field slug
-	*		Any special validation, sanitization, formatting and defaults values ( as opposed to default rule values ) are supplied from the relevant object
+	*		Any special validation, sanitization, formatting and default values ( as opposed to default rule values ) are supplied from the relevant object and the dictionary
 	*/
 
 
 	public function initialize_default_values ( $entity, $field_slug, $instance ) {
+
+		global $wic_db_dictionary;
+
 	// initialize the default values of field RULES  
-		$this->field = WIC_DB_Dictionary::get_field_rules( $entity, $field_slug );
+		$this->field = $wic_db_dictionary->get_field_rules( $entity, $field_slug );
 		$this->default_control_args =  array_merge( $this->default_control_args, get_object_vars ( $this->field ) );
-		$this->default_control_args['field_slug_css'] = str_replace( '_', '-', $field_slug );
-		$this->default_control_args['field_slug_stable'] = $field_slug; 
+		$this->default_control_args['input_class'] 			= 'wic-input';
+		$this->default_control_args['label_class'] 			= 'wic-label';
+		$this->default_control_args['field_slug_css'] 		= str_replace( '_', '-', $field_slug );
+		$this->default_control_args['field_slug_stable'] 	= $field_slug; 
 		// retain this value arg so don't need to parse out instance in static create control function where don't have $this->field->field_slug to refer to
 		$this->default_control_args['field_slug'] = ( '' == $instance ) ? // ternary
 				// if no instance supplied, this is just a field in a main form, and use field slug for field name and field id
@@ -70,20 +69,37 @@ abstract class WIC_Control_Parent {
 		return $this->value;	
 	}
 	
-/*	public function get_display_value () {
-		if ( '' < $this->field->format_call_back  ) {
-			return $this->field->format_call_back( $this->value );
-		} else {
-			return ( $this->value ) ;		
-		}	
-	} */
-	
 	public function reset_value() {
 		$this->value = '';	
 	}
 
 	public function get_wp_query_parameter() {
 		return ( $this->field->wp_query_parameter );	
+	}
+
+	/**********************************************************************************
+	*
+	* get default value for field itself
+	*
+	***********************************************************************************/
+	protected function get_default_value() {
+		$default = $this->value;
+		// if there is a non-empty field_default value for the field in the data dictionary
+		if ( $this->field->field_default > '' ) {
+			// first look for a wp-issues-crm function
+			if ( method_exists ( 'WIC_Function_Utilities', $this->field->field_default ) ) { 
+				$default = WIC_Function_Utilities::{$this->field->field_default} ();			
+			// second look for a function in global name space  ( could be in theme or child theme's function.php )
+			} elseif ( function_exists ( $this->field->field_default ) ) {
+				$temp = $this->field->field_default;
+				$default = $temp(); // $temp because can't seem to execute {$this->field->field_default} as a function, although it works in class::{method} string above
+			// if not a method or function, take it to be a string
+			} else {
+				$default = $this->field->field_default;
+			}
+		// if no field_default value, will be returning just the initialized value of the control 
+		}
+		return ( $default );
 	}
 
 	/*********************************************************************************
@@ -98,24 +114,16 @@ abstract class WIC_Control_Parent {
 
 	public function search_control () {
 		$final_control_args = $this->default_control_args;
-		if ( ! $final_control_args['suppress_on_search'] ) {
-			$final_control_args['readonly'] = false;
-			$final_control_args['value'] = $this->value;
-			$control =  static::create_control( $final_control_args ) ;
-			return ( $control ) ;
-		}
+		$final_control_args['readonly'] = false;
+		$final_control_args['value'] = $this->value;
+		$control =  static::create_control( $final_control_args ) ;
+		return ( $control ) ;
 	}
 	
 	public function save_control () {
 		$final_control_args = $this->default_control_args;
 		if( ! $final_control_args['readonly'] ) {
-	    	$class_name = 'WIC_Entity_' . $this->field->entity_slug;
-			$set_default = $this->field->field_slug . '_set_default';
-			if ( method_exists ( $class_name, $set_default ) ) { 
-				$final_control_args['value'] = $class_name::$set_default ( $this->value );
-			} else {
-				$final_control_args['value'] = $this->value;
-			}
+			$final_control_args['value'] = $this->get_default_value();
 			return  ( static::create_control( $final_control_args ) );	
 		}
 	}
@@ -133,9 +141,11 @@ abstract class WIC_Control_Parent {
 		$value = ( '0000-00-00' == $value ) ? '' : $value; // don't show date fields with non values; 
 		
      	$class_name = 'WIC_Entity_' . $entity_slug; 
-		$formatter = $field_slug_stable . '_formatter'; // ( field slug has instance args in it )
+		$formatter = $list_formatter; // ( field slug has instance args in it )
 		if ( method_exists ( $class_name, $formatter ) ) { 
 			$value = $class_name::$formatter ( $value );
+		} elseif ( function_exists ( $formatter ) ) {
+			$value = $formatter ( $value );		
 		}
 
 		$readonly = $readonly ? 'readonly' : '';
@@ -166,24 +176,7 @@ abstract class WIC_Control_Parent {
 		} else { 
 			$this->value = sanitize_text_field ( stripslashes ( $this->value ) );		
 		} 
-		if ( $this->field->is_date && $this->value > '' ) { 				
-			$this->value = $this->sanitize_date ( $this->value );	
-		}
 	}
-
-	/*
-	* date sanitization function ( no error message for bad date, but will fail a required test )
-	*
-	*/   
-	protected function sanitize_date ( $possible_date ) {
-		try {
-			$test = new DateTime( $possible_date );
-		}	catch ( Exception $e ) {
-			return ( '' );
-		}	   			
- 		return ( date_format( $test, 'Y-m-d' ) );
-	}
-   
 
 	/*********************************************************************************
 	*
@@ -290,19 +283,23 @@ abstract class WIC_Control_Parent {
 				 $this->field->field_slug  ) );
 		}
 		
-		if ( '' == $this->value || 1 == $this->field->transient || ( 0 == $this->value && $this->field->zero_is_null ) ) {
+		if ( '' == $this->value || 1 == $this->field->transient ) {
 			return ('');		
 		}
 		if ( 0 == $match_level || $dup_check || 0 == $this->field->like_search_enabled )  {
 			$compare = '=';
 			$key = $this->field->field_slug;							
 		} elseif ( 1 == $match_level || ( 1 == $this->field->like_search_enabled )) {
+			// at this test $match_level and like_search_enabled both are either 1 or 2 (since 0's in either fall in to prior test)
+			// selecting three out of the 4 possibilities in that 2x2 possibility table (1-1, 1-2, 2-1)
 			$compare = 'like';
 			$key 	= $this->field->field_slug;	
 		} elseif ( 2 == $match_level && 2 == $this->field->like_search_enabled ) {
+			// handles only the remaining possibility 
 			$compare = 'sound';
 			$key 	= $this->field->field_slug . '_soundex';	
 		} else {
+			// cannot reach here unless there are bad values in the data dictionary
 			die ( sprintf( __( 'Incorrect match_level settings for field %1$s reported by WIC_Control_Parent::create_search_clause.', 'WP_Issues_CRM' ),
 				 $this->field->field_slug ) ); 		
 		}	
@@ -310,12 +307,6 @@ abstract class WIC_Control_Parent {
 		if ( 'cat' == $this->field->wp_query_parameter && '' < $category_search_mode ) {
 			$compare = $category_search_mode; // this will actually be parsed in as a $query argument with = as compare 		
 		} 			
- 
-		if ( '' < $this->field->secondary_alpha_search ) { // exists to support address_line search by street name without full text scanning 
- 			if ( ! is_numeric ( $this->value[0] ) ) {
-				$key = $this->field->secondary_alpha_search; 			
- 			}
-		} 
  
 		$query_clause =  array ( // double layer array to standardize a return that allows multivalue fields
 				array (
@@ -326,6 +317,10 @@ abstract class WIC_Control_Parent {
 					'wp_query_parameter' => $this->field->wp_query_parameter,
 				)
 			);
+		
+		// filter to alter search for particular field types	
+		$query_clause = $this->special_search_filter( $query_clause );	
+		
 		return ( $query_clause );
 	}
 	
@@ -343,10 +338,22 @@ abstract class WIC_Control_Parent {
 					'value'	=> $this->value,
 					'wp_query_parameter' => $this->field->wp_query_parameter,
 					'soundex_enabled' => ( 2 == $this->field->like_search_enabled ),
-					'secondary_alpha_search' => $this->field->secondary_alpha_search,
 			);
+			
+			// filter to alter search for particular field types	
+			$update_clause = $this->special_update_filter( $update_clause );				
+		
 			return ( $update_clause );
 		}
+	}
+	
+	// blank filter functions to be overlaid in extensions
+	protected function special_search_filter ( $search_clause ) {
+		return ( $search_clause );	
+	}
+
+	protected function special_update_filter ( $update_clause ) {
+		return ( $update_clause );	
 	}
 
 }

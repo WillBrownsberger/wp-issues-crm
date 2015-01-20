@@ -79,120 +79,11 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	
 	/***************************************************************************
 	*
-	* Constituent properties, setters and getters
+	* Constituent -- special formatters and validators
 	*
 	****************************************************************************/ 	
 
-  	private static $case_status_options = array ( 
-		array(
-			'value'	=> '0',
-			'label'	=>	'Closed' ),
-		array(
-			'value'	=> '1',
-			'label'	=>	'Open' ),
-		);
-		
 
-	private static $gender_options = array ( 
-		array(
-			'value'	=> 'm',
-			'label'	=>	'Male' ),
-		array(
-			'value'	=> 'f',
-			'label'	=>	'Female' ),
-		);
-
-	private static $party_options = array ( 
-		array(
-			'value'	=> 'd',
-			'label'	=>	'Democrat' ),
-		array(
-			'value'	=> 'r',
-			'label'	=>	'Republican' ),
-		array(
-			'value'	=> 'u',
-			'label'	=>	'Unenrolled' ),
-		array(
-			'value'	=> 'l',
-			'label'	=>	'Libertarian' ),
-		array(
-			'value'	=> 'j',
-			'label'	=>	'Green-Rainbow' ),
-		array(
-			'value'	=> 'g',
-			'label'	=>	'Green Party USA' ),	
-		array(
-			'value'	=> 's',
-			'label'	=>	'Socialist' ),	
-		array(
-			'value'	=> 'o',
-					'label'	=>	'Other' ),						
-		);	
-
-
-	private static $retrieve_limit_options = array ( 
-		array(
-			'value'	=> '50',
-			'label'	=>	'Up to 50' ),
-		array(
-			'value'	=> '100',
-			'label'	=>	'Up to 100' ),
-		array(
-			'value'	=> '500',
-			'label'	=>	'Up to 500' ),
-		);
-
-	private static $match_level_options = array ( 
-		array(
-			'value'	=> '1',
-			'label'	=>	'Right wild card' ),
-		array(
-			'value'	=> '2',
-			'label'	=>	'Soundex' ),
-		array(
-			'value'	=> '0',
-			'label'	=>	'Strict' ),
-		);
-
-	private static $voter_status_options = array ( 
-		array(
-			'value'	=> 'a',
-			'label'	=>	'Active' ),
-		array(
-			'value'	=> 'i',
-			'label'	=>	'Inactive' ),
-		array(
-			'value'	=> 'x',
-			'label'	=>	'Not Registered' ),
-		);	
-	
-	/*
-	*	option array get functions
-	*/
-
-	public static function get_case_assigned_options() {
-		return ( WIC_Function_Utilities::get_administrator_array() );
-	}
-		
-  	public static function get_case_status_options() {
-		return self::$case_status_options; 
-	} 
-
-	public static function get_gender_options() {
-		return self::$gender_options; 
-	}
-
-	public static function get_match_level_options() {
-		return self::$match_level_options; 
-	}
-	
-	public static function get_party_options() {
-		return self::$party_options; 
-	}
-	
-	public static function get_party_label( $lookup ) {
-		return WIC_Function_Utilities::value_label_lookup ( $lookup,  self::$party_options );
-	}
 	// note: since phone is multivalue, and formatter is not invoked in the 
 	// WIC_Control_Multivalue class (rather at the child entity level), 
 	// this function is only invoked in the list context
@@ -214,38 +105,10 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		return ( implode ( '<br />', $clean_email_array ) );
 	}		
 
-	public static function address_formatter ( $address_list ) {
-		return self::email_formatter ( $address_list );	
-	}	
-
-	public static function get_last_updated_by_options() {
-		return ( WIC_Function_Utilities::get_administrator_array() );
-	}
-
-	public static function get_last_updated_by_label( $user_id ) {
-		if ( '' < $user_id && 0 < $user_id ) {
-			$user = get_user_by ( 'id', $user_id );
-			return ( $user->display_name );
-		}
-		else return ( '' );
-	}
-
 	public static function mark_deleted_validator ( $value ) {
 		if ( $value > '' && trim( strtolower( $value ) ) != 'deleted' ) {
 			return __( 'To hide this record from future searches, type the full word "DELETED" into Mark Deleted and then Update.', 'wp-issues-crm');		
 		}
 	}	
-
-	public static function get_retrieve_limit_options() {
-		return self::$retrieve_limit_options; 
-	}
-
-	public static function get_voter_status_options() {
-		return self::$voter_status_options; 
-	}
-	
-	public static function get_voter_status_label( $lookup ) {
-		return WIC_Function_Utilities::value_label_lookup ( $lookup,  self::$voter_status_options );
-	}
 	
 }

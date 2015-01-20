@@ -14,14 +14,16 @@ class WIC_Control_Radio extends WIC_Control_Select {
 		$control = ( $field_label > '' ) ? '<label class="' . $label_class . '" for="' . esc_attr( $field_slug ) . '">' . 
 				esc_html( $field_label ) . '</label>' : '';
 
-		$default_unset = true;
 		foreach ( $option_array as $option ) {
 		
-			if ( $blank_prohibited && $transient && $default_unset ) {
-				$selected = ' checked ';	
-				$default_unset = false;		
+			if ( '' == $value ) {
+				// if value is blank and there is a default value, check the default value 
+				if ( $field_default > '' ) {
+					$selected = ( $field_default == $option['value'] ) ? ' checked ' : '';
+				}
 			} else {
-				$selected = ( $value == $option['value'] ) ?	$selected = ' checked ' : '';
+				// otherwise, value is already chosen, so check that value
+				$selected = ( $value == $option['value'] ) ?	' checked ' : '';
 			}
 
 			$control .= '<p class = "wic-radio-button" ><input ' . 

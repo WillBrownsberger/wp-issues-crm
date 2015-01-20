@@ -60,6 +60,8 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 
 	protected function db_search( $meta_query_array, $search_parameters ) { // $select_mode = '*' ) {
 
+		global $wic_db_dictionary;
+
 		// default search parameters
 		$select_mode 		= 'id';
 		$sort_order 		= false;
@@ -77,7 +79,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		} else {
 			$select_list = $top_entity . '.' . '* '; 
 		}
-		$sort_clause = $sort_order ? WIC_DB_Dictionary::get_sort_order_for_entity( $this->entity ) : '';
+		$sort_clause = $sort_order ? $wic_db_dictionary->get_sort_order_for_entity( $this->entity ) : '';
 		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause $sort_direction ";
 		$deleted_clause = $show_deleted ? '' : 'AND ' . $top_entity . '.mark_deleted != \'deleted\'';
 		$found_rows = $compute_total ? 'SQL_CALC_FOUND_ROWS' : '';
@@ -181,9 +183,10 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 					$set_clause_with_placeholders .= ', ' . $save_update_clause['key'] . '_soundex = soundex( %s ) '; 		
 					$set_value_array[] = $save_update_clause['value'];
 				}
-				if ( ''< $save_update_clause['secondary_alpha_search'] ) {
+				if ( isset( $save_update_clause['secondary_alpha_search'] ) ) {
 					// this supports address line being indexed by street name -- assumes address line begins with number/suffix and then a space
 					// may entrain apartment number, but not a problem if searching this field on a right wild card basis.
+					// implemented in data dictionary as field type alpha
 					$set_clause_with_placeholders .= ', ' . $save_update_clause['secondary_alpha_search'] . ' = %s ';
 					$first_space = strpos( $save_update_clause['value'], ' ' );	
 					$probable_alpha_value = trim ( substr ( $save_update_clause['value'], $first_space ) );
@@ -219,24 +222,25 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 
 	protected function db_list_by_id ( $id_string, $sort_direction ) {
 
-		global $wpdb;	
+		global $wpdb;
+		global $wic_db_dictionary;	
 
 		$top_entity = $this->entity;
 		$table_array = array( $this->entity );
 		$where = $top_entity . '.ID IN ' . $id_string . ' ';
 		$join = $wpdb->prefix . 'wic_' . $this->entity . ' AS ' . $this->entity;
-		$sort_clause = WIC_DB_Dictionary::get_sort_order_for_entity( $this->entity );
+		$sort_clause = $wic_db_dictionary->get_sort_order_for_entity( $this->entity );
 		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause $sort_direction ";
 		$select_list = '';	
 
-		$fields =  WIC_DB_Dictionary::get_list_fields_for_entity( $this->entity );
+		$fields =  $wic_db_dictionary->get_list_fields_for_entity( $this->entity );
 		foreach ( $fields as $field ) { 
 				if ( 'multivalue' != $field->field_type ) {
 					$select_list .= ( '' == $select_list ) ? $top_entity . '.' : ', ' . $top_entity . '.' ;
 					$select_list .= $field->field_slug . ' AS ' . $field->field_slug ;
 				} else {
 					$select_list .= '' == $select_list ? '' : ', ';
-					$sub_fields = WIC_DB_Dictionary::get_list_fields_for_entity( $field->field_slug );
+					$sub_fields = $wic_db_dictionary->get_list_fields_for_entity( $field->field_slug );
 					$sub_field_list = ''; 
 					foreach ( $sub_fields as $sub_field ) {
 						if ( 'ID' != $sub_field->field_slug ) { 

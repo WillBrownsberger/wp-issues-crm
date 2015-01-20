@@ -31,32 +31,7 @@ class WIC_Entity_Email extends WIC_Entity_Multivalue {
 		$new_update_row = $new_update_row_object->layout_form( $this->data_object_array, $message, null );
 		return $new_update_row;
 	}
-
-	private static $email_type_options = array(	
-		array(
-			'value'	=> '0',
-			'label'	=>	'Personal' ),
-		array(
-			'value'	=> '1',
-			'label'	=>	'Work' ),
-		array(
-			'value'	=> '2',
-			'label'	=>	'Other' ),
-		);
-
 		
-	public static function get_email_type_options () {
-		return self::$email_type_options; 
-	}
-
-	public static function get_email_type_label( $lookup ) {
-		foreach ( self::$email_type_options as $select_item_array ) {
-			if ( $lookup == $select_item_array['value'] ) {
-				return ( $select_item_array['label'] );			
-			} 
-		}
-	}
-
 	public static function email_address_validator ( $email ) { 
 		$error = '';
 		if ( $email > '' ) {	

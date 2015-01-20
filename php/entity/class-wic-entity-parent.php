@@ -106,7 +106,7 @@ abstract class WIC_Entity_Parent {
 	
 	// check for dups -- $save is true/false for save/update
 	protected function dup_check ( $save ) {
- 
+		global $wic_db_dictionary;
 		$dup_check = false;
 		// first check whether any fields are set for dup checking
 		foreach ( $this->data_object_array as $field_slug => $control ) {
@@ -135,7 +135,7 @@ abstract class WIC_Entity_Parent {
 					|| ( $save && $wic_query->found_count > 0 ) ) {
 						// for save, dups are never OK
 				$this->outcome = false;
-				$dup_check_string = WIC_DB_Dictionary::get_dup_check_string ( $this->entity );
+				$dup_check_string = $wic_db_dictionary->get_dup_check_string ( $this->entity );
 				$this->explanation .= sprintf ( __( 'Other records found with same combination of %s.' , 'wp-issues-crm' ), $dup_check_string );
 				$this->outcome_dups = true;
 				$this->outcome_dups_query_object = $wic_query;		
@@ -160,6 +160,7 @@ abstract class WIC_Entity_Parent {
 	}
 
 	public function required_check () {
+		global $wic_db_dictionary;
 		// have each control see if it is present as required 
 		$required_errors = '';
 		$there_is_a_required_group = false;
@@ -173,7 +174,7 @@ abstract class WIC_Entity_Parent {
 		}
 		// report cross-control group required result
 		if ( $there_is_a_required_group && ! $a_required_group_member_is_present ) {	
-			$required_errors .= sprintf ( __( ' At least one among %s is required. ', 'wp-issues-crm' ), WIC_DB_Dictionary::get_required_string( $this->entity, "group" ) );
+			$required_errors .= sprintf ( __( ' At least one among %s is required. ', 'wp-issues-crm' ), $wic_db_dictionary->get_required_string( $this->entity, "group" ) );
 		}
 		if ( $required_errors > '' ) {
 			$this->outcome = false;
@@ -215,7 +216,8 @@ abstract class WIC_Entity_Parent {
 	**************************************************************************************/
 
 	protected function new_form_generic( $form, $guidance = '' ) {
-		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+		global $wic_db_dictionary;
+		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->initialize_data_object_array();
 		$new_search = new $form;
 		$new_search->layout_form( $this->data_object_array, $guidance, 'guidance' );
@@ -224,7 +226,8 @@ abstract class WIC_Entity_Parent {
 	// handle a save request coming from search -- 
 	// need to lose readonly fields from search form, so show save form, rather than proceeding directly
 	protected function save_from_search ( $entity_save_form, $message = '', $message_level = 'good_news', $sql = ''  ) {
-		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+		global $wic_db_dictionary;
+		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->populate_data_object_array_from_submitted_form();
 		$save_form = new $entity_save_form;
 		$save_form->layout_form ( $this->data_object_array, $message, $message_level, $sql );		
@@ -232,7 +235,8 @@ abstract class WIC_Entity_Parent {
 
 	//handle an update request coming from a form ( $save is true or false )
 	protected function form_save_update_generic ( $save, $fail_form, $success_form ) {
-		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+		global $wic_db_dictionary;
+		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->populate_data_object_array_from_submitted_form();
 		$this->update_ready( $save ); // false, not a save 
 		if ( false === $this->outcome ) {
@@ -291,7 +295,8 @@ abstract class WIC_Entity_Parent {
 		if ( 1 == $wic_query->found_count ) {
 			$message = __( '', 'wp-issues-crm' );
 			$message_level =  'guidance';
-			$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+			global $wic_db_dictionary;
+			$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 			$this->initialize_data_object_array();	
 			$this->populate_data_object_array_from_found_record ( $wic_query );			
 			$update_form = new $success_form;
@@ -305,7 +310,11 @@ abstract class WIC_Entity_Parent {
 	// handle a search request coming from a full form
 	// the first form passed will be 
 	protected function form_search_generic ( $not_found_form, $found_form ) { 
-		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+
+		global $wic_db_dictionary;
+
+		
+		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->populate_data_object_array_from_submitted_form();
 		$this->sanitize_values();
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
@@ -348,7 +357,10 @@ abstract class WIC_Entity_Parent {
 
 	public function redo_search_from_meta_query ( $meta_query_array, $save_form, $update_form ) {
 
-		$this->fields = WIC_DB_Dictionary::get_form_fields( $this->entity );
+		global $wic_db_dictionary;
+
+
+		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->initialize_data_object_array();
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$search_parameters = array(); // use default parameters, since original unknown

@@ -101,36 +101,15 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	
 	/***************************************************************************
 	*
-	* Constituent properties, setters and getters
+	* Functions related to issue properties
 	*
 	****************************************************************************/ 	
 
-	private static $category_search_mode_options = array (
-		array(
-			'value'	=> 'cat',
-			'label'	=>	'Post must have ANY of selected categories and child categories will be included.' ),
-		array(
-			'value'	=> 'category__in',
-			'label'	=>	'Post must have ANY of selected categories and child categories will NOT be included.' ),
-		array(
-			'value'	=> 'category__and',
-			'label'	=>	'Post must have ALL selected categories.' ),
-		array(
-			'value'	=> 'category__not_in',
-			'label'	=>	'Post must have NONE of selected categories.' ),
- 	);
-
+	// since tied so fundamentally to database structure, do not include this option_group in options_group table
 	private static $wic_live_issue_options = array (
 		array(
-			'value'	=> 'closed',
-			'label'	=>	'Closed' ),
-		array(
-			'value'	=> 'open',
-			'label'	=>	'Open' ),
-	);
-
-
-  	private static $follow_up_status_options = array ( 
+			'value'	=> '',
+			'label'	=>	'Open/Closed?' ),
 		array(
 			'value'	=> 'closed',
 			'label'	=>	'Closed' ),
@@ -138,34 +117,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 			'value'	=> 'open',
 			'label'	=>	'Open' ),
 	);
-	
-	private static $post_status_options = array (
- 		array(
-			'value'	=> 'publish',
-			'label'	=>	'Public' ),
-		array(
-			'value'	=> 'private',
-			'label'	=>	'Private' ),
-		array(
-			'value'	=> 'draft',
-			'label'	=>	'Draft' ),
-		array(
-			'value'	=> 'trash',
-			'label'	=>	'Trash' ),
-	);	
 
-	private static $retrieve_limit_options = array ( 
-		array(
-			'value'	=> '50',
-			'label'	=>	'Up to 50' ),
-		array(
-			'value'	=> '100',
-			'label'	=>	'Up to 100' ),
-		array(
-			'value'	=> '500',
-			'label'	=>	'Up to 500' ),
-		);
-	
 	/*
 	*	option array get functions
 	*/
@@ -179,6 +131,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	} 		
 
 
+	// this is recursive to traverse the category list -- initiatied by get_post_category_options
 	private static function wic_get_category_list ( $parent ) {
 
 		global $wic_category_select_array;
@@ -211,6 +164,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return ( $wic_category_select_array );
 	} 	
 
+	// this is not a formatter -- it is actually used to retrieve the values as well as formatting
 	public static function get_post_categories ( $post_id ) {
 		$categories = get_the_category ( $post_id );
 		$return_list = '';
@@ -220,9 +174,6 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return ( $return_list ) ;	
 	}	
 	
-	public static function get_category_search_mode_options() {
-		return self::$category_search_mode_options;
-	} 
 
 	public static function wic_live_issue_formatter( $value ) {
 		return WIC_Function_Utilities::value_label_lookup ( $value,  self::$wic_live_issue_options );	
@@ -234,38 +185,18 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	} 
 
 	
-	public static function get_issue_staff_options() {
-		return WIC_Function_Utilities::get_administrator_array();
-	}
-
-		
-  	public static function get_follow_up_status_options() {
-		return self::$follow_up_status_options; 
-	} 
-
-		
-  	public static function follow_up_status_formatter( $value ) {
-		return WIC_Function_Utilities::value_label_lookup ( $value,  self::$follow_up_status_options );	 
-	} 
-
-
-
 	public static function issue_staff_formatter ( $user_id ) {
 		
 		$display_name = '';		
 		if ( isset ( $user_id ) ) { 
 			if ( $user_id > 0 ) {
 				$user =  get_users( array( 'fields' => array( 'display_name' ), 'include' => array ( $user_id ) ) );
-				$display_name = $user[0]->display_name; // best to generate an error here if this is not set on non-zero user_id
+				$display_name = esc_attr( $user[0]->display_name ); // best to generate an error here if this is not set on non-zero user_id
 			}
 		}
 		return ( $display_name );
 	}
 
-	public static function get_post_author_label ( $user_id ) {
-		return ( self::issue_staff_formatter ( $user_id ) );
-	}
-	
 	public static function get_post_author_options () {
 	
 		global $wpdb;
@@ -278,7 +209,12 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		);
 		$authors = get_users( $query_args );
 		
-		$author_options = array();
+		$author_options = array(
+			array (
+				'value' => '',
+				'label' => '',			
+			)		
+		);
 		foreach ( $authors as $author ) {
 			$author_options[] = array (
 				'value' => $author->ID,
@@ -287,24 +223,18 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		}
 		return ( $author_options ) ;
 	}
+	
+	public static function follow_up_status_formatter( $value ) {
+		global $wic_db_dictionary;
+		return ( WIC_Function_Utilities::value_label_lookup ( $value,  $wic_db_dictionary->lookup_option_values( 'follow_up_status_options' ) ) ); 
+	} 
 		
 	
-	public static function get_post_status_options() {
-		return self::$post_status_options; 
-	} 
-	
 	public static function post_status_formatter( $value ) {
-		return WIC_Function_Utilities::value_label_lookup ( $value,  self::$post_status_options ); 
+		global $wic_db_dictionary;
+		return ( WIC_Function_Utilities::value_label_lookup ( $value,  $wic_db_dictionary->lookup_option_values( 'post_status_options' ) ) ); 
 	} 
-	
-	public static function get_post_status_label ( $value ) {
-		return self::post_status_formatter ( $value );	
-	}
-	
-	public static function get_retrieve_limit_options() {
-		return self::$retrieve_limit_options; 
-	}	
-	
+
 	public static function tags_input_sanitizor ( $value ) {
 		return WIC_Function_Utilities::sanitize_textcsv( $value );	
 	}	
