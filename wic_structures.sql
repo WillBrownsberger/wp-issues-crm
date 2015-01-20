@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Dec 30, 2014 at 08:00 AM
+-- Generation Time: Jan 20, 2015 at 04:18 PM
 -- Server version: 5.5.40-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_activity` (
   `activity_date` date NOT NULL,
   `activity_type` smallint(6) DEFAULT NULL,
   `issue` int(11) NOT NULL COMMENT 'post_id for associated issue',
-  `pro_con` tinyint(1) NOT NULL,
+  `pro_con` char(1) NOT NULL,
   `activity_note` text NOT NULL,
   `last_updated_time` date NOT NULL,
   `last_updated_by` int(11) NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_activity` (
   KEY `constituent_id` (`constituent_id`),
   KEY `email_address` (`activity_type`),
   KEY `email_type` (`activity_date`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=89 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=94 ;
 
 -- --------------------------------------------------------
 
@@ -53,20 +53,20 @@ CREATE TABLE IF NOT EXISTS `wp_wic_address` (
   `constituent_id` bigint(20) unsigned NOT NULL,
   `address_type` smallint(11) NOT NULL,
   `address_line` varchar(50) NOT NULL,
-  `street_name` varchar(25) NOT NULL,
+  `address_line_alpha` varchar(25) NOT NULL,
   `city` varchar(20) NOT NULL,
   `state` varchar(2) NOT NULL,
   `zip` varchar(10) NOT NULL,
   `last_updated_time` datetime NOT NULL,
   `last_updated_by` int(10) unsigned NOT NULL,
   PRIMARY KEY (`ID`),
-  KEY `street_name` (`street_name`),
+  KEY `street_name` (`address_line_alpha`),
   KEY `zip` (`zip`),
   KEY `address_line` (`address_line`),
   KEY `constituent_id` (`constituent_id`),
   KEY `city` (`city`),
   KEY `state` (`state`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171500 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171504 ;
 
 -- --------------------------------------------------------
 
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   `date_of_birth` date NOT NULL,
   `is_deceased` tinyint(1) NOT NULL,
   `mark_deleted` varchar(7) NOT NULL,
-  `case_assigned` int(10) unsigned NOT NULL,
+  `case_assigned` varchar(10) NOT NULL,
   `case_review_date` date NOT NULL,
   `case_status` varchar(1) NOT NULL,
   `occupation` varchar(20) NOT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   `voter_status` varchar(1) NOT NULL,
   `reg_date` date NOT NULL,
   `last_updated_time` datetime NOT NULL,
-  `last_updated_by` int(10) unsigned NOT NULL,
+  `last_updated_by` varchar(10) NOT NULL,
   PRIMARY KEY (`ID`),
   KEY `ssid` (`ssid`),
   KEY `last_name` (`last_name`),
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `organization` (`organization`),
   KEY `last_updated_time` (`last_updated_time`),
   KEY `last_updated_by` (`last_updated_by`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171513 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171515 ;
 
 -- --------------------------------------------------------
 
@@ -142,8 +142,6 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   `group_slug` varchar(30) NOT NULL,
   `field_slug` varchar(30) NOT NULL,
   `field_type` varchar(30) NOT NULL COMMENT 'name of entity supplying multiple rows for this field',
-  `is_date` tinyint(1) NOT NULL,
-  `is_int` tinyint(1) NOT NULL,
   `field_label` varchar(30) NOT NULL,
   `field_order` mediumint(9) NOT NULL,
   `listing_order` int(11) NOT NULL,
@@ -154,16 +152,12 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   `hidden` tinyint(1) NOT NULL,
   `field_default` varchar(30) NOT NULL,
   `like_search_enabled` tinyint(1) NOT NULL,
-  `secondary_alpha_search` varchar(30) NOT NULL,
   `transient` tinyint(1) NOT NULL,
   `wp_query_parameter` varchar(30) NOT NULL,
-  `input_class` varchar(30) NOT NULL DEFAULT 'wic-input',
-  `label_class` varchar(30) NOT NULL DEFAULT 'wic-label',
   `placeholder` varchar(50) NOT NULL,
-  `blank_prohibited` tinyint(1) NOT NULL DEFAULT '0',
-  `suppress_on_search` tinyint(1) NOT NULL,
+  `option_group` varchar(50) NOT NULL,
   `onchange` varchar(40) NOT NULL,
-  `zero_is_null` tinyint(1) NOT NULL COMMENT 'do not include 0 values in search clause array',
+  `list_formatter` varchar(50) NOT NULL,
   PRIMARY KEY (`field_id`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
@@ -186,7 +180,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_email` (
   KEY `constituent_id` (`constituent_id`),
   KEY `email_address` (`email_address`),
   KEY `email_type` (`email_type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10602 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10605 ;
 
 -- --------------------------------------------------------
 
@@ -209,6 +203,23 @@ CREATE TABLE IF NOT EXISTS `wp_wic_form_field_groups` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `wp_wic_option_values`
+--
+
+CREATE TABLE IF NOT EXISTS `wp_wic_option_values` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `option_group` varchar(50) NOT NULL,
+  `option_value` varchar(50) NOT NULL,
+  `option_label` varchar(200) NOT NULL,
+  `value_order` int(11) NOT NULL,
+  `enabled` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `enabled` (`enabled`,`option_group`,`value_order`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=67 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `wp_wic_phone`
 --
 
@@ -224,7 +235,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_phone` (
   KEY `constituent_id` (`constituent_id`),
   KEY `email_address` (`phone_number`),
   KEY `email_type` (`phone_type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=23 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=28 ;
 
 -- --------------------------------------------------------
 
@@ -241,7 +252,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_search_log` (
   `download_time` varchar(20) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user-time` (`user_id`,`time`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1734 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2318 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
