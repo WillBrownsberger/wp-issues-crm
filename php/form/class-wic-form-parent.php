@@ -28,8 +28,9 @@ abstract class WIC_Form_Parent  {
 		$groups = $wic_db_dictionary->get_form_field_groups( $this->get_the_entity() );
 		return ($groups );
 	}
-
-	// define the top row of buttons (return a row of wic_form_button s)
+	// add attributes to the form ( e.g. onsubmit parameter )
+	abstract protected function supplemental_attributes();
+	// define the top row of buttons (return a row of wic_form_buttons)
 	abstract protected function get_the_buttons();
 	// define the form message (return a message)
 	abstract protected function format_message ( &$data_array, $message );
@@ -68,9 +69,9 @@ abstract class WIC_Form_Parent  {
 		
 		global $wic_db_dictionary;		
 		
-		?><div id='wic-forms'>
-
-		<form id = "<?php echo $this->get_the_form_id(); ?>" class="wic-post-form" method="POST" autocomplete = "on">
+		?><div id='wic-forms'> 
+		
+		<form id = "<?php echo $this->get_the_form_id(); ?>" <?php $this->supplemental_attributes(); ?> class="wic-post-form" method="POST" autocomplete = "on">
 
 			<?php // child class must define message, possibly using the $message in calling parameters of layout form			
 			$message = $this->format_message ( $data_array, $message );	?>
@@ -81,18 +82,26 @@ abstract class WIC_Form_Parent  {
 		   $buttons = $this->get_the_buttons(); 
 		   		echo $buttons;	?>			   
 		
-			<?php	// set up buffers for field output[.=] in two areas of the screen
+			<?php	
+			
+			// set up buffers for field output[.=] in two areas of the screen
 			$main_groups = '';
 			$sidebar_groups = '';
+
+			// go to the data dictionary and get the list of groups for the entity			
 			$groups = $this->get_the_groups();
-		   foreach ( $groups as $group ) {
+
+		   foreach ( $groups as $group ) { 
+
 		   	// set up buffer for all group content
 				$group_output = '';
-				// child class must define a group screen ( return true or false )
-				if ( $this->group_screen( $group ) ) {				
-
+				
+				// child class MUST define a group screen that returns true to show any groups
+				if ( $this->group_screen( $group ) ) {	
+				
 					$group_output .= '<div class = "wic-form-field-group" id = "wic-field-group-' . esc_attr( $group->group_slug  ) . '">';				
 					
+						// show-hide button for group
 						$button_args = array (
 							'class'			=> 	'field-group-show-hide-button',		
 							'name_base'		=> 	'wic-inner-field-group-',
@@ -100,15 +109,15 @@ abstract class WIC_Form_Parent  {
 							'label' 			=> 	$group->group_label ,
 							'show_initial' => 	$group->initial_open,
 						);
-				
 						$group_output .= $this->output_show_hide_toggle_button( $button_args );			
 					
+						// wrapper for group to show-hide 
 						$show_class = $group->initial_open ? 'visible-template' : 'hidden-template';
 						$group_output .= '<div class="' . $show_class . '" id = "wic-inner-field-group-' . esc_attr( $group->group_slug ) . '">' .					
 						'<p class = "wic-form-field-group-legend">' . esc_html ( $group->group_legend )  . '</p>';
 						
 						// here is the main content -- either   . . .
-						if ( $this->group_special ( $group->group_slug ) ) { 				// if implemented returns true -- run special function 
+						if ( $this->group_special ( $group->group_slug ) ) { 				// if implemented returns true -- run special function to output a group
 							$special_function = 'group_special_' . $group->group_slug; 	// must define the special function too 
 							$group_output .= $this->$special_function( $data_array );
 						} else {	// standard main form logic 	
@@ -119,6 +128,8 @@ abstract class WIC_Form_Parent  {
 					$group_output .= '</div></div>';	
 					
 				} 
+				
+				// put group output into either side or main buffer
   				if ( $group->sidebar_location ) {
 					$sidebar_groups .= $group_output;  				
   				} else {
@@ -126,6 +137,7 @@ abstract class WIC_Form_Parent  {
   				}
 		   } // close foreach group
 		
+			// output form
 			echo 	'<div id="wic-form-body">' . '<div id="wic-form-main-groups">' . $main_groups . '</div>' .
 					'<div id="wic-form-sidebar-groups">' . $sidebar_groups . '</div>' . '</div>';		
 		
@@ -207,13 +219,12 @@ abstract class WIC_Form_Parent  {
 		$button_class				= 'wic-form-button';
 		$button_label				= '';
 		$title						= '';
-	
 
 		extract ( $control_array_plus_class, EXTR_OVERWRITE );
 
 		$button_value = $entity_requested . ',' . $action_requested  . ',' . $id_requested;
 	
-		$button =  '<button class = "' . $button_class . '" title = "' . $title . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . $button_label . '</button>';
+		$button =  '<button class = "' . $button_class . '" title = "' . $title . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . $button_label . '</button>';		
 		return ( $button );
 	}
 

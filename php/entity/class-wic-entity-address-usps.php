@@ -13,7 +13,8 @@ class WIC_Entity_Address_USPS {
 	public $ship_address1, $ship_address2, $ship_city, $ship_state, $ship_zip;
  
 	public function __construct() {
-		$this->account =  WIC_Entity_Address_USPS_Account::get_usps_account();
+		$options = get_option ('wp_issues_crm_plugin_options_array');
+		$this->account = $options['user_name_for_postal_address_interface'];
 	} 
  
 	function toXML() {

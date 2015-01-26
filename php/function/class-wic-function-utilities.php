@@ -115,4 +115,70 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 		return ( date ( 'Y-m-d' ) );
 	}	
 
+	/* 
+	*  The following two array functions just create option arrays used in the admin area. 
+	*/
+
+	
+	public static function order_array () {
+		$order_array = array(
+			array(
+				'value' => '',
+				'label' => 'Order?',
+			),
+		);
+		
+		/* offer multiples of 10 first */
+		for ( $i = 1; $i <= 20; $i++ ) {
+			$temp = array (
+				'value' => $i * 10,
+				'label' => $i * 10,
+			);
+			array_push ( $order_array, $temp );
+		}
+		/* offer multiples of 5 next */
+		for ( $i = 0; $i <= 20; $i++ ) {
+			$temp = array (
+				'value' => $i * 10 + 5,
+				'label' => $i * 10 + 5,
+			);
+			array_push ( $order_array, $temp );
+		}
+		/* offer individual lines */
+		for ( $i = 1; $i <= 200; $i++ ) {
+			$temp = array (
+				'value' => $i,
+				'label' => $i,
+			);
+			if ( $i % 5 > 0 ) {
+				array_push ( $order_array, $temp );
+			}
+		}
+
+		return ( $order_array );		
+		
+	}	
+	
+	public static function list_option_groups() {
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'wic_option_group' ;
+		$option_groups = $wpdb->get_results(
+			"
+			SELECT option_group_slug, option_group_desc
+			FROM $table
+			"
+		);
+		
+		$option_group_array = array( array ( 'value' => '' , 'label' => 'None' ) );
+		foreach ( $option_groups as $option_group ) {
+			$temp = array(
+				'value' => $option_group->option_group_slug,
+				'label' => $option_group->option_group_desc,
+			);
+			array_push ( $option_group_array, $temp );
+		}
+		
+		return ( $option_group_array );
+	}
 }

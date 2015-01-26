@@ -100,6 +100,7 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 	}
 	
 	// hooks not implemented
+	protected function supplemental_attributes() {}
 	protected function pre_button_messaging ( &$data_array ){}
 	protected function post_form_hook ( &$data_array ) {}
 	 	

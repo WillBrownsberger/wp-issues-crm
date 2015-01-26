@@ -32,20 +32,7 @@ Class WIC_Entity_Issue_Open_Metabox {
 		
 	   wp_nonce_field( site_url(__FILE__), 'wic_live_issue_metabox_noncename' );
 	
-      $wic_live_issue_options = array(
-			array(
-				'value' =>	'',
-				'label' =>  'Open/Closed?' 
-			),
-			array(
-				'value' =>	'open',
-				'label' =>  'Open for WP Issues CRM' 
-			),
-			array(
-				'value' =>	'closed',
-				'label' =>  'Closed for WP Issues CRM'
-			),
-		);	 
+      $wic_live_issue_options =  $wic_db_dictionary->lookup_option_values( 'wic_live_issue_options' );
 	   
 		$value = ( null !== get_post_meta($post->ID, 'wic_data_wic_live_issue', true) ) ? esc_attr( get_post_meta($post->ID, 'wic_data_wic_live_issue', true)) : '';	   
 	   

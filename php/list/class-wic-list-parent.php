@@ -2,22 +2,26 @@
 /*
 * File: class-wic-list-parent.php
 *
-* Description: lists entities (posts) passed as query 
+* Description: lists entities (posts or WIC entities) passed as query 
 * 
 * @package wp-issues-crm
 *
 */ 
 
 abstract class WIC_List_Parent {
+
+	// the top row of buttons over the list
+	protected abstract function get_the_buttons( &$wic_query );
+	// header message, e.g., for count	
+	protected abstract function format_message( &$wic_query );
+	// actual row content
+	protected abstract function format_rows ( &$wic_query, &$fields );
+	
 	/*
 	*
-	* field definitions for ready reference array 
+	* main function -- takes query result and sets up a list each row of which is a button
 	*
-	*/
-	
-	protected abstract function get_the_buttons( &$wic_query );	
-	protected abstract function format_message( &$wic_query );
-		
+	*/	
 	public function format_entity_list( &$wic_query, $show_top_buttons ) {
 
 		global $wic_db_dictionary;
@@ -57,5 +61,36 @@ abstract class WIC_List_Parent {
 
 		return $output;
    } // close function
+   
+   // defines standard lookup hierarchy for formats (mirrors look up for dropdowns)
+   protected function format_item ( $entity, $list_formatter, $value ) {
+   	
+		global $wic_db_dictionary;
+   	
+		// prepare to look for format in a sequence of possible sources
+   	$class_name = 'WIC_Entity_' . $entity;
+   	$function_class = 'WIC_Function_Utilities';
+
+		// first point to an option array with list_formatter, in which case, just lookup and return the formatted value
+		$option_array = $wic_db_dictionary->lookup_option_values( $list_formatter );
+
+		if ( $option_array > '' ) {
+			$display_value = WIC_Function_Utilities::value_label_lookup ( $value, $option_array );
+	  	// second look for a method in the entity class
+		} elseif ( method_exists ( $class_name, $list_formatter ) ) { 	
+			$display_value = esc_html( $class_name::$list_formatter ( $value ) );
+		// third look for method in in the utility class 
+		} elseif ( method_exists ( $function_class, $list_formatter ) ) {
+			$display_value = $function_class::$list_formatter( $value );			
+		// fourth look for a function in the global name space 
+		} elseif ( function_exists ( $list_formatter ) ) {
+			$display_value = $list_formatter( $value );
+		// otherwise just display the value after esc_html 
+		} else { 
+			$display_value =  $value ;		
+		}   
+		return ( $display_value );
+   }
+   
 }	
 

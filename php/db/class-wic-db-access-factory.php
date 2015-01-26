@@ -16,16 +16,19 @@
 class WIC_DB_Access_Factory {
 
 	static private $entity_model_array = array (
-		'constituent' => 'WIC_DB_Access_WIC',	
-		'activity' 	=> 'WIC_DB_Access_WIC',
-		'email'		=> 'WIC_DB_Access_WIC',
-		'phone'		=> 'WIC_DB_Access_WIC',
-		'address'	=> 'WIC_DB_Access_WIC',
-		'email'		=> 'WIC_DB_Access_WIC',
-		'issue' 		=> 'WIC_DB_Access_WP',
-		'comment' 	=> 'WIC_DB_Access_WIC',
-		'search_log'=> 'WIC_DB_Access_WIC',	
-		'trend' 		=> 'WIC_DB_Access_Trend', 		
+		'activity' 		=> 'WIC_DB_Access_WIC',
+		'address'		=> 'WIC_DB_Access_WIC',
+		'comment' 		=> 'WIC_DB_Access_WIC',
+		'constituent' 	=> 'WIC_DB_Access_WIC',	
+		'data_dictionary' => 'WIC_DB_Access_Dictionary',
+		'email'			=> 'WIC_DB_Access_WIC',
+		'email'			=> 'WIC_DB_Access_WIC',
+		'issue' 			=> 'WIC_DB_Access_WP',
+		'option_group'	=> 'WIC_DB_Access_WIC',
+		'option_value'	=> 'WIC_DB_Access_WIC',
+		'phone'			=> 'WIC_DB_Access_WIC',
+		'search_log'	=> 'WIC_DB_Access_WIC',	
+		'trend' 			=> 'WIC_DB_Access_Trend',
 	);
 
 	public static function make_a_db_access_object ( $entity ) {

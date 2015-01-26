@@ -22,7 +22,7 @@ class WIC_Control_Select extends WIC_Control_Parent {
 			$final_control_args['readonly_update'] = 1 ; // lets control know to only show the already set value if readonly
 																		// (readonly control will not show at all on save, so need not cover that case)
 		} 
-		$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );		
+		$final_control_args['option_array'] =  $this->create_options_array ( $final_control_args );
 		$control =  $this->create_control( $final_control_args ) ;
 		return ( $control );
 	}	
@@ -76,12 +76,11 @@ class WIC_Control_Select extends WIC_Control_Parent {
 				)
 			);
 		} 	
-	
 		return ( $option_array );	
 	}	
 	
 	public static function create_control ( $control_args ) { 
-		
+
 		extract ( $control_args, EXTR_SKIP ); 
 
 		$control = '';
@@ -94,8 +93,8 @@ class WIC_Control_Select extends WIC_Control_Parent {
 		$r = '';
 		foreach ( $option_array as $option ) {
 			$label = $option['label'];
+
 			if ( $value == $option['value'] ) { // Make selected first in list
-			
 				$p = '<option selected="selected" value="' . esc_attr( $option['value'] ) . '">' . esc_html ( $label ) . '</option>';
 			} else {
 				$r .= '<option value="' . esc_attr( $option['value'] ) . '">' . esc_html( $label ) . '</option>';

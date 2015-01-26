@@ -1,0 +1,359 @@
+/*
+*
+*	Styling for wp-issues-crm admin screens
+*
+*
+*/
+
+/* top-level form button styling ( look like horizontal menu tabs )  */
+button.wic-form-button {
+	background: #C6C2BA;
+	border: 0;
+	border-radius: 0;
+	color: white;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 1.2em;
+	margin: 0 10px 20px 0; 
+	padding: 0 10px;
+}
+
+
+.wic-form-button:hover {
+	background: #D2CEC6;
+	color: black;
+}
+
+
+/* message box and notices */
+#post-form-message-box {
+	margin:  10px 0;
+	padding: 0;
+}
+
+/* semantic colors for message */
+#post-form-message-box.wic-form-routine-guidance {
+	color: #333;
+}
+#post-form-message-box.wic-form-errors-found {
+	color: red;
+	font-weight: 700;
+}
+#post-form-message-box.wic-form-good-news {
+	color: green;
+}		
+
+
+
+
+/* body of form -- field group areas */
+#wic-form-body {
+	display:block;
+	width: 100%;
+}
+
+/* label is 20% with margin */
+.wic-multivalue-control-set {
+	width: 100%;
+}
+
+.wic-multivalue-field-subgroup {
+	width: 100%;
+} 
+
+#wic-form-sidebar-groups {
+	display: none;
+}
+
+
+/* field groups formatting */
+.wic-form-field-group {
+	margin: 0; 
+	max-width: 100%;
+	padding: 0;
+}
+
+.field-group-show-hide-button {
+	display: none;
+}
+
+p.wic-form-field-group-legend {
+	color: #333;
+	font-size: 0.8em;
+	margin: 0 0 10px 0;
+}
+
+
+
+/* wrapper around each label/control pair */
+.wic-control {
+	margin: 0 0 10px 0; 
+}
+
+.wic-multivalue-field-subgroup {
+	margin: 0 0 0 0;
+}
+
+label.wic-label {
+	color: #222;
+	display: inline-block;
+	min-width: 200px;
+	margin-right: 10px;;
+	padding: 0;
+}
+
+
+.wic-multi-select-label:hover,
+.wic-label-2:hover,
+.wic-label:hover {
+	color: #333;
+	cursor: pointer;
+}
+
+.row-add-button {
+	background: #a0faa0;
+	border: none;
+	border-radius: 50%;
+	color: white;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 1.0em;
+	font-weight: 900;
+	margin: 10px 0 0 0;
+	padding: 0 8px;
+
+}
+
+.row-add-button:hover {
+	background: green;
+	color: white;
+	font-size: 1.0em;
+} 
+
+
+.wic-multivalue-block {
+	margin-bottom: 10px;
+}
+
+/* delete button for multi-rows  ( really a label )  */
+.wic-input-deleted-label {
+	background: #fae0e0;;
+	border: none;
+	color: #333;
+	cursor: pointer;
+	font-size: 1em;
+	font-weight: 700;
+	margin: 0 10px 0 0; 
+	padding: 0 4px 0 7px;
+}
+
+.wic-input-deleted-label:hover {
+	background: red;
+	color: white;
+
+}
+/* note -- this is a check box, manipulated by its label, the deleted 'x' */
+input[type="checkbox"].wic-input-deleted {
+    display: none;
+}
+
+/* styling of field rows for fields that are added and removed */
+.hidden-template {
+	display: none;
+}
+
+.visible-template {
+	display: block;
+}
+
+#wic-control-option-value {
+	background: white;
+	padding: 20px;
+	margin-right: 20px; 
+}
+
+
+/* formatting for individual labels and inputs in the option value form */
+#option_value-control-set label.wic-label {
+	font-size: 0.8em;
+	min-width: 0;
+}http://localhost/wp-admin/options-general.php
+
+#option_value-control-set label.wic-label::after {
+	content: ": "
+}
+
+#option_value-control-set select.wic-input,
+#option_value-control-set input.wic-input {
+	margin: 5px 20px 5px 0;
+}
+
+#option_value-control-set select.wic-input.enabled {
+	margin-right: 0px;
+}
+
+input.wic-input.option-value {
+	width: 10%;
+	max-width: 40px;
+}
+
+input.wic-input.option-label {
+	width: 35%;
+}
+
+input.wic-input.value-order {
+	width: 60px;
+}
+#option_value-control-set label.wic-label.value-order,
+#option_value-control-set label.wic-label.enabled {
+	display: none;
+}
+
+#wic-inner-field-group-data_dictionary select.wic-input,
+#wic-inner-field-group-data_dictionary input.wic-input {
+	width: 300px;
+}
+
+/* dictionary fields */
+/* bottom of screen legends */
+.wic-form-legend,
+.wic-list-legend {
+	color: #999;
+	font-size: .8em;
+}
+.wic-form-legend {
+	margin: 10px 0 10px 14.2222222%;
+}
+
+
+/****************************************************************
+* option list styling 
+*
+******************************************************************/
+
+#wic-post-list,
+#wic-post-list button {
+}
+
+/* outer ul for whole list */
+#wic-post-list ul.wic-post-list  {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+
+#wic-list-button-row .wic-form-button {
+	width: auto;
+}
+
+/* alternating row colors can be applied to li's in outer list */
+.pl-odd {
+	background: #ececec;
+	border-bottom: none;
+}
+
+/* spec button to override responsive tabs styling */
+.pl-even.wic-post-list-button,
+.pl-odd.wic-post-list-button {
+	background: #ffffff;
+	border-bottom: 1px solid #ddd;
+
+}
+
+.pl-even.wic-post-list-button.option-group-disabled,
+.pl-odd.wic-post-list-button.option-group-disabled {
+	background: #ddd;
+	border-bottom: 1px solid #ddd;
+	color: #777;
+}
+
+.wic-post-list-button:hover {
+	background: #f1f1f1;
+}
+
+.wic-post-list-button.option-group-disabled:hover {
+	background: #eee;
+}
+
+
+
+/* header (horizontal) list styling */
+#wic-post-list ul.wic-post-list-headers {
+	font-size: 1.2em;
+	font-weight: 700;
+	list-style: none;
+	padding: 10px;
+	margin: 0;
+}
+
+li.wic-post-list-header,
+li.wic-post-list-field {
+	display: inline-block;
+	vertical-align: top;	
+}
+button.wic-post-list-button {
+	border: none;	
+	cursor: pointer;
+	margin: 0;
+	padding: 0;
+	text-align: left; 
+	width: 100%;
+}
+
+
+#wic-post-list ul.wic-post-list-line {
+ 	
+	display: inline-block;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 10px;
+	vertical-align: top;
+	list-style: none;
+	width: 100%;	
+}
+
+.pl-option_group-option_group_desc{ width:30%;}
+.pl-option_group-enabled{ width:10%;}
+.pl-option_group-option_value{ width:60%;}
+
+.pl-data_dictionary-group_slug { width:15%;}
+.pl-data_dictionary-field_label { width:15%;}
+.pl-data_dictionary-field_type { width:20%;}
+.pl-data_dictionary-option_group { width:20%;}
+.pl-data_dictionary-enabled { width:10%;}
+
+
+
+.wic-list-legend {
+	margin: 10px 14.22222%;
+}
+#wp-issues-crm-stats td,
+#wp-issues-crm-stats th {
+	padding: 2px 15px;
+	border: 1px solid #ccc;
+
+}
+
+#wp-issues-crm-stats {
+	border: 1px solid #ccc;
+}
+
+#wp-issues-crm-stats th {
+	text-align: right;
+}
+
+td.wic-statistic  {
+	width: 12%;
+	text-align: right;
+}
+
+#wp-issues-crm-stats th.wic-statistic-text {
+	text-align: left;
+}
+
+.wic-statistic-table-name {
+	font-weight: bold;
+}

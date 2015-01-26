@@ -47,6 +47,7 @@ class WIC_Form_Trend_Search extends WIC_Form_Parent  {
 	}
 	
 	// hooks not implemented
+	protected function supplemental_attributes() {}
 	protected function group_special( $group ) {}
 	protected function pre_button_messaging ( &$data_array ){}
    protected function post_form_hook ( &$data_array ) {} 

@@ -36,7 +36,6 @@ class WIC_Dashboard_Main {
 		if ( isset ( $_POST['wic_form_button'] ) ) {
 			// check nonces and die if not OK			
 			if ( isset($_POST['wp_issues_crm_post_form_nonce_field']) &&
-				wp_verify_nonce($_POST['wp_issues_crm_post_form_nonce_field'], 'wp_issues_crm_post' ) && 
 				check_admin_referer( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field')) 
 				{ } else { die ('cheating, huh?'); }
 				

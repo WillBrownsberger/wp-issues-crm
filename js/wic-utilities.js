@@ -4,9 +4,9 @@
 *
 */
 
-
+// automatically set case_status to Open when Assigned
 function changeCaseStatus() {
-	// set case_status to Open if Assigned	 
+	 
 	if( document.getElementById('case_assigned') != undefined && undefined == document.getElementById('wic-form-constituent-search') ) {
 		var assigned = document.getElementById('case_assigned');				
 		var assignedStaff = assigned.options[assigned.selectedIndex].value;
@@ -18,7 +18,19 @@ function changeCaseStatus() {
 	}
 }
 
-// function changes the activity issue link on change of the selected issue
+// set issue follow_up_status to Open if Assigned
+function changeFollowUpStatus() {
+	if( document.getElementById('issue_staff') != undefined && undefined == document.getElementById('wic-form-issue-search') ) {
+		var assigned = document.getElementById('issue_staff');				
+		var assignedStaff = assigned.options[assigned.selectedIndex].value;
+		if ( assignedStaff > '' ) {
+			var caseStatus = document.getElementById('follow_up_status');	
+				caseStatus.value = 'open';	
+		}
+	}
+}
+
+// changes the activity issue link on change of the selected issue
 function changeActivityIssueButtonDestination() {
 	// since can't point to button that should change, just update them all
 	var activities = document.getElementsByClassName( 'wic-multivalue-block activity' );
@@ -49,18 +61,47 @@ function changeActivityIssueButtonDestination() {
 	}
 }
 
-function changeFollowUpStatus() {
-	// set issue follow_up_status to Open if Assigned	 
-	if( document.getElementById('issue_staff') != undefined && undefined == document.getElementById('wic-form-issue-search') ) {
-		var assigned = document.getElementById('issue_staff');				
-		var assignedStaff = assigned.options[assigned.selectedIndex].value;
-		if ( assignedStaff > '' ) {
-			var caseStatus = document.getElementById('follow_up_status');	
-				caseStatus.value = 'open';	
+// in field customization, set field options according to type
+function  setFieldTypeDefaults() {
+	// change values of 	 
+	if( document.getElementById('field_type') != undefined ) {
+		
+		var fieldType = document.getElementById('field_type');
+		var optionGroup = document.getElementById('option_group');				
+		var likeSearch = document.getElementById('like_search_enabled');
+		var listFormatter = document.getElementById('list_formatter');	
+			
+		var selectedFieldType = fieldType.options[fieldType.selectedIndex].value;
+		if ( selectedFieldType == 'text' ) {
+			optionGroup.value = '';	
+			likeSearch.value = 1;	
+		} else if ( selectedFieldType == 'select' ) {
+			if ( '' == optionGroup.value ) {
+				alert ( 'Now set option group for your drowdown field.' );			
+			}			
+			likeSearch.value = 0;			
+		} else if ( selectedFieldType == 'date' ) {
+			optionGroup.value = '';	
+			likeSearch.value = 0;	
 		}
 	}
 }
 
+// in field customization, warn if need to set field type
+function  setFieldType() {
+	// alert to change text value 	 
+	if( document.getElementById('option_group') != undefined ) {
+		var optionGroup = document.getElementById('option_group');
+		var selectedOptionGroup = optionGroup.options[optionGroup.selectedIndex].value;
+		var fieldType = document.getElementById('field_type');				
+		var selectedFieldType = fieldType.options[fieldType.selectedIndex].value;
+		if ( selectedOptionGroup != '' && selectedFieldType != 'select' ) {
+			alert ( 'Set field type as dropdown to use option groups' );
+		}
+	}
+}
+
+// show/hide form sections
 function togglePostFormSection( section ) { 
 	var constituentFormSection = document.getElementById ( section );
 	var display = constituentFormSection.style.display;
@@ -77,6 +118,7 @@ function togglePostFormSection( section ) {
 	}
 }
 
+// screen delete rows in multivalue fields
 function hideSelf( rowname ) {
 	var row = document.getElementById ( rowname );
 	rowClass =row.className; 
@@ -88,7 +130,7 @@ function hideSelf( rowname ) {
 	}
 }
 
-
+// add new visible rows by copying hidden template
 function moreFields( base ) {
 
 	// counter always unique since gets incremented on add, but not decremented on delete
@@ -111,6 +153,7 @@ function moreFields( base ) {
 	insertHere.parentNode.insertBefore( newFields, insertHere );
 }
 
+// supports moreFields by walking node tree for whole multi-value group to copy in new name/ID values
 function replaceInDescendants ( template, oldValue, newValue, base  ) {
 	var newField = template.childNodes;
 	if ( newField.length > 0 ) {
@@ -129,11 +172,44 @@ function replaceInDescendants ( template, oldValue, newValue, base  ) {
 			} 
 			var theOnClick = newField[i].onclick;
 			if ( undefined != theOnClick)  {
-//				newClickVal = 'hideSelf(\'' + base + '-' + newValue + '\')' ;
 				newClickVal = 'hideSelf(\'' + base + '[' + newValue + ']' + '\')' ;
 				newField[i].setAttribute( "onClick", newClickVal );
 			} 
 			replaceInDescendants ( newField[i], oldValue, newValue, base )
 		}
 	}
+}
+
+// test for dup values among option values in option group edit
+function testForDupOptionValues () {
+
+	var optionValues = document.getElementsByClassName( 'wic-input option-value' );
+
+	valuesValues = [];
+	
+	for ( var i = 0; i < optionValues.length; i++ ) {
+		var dbVal = optionValues[i].value;
+		if ( null !== optionValues[i].offsetParent ) {
+			valuesValues.push( optionValues[i].value.trim() );	
+		}
+	} 
+	var sortedValues = valuesValues.sort();
+	
+	var results = [];
+
+	for (var j = 0;  j < sortedValues.length - 1; j++) {
+   	 if (sortedValues[j + 1] == sortedValues[j]) {
+   	 	var displayValue;
+   	 	if ( '' == sortedValues[j]) {
+   	 		displayValue = '<BLANK>';
+   	 	} else {
+				displayValue = '"' + sortedValues[j] + '"';   	 	
+   	 	}	
+      	alert ( 'The database value of each option must be unique.  The value ' + displayValue + ' appears more once.' );
+      	return false;
+    	}
+	}	
+	
+	return true;
+	
 }

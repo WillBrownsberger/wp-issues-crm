@@ -292,14 +292,14 @@ abstract class WIC_Entity_Parent {
 		$wic_query->search ( $this->assemble_meta_query_array( $search_clause_args ), $search_parameters ); 
 		// retrieve record if found, otherwise error
 
-		if ( 1 == $wic_query->found_count ) {
+		if ( 1 == $wic_query->found_count ) { 
 			$message = __( '', 'wp-issues-crm' );
 			$message_level =  'guidance';
 			global $wic_db_dictionary;
 			$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 			$this->initialize_data_object_array();	
 			$this->populate_data_object_array_from_found_record ( $wic_query );			
-			$update_form = new $success_form;
+			$update_form = new $success_form; 
 			$update_form->layout_form ( $this->data_object_array, $message, $message_level, $sql );	
 			$this->list_after_form ( $wic_query );
 		} else {

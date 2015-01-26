@@ -129,6 +129,7 @@ class WIC_Form_Issue_Update extends WIC_Form_Parent  {
 	}
 	
 	// hooks not implemented
+	protected function supplemental_attributes() {}
 	protected function group_special( $group ) {}
    protected function post_form_hook ( &$data_array ) {} 
 }

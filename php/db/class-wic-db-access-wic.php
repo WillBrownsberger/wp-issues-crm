@@ -13,6 +13,8 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$table  = $wpdb->prefix . 'wic_' . $this->entity;  
 		
 		$set = $this->parse_save_update_array( $save_update_array );
+		// hook for updating parallel table in class extension
+		$set = $this->external_update( $set );
   		$set_clause_with_placeholders = $set['set_clause_with_placeholders'];
 		$sql = $wpdb->prepare( "
 				INSERT INTO $table 	
@@ -29,11 +31,15 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 	
 		} else {		
 			$this->outcome = false;
-			$this->explanation = __( 'Unknown database error. Update may not have been successful', 'wp-issues-crm' );
+			$this->explanation = __( 'Unknown database error. Save may not have been successful', 'wp-issues-crm' );
 		}
 		$this->sql = $sql;
 		return;
 	}
+	
+	protected function external_update ( $set ) {
+		return ( $set );	
+	}	
 	
 	protected function db_update ( &$save_update_array ) {
 		global $wpdb;
@@ -233,26 +239,33 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$order_clause = ( '' == $sort_clause ) ? '' : " ORDER BY $sort_clause $sort_direction ";
 		$select_list = '';	
 
+		// assemble list query based on dictionary list specification
 		$fields =  $wic_db_dictionary->get_list_fields_for_entity( $this->entity );
-		foreach ( $fields as $field ) { 
-				if ( 'multivalue' != $field->field_type ) {
-					$select_list .= ( '' == $select_list ) ? $top_entity . '.' : ', ' . $top_entity . '.' ;
-					$select_list .= $field->field_slug . ' AS ' . $field->field_slug ;
-				} else {
-					$select_list .= '' == $select_list ? '' : ', ';
-					$sub_fields = $wic_db_dictionary->get_list_fields_for_entity( $field->field_slug );
-					$sub_field_list = ''; 
-					foreach ( $sub_fields as $sub_field ) {
-						if ( 'ID' != $sub_field->field_slug ) { 
-							$sub_field_list .= ( '' == $sub_field_list ) ? $field->field_slug . '.' : ', ' . $field->field_slug . '.' ;
-							$sub_field_list .= $sub_field->field_slug;
-						}
+		// retrieving those with non-zero listing order -- SQL error will occur if none have non-zero listing order
+		// either for main list or for fields of multivalue entities which are included in main list
+		foreach ( $fields as $field ) {
+			// standard single field addition to list
+			if ( 'multivalue' != $field->field_type ) {
+				$select_list .= ( '' == $select_list ) ? $top_entity . '.' : ', ' . $top_entity . '.' ;
+				$select_list .= $field->field_slug . ' AS ' . $field->field_slug ;
+			// else multivalue field calls for multiple instances, compressed into single value
+			} else {
+				// create comma separated list of list fields for entity 
+				$select_list .= '' == $select_list ? '' : ', ';
+				$sub_fields = $wic_db_dictionary->get_list_fields_for_entity( $field->field_slug );
+				$sub_field_list = ''; 
+				foreach ( $sub_fields as $sub_field ) {
+					if ( 'ID' != $sub_field->field_slug ) { 
+						$sub_field_list .= ( '' == $sub_field_list ) ? $field->field_slug . '.' : ', ' . $field->field_slug . '.' ;
+						$sub_field_list .= $sub_field->field_slug;
 					}
-					$select_list .= ' GROUP_CONCAT( DISTINCT ' . $sub_field_list . ' SEPARATOR \', \' ) AS ' . $field->field_slug;
-					$join .= ' LEFT JOIN ' .  $wpdb->prefix . 'wic_' . $field->field_slug . ' ' . $field->field_slug . ' ON ' . 
-						$this->entity . '.ID = ' . $field->field_slug . '.constituent_id ';
-				}		
-			}	
+				}
+				// concat multivalues for single row display
+				$select_list .= ' GROUP_CONCAT( DISTINCT ' . $sub_field_list . ' SEPARATOR \', \' ) AS ' . $field->field_slug;
+				$join .= ' LEFT JOIN ' .  $wpdb->prefix . 'wic_' . $field->field_slug . ' ' . $field->field_slug . ' ON ' . 
+					$this->entity . '.ID = ' . $field->field_slug . '.' . $this->entity . '_id ';
+			}		
+		}	
 
 		$sql = 	"SELECT $select_list
 					FROM 	$join

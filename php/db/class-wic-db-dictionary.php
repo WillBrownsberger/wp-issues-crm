@@ -24,6 +24,12 @@
 
 class WIC_DB_Dictionary {
 	
+	/*
+	*	dictionary is initialized on start up by plug in
+	*	construct initializes the rules and options caches
+	*	almost all rules lookups are to these caches
+	*
+	*/
 	private $field_rules_cache;
 	private $option_values_cache;	
 	
@@ -32,6 +38,7 @@ class WIC_DB_Dictionary {
 		$this->initialize_option_values_cache();
 	}	
 
+	// read field rules into class property that functions as cache
 	private function initialize_field_rules_cache () {
 		global $wpdb;
 
@@ -40,36 +47,39 @@ class WIC_DB_Dictionary {
 				"
 				SELECT * 
 				FROM $table
+				where enabled
 				"				
 			, OBJECT );
 	}	
 	
+	// read option values into class property that functions as cache
 	private function initialize_option_values_cache() {
 		global $wpdb;
 		
 		$this->option_values_cache = array();		
 		
-		$table = $wpdb->prefix . 'wic_option_values';
+		$table1 = $wpdb->prefix . 'wic_option_group';
+		$table2 = $wpdb->prefix . 'wic_option_value';
 		$option_groups = $wpdb->get_results( 
 			"
-			SELECT option_group, 
+			SELECT option_group_slug, 
 				group_concat( option_value ORDER BY value_order DESC SEPARATOR '<!!>' ) AS option_values,
 				group_concat( option_label ORDER BY value_order DESC SEPARATOR '<!!>' ) AS option_labels
-			FROM $table
-			WHERE enabled
-			GROUP BY option_group
-			ORDER BY option_group
+			FROM $table1 g inner join $table2 v on g.id = v.option_group_id
+			WHERE v.enabled and g.enabled
+			GROUP BY option_group_slug
+			ORDER BY option_group_slug
 			"				
 		, ARRAY_A );
 
 		foreach( $option_groups as $option_group ) {
 			$values = explode( '<!!>', $option_group['option_values'] );
 			$labels = explode( '<!!>', $option_group['option_labels'] );
-			$this->option_values_cache[$option_group['option_group']] = array();
+			$this->option_values_cache[$option_group['option_group_slug']] = array();
 			while ( count( $values ) > 0 ) {
 				$value = array_pop ( $values );
 				$label = array_pop ( $labels );
-				array_push ( $this->option_values_cache[$option_group['option_group']], 
+				array_push ( $this->option_values_cache[$option_group['option_group_slug']], 
 					array ( 'value' => $value,
 							  'label' => $label
 					)  
@@ -80,7 +90,7 @@ class WIC_DB_Dictionary {
 	
 	/***********************************************************************
 	*
-	* methods supporting option value groups 
+	* method supporting option value groups -- return an array of option values
 	*
 	************************************************************************/	
 	public function lookup_option_values ( $option_group ) {
@@ -121,15 +131,14 @@ class WIC_DB_Dictionary {
 	public  function get_field_rules ( $entity, $field_slug ) {
 		// this is only called in the control object -- only the control object knows field details
 
-		global $wpdb;
-
 		foreach ( $this->field_rules_cache as $field_rule ) {
 			if ( $entity == $field_rule->entity_slug && $field_slug == $field_rule->field_slug ) {
 				return ( $field_rule );			
 			}		
 		}
 
-		die ( sprintf( __('Field rule table inconsistency -- entity (%1$s), field_slug (%2$s) . $wic_db_dictionary->get_field_rules reporting.', 'wp-issues-crm' ) , $entity, $field_slug ) );		
+		die ( '<h3>' . sprintf( __( 'WP_Issues_CRM, Fatal Error: Field rule table inconsistency -- entity (%1$s), field_slug (%2$s) . 
+				$wic_db_dictionary->get_field_rules reporting.', 'wp-issues-crm' ) , $entity, $field_slug ) ) . '</h3>';		
 		
 	}
 
@@ -139,8 +148,6 @@ class WIC_DB_Dictionary {
 	*
 	**************************************************************************/
 	public  function get_field_list_with_wp_query_parameters( $entity ) {
-		
-		global $wpdb;
 
 		$entity_fields = array();
 		foreach ( $this->field_rules_cache as $field_rule ) {
@@ -160,8 +167,6 @@ class WIC_DB_Dictionary {
 
 	// return string of fields for inclusion in sort clause for lists
 	public  function get_sort_order_for_entity ( $entity ) {
-	
-		global $wpdb;
 
 		$sort_string = array();
 		foreach ( $this->field_rules_cache as $field_rule ) {
@@ -255,20 +260,18 @@ class WIC_DB_Dictionary {
 
 	// this just retrieves the list of fields in a form group 
 	public  function get_fields_for_group ( $entity, $group ) {
-		global $wpdb;
-		$table = $wpdb->prefix . 'wic_data_dictionary';
-		$fields = $wpdb->get_col ( 
-			$wpdb->prepare (
-				"
-				SELECT field_slug
-				FROM $table 
-				WHERE entity_slug = %s and group_slug = %s
-				ORDER BY field_order
-				"				
-				, array ( $entity, $group )
-				)
-			);
 
+		$fields = array();
+		
+		foreach ( $this->field_rules_cache as $field_rule ) {
+			
+			if ( $entity == $field_rule->entity_slug && $group == $field_rule->group_slug ) {
+				$fields[$field_rule->field_order] = $field_rule->field_slug;			
+			}
+		}
+
+		ksort( $fields, SORT_NUMERIC );
+		
 		return ( $fields );
 	}
 
@@ -295,7 +298,7 @@ class WIC_DB_Dictionary {
 					max( if ( required = 'group', 1, 0 ) ) as required_group , 
 					max( if ( required = 'individual', 1, 0 ) ) as required_individual
 				FROM $table1 t1 inner join $table2 t2 on t1.entity_slug = t2.entity_slug and t1.group_slug = t2.group_slug
-				WHERE t1.entity_slug = %s 
+				WHERE t1.entity_slug = %s and t1.enabled
 				ORDER BY field_order
 				"				
 				, array ( $entity )
@@ -313,7 +316,7 @@ class WIC_DB_Dictionary {
 					"
 					SELECT group_concat( field_label SEPARATOR ', ' ) AS dup_check_string
 					FROM $table 
-					WHERE entity_slug = %s and dedup = 1 
+					WHERE entity_slug = %s and dedup = 1 and enabled
 					"				
 					, array ( $entity )
 					)

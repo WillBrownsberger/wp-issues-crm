@@ -53,30 +53,51 @@ if ( is_admin() ) {
 	$wic_issue_open_metabox = new WIC_Entity_Issue_Open_Metabox;
 }
 
-// load css for plugin 
-function wp_issue_crm_setup_styles() {
-
-	wp_register_style(
-		'wp-issues-crm-styles',
-		plugins_url( 'css' . DIRECTORY_SEPARATOR . 'wp-issues-crm.css' , __FILE__ )
-		);
-	wp_enqueue_style('wp-issues-crm-styles');
-
-}
-add_action( 'wp_enqueue_scripts', 'wp_issue_crm_setup_styles');
-
-// load javascript utilities for plugin 
-function wic_utilities_script_setup() {
-	if ( ! is_admin() ) {
+// load css and javascript utilities for front end plugin 
+function wp_issues_crm_front_end_setup() {
+	
+	if ( ! is_admin() ) { // test should and may be unnecessary
+		
 		wp_register_script(
 			'wic-utilities',
 			plugins_url( 'js' . DIRECTORY_SEPARATOR . 'wic-utilities.js' , __FILE__ ) 
 		);
-		
-	wp_enqueue_script('wic-utilities');
+		wp_enqueue_script('wic-utilities');
+				
+		wp_register_style(
+			'wp-issues-crm-styles',
+			plugins_url( 'css' . DIRECTORY_SEPARATOR . 'wp-issues-crm.css' , __FILE__ )
+			);
+		wp_enqueue_style('wp-issues-crm-styles');
+				
 	}
+	
 }
-add_action('wp_enqueue_scripts', 'wic_utilities_script_setup');
+add_action('wp_enqueue_scripts', 'wp_issues_crm_front_end_setup');
+
+
+// load admin css (and same javascript as front end)
+function wp_issues_crm_admin_setup ( $hook ) { 
+	// load only for this plugin's settings pages
+	if ( is_admin() && -1 < strpos( $hook, 'wp-issues-crm' ) ) {
+
+		wp_register_script(
+			'wic-utilities',
+			plugins_url( 'js' . DIRECTORY_SEPARATOR . 'wic-utilities.js' , __FILE__ ) 
+		);
+		wp_enqueue_script('wic-utilities');
+						
+		wp_register_style(
+			'wp-issues-crm-admin-styles',
+			plugins_url( 'css' . DIRECTORY_SEPARATOR . 'wp-issues-crm-admin.css' , __FILE__ )
+			);
+		wp_enqueue_style('wp-issues-crm-admin-styles');
+		
+	}
+	
+}
+add_action( 'admin_enqueue_scripts', 'wp_issues_crm_admin_setup');
+
 
 // add action to intercept press of download button before any headers sent 
 function do_download () {
@@ -114,7 +135,9 @@ add_action( 'send_headers', 'wic_change_cache_header' );
 
 // set up data dictionary and invoke principal class that displays and handles main buttons 
 $wic_db_dictionary = new WIC_DB_Dictionary; 
+$wp_issues_crm_admin = new WIC_Admin_Main; // register admin settings
 $wp_issues_crm = new WIC_Dashboard_Main;
+
 
 // function for catching bad class definitions; 
 // here only to support work of people adding new entity classes
@@ -185,3 +208,22 @@ function keep_private_posts_off_front_end_even_for_administrators( $query ) {
 }
 
 add_action( 'pre_get_posts', 'keep_private_posts_off_front_end_even_for_administrators' );
+
+/* mark posts private by default -- problem -- does them all.
+ add_filter('wp_insert_post_data', 'mark_post_private');
+http://wordpress.stackexchange.com/questions/15046/how-can-i-make-it-so-the-add-new-post-page-has-visibility-set-to-private-by-defa
+http://en.support.wordpress.com/settings/privacy-settings/
+http://wordpress.stackexchange.com/questions/20729/easiest-way-to-make-post-private-by-default
+http://premium.wpmudev.org/blog/daily-tip-set-wordpress-posts-to-private-by-default/
+https://wordpress.org/support/topic/how-to-set-new-post-visibility-to-private-by-default
+https://www.google.com/search?q=wordpress+set+post+to+private+by+default&ie=UTF-8&sa=Search&channel=fe&client=browser-ubuntu&hl=en&gws_rd=ssl 
+function mark_post_private($data)
+{
+    if($data['post_type'] == 'post')
+    {
+        $data['post_status'] = 'private';
+    }
+
+    return $data;
+}
+*/

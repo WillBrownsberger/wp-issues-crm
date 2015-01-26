@@ -53,6 +53,7 @@ class WIC_Form_Multivalue_Search extends WIC_Form_Parent  {
 	}
 	
 	// hooks not implemented
+	protected function supplemental_attributes() {}
 	protected function get_the_buttons(){}
 	protected function format_message ( &$data_array, $message ) {}	
 	protected function group_special( $group ) {}

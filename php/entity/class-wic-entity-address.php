@@ -44,7 +44,10 @@ class WIC_Entity_Address extends WIC_Entity_Multivalue {
 	}
 
 	public function validate_values () { 
-		$this->get_zip_from_usps();
+		$options = get_option ('wp_issues_crm_plugin_options_array');
+		if ( isset ( $options['use_postal_address_interface'] ) ) {
+			$this->get_zip_from_usps();
+		}
 		return ( parent::validate_values() );
 	} 
 

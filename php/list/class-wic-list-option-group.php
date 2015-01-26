@@ -1,6 +1,6 @@
 <?php
 /*
-* File: class-wic-list-parent.php
+* File: class-wic-list-option-group.php
 *
 * Description: lists entities (posts) passed as query 
 * 
@@ -8,11 +8,13 @@
 *
 */ 
 
-class WIC_List_Search_Log extends WIC_List_Parent {
+class WIC_List_Option_Group extends WIC_List_Constituent {
 	/*
 	*
 	*
+	*
 	*/
+
 	protected function format_rows( &$wic_query, &$fields ) {
 		$output = '';
 		
@@ -27,11 +29,7 @@ class WIC_List_Search_Log extends WIC_List_Parent {
    	
    	// create a new WIC access object and search for the id's
   		$wic_query2 = WIC_DB_Access_Factory::make_a_db_access_object( $wic_query->entity );
-		$wic_query2->list_by_id ( $id_list, 'DESC' ); 
-
-		// check current user so can highlight own searches
-		$current_user_id = get_current_user_id();
-		
+		$wic_query2->list_by_id ( $id_list ); 
 		// loop through the rows and output a list item for each
 		foreach ( $wic_query2->result as $row_array ) {
 
@@ -41,20 +39,18 @@ class WIC_List_Search_Log extends WIC_List_Parent {
 			// get row class alternating color marker
 			$row_class = ( 0 == $line_count % 2 ) ? "pl-even" : "pl-odd";
 
-			// add special row class to highlight own searches and downloads (bold)
-			if ( $current_user_id == $row_array->user_id ) {
-				$row_class .= " case-assigned case-open ";
-			} 
-			if ( '' < $row_array->download_time ) {
-				$row_class .= " long-overdue ";				
-			}
+			// add special row class to reflect case assigned status
+			if ( ! $row_array->enabled ) {
+				$row_class .= " option-group-disabled ";
+			}			
 			
+			// $control_array['id_requested'] =  $wic_query->post->ID;
 			$row .= '<ul class = "wic-post-list-line">';			
 				foreach ( $fields as $field ) {
 					// showing fields other than ID with positive listing order ( in left to right listing order )
-					if ( 'id' != $field->field_slug && $field->listing_order > 0 ) {
+					if ( 'ID' != $field->field_slug && $field->listing_order > 0 ) {
 						$row .= '<li class = "wic-post-list-field pl-' . $wic_query->entity . '-' . $field->field_slug . ' "> ';
-							$row .=  $this->format_item ( $wic_query->entity, $field->list_formatter, $row_array->{$field->field_slug} ) ;
+							$row .=  $this->format_item ( $wic_query->entity, $field->list_formatter, $row_array->{$field->field_slug} );
 						$row .= '</li>';			
 					}	
 				}
@@ -64,39 +60,36 @@ class WIC_List_Search_Log extends WIC_List_Parent {
 					'entity_requested'	=> $wic_query->entity,
 					'action_requested'	=> 'id_search',
 					'button_class' 		=> 'wic-post-list-button ' . $row_class,
-					'id_requested'			=> $row_array->id,
+					'id_requested'			=> $row_array->ID,
 					'button_label' 		=> $row,				
 			);			
 			$output .= '<li>' . WIC_Form_Parent::create_wic_form_button( $list_button_args ) . '</li>';	
 			}
+		
 		return ( $output );		
 	}
-	
+
+
 	protected function format_message( &$wic_query ) {
-	
-		$header_message = sprintf ( __( 'Showing your most recent %1$s searches (downloads highlighted).  
-				You can rerun prior searches.', 'wp-issues-crm'), $wic_query->found_count );		
+		$header_message = sprintf ( __( 'Found %1$s Customizable Option Groups.', 'wp-issues-crm'), $wic_query->found_count );		
 		return $header_message;
 	}
 
-	protected function get_the_buttons( &$wic_query ) {
-		$button = '<div id = "wic-list-button-row">' .
-			'<button id = "wic-post-export-button" 
-				name = "wic-post-export-button" 
-				class = "wic-form-button" 
-				type="submit" 
-				value = "' . $wic_query->search_id  .'" >' . 
-					__( 'Export All', 'wp-issues-crm' ) . 
-			'</button>' . 
-			'<button 	id = "wic-list-back-button" 
-				class= "wic-form-button" 
-				type="button" 
-				onclick = "history.go(-1);return true;">' .
-					 __( 'Go Back', 'wp-issues-crm' ) . 
-				'</button>' .
-			'</div>';
-		return ( $button );
+	protected function get_the_buttons ( &$wic_query ) {
+
+		$buttons =  '<div id = "wic-list-button-row">'; 
+		
+			$button_args_main = array(
+				'entity_requested'			=> 'option_group', // entity_requested is not processed, since whole page is for option_group
+				'action_requested'			=> 'new_option_group',
+				'button_label'					=> __('Add New Option Group', 'wp-issues-crm')
+			);	
+			$buttons .= WIC_Form_Parent::create_wic_form_button ( $button_args_main );
+
+		$buttons .= '</div>';
+
+		return $buttons;
+		
 	}
-	
  }	
 

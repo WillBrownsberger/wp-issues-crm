@@ -105,23 +105,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	*
 	****************************************************************************/ 	
 
-	// since tied so fundamentally to database structure, do not include this option_group in options_group table
-	private static $wic_live_issue_options = array (
-		array(
-			'value'	=> '',
-			'label'	=>	'Open/Closed?' ),
-		array(
-			'value'	=> 'closed',
-			'label'	=>	'Closed' ),
-		array(
-			'value'	=> 'open',
-			'label'	=>	'Open' ),
-	);
-
-	/*
-	*	option array get functions
-	*/
-
+	// this is special purpose option array generator -- uses recursive function below
 	public static function get_post_category_options() {
 		global $wic_category_select_array;
 		global $wic_category_array_depth;
@@ -164,7 +148,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return ( $wic_category_select_array );
 	} 	
 
-	// this is not a formatter -- it is actually used to retrieve the values as well as formatting
+	// for issue list: retrieve the values as well as formatting
 	public static function get_post_categories ( $post_id ) {
 		$categories = get_the_category ( $post_id );
 		$return_list = '';
@@ -174,17 +158,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return ( $return_list ) ;	
 	}	
 	
-
-	public static function wic_live_issue_formatter( $value ) {
-		return WIC_Function_Utilities::value_label_lookup ( $value,  self::$wic_live_issue_options );	
-	} 
-
-
-	public static function get_wic_live_issue_options() {
-		return self::$wic_live_issue_options; 
-	} 
-
-	
+	// for issue list: look up assigned user's display name 
 	public static function issue_staff_formatter ( $user_id ) {
 		
 		$display_name = '';		
@@ -197,6 +171,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return ( $display_name );
 	}
 
+	// for author search, author drop down 
 	public static function get_post_author_options () {
 	
 		global $wpdb;
@@ -224,17 +199,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return ( $author_options ) ;
 	}
 	
-	public static function follow_up_status_formatter( $value ) {
-		global $wic_db_dictionary;
-		return ( WIC_Function_Utilities::value_label_lookup ( $value,  $wic_db_dictionary->lookup_option_values( 'follow_up_status_options' ) ) ); 
-	} 
-		
-	
-	public static function post_status_formatter( $value ) {
-		global $wic_db_dictionary;
-		return ( WIC_Function_Utilities::value_label_lookup ( $value,  $wic_db_dictionary->lookup_option_values( 'post_status_options' ) ) ); 
-	} 
-
+	// for tag input -- sanitize to csv
 	public static function tags_input_sanitizor ( $value ) {
 		return WIC_Function_Utilities::sanitize_textcsv( $value );	
 	}	

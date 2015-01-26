@@ -66,19 +66,8 @@ class WIC_List_Constituent extends WIC_List_Parent {
 				foreach ( $fields as $field ) {
 					// showing fields other than ID with positive listing order ( in left to right listing order )
 					if ( 'ID' != $field->field_slug && $field->listing_order > 0 ) {
-						// 						
-						$class_name = 'WIC_Entity_' . $wic_query->entity;
-						$formatter = $field->list_formatter;
-						if ( method_exists ( $class_name, $formatter ) ) { 
-							// note:  formatter MUST include esc_html on value unless known sanitized field like phone
-							$display_value = $class_name::$formatter (  $row_array->{$field->field_slug} );
-						} elseif ( function_exists ( $formatter ) ) {
-							$display_value = $formatter (  $row_array->{$field->field_slug} );
-						} else {
-							$display_value =  esc_html( $row_array->{$field->field_slug} );		
-						}
 						$row .= '<li class = "wic-post-list-field pl-' . $wic_query->entity . '-' . $field->field_slug . ' "> ';
-							$row .=  $display_value ;
+							$row .=  $this->format_item ( $wic_query->entity, $field->list_formatter, $row_array->{$field->field_slug} ) ;
 						$row .= '</li>';			
 					}	
 				}
