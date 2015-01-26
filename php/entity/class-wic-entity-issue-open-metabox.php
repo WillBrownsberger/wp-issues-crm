@@ -28,7 +28,8 @@ Class WIC_Entity_Issue_Open_Metabox {
 	
 	function wic_live_issue_meta_box( $post, $args ) {
 		
-		global $wic_form_utilities;		
+		global $wic_form_utilities;
+		global $wic_db_dictionary;		
 		
 	   wp_nonce_field( site_url(__FILE__), 'wic_live_issue_metabox_noncename' );
 	

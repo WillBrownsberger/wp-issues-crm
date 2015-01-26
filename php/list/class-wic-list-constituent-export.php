@@ -30,7 +30,6 @@ class WIC_List_Constituent_Export {
 		$sql = 	"SELECT first_name, last_name,  
 						GROUP_CONCAT( DISTINCT email_address SEPARATOR ';' ) as emails, 
 						max( if ( address_type = 0, city, ' ' ) ) as city, 
-						occupation,
 						GROUP_CONCAT( DISTINCT phone_number SEPARATOR ';' ) as phones,
 						max( if ( address_type = 0, address_line, ' '	) ) as address_line_1,
 						max( if ( address_type = 0, concat ( city, ', ', state, ' ',  zip ), ' ' ) ) as address_line_2,
@@ -54,13 +53,12 @@ class WIC_List_Constituent_Export {
 		
 		if ( ! current_user_can ( 'activate_plugins' ) ) { 
 			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
-			die ('cheating on download, huh?');
+			die ( __( 'Download permissions error.', 'WP_Issues_CRM' ) ) ;
 		} 		
 		
 		if ( isset($_POST['wp_issues_crm_post_form_nonce_field']) &&
-			wp_verify_nonce($_POST['wp_issues_crm_post_form_nonce_field'], 'wp_issues_crm_post') && 
 			check_admin_referer( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field')) 
-		{ } else { die ('cheating on download, huh?'); }
+		{ } else die ( __( 'Download cross permissions error.', 'WP_Issues_CRM' ) );
 
 		$search = WIC_DB_Access::get_search_from_search_log( $id );	
 		$current_user = wp_get_current_user();		
@@ -76,7 +74,7 @@ class WIC_List_Constituent_Export {
 		);
 
 		$wic_query->search ( $search['meta_query_array'], $search_parameters );
-	
+
 		if ( 'constituent' == $search['entity'] ) {
 			$results = self::assemble_list_for_export( $wic_query ); 
 		} elseif ( 'issue' ==  $search['entity'] ) {
@@ -90,6 +88,7 @@ class WIC_List_Constituent_Export {
 				);
 			$comment_query = new WIC_Entity_Comment ( 'get_constituents_by_issue_id', $args );
 			$results = self::assemble_list_for_export( $comment_query ); 
+
 		} 
 
 		$fileName = 'wic-export-' . $current_user->user_firstname . '-' .  current_time( 'Y-m-d-H-i-s' )  .  '.csv' ; 
