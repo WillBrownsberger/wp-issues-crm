@@ -7,6 +7,8 @@
 */
 
 class WIC_DB_Access_Dictionary Extends WIC_DB_Access_WIC {
+	
+	public $field_slug;
 
 	// function adds a field to constituent table and then feeds field_name to data dictionary save array
 	protected function external_update ( $set ) {
@@ -33,6 +35,8 @@ class WIC_DB_Access_Dictionary Extends WIC_DB_Access_WIC {
 			$new_field_name = 'custom_field_001';		 
 		 }
 
+		// set property to be picked up in wic-entity-data-dictionary->special_entity_value_hook
+		$this->field_slug = $new_field_name;
 		// update database
 		$wpdb->query ( 
 			"

@@ -369,8 +369,8 @@ abstract class WIC_Entity_Parent {
 	}
 
 	protected function special_entity_value_hook ( &$wic_access_object ) {
-		// available to bring back values from save/update for entity if necessary
-		// not required.
+		// available to bring back values from save/update for entity where a value is created by the save process
+		// must have correlated language in the save process -- see wic-entity-issue and wic-entity-data-dictionary
 	}
 	
 	protected function list_after_form ( &$wic_query ) {

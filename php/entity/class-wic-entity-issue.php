@@ -69,6 +69,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		$control = $this->data_object_array['post_date'];
 		$post_date = $control->get_value();
 		if ( '' == $post_date ) { 
+			// these values specially prepared for this hook by wic-db-access-wic->process_save_update_array
 			$this->data_object_array['post_author']->set_value( $wic_access_object->post_author );
 			$this->data_object_array['post_date']->set_value( $wic_access_object->post_date );
 			$this->data_object_array['post_status']->set_value( $wic_access_object->post_status );

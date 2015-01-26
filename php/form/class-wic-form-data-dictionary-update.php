@@ -24,6 +24,13 @@ class WIC_Form_Data_Dictionary_Update extends WIC_Form_Parent  {
 		);	
 		$buttons .= $this->create_wic_form_button ( $button_args_main );
 		
+		$button_args_main = array(
+			'entity_requested'			=> 'data_dictionary',
+			'action_requested'			=> 'new_data_dictionary',
+			'button_label'					=> __('New Field', 'wp-issues-crm'),
+		);	
+		$buttons .= $this->create_wic_form_button ( $button_args_main );
+		
 		$buttons .= '<a href="/wp-admin/admin.php?page=wp-issues-crm-fields">' . __( 'Back to Fields List', 'wp-issues-crm' ) . '</a>';
 
 		return $buttons;

@@ -247,6 +247,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 			// set values from save that are not in form -- picked up in entity class
 			$this->insert_id = $check_id;
 			$current_user = wp_get_current_user();
+			// values below set for use by wic-entity-issue->special_entity_value_hook
 			$this->post_author = $current_user->ID;
 			$this->post_date = current_time ('Y-m-d H:i:s' ); // date('Y-m-d H:i:s') ;
 			$this->post_status = 'private';
