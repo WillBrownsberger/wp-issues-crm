@@ -84,18 +84,18 @@ abstract class WIC_Control_Parent {
 	***********************************************************************************/
 	protected function get_default_value() {
 		$default = $this->value;
+		$field_default = $this->field->field_default; // move string to single variable to allow execution as function
 		// if there is a non-empty field_default value for the field in the data dictionary
-		if ( $this->field->field_default > '' ) {
+		if ( $field_default > '' ) {
 			// first look for a wp-issues-crm function
-			if ( method_exists ( 'WIC_Function_Utilities', $this->field->field_default ) ) { 
-				$default = WIC_Function_Utilities::{$this->field->field_default} ();			
+			if ( method_exists ( 'WIC_Function_Utilities', $field_default ) ) { 
+				$default = WIC_Function_Utilities::$field_default ();			
 			// second look for a function in global name space  ( could be in theme or child theme's function.php )
-			} elseif ( function_exists ( $this->field->field_default ) ) {
-				$temp = $this->field->field_default;
-				$default = $temp(); // $temp because can't seem to execute {$this->field->field_default} as a function, although it works in class::{method} string above
+			} elseif ( function_exists ( $field_default ) ) {
+				$default = $field_default(); 
 			// if not a method or function, take it to be a string
 			} else {
-				$default = $this->field->field_default;
+				$default = $field_default;
 			}
 		// if no field_default value, will be returning just the initialized value of the control 
 		}

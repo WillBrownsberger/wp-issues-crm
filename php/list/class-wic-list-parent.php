@@ -76,9 +76,9 @@ abstract class WIC_List_Parent {
 
 		if ( $option_array > '' ) {
 			$display_value = WIC_Function_Utilities::value_label_lookup ( $value, $option_array );
-	  	// second look for a method in the entity class
+	  	// second look for a method in the entity class (method must do own escaping of html b/c might add legit html)
 		} elseif ( method_exists ( $class_name, $list_formatter ) ) { 	
-			$display_value = esc_html( $class_name::$list_formatter ( $value ) );
+			$display_value = $class_name::$list_formatter ( $value ) ;
 		// third look for method in in the utility class 
 		} elseif ( method_exists ( $function_class, $list_formatter ) ) {
 			$display_value = $function_class::$list_formatter( $value );			

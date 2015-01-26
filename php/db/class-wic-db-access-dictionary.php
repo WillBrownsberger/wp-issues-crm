@@ -50,8 +50,7 @@ class WIC_DB_Access_Dictionary Extends WIC_DB_Access_WIC {
 			// add to set value array		
 			array_push ( $set['set_value_array'], $new_field_name );	
 			array_push ( $set['set_value_array'], 'constituent' );
-			array_push ( $set['set_value_array'], 'customizable' );			
-			var_dump ($set);
+			array_push ( $set['set_value_array'], 1 );			
 			return ( $set );
 		}	
 	}	

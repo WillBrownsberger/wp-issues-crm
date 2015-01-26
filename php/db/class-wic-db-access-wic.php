@@ -275,9 +275,16 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 					";
 
 		$this->sql = $sql; 
-		$this->result = $wpdb->get_results ( $sql );
-	 	$this->showing_count = count ( $this->result );
-	 	$this->found_count = $this->showing_count; 
+		if ( '()' != $id_string ) {
+			$this->result = $wpdb->get_results ( $sql );
+	 		$this->showing_count = count ( $this->result );
+	 		$this->found_count = $this->showing_count;
+	 	} else {
+	 		$this->sql = 'Empty ID string -- not valid'; 
+			$this->result = array();
+			$this->showing_count = 0;
+			$this->found_count = 0;	 	
+	 	} 
 		$this->outcome = true;  // wpdb get_results does not return errors for searches, so assume zero return is just a none found condition (not an error)
 										// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results 
 		$this->explanation = ''; 

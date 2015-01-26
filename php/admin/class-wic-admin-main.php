@@ -92,8 +92,8 @@ class WIC_Admin_Main {
 			<a href="mailto:uspstechnicalsupport@mailps.custhelp.com">uspstechnicalsupport@mailps.custhelp.com</a> with the subject line "Web Tools API Access"
 			and content simply asking for access.</li>
 			<li>The USPS will reply seeking confirmation essentially that the access is not for bulk processing and will promptly grant you access.</li>
-			<li>Once they have sent an email granting access to the API, enter your Username below and enable the Interface.  Note that you do not need to
-			enter a password.</li>.
+			<li>Once they have sent an email granting access to the API, enter Username that they give you below and enable the Interface.  Note that you do not need to
+			enter the password that they give you.</li>.
 		</ol>', 'wp-issues-crm' );
 				
 	}

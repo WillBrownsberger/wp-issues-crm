@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 26, 2015 at 08:13 AM
+-- Generation Time: Jan 26, 2015 at 11:30 AM
 -- Server version: 5.5.41-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -76,9 +76,6 @@ CREATE TABLE IF NOT EXISTS `wp_wic_address` (
 
 CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `ssid` varchar(13) NOT NULL,
-  `civi_id` bigint(20) unsigned NOT NULL,
-  `van_id` bigint(20) unsigned NOT NULL,
   `last_name` varchar(30) NOT NULL,
   `last_name_soundex` varchar(15) NOT NULL,
   `first_name` varchar(20) NOT NULL,
@@ -91,34 +88,15 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   `case_assigned` varchar(10) NOT NULL,
   `case_review_date` date NOT NULL,
   `case_status` varchar(1) NOT NULL,
-  `occupation` varchar(20) NOT NULL,
-  `organization` varchar(50) NOT NULL,
-  `party` varchar(2) NOT NULL,
   `gender` varchar(1) NOT NULL,
-  `ward` tinyint(4) NOT NULL,
-  `precinct` tinyint(4) NOT NULL,
-  `voter_status` varchar(1) NOT NULL,
-  `reg_date` varchar(50) NOT NULL,
   `last_updated_time` datetime NOT NULL,
   `last_updated_by` varchar(10) NOT NULL,
-  `custom_field_001` varchar(255) NOT NULL,
-  `custom_field_002` varchar(255) NOT NULL,
-  `custom_field_003` varchar(255) NOT NULL,
-  `custom_field_004` varchar(255) NOT NULL,
   PRIMARY KEY (`ID`),
-  KEY `ssid` (`ssid`),
   KEY `last_name` (`last_name`),
   KEY `middle_name` (`middle_name`),
   KEY `dob` (`date_of_birth`),
-  KEY `occupation` (`occupation`),
-  KEY `party` (`party`),
   KEY `gender` (`gender`),
-  KEY `ward` (`ward`),
-  KEY `precinct` (`precinct`),
-  KEY `voter_status` (`voter_status`),
   KEY `first_name` (`first_name`),
-  KEY `civicrm_id` (`civi_id`),
-  KEY `VAN_id` (`van_id`),
   KEY `is_deceased` (`is_deceased`),
   KEY `is_deleted` (`mark_deleted`),
   KEY `assigned` (`case_assigned`),
@@ -129,13 +107,8 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `last_name_soundex` (`last_name_soundex`),
   KEY `middle_name_soundex` (`middle_name_soundex`),
   KEY `soundex` (`mark_deleted`,`last_name_soundex`,`first_name_soundex`),
-  KEY `organization` (`organization`),
   KEY `last_updated_time` (`last_updated_time`),
-  KEY `last_updated_by` (`last_updated_by`),
-  KEY `custom_field_001` (`custom_field_001`),
-  KEY `custom_field_002` (`custom_field_002`),
-  KEY `custom_field_003` (`custom_field_003`),
-  KEY `custom_field_004` (`custom_field_004`)
+  KEY `last_updated_by` (`last_updated_by`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171516 ;
 
 -- --------------------------------------------------------
@@ -175,7 +148,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   PRIMARY KEY (`ID`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=125 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=127 ;
 
 -- --------------------------------------------------------
 
@@ -286,7 +259,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_search_log` (
   `download_time` varchar(20) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user-time` (`user_id`,`time`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2432 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2433 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

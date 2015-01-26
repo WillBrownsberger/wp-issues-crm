@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 26, 2015 at 08:13 AM
+-- Generation Time: Jan 26, 2015 at 11:32 AM
 -- Server version: 5.5.41-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   PRIMARY KEY (`ID`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=125 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=127 ;
 
 --
 -- Dumping data for table `wp_wic_data_dictionary`
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
 
 INSERT INTO `wp_wic_data_dictionary` (`ID`, `entity_slug`, `group_slug`, `field_slug`, `field_type`, `field_label`, `field_order`, `listing_order`, `sort_clause_order`, `required`, `dedup`, `readonly`, `hidden`, `field_default`, `like_search_enabled`, `transient`, `wp_query_parameter`, `placeholder`, `option_group`, `onchange`, `list_formatter`, `reverse_sort`, `customizable`, `enabled`, `mark_deleted`, `last_updated_by`, `last_updated_time`) VALUES
 (1, 'activity', 'activity', 'screen_deleted', 'deleted', 'x', 1, 0, 0, '', 0, 0, 0, '', 0, 1, '', '', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
-(2, 'constituent', 'registration', 'ID', 'text', 'Internal Id', 0, 0, 0, '', 0, 1, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
+(2, 'constituent', 'registration', 'ID', 'text', 'Internal Id', 420, 0, 0, '', 0, 1, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
 (3, 'constituent', 'contact', 'first_name', 'text', 'Name', 10, 10, 30, 'group', 1, 0, 0, '', 2, 0, '', 'First', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
 (4, 'constituent', 'contact', 'middle_name', 'text', 'Middle Name', 20, 20, 40, '', 1, 0, 0, '', 2, 0, '', 'Middle ', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
 (5, 'constituent', 'contact', 'last_name', 'text', 'Last Name', 30, 30, 20, 'group', 1, 0, 0, '', 2, 0, '', 'Last', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
@@ -76,9 +76,9 @@ INSERT INTO `wp_wic_data_dictionary` (`ID`, `entity_slug`, `group_slug`, `field_
 (11, 'constituent', 'case', 'case_assigned', 'select', 'Staff', 110, -3, 0, '', 0, 0, 0, '', 0, 0, '', '', 'get_administrator_array', 'changeCaseStatus()', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
 (12, 'constituent', 'case', 'case_status', 'select', 'Status', 120, -2, 0, '', 0, 0, 0, '', 0, 0, '', '', 'case_status_options', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
 (13, 'constituent', 'case', 'case_review_date', 'date', 'Review Date', 130, -1, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
-(14, 'constituent', 'personal', 'date_of_birth', 'date', 'Date of Birth', 210, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
-(15, 'constituent', 'personal', 'gender', 'select', 'Gender', 220, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', 'gender_options', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
-(18, 'constituent', 'personal', 'is_deceased', 'checked', 'Deceased?', 250, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
+(14, 'constituent', 'personal', 'date_of_birth', 'date', 'Date of Birth', 85, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
+(15, 'constituent', 'personal', 'gender', 'select', 'Gender', 90, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', 'gender_options', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
+(18, 'constituent', 'personal', 'is_deceased', 'checked', 'Deceased?', 95, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
 (27, 'constituent', 'registration', 'last_updated_time', 'date', 'Last Updated Time', 430, 0, 0, '', 0, 1, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
 (28, 'constituent', 'registration', 'last_updated_by', 'select', 'Last Updated User', 440, 0, 0, '', 0, 1, 0, '', 0, 0, '', '', 'constituent_last_updated_by', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),
 (29, 'activity', 'activity', 'ID', 'text', 'Internal ID for Activity', 400, 0, 0, '', 0, 0, 1, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', '0', '0000-00-00 00:00:00'),

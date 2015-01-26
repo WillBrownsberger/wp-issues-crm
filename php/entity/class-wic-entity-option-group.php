@@ -90,7 +90,7 @@ class WIC_Entity_Option_Group extends WIC_Entity_Parent {
 		// sorts labels and replaces emptystring with the word BLANK
 		$label_array = explode ( ',', $list );
 		
-		sort( $label_array, SORT_NATURAL | SORT_FLAG_CASE );
+		sort( $label_array );
 
 		if ( count( $label_array ) > 0 ) {	
 			for ( $i = 0; $i < count ( $label_array); $i++ )  {
