@@ -27,11 +27,39 @@
 
 /*
 *
-* This file initializes the system.
+*	This file invokes WIC_Admin_Setup, the main setup class, after registering an autoloader for WP_Issues_CRM classes.
 *
-**/
+*	WP_Issues_CRM classes are organized under subdirectories within the plugin directory like so: 
+*			<path to plugin>/php/class-category/class-identifier -- for example WIC_Entity_Issues is in /php/entity/class-wic-entity-issue.php
+*
+*  This module also includes hide private posts function (the only function created in the public name space by this plugin).
+*/
 
-// class autoloader is case insensitive, except that requires WIC_ (sic) as a prefix.
+// if is_admin, load necessary ( and only necessary ) components in admin
+if ( is_admin() ) {
+	if ( ! spl_autoload_register('wp_issues_crm_autoloader', true, true ) ) { // true throw errors, true, prepend
+		die ( __( 'Fatal Error: Unable to register wp_issues_crm_autoloader in wp-issues-crm.php', 'wp-issues-crm' ) );	
+	};
+	$wic_admin_setup = new WIC_Admin_Setup;
+// otherwise execute the one function in this plugin that acts directly on the front end 
+} else {
+		$plugin_options = get_option( 'wp_issues_crm_plugin_options_array' );
+		if ( isset ( $plugin_options['hide_private_posts'] ) ) { 
+			// optionally control display of private posts
+			add_action( 'pre_get_posts', 'keep_private_posts_off_front_end_even_for_administrators' );
+		}
+}
+
+// function placed here so will be accessible on front end.
+function keep_private_posts_off_front_end_even_for_administrators( $query ) {
+	if ( ! is_admin() ) { // && add option setting) { 
+		// note that this does not prevent this plugin or widgets from showing private posts to which logged in user has access
+   	$query->set( 'post_status', array( 'publish' ) );			
+	}
+}
+
+
+// class autoloader is case insensitive, except that it requires WIC_ (sic) as a prefix.
 function wp_issues_crm_autoloader( $class ) {
 	if ( 'WIC_' == substr ($class, 0, 4 ) ) {
 		$subdirectory = 'php'. DIRECTORY_SEPARATOR . strtolower( substr( $class, 4, ( strpos ( $class, '_', 4  ) - 4 )  ) ) . DIRECTORY_SEPARATOR ;
@@ -45,102 +73,10 @@ function wp_issues_crm_autoloader( $class ) {
 			die ( '<h3>' . sprintf(  __( 'Fatal configuration error -- missing file %s; failed in autoload in wp-issues-crm.php, line 43.', 'wp_issues_crm' ), $class_file ) . '</h3>' );   
 	   } 
 	}	
-}
-spl_autoload_register('wp_issues_crm_autoloader', false, true);
-
-// add metabox to post edit screens to set issues as open for activity assignment
-if ( is_admin() ) { 
-	$wic_issue_open_metabox = new WIC_Entity_Issue_Open_Metabox;
-}
-
-// load css and javascript utilities for front end plugin 
-function wp_issues_crm_front_end_setup() {
-	
-	if ( ! is_admin() ) { // test should and may be unnecessary
-		
-		wp_register_script(
-			'wic-utilities',
-			plugins_url( 'js' . DIRECTORY_SEPARATOR . 'wic-utilities.js' , __FILE__ ) 
-		);
-		wp_enqueue_script('wic-utilities');
-				
-		wp_register_style(
-			'wp-issues-crm-styles',
-			plugins_url( 'css' . DIRECTORY_SEPARATOR . 'wp-issues-crm.css' , __FILE__ )
-			);
-		wp_enqueue_style('wp-issues-crm-styles');
-				
-	}
-	
-}
-add_action('wp_enqueue_scripts', 'wp_issues_crm_front_end_setup');
+} // close class wic_admin_setup
 
 
-// load admin css (and same javascript as front end)
-function wp_issues_crm_admin_setup ( $hook ) { 
-	// load only for this plugin's settings pages
-	if ( is_admin() && -1 < strpos( $hook, 'wp-issues-crm' ) ) {
-
-		wp_register_script(
-			'wic-utilities',
-			plugins_url( 'js' . DIRECTORY_SEPARATOR . 'wic-utilities.js' , __FILE__ ) 
-		);
-		wp_enqueue_script('wic-utilities');
-						
-		wp_register_style(
-			'wp-issues-crm-admin-styles',
-			plugins_url( 'css' . DIRECTORY_SEPARATOR . 'wp-issues-crm-admin.css' , __FILE__ )
-			);
-		wp_enqueue_style('wp-issues-crm-admin-styles');
-		
-	}
-	
-}
-add_action( 'admin_enqueue_scripts', 'wp_issues_crm_admin_setup');
-
-
-// add action to intercept press of download button before any headers sent 
-function do_download () {
-	if ( isset( $_POST['wic-post-export-button'] ) ) {
-		WIC_List_Constituent_Export::do_constituent_download( $_POST['wic-post-export-button'] );	
-	}
-}
-add_action( 'template_redirect', 'do_download' );
-
-// add action to allow caching of non-save pages to facilitate back navigation in IE 
-// while still forcing reload for new record save screens to avoid duping
-function wic_change_cache_header() {
-	if ( isset ( $_POST['wic_form_button'] ) ) {
-		$control_array = explode( ',', $_POST['wic_form_button'] );
-		$revalidate_always = array (
-			'new_constituent',
-			'save_from_search',
-			'new_issue',
-			'save_from_search_request',
-		);  
-		if ( in_array( $control_array[1], $revalidate_always ) ) {
-			header( "Cache-Control: no-cache, no-store, must-revalidate" );	
-			// http://blogs.msdn.com/b/ie/archive/2010/07/14/caching-improvements-in-internet-explorer-9.aspx
-			// http://www.mobify.com/blog/beginners-guide-to-http-cache-headers/
-			// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9.3
-			// http://blog.httpwatch.com/2008/10/15/two-important-differences-between-firefox-and-ie-caching/
-		} else {
-			header( "Cache-Control: private, max-age=0" );			
-		}
-	}
-}
-add_action( 'send_headers', 'wic_change_cache_header' );
-// https://core.trac.wordpress.org/browser/tags/4.1/src//wp-includes/class-wp.php#L0 (line 448)
-// fires after other headers sent, so can override previously sent Cache-Control header
-
-// set up data dictionary and invoke principal class that displays and handles main buttons 
-$wic_db_dictionary = new WIC_DB_Dictionary; 
-$wp_issues_crm_admin = new WIC_Admin_Main; // register admin settings
-$wp_issues_crm = new WIC_Dashboard_Main;
-
-
-// function for catching bad class definitions; 
-// here only to support work of people adding new entity classes
+// stack trace function for locating bad class definitions; 
 function wic_generate_call_trace() { // from http://php.net/manual/en/function.debug-backtrace.php
 
 	$e = new Exception();
@@ -158,113 +94,4 @@ function wic_generate_call_trace() { // from http://php.net/manual/en/function.d
 	echo "\t" . implode("<br/>\n\t", $result);
 }
 
-function wic_set_up_roles_and_capabilities() {
-	
-	 // give administrators access to the plugin 
-    $role = get_role( 'administrator' );
-    $role->add_cap( 'manage_wic_constituents' ); 
 
-	// give editors access to the plugin 
-   $role = get_role( 'editor' );
-   $role->add_cap( 'manage_wic_constituents' ); 
-
-	// define a role that has limited author privileges and access to the plugin
-	
-	// first remove the role in case the capabilities array below has been revised  	
-	remove_role('wic_constituent_manager');
-
-	// now add the role
-	$result = add_role(
-   	'wic_constituent_manager',
-    	__( 'Constituent Manager', 'wp-issues-crm' ),
-	   array(
-	   		// capacities to add
-			  'manage_wic_constituents' 	=> true, // grants access to plugin and all constituent functions
-	        'read_private_posts' 			=> true, // necessary for viewing (and so editing) individual private issues through wic interface
-	        'upload_files'					=> true,
-	        // capacities explicitly (and perhaps unnecessarily) denied
-	        'read'								=> false, // denies access to dashboard
-           'edit_posts'  					=> false, // limits wp backend access -- can still edit private issues through the wic interface
-	        'edit_others_posts'  			=> false, // limits wp backend access -- can still edit private issues through the wic interface 
-	        'delete_posts'					=> false,
-           'delete_published_posts' 	=> false,
-	        'edit_published_posts' 		=> false,
-	        'publish_posts'					=> false,
-	        'read_private_pages' 			=> false,
-	        'edit_private_posts' 			=> false,
-	        'edit_private_pages' 			=> false, 
-	    )
-	);
-	
-}
-register_activation_hook ( __FILE__, 'wic_set_up_roles_and_capabilities' );
-
-  
-function keep_private_posts_off_front_end_even_for_administrators( $query ) {
-	if ( ! is_admin()  &&  $query->is_main_query() ) { 
-		// note that this does not prevent this plugin or widgets from showing private posts to which logged in user has access
-   	$query->set( 'post_status', array( 'publish' ) );			
-	}
-}
-
-add_action( 'pre_get_posts', 'keep_private_posts_off_front_end_even_for_administrators' );
-
-/* mark posts private by default -- problem -- does them all.
- add_filter('wp_insert_post_data', 'mark_post_private');
-http://wordpress.stackexchange.com/questions/15046/how-can-i-make-it-so-the-add-new-post-page-has-visibility-set-to-private-by-defa
-http://en.support.wordpress.com/settings/privacy-settings/
-http://wordpress.stackexchange.com/questions/20729/easiest-way-to-make-post-private-by-default
-http://premium.wpmudev.org/blog/daily-tip-set-wordpress-posts-to-private-by-default/
-https://wordpress.org/support/topic/how-to-set-new-post-visibility-to-private-by-default
-https://www.google.com/search?q=wordpress+set+post+to+private+by+default&ie=UTF-8&sa=Search&channel=fe&client=browser-ubuntu&hl=en&gws_rd=ssl 
-function mark_post_private($data)
-{
-    if($data['post_type'] == 'post')
-    {
-        $data['post_status'] = 'private';
-    }
-
-    return $data;
-}
-*/
-
-
-/**
- * https://wordpress.org/support/topic/how-to-set-new-post-visibility-to-private-by-default?replies=14#post-2074408 
- *
- * It reverses the role of public and private in the logic of what visibility is assigned in the misc publishing metabox.
- * Compare /wp-admin/includes/meta-boxes.php, lines 121-133.   
- * It then include jquery script to write the correct values in after the fact.
- * Since core functions are doing the output as they go, there is no good pre or post hook, so client side jquery is only surgical solution 
- * 
-*/
- function default_post_visibility(){
-	global $post;
-	
-	if ( 'publish' == $post->post_status ) {
-		$visibility = 'public';
-		$visibility_trans = __('Public');
-	} elseif ( !empty( $post->post_password ) ) {
-		$visibility = 'password';
-		$visibility_trans = __('Password protected');
-	} elseif ( $post_type == 'post' && is_sticky( $post->ID ) ) {
-		$visibility = 'public';
-		$visibility_trans = __('Public, Sticky');
-	} else {
-		$post->post_password = '';
-		$visibility = 'private';
-		$visibility_trans = __('Private');
-	} ?>
-	
- 	<script type="text/javascript">
- 		(function($){
- 			try {
- 				$('#post-visibility-display').text('<?php echo $visibility_trans; ?>');
- 				$('#hidden-post-visibility').val('<?php echo $visibility; ?>');
- 				$('#visibility-radio-<?php echo $visibility; ?>').attr('checked', true);
- 			} catch(err){}
- 		}) (jQuery);
- 	</script>
- 	<?php
- }
- add_action( 'post_submitbox_misc_actions' , 'default_post_visibility' );

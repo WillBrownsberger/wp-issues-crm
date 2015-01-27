@@ -1,43 +1,30 @@
 <?php
 /**
 *
-* class-wic-dashboard-main.php
+* class-wic-admin-dashboard.php
 */
 
 
-class WIC_Dashboard_Main {
-
-	// construct registers short code; this class instantiated in wp-issues-crm.php
-	public function __construct() {
-		add_shortcode( 'wp_issues_crm', array( $this, 'wp_issues_crm' ) );
-	}
+class WIC_Admin_Dashboard {
 
 	/* 
-	*  This is the central request handler for the entire plugin -- all requests are button submits named wic_form_button.
-	*	
-	*  It distributes button submissions (all of which have the same name, with a string of values)
-	*  to an class entity class with an action request and arguments.
+	*  This is the central request handler for the working screens of the plugin -- all requests are button submits named wic_form_button.
+	*	WIC_Admin_Navigation just handles the page selection from the wordpress menu and checks nonces and user capabilities.
+	*
+	*  The constructor of this function, when instantiated by WIC_Admin_Navigation, distributes button submissions 
+	*    (all of which have the same name, with a string of values) to an entity class with an action request and arguments.
 	*
 	*	See WIC_Form_Parent::create_wic_form_button for button interface (exclusive main form button creator for system)
 	*
-	*  Only other entry is at WIC_List_Constituent_Export 
-	*	 same security tests there -- is logged in and, other than for dashboard first screen (my cases) have nonce?
+	*  Only other entry points ( other than fields/options/settings ) is at WIC_List_Constituent_Export 
+	*	 same security tests as in Navigation are done there -- is logged in and, other than for dashboard first screen (my cases) have nonce
 	*
 	*/
-	public function wp_issues_crm() {
+	
+	public function __construct() {
 
-		// is user logged in as administrator; if not, return
-		if ( ! current_user_can ( 'manage_wic_constituents' ) ) { 
-			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators and constituent managers.', 'wp-issues-crm' ) . '<h3>';
-			return;
-		} 
-
-		// is the logged in user purporting to submit a previous form; if so, have a nonce?
+		// is submitting a previous form; 
 		if ( isset ( $_POST['wic_form_button'] ) ) {
-			// check nonces and die if not OK			
-			if ( isset($_POST['wp_issues_crm_post_form_nonce_field']) &&
-				check_admin_referer( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field')) 
-				{ } else { die ('cheating, huh?'); }
 				
 			//parse button arguments
 			$control_array = explode( ',', $_POST['wic_form_button'] ); 
