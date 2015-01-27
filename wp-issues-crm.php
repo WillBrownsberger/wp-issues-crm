@@ -227,3 +227,44 @@ function mark_post_private($data)
     return $data;
 }
 */
+
+
+/**
+ * https://wordpress.org/support/topic/how-to-set-new-post-visibility-to-private-by-default?replies=14#post-2074408 
+ *
+ * It reverses the role of public and private in the logic of what visibility is assigned in the misc publishing metabox.
+ * Compare /wp-admin/includes/meta-boxes.php, lines 121-133.   
+ * It then include jquery script to write the correct values in after the fact.
+ * Since core functions are doing the output as they go, there is no good pre or post hook, so client side jquery is only surgical solution 
+ * 
+*/
+ function default_post_visibility(){
+	global $post;
+	
+	if ( 'publish' == $post->post_status ) {
+		$visibility = 'public';
+		$visibility_trans = __('Public');
+	} elseif ( !empty( $post->post_password ) ) {
+		$visibility = 'password';
+		$visibility_trans = __('Password protected');
+	} elseif ( $post_type == 'post' && is_sticky( $post->ID ) ) {
+		$visibility = 'public';
+		$visibility_trans = __('Public, Sticky');
+	} else {
+		$post->post_password = '';
+		$visibility = 'private';
+		$visibility_trans = __('Private');
+	} ?>
+	
+ 	<script type="text/javascript">
+ 		(function($){
+ 			try {
+ 				$('#post-visibility-display').text('<?php echo $visibility_trans; ?>');
+ 				$('#hidden-post-visibility').val('<?php echo $visibility; ?>');
+ 				$('#visibility-radio-<?php echo $visibility; ?>').attr('checked', true);
+ 			} catch(err){}
+ 		}) (jQuery);
+ 	</script>
+ 	<?php
+ }
+ add_action( 'post_submitbox_misc_actions' , 'default_post_visibility' );

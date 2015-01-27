@@ -46,6 +46,7 @@ Class WIC_Entity_Issue_Open_Metabox {
 			'value'	=> $value,
 			'field_label_suffix'	=> '',
 			'option_array' => $wic_live_issue_options, 
+			'onchange' => '',
 		);	  
 
 		echo '<p>' . WIC_Control_Select::create_control ( $args) . '</p>';

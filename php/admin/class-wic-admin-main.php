@@ -35,10 +35,10 @@ class WIC_Admin_Main {
 
 	// add menu links to wp admin
 	public function menu_setup () {
-	//	add_menu_page( 'WP Issues CRM', 'WP Issues CRM', 'activate_plugins', 'wp-issues-crm-main', array ( $this, 'wp_issues_crm_main' ) ); // omit icon for now and also position		
-		add_menu_page( 'WIC Settings', 'WP Issues CRM', 'activate_plugins', 'wp-issues-crm-settings', array ( $this, 'wp_issues_crm_settings' ) ); // omit icon for now and also position
-		add_submenu_page( 'wp-issues-crm-settings', 'Fields', 'Fields', 'activate_plugins', 'wp-issues-crm-fields', array ( $this, 'admin_main' ) );
-		add_submenu_page( 'wp-issues-crm-settings', 'Options', 'Options', 'activate_plugins', 'wp-issues-crm-options', array ( $this, 'admin_main' ) );
+		add_menu_page( 'WP Issues CRM', 'WP Issues CRM', 'activate_plugins', 'wp-issues-crm-main', array ( $this, 'wp_issues_crm_main' ) ); // omit icon for now and also position		
+		add_submenu_page( 'wp-issues-crm-main', 'Options', 'Options', 'activate_plugins', 'wp-issues-crm-options', array ( $this, 'admin_main' ) );
+		add_submenu_page( 'wp-issues-crm-main', 'Fields', 'Fields', 'activate_plugins', 'wp-issues-crm-fields', array ( $this, 'admin_main' ) );
+		add_submenu_page( 'wp-issues-crm-main', 'WIC Settings', 'WP Issues CRM', 'activate_plugins', 'wp-issues-crm-settings', array ( $this, 'wp_issues_crm_settings' ) ); // omit icon for now and also position
 	}
 
 	public function wp_issues_crm_main (){
