@@ -31,7 +31,7 @@ abstract class WIC_Form_Parent  {
 	// add attributes to the form ( e.g. onsubmit parameter )
 	abstract protected function supplemental_attributes();
 	// define the top row of buttons (return a row of wic_form_buttons)
-	abstract protected function get_the_buttons();
+	abstract protected function get_the_buttons( &$data_array );
 	// define the form message (return a message)
 	abstract protected function format_message ( &$data_array, $message );
 	// coloring of message box
@@ -79,7 +79,7 @@ abstract class WIC_Form_Parent  {
 			<div id="post-form-message-box" class = "<?php echo $this->message_level_to_css_convert[$message_level]; ?>" ><?php echo esc_html( $message ); ?></div>
 			
 			<?php // child class must define buttons, without receiving the calling parameters of layout form  
-		   $buttons = $this->get_the_buttons(); 
+		   $buttons = $this->get_the_buttons( $data_array ); 
 		   		echo $buttons;	?>			   
 		
 			<?php	

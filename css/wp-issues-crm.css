@@ -30,7 +30,7 @@ button.button.button-primary.wic-form-button {
 
 /* message box and notices */
 #post-form-message-box {
-	margin: 20px 15px 20px 14.222%;
+	margin: 20px 1% 20px 14.222%;
 	padding: 10px 0;
 }
 
@@ -110,7 +110,6 @@ button.button.button-primary.wic-form-button {
 .field-group-show-hide-button {
 	background: none;
 	border: 0;
-	color: #aaa;
 	cursor: pointer;
 	font-size: 1.1em;
 	font-weight: 700;
@@ -136,13 +135,11 @@ button.button.button-primary.wic-form-button {
 	padding-left: 10px;
 }
 p.wic-form-field-group-legend {
-	color: #777;
 	font-size: 0.8em;
 	margin: 0 0 10px 0;
 }
 
 .wic-form-field-group-label {
- 	color: #777;
 }
 
 /* no need for header for contact group */
@@ -174,21 +171,14 @@ label.wic-label {
 /* as in the label between range of dates */
 .wic-label-2 {
 	display: inline-block;
-	color: #aaa;
-	padding: 0 8px 0 0;
+	padding: 0 2.2888% 0 1.4%;
 	
 }
 
-.wic-multi-select-label:hover,
-.wic-label-2:hover,
-.wic-label:hover {
-	color: #000;
-	cursor: pointer;
-}
 
 /* style to line up with labels above it */
 .row-add-button {
-	background: #e0fae0;
+	background: #50D03A;
 	border: none;
 	border-radius: 50%;
 	color: white;
@@ -250,7 +240,7 @@ label.wic-label.first-name{
 	width: 18.75%
 }
 #wic-control-last-name {
-	width: 37%	
+	width: 36.4%	
 }
 
 .wic-input.last-name,
@@ -261,6 +251,10 @@ label.wic-label.first-name{
 	width: 100%;
 }
 
+input.wic-input,
+select.wic-input {
+	margin-right: 1.25%;
+}
 
 .wic-multivalue-block {
 	margin-bottom: 10px;
@@ -268,23 +262,22 @@ label.wic-label.first-name{
 
 /* delete button for multi-rows  ( really a label )  */
 .wic-input-deleted-label {
-	background: #fae0e0;;
+	background: #e0503A;
 	border: none;
-	color: #333;
+	color: white;
 	cursor: pointer;
 	font-size: 1em;
 	font-weight: 700;
-	margin: 0 1.5625% 0 0; 
-	padding: 0 .3906% 0 1.171875%;
+	margin: 0 1.5625% 0 -3px; 
+	padding: 0 .3906% 0 .8%;
 }
 
 .wic-input-deleted-label:hover {
 	background: red;
-	color: white;
-
 }
+
 /* note -- this is a check box, manipulated by its label, the deleted 'x' */
-.wic-input-deleted {
+input.wic-input-deleted {
     display: none;
 }
 
@@ -303,7 +296,6 @@ label.wic-label.email-address,
 label.wic-label.phone-number {
 	display: none;
 }
-
 
 /* standardize drop down width to a button width */
 .wic-input.activity-type,
@@ -333,34 +325,32 @@ label.wic-label.phone-number {
 	width: 18.1641%;
 } 
 
-.wic-input.phone {
-	width: 46.4844%;
-}
 
 #wic-form-constituent-search .wic-input.phone {
 	margin-bottom: 20px; /* space row on search form */
 }
 
-.wic-input.extension {
-	width: 22.2656%;
-} 
+.wic-input.phone-number {
+	width: 23.7%
+}
 
+.wic-input.extension {
+	width: 15%;
+} 
 
 /* extension suppressed on search */
 #wic-form-constituent-search .wic-input.extension {
 	display: none;
 }
 
-
 .wic-input.address-line,
 .wic-input.email-address {
 	width: 70.7031%;
 }
-
+#wic-form-constituent-update .wic-input.address-line,
 #wic-form-constituent-update .wic-input.email-address {
-	width: 62%;
+	width: 50.3%;
 }
-
 
 a#wic-email-icon-link {
 	text-decoration: none;	
@@ -391,25 +381,24 @@ a#wic-email-icon-link:hover {
 	margin: 0 0 10px 0;
 }
 
- 
-
-
-
 .wic-field-subgroup-activity_note {
 	border-bottom: 1px dashed #ccc;
 	padding-bottom: 10px;
 	margin-bottom: 20px;
 }
 
-
-/* with border and input padding = 120 */
-.wic-input.state,
-.wic-input.zip {
+.wic-input.state{
 	width: 22.2656%;
 } 
+
+.wic-input.zip {
+	width: 20.5%;
+} 
+
 /* plus 128 extends one further across grid */
 .wic-input.city {
-	width: 47.2656%;
+	width: 50%
+	
 }
 
 label.wic-label.activity-type, 
@@ -426,25 +415,25 @@ label.wic-label.activity-date {
 }
 
 .wic-input.activity-date {
-	width: 28%;
+	width: 25%;
 }
 
 /* widen it on update form since lose range and want to line up issue link button */
 #wic-form-constituent-update .wic-input.activity-date {
-	width: 37.7188%;
+	width: 18%;
 }
 
 .wic-field-subgroup-activity_issue .wic-input.issue,
 #wic-field-subgroup-activity_issue .wic-input.issue {
-	width: 71.4844%
+	width: 73.5%;
 }
 
 .wic-form-button.wic-activity-issue-link-button {
 	background: transparent;
 	border: 1px solid #ddd;
 	cursor: pointer;
-	width: 23.4375%;
-	margin: 0;
+	width: 22%;
+	margin: 0 3px;
 }
 
 .wic-form-button.wic-activity-issue-link-button:hover {
@@ -453,7 +442,7 @@ label.wic-label.activity-date {
 }
 
 .wic-input.pro-con {
-	width: 23.4375%;
+	width: 20.5%;
 	min-width: 0px; 
 } 
 
@@ -554,44 +543,17 @@ ul#constituent-comment-list {
 	padding: 0;
 }
 
-#wic-field-group-search_parms {
-	margin: 0;
-}
-
-
 #wic-form-sidebar-groups .wic-label {
-	color: #777;
 	display: block;
-	font-size: 0.8em;
 	margin: 0;
 	padding: 0;
 	text-align: left;
 }
 
-#wic-form-sidebar-groups .wic-label:hover {
-	color: #333;
-	cursor: pointer;
-}
-
-
 #wic-form-sidebar-groups .wic-input {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	background: #ffffff;
-	border: 1px solid #f0f0f0;
-	font-size: 0.9em;
 	margin: 0;
-	padding: 0;
 	width: 100%;
 } 
-
-#wic-form-sidebar-groups select {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	width: 100%;
-}
 
 #wic-form-issue-search #wic-form-sidebar-groups .wic-input.post-date,
 #wic-form-issue-search #wic-form-sidebar-groups .wic-input.review-date,
@@ -676,7 +638,6 @@ div.wic_multi_select {
 }
 
 .wic-multi-select-label {
-	color: #333;	
 	cursor: pointer;
 	display: inline-block;
 	width: 280px;
@@ -713,17 +674,8 @@ div.wic_multi_select {
 }
 
 #wic-issue-post-edit-link {
-	display: block;
-	margin: 10px 0 20px 14.222222%;
-	font-size: 0.8em;
-
+	display: inline-block;
 }
-
-/* prevent generic styling from overriding wic styling */
-.wic-input.post-author,
-.wic-label.post-author {
-	font-style: normal;
-}	
 
 .wic-input.post-content{
 	height: 300px;
@@ -733,13 +685,11 @@ div.wic_multi_select {
 	box-sizing: border-box;
 }
 
-
 #wic-control-category-search-mode label.wic-label {
 	display: none;
 }
 
 p.wic-radio-button {
-	color: #777;
 	font-size: 0.8em;
 }
 
@@ -763,7 +713,7 @@ p.wic-radio-button input{
 #option_value-control-set label.wic-label {
 	font-size: 0.8em;
 	min-width: 0;
-}http://localhost/wp-admin/options-general.php
+}
 
 #option_value-control-set label.wic-label::after {
 	content: ": "
@@ -855,7 +805,7 @@ button.wic-post-list-button.pl-even:hover {
 
 /* header (horizontal) list styling */
 #wic-post-list ul.wic-post-list-headers {
-	font-size: 14px;
+	font-weight: 700;
 	list-style: none;
 	padding: .88889% .88889%;
 	margin: 0;
@@ -903,15 +853,11 @@ button.wic-post-list-button {
 	color: #777;
 }
 
-.wic-post-list-button:hover {
-	background: #f1f1f1;
-}
-
 .wic-post-list-button.option-group-disabled:hover {
 	background: #eee;
 }
 
-
+/* list element widths */
 .pl-constituent-first_name{ width:14%;}
 .pl-constituent-middle_name{ width:14%;}
 .pl-constituent-last_name{ width:14%;}
@@ -962,6 +908,7 @@ button.wic-post-list-button {
 * Trend form/list styling
 *
 */
+#wic-inner-field-group-trend-toggle-button,
 #wic-form-trend-search-again #wic-form-sidebar-groups,
 #wic-form-trend-search-again #bottom-button-group {
 	display: none;
@@ -971,20 +918,17 @@ button.wic-post-list-button {
 #wic-form-trend-search-again label.wic-label.activity-type,
 #wic-form-trend-search label.wic-label.activity-date, 
 #wic-form-trend-search-again label.wic-label.activity-date {
-	color: #777;
 	display: inline-block;
-	font-size: 0.8em;
 	min-width: 18.75%;
 	margin-right: 1.25%;
 	padding: 0;
 	text-align: right;
 	vertical-align: top;
-}
+} 
 
 #wic-inner-field-group-trend select.wic-input.activity-type, 
 #wic-inner-field-group-trend input.wic-input.activity-date, 
 #wic-inner-field-group-trend select.wic-input.last-updated-by {
-	padding: 0; 
 	width: 18.1641%;
 }
 

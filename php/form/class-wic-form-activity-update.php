@@ -46,7 +46,7 @@ class WIC_Form_Activity_Update extends WIC_Form_Multivalue_Update  {
 							$list_button_args = array(
 								'entity_requested'	=> 'issue',
 								'action_requested'	=> 'id_search',
-								'button_class' 		=> 'wic-form-button wic-activity-issue-link-button',
+								'button_class' 		=> 'wic-form-button button wic-activity-issue-link-button',
 								'id_requested'			=> $data_array['issue']->get_value(),
 								'button_label' 		=> __( 'View Issue', 'wp-issues-crm' )				
 							);			

@@ -9,7 +9,7 @@ class WIC_Form_issue_Search_Again extends WIC_Form_issue_Search  {
 	
 
 	// choose form buttons
-	protected function get_the_buttons () {
+	protected function get_the_buttons ( &$data_array ) {
 
 		$buttons = '';
 		

@@ -13,7 +13,7 @@ class WIC_Form_issue_Search extends WIC_Form_Parent  {
 	}
 
 	// choose form buttons
-	protected function get_the_buttons () {
+	protected function get_the_buttons ( &$data_array ) {
 		
 		$button_args_main = array(
 			'entity_requested'			=> 'issue',

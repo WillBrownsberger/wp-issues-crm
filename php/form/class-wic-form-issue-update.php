@@ -13,14 +13,21 @@ class WIC_Form_Issue_Update extends WIC_Form_Parent  {
 	}
 
 	// define form buttons
-	protected function get_the_buttons () {
+	protected function get_the_buttons ( &$data_array ) {
 		$button_args_main = array(
 			'entity_requested'			=> 'issue',
 			'action_requested'			=> 'form_update',
 			'button_class'					=> 'button button-primary wic-form-button',
 			'button_label'					=> __('Update issue', 'wp-issues-crm')
 		);	
-		return ( $this->create_wic_form_button ( $button_args_main ) . parent::backbutton (' second-position' ) ) ;
+		
+		$buttons = $this->create_wic_form_button ( $button_args_main ) . parent::backbutton (' second-position' );
+		
+		$buttons .= '<a href="/wp-admin/post.php?post=' . $data_array['ID']->get_value() .'&action=edit">' .
+								__( 'Edit post in Wordpress editor.', 'wp-issues-crm' ) .
+							'</a>';		
+
+		return ( $buttons ) ;
 	}
 	
 	// define form message

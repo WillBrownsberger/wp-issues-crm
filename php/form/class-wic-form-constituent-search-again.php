@@ -8,7 +8,7 @@
 class WIC_Form_Constituent_Search_Again extends WIC_Form_Constituent_Search  {
 	
 	// differ from search form only in button definition
-	protected function get_the_buttons () {
+	protected function get_the_buttons ( &$data_array ) {
 
 		$buttons = '';
 		

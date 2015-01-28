@@ -13,7 +13,7 @@ class WIC_Form_Data_Dictionary_Save extends WIC_Form_Parent  {
 	}
 
 	// define the top row of buttons (return a row of wic_form_button s)
-	protected function get_the_buttons () {
+	protected function get_the_buttons ( &$data_array ) {
 
 		$buttons = '';
 		
