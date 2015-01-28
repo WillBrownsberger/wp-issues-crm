@@ -10,8 +10,7 @@
 
 abstract class WIC_List_Parent {
 
-	// the top row of buttons over the list
-	protected abstract function get_the_buttons( &$wic_query );
+
 	// header message, e.g., for count	
 	protected abstract function format_message( &$wic_query );
 	// actual row content
@@ -92,5 +91,19 @@ abstract class WIC_List_Parent {
 		return ( $display_value );
    }
    
+   // the top row of buttons over the list
+  	protected function get_the_buttons( &$wic_query ) {
+
+		$button_args_main = array(
+			'button_class'					=> 'button button-primary wic-form-button',
+			'button_label'					=> __( 'Export All', 'wp-issues-crm' ),
+			'id'								=> 'wic-post-export-button',
+			'name'							=> 'wic-post-export-button',
+			'value' 							=>  $wic_query->search_id, 
+		);	
+		$buttons = WIC_Form_Parent::create_wic_form_button ( $button_args_main ) . WIC_Form_Parent::backbutton (' second-position' );	
+	
+		return ( $buttons );
+	}
 }	
 

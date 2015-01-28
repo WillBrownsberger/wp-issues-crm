@@ -65,7 +65,7 @@ class WIC_Admin_Dashboard {
 			$button_args = array (
 				'entity_requested'	=> $top_menu_button[0],
 				'action_requested'	=> $top_menu_button[1],
-				'button_class'			=> 'wic-form-button ' . $selected_class,	
+				'button_class'			=> 'button button-primary wic-form-button ' . $selected_class,	
 				'button_label'			=>	$top_menu_button[2],
 				'title'					=>	$top_menu_button[3],
 			);

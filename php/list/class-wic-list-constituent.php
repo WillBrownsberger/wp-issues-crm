@@ -99,23 +99,5 @@ class WIC_List_Constituent extends WIC_List_Parent {
 		return $header_message;
 	}
 
-	protected function get_the_buttons( &$wic_query ) {
-		$button = '<div id = "wic-list-button-row">' .
-			'<button id = "wic-post-export-button" 
-				name = "wic-post-export-button" 
-				class = "wic-form-button" 
-				type="submit" 
-				value = "' . $wic_query->search_id  .'" >' . 
-					__( 'Export All', 'wp-issues-crm' ) . 
-			'</button>' . 
-			'<button 	id = "wic-list-back-button" 
-				class= "wic-form-button" 
-				type="button" 
-				onclick = "history.go(-1);return true;">' .
-					 __( 'Go Back', 'wp-issues-crm' ) . 
-				'</button>' .
-			'</div>';
-		return ( $button );
-	}
  }	
 

@@ -15,6 +15,7 @@ class WIC_Form_Option_Group_Save extends WIC_Form_Option_Group_Update  {
 		$button_args_main = array(
 			'entity_requested'			=> 'option_group',
 			'action_requested'			=> 'form_save',
+			'button_class'					=> 'button button-primary wic-form-button',
 			'button_label'					=> __('Save', 'wp-issues-crm')
 		);	
 		$buttons .= $this->create_wic_form_button ( $button_args_main );

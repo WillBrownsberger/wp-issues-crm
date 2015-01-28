@@ -219,19 +219,24 @@ abstract class WIC_Form_Parent  {
 		$button_class				= 'wic-form-button';
 		$button_label				= '';
 		$title						= '';
+		$name							= 'wic_form_button';
+		$id							= '';
+		$value						= '';
 
 		extract ( $control_array_plus_class, EXTR_OVERWRITE );
 
-		$button_value = $entity_requested . ',' . $action_requested  . ',' . $id_requested;
+		// supports the standard WIC string button value or can be overridden by a set value as in list export buttons
+		$button_value = $value > '' ? $value : $entity_requested . ',' . $action_requested  . ',' . $id_requested;
+		$id_phrase = $id > '' ? ' id = "' . $id . '" ' : ' ';	
 	
-		$button =  '<button class = "' . $button_class . '" title = "' . $title . '" type="submit" name = "wic_form_button" value = "' . $button_value . '">' . $button_label . '</button>';		
+		$button =  '<button class = "' . $button_class . '" title = "' . $title . '" type="submit" name = "' . $name . '"' . $id_phrase . ' value = "' . $button_value . '">' . $button_label . '</button>';		
 		return ( $button );
 	}
 
 	// just a back button 
 	static public function backbutton ( $class ) {
 		return ( '<button 
-				class= "wic-form-button ' . $class . '" 
+				class= "wic-form-button button button-primary ' . $class . '" 
 				type="button" 
 				onclick = "history.go(-1); return true;">' .
 					 __( 'Go Back', 'wp-issues-crm' ) . 

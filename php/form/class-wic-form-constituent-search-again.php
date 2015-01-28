@@ -15,6 +15,7 @@ class WIC_Form_Constituent_Search_Again extends WIC_Form_Constituent_Search  {
 		$button_args_main = array(
 			'entity_requested'			=> 'constituent',
 			'action_requested'			=> 'form_search',
+			'button_class'					=> 'button button-primary wic-form-button',			
 			'button_label'					=> __('Search Again', 'wp-issues-crm')
 		);	
 		
@@ -23,7 +24,7 @@ class WIC_Form_Constituent_Search_Again extends WIC_Form_Constituent_Search  {
 		$button_args_main = array(
 			'entity_requested'			=> 'constituent',
 			'action_requested'			=> 'save_from_search_request',
-			'button_class'					=> 'wic-form-button second-position',
+			'button_class'					=> 'button button-primary wic-form-button second-position',
 			'button_label'					=> __('Save New', 'wp-issues-crm')
 		);	
 		
@@ -32,7 +33,7 @@ class WIC_Form_Constituent_Search_Again extends WIC_Form_Constituent_Search  {
 		$button_args_main = array(
 			'entity_requested'			=> 'constituent',
 			'action_requested'			=> 'new_form',
-			'button_class'					=> 'wic-form-button second-position',
+			'button_class'					=> 'button button-primary wic-form-button second-position',
 			'button_label'					=> __('Start Over', 'wp-issues-crm')
 		);	
 		

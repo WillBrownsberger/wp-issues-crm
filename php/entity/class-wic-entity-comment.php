@@ -135,7 +135,7 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 			'action_requested'	=> 'id_search',
 			'button_class' 		=> 'wic-form-button wic-comment-issue-link-button',
 			'id_requested'			=> $id,
-			'button_label' 		=> __( 'Issue', 'wp-issues-crm' ),
+			'button_label' 		=> __( 'View Issue', 'wp-issues-crm' ),
 			'title'					=> __( 'View associated WIC issue (i.e., post).', 'wp-issues-crm' ),				
 			);			
 		return ( WIC_Form_Parent::create_wic_form_button( $list_button_args ) );		

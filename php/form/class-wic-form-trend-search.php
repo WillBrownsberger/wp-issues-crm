@@ -18,6 +18,7 @@ class WIC_Form_Trend_Search extends WIC_Form_Parent  {
 		$button_args_main = array(
 			'entity_requested'			=> 'trend',
 			'action_requested'			=> 'form_search',
+			'button_class'					=> 'button button-primary wic-form-button',
 			'button_label'					=> __('Search', 'wp-issues-crm')
 		);	
 		

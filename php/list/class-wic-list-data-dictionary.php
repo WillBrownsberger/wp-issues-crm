@@ -24,6 +24,7 @@ class WIC_List_Data_Dictionary extends WIC_List_Option_Group {
 			$button_args_main = array(
 				'entity_requested'			=> 'data_dictionary', // entity_requested is not processed, since whole page is for option_group
 				'action_requested'			=> 'new_data_dictionary',
+				'button_class'					=> 'button button-primary wic-form-button',
 				'button_label'					=> __('Add New Custom Field', 'wp-issues-crm')
 			);	
 			$buttons .= WIC_Form_Parent::create_wic_form_button ( $button_args_main );
