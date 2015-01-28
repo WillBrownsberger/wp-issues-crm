@@ -70,7 +70,6 @@ button.button.button-primary.wic-form-button {
 #wic-form-main-groups {
 	display: inline-block;
 	overflow-x: hidden;
-	min-width: 640px;
 	width: 71.1111% 
 }
 
@@ -95,7 +94,6 @@ button.button.button-primary.wic-form-button {
 	overflow-x: hidden;
 	padding: 0 30px;
 	vertical-align: top;
-	min-width: 260px;
 	width: 28.8888888%;	
 }
 
