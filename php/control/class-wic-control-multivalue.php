@@ -272,7 +272,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 			' title ="' . esc_attr(  $button_label ) . '"' .
 			' type = "button" ' .
 			' onclick="moreFields(\'' . esc_attr( $base ) . '\')" ' .
-			' >+</button>'; 
+			' ><span class="dashicons dashicons-plus-alt"></span></button>'; 
 
 		return ( $button );
 	}

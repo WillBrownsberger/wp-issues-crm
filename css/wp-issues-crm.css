@@ -34,7 +34,6 @@ button.button.button-primary.wic-form-button {
 	padding: 10px 0;
 }
 
-#post-form-message-box.wic-form-errors-found,
 #post-form-message-box.wic-form-good-news {
 	background: #fff;
 	border-left: 4px solid #7AD03A;
@@ -45,6 +44,7 @@ button.button.button-primary.wic-form-button {
 #post-form-message-box.wic-form-errors-found {
 	background: #fff;
 	border-left: 4px solid red;
+	padding: 10px 12px;	
 }
 
 
@@ -176,23 +176,18 @@ label.wic-label {
 
 /* style to line up with labels above it */
 .row-add-button {
-	background: #50D03A;
+	background: transparent;
 	border: none;
-	border-radius: 50%;
-	color: white;
+	color: #50D03A;
 	cursor: pointer;
 	display: inline-block;
-	font-size: 1.0em;
-	font-weight: 900;
-	margin: 0 0 0px -3px;
-	padding: 0 5px;
+	margin: 0;
+	padding: 0;
 
 }
 
 .row-add-button:hover {
-	background: green;
-	color: white;
-	font-size: 1.0em;
+	color: green;
 } 
 
 /********************************************************
@@ -260,18 +255,21 @@ select.wic-input {
 
 /* delete button for multi-rows  ( really a label )  */
 .wic-input-deleted-label {
-	background: #e0503A;
-	border: none;
-	color: white;
 	cursor: pointer;
-	font-size: 1em;
-	font-weight: 700;
-	margin: 0 1.5625% 0 -3px; 
-	padding: 0 .3906% 0 .8%;
+	color: #e0503A;
+	margin: 0 2.8% 0 0; 
 }
 
 .wic-input-deleted-label:hover {
-	background: red;
+	color: red;	
+}
+
+
+.dashicons-dismiss {
+	vertical-align: middle;
+}
+.wic-input-deleted-label:hover {
+	
 }
 
 /* note -- this is a check box, manipulated by its label, the deleted 'x' */
@@ -303,11 +301,6 @@ label.wic-label.phone-number {
 	cursor: pointer;
 	width: 23.4375%;
 } 
-
-/* part of ugly vertical spacing plan */
-.wic-input.email-type {
-	margin-bottom: 10px;
-}
 
 /* make these a little smaller on update/save forms 
 * to allow room for delete button (27px) 
@@ -350,13 +343,17 @@ label.wic-label.phone-number {
 	width: 50.3%;
 }
 
+.dashicons-email-alt {
+	vertical-align: middle;
+}
+
 a#wic-email-icon-link {
 	text-decoration: none;	
-	color: #777;
+	color: #77f;
 }
 
 a#wic-email-icon-link:hover {
-	color: #77f;
+	color: #99f;
 	font-weight: 700;
 }
 

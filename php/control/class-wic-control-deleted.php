@@ -38,7 +38,7 @@ class WIC_Control_Deleted extends WIC_Control_Parent {
 		$readonly = $readonly ? 'readonly' : '';
 		 
 		$control = ( $field_label > '' ) ?  '<label title = "' . __( 'Permanently remove this row.', 'wp-issues-crm' ) . '" class="' . $label_class . '" for="' . 
-				esc_attr( $field_slug ) . '">' . esc_html( $field_label ) . ' ' . '</label>' : '';
+				esc_attr( $field_slug ) . '"><span class="dashicons dashicons-dismiss"></span></span></label>' : '';
 		$control .= '<input class="' . $input_class . '"  id="' . esc_attr( $field_slug ) . '" name="' . esc_attr( $field_slug ) . 
 			'" type="checkbox"  value="1"' . checked( $value, 1, false) . $readonly  .' onclick = "' . $onclick_delete . '"/>' ;	
 

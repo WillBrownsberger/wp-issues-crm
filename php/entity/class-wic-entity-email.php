@@ -16,16 +16,10 @@ class WIC_Entity_Email extends WIC_Entity_Multivalue {
 	} 
 
 	public function update_row() {
-		$upload_location = wp_upload_dir(); 
-		if ( file_exists ( $upload_location['basedir'] . '/email-icon.png' ) ) {
-			$link_location =  '<img id = "wic-email-icon" src="' . $upload_location['baseurl'] . '/email-icon.png">';  		
-		} else {
-			$link_location = 'send';		
-		}
 
 		$message = '<a id = "wic-email-icon-link" title = "' . __( 'Send email to email address.', 'wp-issues-crm' ) . 
 			 '" href="mailto:'. $this->get_email_address() .'"> ' .
-				$link_location .			
+				'<span class="dashicons dashicons-email-alt"></span>' .			
 				 '</a>';
 		$new_update_row_object = new WIC_Form_Email_Update ( $this->entity, $this->entity_instance );
 		$new_update_row = $new_update_row_object->layout_form( $this->data_object_array, $message, null );

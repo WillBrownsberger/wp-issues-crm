@@ -34,7 +34,7 @@ class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 		
 		$open_posts = WIC_DB_Access_WP::get_wic_live_issues();
 
-		$issues_array = array( array ( 'value' => '' , 'label' => '' ) );	
+		$issues_array = array( array ( 'value' => '' , 'label' => __( 'Activity Issue?', 'wp-issues-crm' ) ) );	
 
 		$value_in_option_list = false;			
 		foreach ( $open_posts as $open_post ) {		

@@ -19,7 +19,7 @@ class WIC_Admin_Setup {
 		// set up roles and capabilities
 		register_activation_hook ( __FILE__, array ( $this, 'wic_set_up_roles_and_capabilities' ) );
 		
-		// add metaboxes		
+		// add metabox -- take care: this fires on all save/updates of posts; 
 		$wic_issue_open_metabox = new WIC_Entity_Issue_Open_Metabox;
 		
 		//	enqueue styles and scripts	

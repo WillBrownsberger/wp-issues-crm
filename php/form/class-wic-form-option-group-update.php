@@ -25,6 +25,15 @@ class WIC_Form_Option_Group_Update extends WIC_Form_Parent  {
 		);	
 		$buttons .= $this->create_wic_form_button ( $button_args_main );
 		
+				
+		$button_args_main = array(
+			'entity_requested'			=> 'option_group',
+			'action_requested'			=> 'new_option_group',
+			'button_class'					=> 'button button-primary wic-form-button second-position',
+			'button_label'					=> __('New Field', 'wp-issues-crm'),
+		);	
+		$buttons .= $this->create_wic_form_button ( $button_args_main );
+		
 		$buttons .= '<a href="/wp-admin/admin.php?page=wp-issues-crm-options">' . __( 'Back to Options List', 'wp-issues-crm' ) . '</a>';
 
 		return $buttons;

@@ -122,12 +122,24 @@ function togglePostFormSection( section ) {
 function hideSelf( rowname ) {
 	var row = document.getElementById ( rowname );
 	rowClass =row.className; 
-	var test = confirm ( "When you update, this row will be permanently deleted."  )
-	if ( test == true ) {
-		row.className = rowClass.replace( 'visible-templated-row', 'hidden-template' ) ;
-	} else {
-		document.getElementById( rowname + '[screen_deleted]' ).checked = false;	
-	}
+	row.className = rowClass.replace( 'visible-templated-row', 'hidden-template' ) ;
+	sendErrorMessage ( 'Row will be deleted when you save/update.' )
+	window.nextWPIssuesCRMMessage = 'You can proceed.';
+}
+
+function sendErrorMessage ( messageText ) {
+	var message = document.getElementById( 'post-form-message-box' );
+	permMessage = message.innerHTML
+	message.innerHTML = messageText;
+	message.className = 'wic-form-errors-found';
+
+	timeout = window.setTimeout ( restoreMessage, 5000 ); 
+}
+
+function restoreMessage (  ) {
+	var message = document.getElementById( 'post-form-message-box' );
+	message.innerHTML = window.nextWPIssuesCRMMessage;
+	message.className = 'wic-form-good-news';
 }
 
 // add new visible rows by copying hidden template
@@ -204,8 +216,9 @@ function testForDupOptionValues () {
    	 		displayValue = '<BLANK>';
    	 	} else {
 				displayValue = '"' + sortedValues[j] + '"';   	 	
-   	 	}	
-      	alert ( 'The database value of each option must be unique.  The value ' + displayValue + ' appears more once.' );
+   	 	}
+   	 	sendErrorMessage ( 'The database value of each option must be unique.  The value ' + displayValue + ' appears more once.'  )
+			window.nextWPIssuesCRMMessage = 'You can proceed after error correction.';	
       	return false;
     	}
 	}	

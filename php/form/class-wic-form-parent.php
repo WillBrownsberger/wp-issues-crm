@@ -222,14 +222,16 @@ abstract class WIC_Form_Parent  {
 		$name							= 'wic_form_button';
 		$id							= '';
 		$value						= '';
+		$formaction					= '';
 
 		extract ( $control_array_plus_class, EXTR_OVERWRITE );
 
 		// supports the standard WIC string button value or can be overridden by a set value as in list export buttons
 		$button_value = $value > '' ? $value : $entity_requested . ',' . $action_requested  . ',' . $id_requested;
-		$id_phrase = $id > '' ? ' id = "' . $id . '" ' : ' ';	
+		$id_phrase = $id > '' ? ' id = "' . $id . '" ' : ' ';
+		$formaction_phrase = $formaction > '' ? ' formaction = "' . $formaction . '" ' : ' ';
 	
-		$button =  '<button class = "' . $button_class . '" title = "' . $title . '" type="submit" name = "' . $name . '"' . $id_phrase . ' value = "' . $button_value . '">' . $button_label . '</button>';		
+		$button =  '<button class = "' . $button_class . '" title = "' . $title . '" type="submit" name = "' . $name . '"' . $id_phrase . $formaction_phrase . ' value = "' . $button_value . '">' . $button_label . '</button>';		
 		return ( $button );
 	}
 
