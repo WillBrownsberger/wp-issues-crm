@@ -57,7 +57,7 @@ Class WIC_Entity_Issue_Open_Metabox {
 			$list_button_args = array(
 					'entity_requested'	=> 'issue',
 					'action_requested'	=> 'id_search',
-					'button_class' 		=> 'button button-primary wic-form-button ' ,
+					'button_class' 		=> 'button ' ,
 					'id_requested'			=> $post->ID,
 					'button_label' 		=> __( 'View in WP Issues CRM', 'wp-issues-crm' ),
 					'formaction'			=> '/wp-admin/admin.php?page=wp-issues-crm-main',				
