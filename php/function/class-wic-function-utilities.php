@@ -11,6 +11,19 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 	/*
 	*  display option array of administrators of the system
 	*/	
+
+	public static function wic_error ( $text, $file, $line, $method, $fatal ) {
+		$fatal_phrase = $fatal ? __( 'WP Issues CRM Fatal Error: ', 'wp-issues-crm' ) : __( 'WP Issues CRM Non Fatal Error: ', 'wp_issues_crm' );
+		$error_class  = $fatal ? 'wp-issues-crm-fatal-error' : 'wp-issues-crm-non-fatal-error'; 
+		echo '<div class="' . $error_class . '">' . ' 
+			<h3>' . $fatal_phrase . __( $text, 'wp-issues-crm' ) . '</h3>' .  
+			'<p>' . sprintf ( __( '  File Reporting: %s on line number %s -- method %s.', 'wp-issues-crm' ), $file, $line, $method ) . '</p>' . 
+		'</h3</div>';
+		if ( $fatal ) {
+			die;		
+		}	
+	}	
+	
 	public static function get_administrator_array() {
 	
 		$user_select_array = array();	

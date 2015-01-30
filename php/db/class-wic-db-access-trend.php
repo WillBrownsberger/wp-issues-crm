@@ -39,8 +39,7 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 				$values[] = $where_item['value'][0];
 				$values[] = $where_item['value'][1];
 			} else {
-				 die ( sprintf( __( 'Incorrect compare settings for field %1$s reported by WIC_DB_Access_Trend::db_search.', 'WP_Issues_CRM' ),
-					 $this->field->field_slug ) ); 
+				WIC_Function_Utilities::wic_error ( sprintf( 'Incorrect compare settings for field %1$s.', $this->field->field_slug ), __FILE__, __LINE__, __METHOD__, true );
 			}
 		}
 

@@ -46,7 +46,7 @@ class WIC_DB_Access_Dictionary Extends WIC_DB_Access_WIC {
 			);
 		// die on error		
 		if ( $wpdb->last_error > '' ) {
-			die ( '<h3>' .  sprintf( __( 'MySQL could not add custom field. Error reported was: %s', 'wp-issues-crm' ), $wpdb->last_error ) . '</h3>' );
+			WIC_Function_Utilities::wic_error ( sprintf( 'MySQL could not add custom field. Error reported was: %s', $wpdb->last_error ), __FILE__, __LINE__, __METHOD__, true );
 		// other wise proceed to do set up save to data dictionary		
 		} else {		
 			// add to set clause with placeholders

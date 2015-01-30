@@ -6,9 +6,26 @@
 *
 */
 
+/* SYSTEM ERROR MESSAGE */
+
+.wp-issues-crm-fatal-error {
+ 	background: #ffd0db;
+	border: solid 1px red;
+	margin: 60px;
+	padding: 20px;
+}
+
+.wp-issues-crm-non-fatal-error {
+	background: white;
+	border: solid 1px #333;
+	margin: 60px;
+	padding: 20px;
+} 
+
+
 /*
 *
-* first, styles for main search/update/save form, from top to bottom
+* styles for main search/update/save form, from top to bottom
 *
 */
 
@@ -42,7 +59,7 @@ button.button.button-primary.wic-form-button {
 
 
 #post-form-message-box.wic-form-errors-found {
-	background: #fff;
+	background: #ffd0db;
 	border-left: 4px solid red;
 	padding: 10px 12px;	
 }

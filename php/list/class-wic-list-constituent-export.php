@@ -52,13 +52,12 @@ class WIC_List_Constituent_Export {
 	public static function do_constituent_download ( $id ) {
 		
 		if ( ! current_user_can ( 'activate_plugins' ) ) { 
-			echo '<h3>' . __( 'Sorry, this function is only accessible to administrators.', 'simple-wp-crm' ) . '<h3>';
-			die ( __( 'Download permissions error.', 'WP_Issues_CRM' ) ) ;
+			WIC_Function_Utilities::wic_error ( 'Download permissions inadequate.', __FILE__, __LINE__, __METHOD__, true );			 
 		} 		
 		
 		if ( isset($_POST['wp_issues_crm_post_form_nonce_field']) &&
 			check_admin_referer( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field')) 
-		{ } else die ( __( 'Download cross permissions error.', 'WP_Issues_CRM' ) );
+		{ } WIC_Function_Utilities::wic_error ( 'Apparent cross-site scripting or configuration error.', __FILE__, __LINE__, __METHOD__, true );
 
 		$search = WIC_DB_Access::get_search_from_search_log( $id );	
 		$current_user = wp_get_current_user();		

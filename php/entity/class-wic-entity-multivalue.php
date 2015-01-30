@@ -72,6 +72,9 @@ abstract class WIC_Entity_Multivalue extends WIC_Entity_Parent {
 			if ( '' == $this->data_object_array['ID']->get_value() ) { // then just did a save, so . . .
 				$this->data_object_array['ID']->set_value( $wic_access_object->insert_id );
 			}
+			// if update was successful (possibly no update, but not an error), record changes as made to this entity
+			// this will be aggregated to changes made for any row in the control
+			$this->made_changes = $wic_access_object->were_changes_made();
 		}		
 		return ( $error );
 	}

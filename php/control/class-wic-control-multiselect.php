@@ -46,7 +46,7 @@ class WIC_Control_Multiselect extends WIC_Control_Select {
 	public function sanitize () {
 		foreach ( $this->value as $key => $value ) {
 			if ( $value != absint( $value ) ) {
-				die ( sprintf ( __( 'Invalid value for multiselect field %s', 'wp-issues-crm' ), $this->field->field_slug ) );			
+				WIC_Function_Utilities::wic_error ( sprintf ( 'Invalid value for multiselect field %s', $this->field->field_slug ) , __FILE__, __LINE__, __METHOD__,true );
 			}	
 		}			
 	}

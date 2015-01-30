@@ -15,6 +15,9 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	*
 	**************************************************************************************/
 	
+	protected $made_changes = false; // property captures results of were_changes_made functions from each row during update process	
+	
+	
 	public function reset_value() {  
 		$this->value = array();
 	}		
@@ -298,10 +301,16 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 	public function do_save_updates ( $id  ) {
 		$errors = '';
 		foreach ( $this->value as $child_entity ) {
-			$errors .= $child_entity->do_save_update ( $this->field->entity_slug, $id );		 
+			$errors .= $child_entity->do_save_update ( $this->field->entity_slug, $id );
+			// if any child row has changes, mark this control has having changes
+			$this->made_changes = $child_entity->were_changes_made() ? true : $this->made_changes;		 
 		}
 		return $errors;
 	}
 
+	// function reports up values of row results -- any changes
+	public function were_changes_made () {
+		return ( $this->made_changes );
+	}
 
 }	

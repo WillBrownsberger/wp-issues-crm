@@ -136,10 +136,7 @@ class WIC_DB_Dictionary {
 				return ( $field_rule );			
 			}		
 		}
-
-		die ( '<h3>' . sprintf( __( 'WP_Issues_CRM, Fatal Error: Field rule table inconsistency -- entity (%1$s), field_slug (%2$s) . 
-				$wic_db_dictionary->get_field_rules reporting.', 'wp-issues-crm' ) , $entity, $field_slug ) ) . '</h3>';		
-		
+		WIC_Function_Utilities::wic_error ( sprintf( ' Field rule table inconsistency -- entity (%1$s), field_slug (%2$s).',  $entity, $field_slug  ), __FILE__, __LINE__, __METHOD__, true );
 	}
 
 	/*************************************************************************

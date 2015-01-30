@@ -19,6 +19,7 @@ abstract class WIC_Entity_Parent {
 	protected $outcome_dups = false;					// supplementary outcome information -- dups among error causes
 	protected $outcome_dups_query_object;			// results of dup query for listing	
 	protected $explanation	= '';						// explanation for outcome
+	protected $made_changes = false;					// after a save_update, were changes made?
 	
 		
 	abstract protected function set_entity_parms ( $args ); // must be included in child to set entity and possibly instance
@@ -263,6 +264,7 @@ abstract class WIC_Entity_Parent {
 			if ( $save ) {
 				$this->data_object_array['ID']->set_value( $wic_access_object->insert_id );
 			}
+			$this->made_changes = $wic_access_object->were_changes_made();
 			$this->special_entity_value_hook( $wic_access_object ); // done on both save and updates, but hook may test values
 			$message = __( 'Successful.  You can update further. ', 'wp-issues-crm' );
 			$message_level = 'good_news';
@@ -303,7 +305,7 @@ abstract class WIC_Entity_Parent {
 			$update_form->layout_form ( $this->data_object_array, $message, $message_level, $sql );	
 			$this->list_after_form ( $wic_query );
 		} else {
-			die ( sprintf ( __( 'Data base corrupted for record ID: %1$s in id_search_generic.', 'wp-issues-crm' ) , $id ) );		
+			WIC_Function_Utilities::wic_error ( sprintf ( 'Data base corrupted for record ID: %1$s in id_search_generic.' , $id ), __FILE__, __LINE__, __METHOD__, true );		
 		} 
 	}
 	
@@ -375,6 +377,10 @@ abstract class WIC_Entity_Parent {
 	
 	protected function list_after_form ( &$wic_query ) {
 		// hook for use with list of constituents after issue display -- see WIC_Entity_Issue 	
+	}
+	
+	public function were_changes_made () {
+		return ( $this->made_changes );	
 	}
 }
 

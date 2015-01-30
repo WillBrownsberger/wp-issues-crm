@@ -62,10 +62,9 @@ class WIC_Control_Select extends WIC_Control_Parent {
 			// look finally for getter as a function in the global name space
 			$option_array = $getter( $value );			
 		} else {
-			// if not found, die with configuration error
-			echo( '<h3>' . sprintf ( __( 'WP-Issues-CRM Warning: Dropdown field "%s" pointed to undefined or disabled option_group -- "%s".</br> 
-			Fix before doing updates on this form; data may be overlayed by updates to the misconfigured field. <br/> WIC_Control_Select::create_options_array reporting.', 
-				'wp-issues-crm' ), $this->field->field_slug, $getter ) . '</h3>' ) ;			
+			WIC_Function_Utilities::wic_error ( sprintf ( 'Dropdown field "%s" pointed to undefined or disabled option_group -- "%s".</br> 
+				Fix before doing updates on this form; data may be overlayed by updates to the misconfigured field.' , 
+				$this->field->field_slug, $getter ) , __FILE__, __LINE__, __METHOD__, false );
 		}
 		
 		if ( isset ( $readonly_update ) ) { 

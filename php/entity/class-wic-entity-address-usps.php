@@ -54,10 +54,10 @@ class WIC_Entity_Address_USPS {
 		$result = curl_exec($ch);
 		$error = curl_error($ch);
  
-		if(empty($error)) {
+		if( empty( $error )) {
 			return $result;
-		}else{
-			die(curl_error($ch));
+		} else {
+			WIC_Function_Utilities::wic_error ( $error, __FILE__, __LINE__, __METHOD__, false );
 		}
 	}
 }

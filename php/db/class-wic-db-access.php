@@ -3,9 +3,8 @@
 *
 * class-wic-db-access.php
 *		intended as wraparound for direct db access objects (implemented as extensions to this.) 
-*
-* 
 */
+
 
 
 abstract class WIC_DB_Access {
@@ -19,6 +18,8 @@ abstract class WIC_DB_Access {
 	public $found_count; // integer save/update/search # records found or acted on
 	public $insert_id;	// ID of newly saved entity
 	public $search_id;  // ID of search completed -- search log
+	public $made_changes; // whether there were any changed values and an update was actually applied ($outcome is true, even if this is false)
+								 // note: maintained by the parent entity save_update but  only actually used here as maintained by the multivalue child class
 	public $last_updated_time; // for pass back to screen
 	public $last_updated_by; // for pass back to screen
 
@@ -48,13 +49,13 @@ abstract class WIC_DB_Access {
 				VALUES ( $user_id, %s, %s, %s )
 				", 
 				array ( current_time( 'Y-m-d H:i:s' ),  $entity, $search ) ); 
-			
+
 			$save_result = $wpdb->query( $sql );
 			
 			if ( 1 == $save_result ) {
 				$this->search_id = $wpdb->insert_id;	
-			} else {		
-				die ( __( 'Unknown database error in query_log. WIC_DB_Access::search_log.' , 'wp-issues-crm' ) );
+			} else {
+				WIC_Function_Utilities::wic_error ( 'Unknown database error in query_log.', __FILE__, __LINE__, __METHOD__, true ); 		
 			}
 		}
 	}
@@ -85,7 +86,7 @@ abstract class WIC_DB_Access {
 		$update_result = $wpdb->query( $sql );
 			
 		if ( 1 != $update_result ) {
-			die ( __( 'Unknown database error in query_log. WIC_DB_Access::mark_search_as_downloaded.' , 'wp-issues-crm' ) );
+			WIC_Function_Utilities::wic_error ( 'Unknown database error in query_log.', __FILE__, __LINE__, __METHOD__, true );
 		}	
 	}		
 
@@ -100,41 +101,84 @@ abstract class WIC_DB_Access {
 		$this->db_delete_by_id ( $id );	
 	}
 
-	// note that the assembly of the save update array occurs in this database access class because
-	// updates are handled for particular entities (and this object serves a particular entity)
-	// by contrast, the search array assembly is handled at the entity level because it needs to be able to report up to
-	// a multivalue control and contribute to a join across multiple entities in addition to the primary object entity  
-	public function save_update ( &$doa ) { // 
+
+/* 
+*	Note on the save_update process for WIC entities which run cross multiple layers, but controlled by the process below   
+*	(1) Top level entity contains an array of controls -- see wic-entity-parent
+*			+ Basic controls each contain a value which is information about the top level entity like name (not an object property technically, but logically so)
+*			+ Multivalue controls contain arrays of entities that have a data relationship to the top level entity, like addresses for a constituent 
+*  (2) Each multivalue entity, e.g., each address is an entity with the same logical structure as the parent entity -- as a class, their entity is
+*		an extension of the parent entity.
+*  (3) So when update is submitted for the parent entity . . .
+*		 (1) The parent entity (e.g. constituent) creates a new instance of this class (actually the _WIC extension of this class ) 
+*				and passes it a pointer to its array of controls 
+*      (2) Second this object->save_update asks each of the basic controls to produce a set clause 
+*		 (3) The set clauses are applied to the database by this object's WIC extension WIC_DB_Access_WIC 
+*				(straightforward insert update for a single entity)
+*		 (4) This object->save_update then asks each of the multivalue controls in turn to do an update
+*		 (5) Each multivalue control object in turn asks each of the row entities in its row array to do a save_update 
+*		 (6) Each multivalue entities (e.g. address) issues a save update request which comes back through an new instance of this object 
+*				and does only steps (1) through (3) for that object (assuming no multivalue controls within multivalue controls, not attempted so far in this implementation. 
+*
+*
+*	note that the assembly of the save update array occurs in this database access class because
+*  updates are handled for particular entities (and this object serves a particular entity)
+*	by contrast, the search array assembly is handled at the entity level because it needs to be able to report up to
+*  a multivalue control and contribute to a join across multiple entities in addition to the primary object entity  
+*
+*
+*/	
+	public function save_update ( &$doa ) { 
 		$save_update_array = $this->assemble_save_update_array( $doa );
+		// each non-multivalue control reports an update clause into the assembly
+		// next do a straight update or insert for the entity in question 
 		if ( count ( $save_update_array ) > 0 ) {
 			if ( $doa['ID']->get_value() > 0 ) {
 				$this->db_update ( $save_update_array );		
 			} else {
 				$this->db_save ( $save_update_array );
 			}	
-		} 
-		$no_multivalue_updates = true;
-		if ( $this->outcome ) { // if main update OK, do multivalue ( child ) updates
+		}
+		// at this stage, the main entity update has occurred and return values for the top level entity have been set (preliminary) 
+		// if main update OK, do multivalue ( child ) updates
+		if ( $this->outcome ) {
+			// set the parent entity ID in case of an insert 
 			$id =  ( $doa['ID']->get_value() > 0 ) ? $doa['ID']->get_value() : $this->insert_id;
-			$errors = '';			
+			$errors = '';
+			// now ask each multivalue to control to do its save_updates 			
+			$multivalue_fields_have_changes = false;			
 			foreach ( $doa as $field => $control ) {
 				if ( $control->is_multivalue() ) {
+					// id for the parent (e.g., constituent) becomes constituent_id for the rows in the multivalue control
 					$errors .= $control->do_save_updates( $id );
-					$no_multivalue_updates = false;
+					// in multi value control, do_save_updates will ask each row entity within it to do its own do_save_updates
+					// do_save_updates for each row will come back through this same save_update method 
+					// report up that changes were made (control has aggregated whether changes made in update of any row)
+					$multivalue_fields_have_changes = $control->were_changes_made() ? true : $multivalue_fields_have_changes;
 				}			
 			}
 			if ( $errors > '' ) {
 				$this->outcome = false;
 				$this->explanation .= $errors;
-			}		
+			}
+			// am in the multivalue control branch and have done updates -- update the top db object's made_changes property 
+			// and time stamp the calling entity's record with a last updated mark 	
+			if ( false === $this->made_changes && true === $multivalue_fields_have_changes ) {
+				$this->made_changes = true;
+				// passing a single ID save update array will just do a time stamp
+				$second_save_update_array = array ( 
+					array ( 	'key' 	=> $id,
+								'value'	=> $this->value,
+								'wp_query_parameter' => '',
+								'soundex_enabled' => false,
+							),
+					);
+				// when doing a timestamp, WIC db_update will just do the update and not set other object properties
+				$this->db_update ( $second_save_update_array );
+			}						
+				
 		}
-		if ( ( 0 == count ( $save_update_array ) ) && $no_multivalue_updates ) {		
-			$this->results = '';
-			$this->sql = '';
-			$this->outcome = false;
-			$this->explanation = __( 'No data received for update.  May have been deleted in sanitization.', 'wp-issues-crm' );
-			$this->insert_id = 0;
-		}
+
 		return;	
 	}
 
@@ -145,7 +189,10 @@ abstract class WIC_DB_Access {
 
 	/*
 	*
-	*	Assemble save_update array from controls.
+	*	Assemble save_update array from controls.  
+	*		-- each control creates the appropriate save update clause which is added to array
+	*		-- multivalue fields are excluded at this stage
+	*		-- when do_save_update is called, it is acting only on individual entities, no multivalue
 	*
 	*/
 	protected function assemble_save_update_array ( &$doa ) {
@@ -168,6 +215,9 @@ abstract class WIC_DB_Access {
 		return ( $now );	
 	}
 
+	public function were_changes_made () {
+		return ( $this->made_changes );	
+	}
 
 	abstract protected function db_search ( $meta_query_array, $search_parameters );
 	abstract protected function db_save ( &$meta_query_array );

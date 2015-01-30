@@ -164,7 +164,7 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 		// test elements of array, protect against remote risk of SQL injection 
 		foreach ( $id_array as $id ) {
 			if ( $id != absint ($id) ) {
-				die ( __('Invalid elements in passed ID array -- WIC_Entity_Comment::get_constituents_by_id reporting', 'wp-issues-crm' ) );			
+				WIC_Function_Utilities::wic_error ( sprintf( 'Invalid elements in passed ID array -- %s', $id ), __FILE__, __LINE__, __METHOD__, true );
 			}		
 		}		
 		

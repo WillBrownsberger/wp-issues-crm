@@ -77,7 +77,7 @@ class WIC_Admin_Navigation {
 				check_admin_referer( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field')) { // if OK, do nothing
 			} else { 
 				var_dump ( $_POST );
-				die  ( '<h3>' .__( 'Nonce checking failure in WIC_Admin_Main.', 'wp-issues-crm' ) . '</h3>' ); 
+				WIC_Function_Utilities::wic_error ( 'Apparent cross-site scripting or configuration error.', __FILE__, __LINE__, __METHOD__, true );
 				}	
 		}	
 	}

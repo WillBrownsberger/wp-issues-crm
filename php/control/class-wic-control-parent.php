@@ -279,8 +279,7 @@ abstract class WIC_Control_Parent {
 		extract ( $search_clause_args, EXTR_OVERWRITE );
 		
 		if ( ! isset( $match_level ) || ! isset ( $dup_check ) ) {
-			die ( sprintf ( __( 'Missing parameters for WIC_Control_Parent::create_search_clause() for %1$s.', 'wp-issues-crm' ),
-				 $this->field->field_slug  ) );
+			WIC_Function_Utilities::wic_error ( sprintf ( 'Missing parameters for WIC_Control_Parent::create_search_clause() for %1$s.', $this->field->field_slug ) , __FILE__, __LINE__, __METHOD__, false );
 		}
 		
 		if ( '' == $this->value || 1 == $this->field->transient ) {
@@ -300,8 +299,7 @@ abstract class WIC_Control_Parent {
 			$key 	= $this->field->field_slug . '_soundex';	
 		} else {
 			// cannot reach here unless there are bad values in the data dictionary
-			die ( sprintf( __( 'Incorrect match_level settings for field %1$s reported by WIC_Control_Parent::create_search_clause.', 'WP_Issues_CRM' ),
-				 $this->field->field_slug ) ); 		
+			WIC_Function_Utilities::wic_error ( sprintf ( 'Incorrect match_level settings for field %1$s.', $this->field->field_slug ) , __FILE__, __LINE__, __METHOD__, false );		
 		}	
 		
 		if ( 'cat' == $this->field->wp_query_parameter && '' < $category_search_mode ) {

@@ -6,8 +6,15 @@
 *
 */
 
+
 class WIC_DB_Access_WIC Extends WIC_DB_Access {
 
+
+	/*
+	*
+	* save an individual database record for the object entity based on the save_update_array containing fields and values
+	*
+	*/
 	protected function db_save ( &$save_update_array ) {
 		global $wpdb;
 		$table  = $wpdb->prefix . 'wic_' . $this->entity;  
@@ -34,6 +41,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			$this->explanation = __( 'Unknown database error. Save may not have been successful', 'wp-issues-crm' );
 		}
 		$this->sql = $sql;
+		$this->made_changes = true; // true even if attempted change failed, an insert is always a change
 		return;
 	}
 	
@@ -41,29 +49,53 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		return ( $set );	
 	}	
 	
+	
+	/*
+	*
+	* update an individual database record for the object entity based on the save_update_array containing fields and values
+	*
+	*/
 	protected function db_update ( &$save_update_array ) {
 		global $wpdb;
-		$table  = $wpdb->prefix . 'wic_' . $this->entity;  
-		
-		$set = $this->parse_save_update_array( $save_update_array );
-				
-  		$set_clause_with_placeholders = $set['set_clause_with_placeholders'];
-		$sql = $wpdb->prepare( "
-				UPDATE $table
-				$set_clause_with_placeholders
-				WHERE ID = %s
-				",
-			$set['set_value_array'] );
+		$table  = $wpdb->prefix . 'wic_' . $this->entity;
 
-		$update_result = $wpdb->query( $sql );
-		$this->outcome = ! ( false === $update_result );
-		$this->explanation = ( $this->outcome ) ? '' : __( 'Unknown database error. Update may not have been successful', 'wp-issues-crm' );
-		$this->last_updated_time = $this->get_mysql_time();
-		$this->last_updated_by = get_current_user_id();
-		$this->sql = $sql;
+		$have_changed_values = $this->have_changed_values ( $save_update_array );		
+		
+		if ( $have_changed_values // if values have changed, apply the updates
+			|| ( 1 == count ( $save_update_array ) && 'ID' == $save_update_array[0]['key'] ) ) { // or if just passing an ID to do a time stamp
+			// parse the array to set up clause and value array for $wpdp->prepare
+			$set = $this->parse_save_update_array( $save_update_array );
+	  		$set_clause_with_placeholders = $set['set_clause_with_placeholders'];
+			$sql = $wpdb->prepare( "
+					UPDATE $table
+					$set_clause_with_placeholders
+					WHERE ID = %s
+					",
+				$set['set_value_array'] );
+	
+			$update_result = $wpdb->query( $sql );
+			// if here because actually doing updates, as opposed to just a time stamp, update the main fields.  
+			if ( $have_changed_values ) {
+				$this->outcome = ! ( false === $update_result );
+				$this->explanation = ( $this->outcome ) ? '' : __( 'Unknown database error. Update may not have been successful', 'wp-issues-crm' );
+				$this->last_updated_time = $this->get_mysql_time();
+				$this->last_updated_by = get_current_user_id();
+				$this->sql = $sql;
+				$this->made_changes = true; // true even if changes may have failed
+			}
+		} else {	// no updates, just set result parameters . . .	
+			$this->outcome = true;
+			$this->made_changes = false;
+		}
+		
 		return;
 	}
 
+	/*
+	*
+	* retrieve database records joined across parent and child tables based on array of search parameters
+	*
+	*/
 	protected function db_search( $meta_query_array, $search_parameters ) { // $select_mode = '*' ) {
 
 		global $wic_db_dictionary;
@@ -129,9 +161,8 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 				$values[] = $where_item['value'][0];
 				$values[] = $where_item['value'][1];
 			} else {
-				 die ( sprintf( __( 'Incorrect compare settings for field %1$s reported by WIC_DB_Access_WIC::db_search.', 'WP_Issues_CRM' ),
-					 $this->field->field_slug ) ); 
-			}
+				WIC_Function_Utilities::wic_error ( sprintf( 'Incorrect compare settings for field %1$s.', $this->field->field_slug  ), __FILE__, __LINE__, __METHOD__, true );
+			}	 
 		}
 		// prepare a join clause		
 		$array_counter = 0;
@@ -173,7 +204,12 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 
 
 	}	
-
+	
+	/*
+	*
+	* parse a save update array into clauses and value array for pre-processing by $wpdb->prepare before a save or update  
+	*
+	*/
 	protected function parse_save_update_array( $save_update_array ) {
 
 		$set_clause_with_placeholders = 'SET last_updated_time = now()';
@@ -217,12 +253,56 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 			);
 	}
 
+	/*
+	*
+	* test whether values have changed on an individual database record before updating that record
+	*
+	*/
+	protected function have_changed_values ( &$save_update_array ) {
+		
+		global $wpdb;		
+		$table  = $wpdb->prefix . 'wic_' . $this->entity;
+		
+		$search_clause = 'ID';
+
+		// extract the field names from the save_update_clause sent with the update request		
+		foreach ( $save_update_array as $save_update_clause ) {
+			if ( $save_update_clause['key'] != 'ID' ) {
+				$search_clause .=  ', ' . $save_update_clause['key']; 		
+			} else { 
+				$entity_id = $save_update_clause['value'];
+			}
+		} 	
+	
+		// construct SQL to retrieve those values for the update target record
+		// no db prepare since not using user supplied values	
+		$sql = "
+			SELECT $search_clause
+			FROM $table
+			WHERE ID = $entity_id
+			";
+		
+		// retrieve the target record
+		$results = $wpdb->get_results ( $sql );
+		
+		// compare the proposed update, field by field
+		$have_changed_values = false;
+		foreach ( $save_update_array as $save_update_clause ) {
+			if ( $save_update_clause['value'] != $results[0]->$save_update_clause['key'] ) {
+				$have_changed_values = true;
+			} 
+		} 
+		
+		return ( $have_changed_values );
+	} 
+
+
 	protected function db_delete_by_id ( $id ) {
 		global $wpdb;		
 		$table  = $wpdb->prefix . 'wic_' . $this->entity;
 		$outcome = $wpdb->delete ( $table, array( 'ID' => $id ) );
 		if ( ! ( 1 == $outcome ) ) {
-			die ( sprintf (  __('Database error on execution of requested delete of %s.' , 'wp-issues-crm' ), $this->entity ) );	
+			WIC_Function_Utilities::wic_error ( sprintf( 'Database error on execution of requested delete of %s.', $this->entity  ), __FILE__, __LINE__, __METHOD__, true );
 		} 
 	}
 
