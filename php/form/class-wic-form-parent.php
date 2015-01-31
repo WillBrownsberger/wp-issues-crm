@@ -235,14 +235,62 @@ abstract class WIC_Form_Parent  {
 		return ( $button );
 	}
 
-	// just a back button 
+	// actually produces up to three affirmative buttons (not vulnerable to caching issues) -- last constituents, last issues, last search 
 	static public function backbutton ( $class ) {
-		return ( '<button 
-				class= "wic-form-button button button-primary ' . $class . '" 
-				type="button" 
-				onclick = "history.go(-1); return true;">' .
-					 __( 'Go Back', 'wp-issues-crm' ) . 
-				'</button>'
-				);
+		
+		$button_output = '';
+
+		$user_id = get_current_user_id();
+		
+		$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( 'constituent' );
+		$latest_update_array = $wic_access_object->updated_last ( $user_id );
+		$latest_search_array = $wic_access_object->search_log_last ( $user_id );
+		$latest_constituent = WIC_Function_Utilities::choose_latest_non_blank ( 
+			$latest_update_array['latest_updated'], 
+			$latest_update_array['latest_updated_time'],
+			$latest_search_array['latest_searched'], 
+			$latest_search_array['latest_searched_time']
+			);
+
+		// if have a latest constituent, show a button linking to them as last updated
+		if ( $latest_constituent > '' ) {
+			$list_button_args = array(
+					'entity_requested'	=> 'constituent',
+					'action_requested'	=> 'id_search',
+					'button_class' 		=> 'button button-primary second-position',
+					'id_requested'			=> $latest_constituent,
+					'button_label' 		=> '<span class="dashicons dashicons-smiley"></span><span class="dashicons dashicons-arrow-left-alt"></span>',				
+			);			
+			$output .= WIC_Form_Parent::create_wic_form_button( $list_button_args ) ;	
+		}
+		
+		// get latest issue
+		$wic_access_object2 = WIC_DB_Access_Factory::make_a_db_access_object( 'issue' );
+		$latest_update_array = $wic_access_object2->updated_last ( $user_id );
+		$latest_search_array = $wic_access_object2->search_log_last ( $user_id );
+		$latest_issue = WIC_Function_Utilities::choose_latest_non_blank ( 
+			$latest_update_array['latest_updated'], 
+			$latest_update_array['latest_updated_time'],
+			$latest_search_array['latest_searched'], 
+			$latest_search_array['latest_searched_time']
+			);
+
+		if ( $latest_issue > '' ) {
+			$list_button_args = array(
+					'entity_requested'	=> 'issue',
+					'action_requested'	=> 'id_search',
+					'button_class' 		=> 'button button-primary second-position',
+					'id_requested'			=> $latest_issue,
+					'button_label' 		=> '<span class="dashicons dashicons-format-aside"></span><span class="dashicons dashicons-arrow-left-alt"></span>',				
+			);			
+			$output .= WIC_Form_Parent::create_wic_form_button( $list_button_args ) ;	
+		}
+		
+		// get latest search
+		
+		
+		// create buttons
+		
+				return ( $output );	
 	}
 }

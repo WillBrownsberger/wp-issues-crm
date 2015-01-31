@@ -312,8 +312,39 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		return ( $open_posts ); 
 	}
 
+	public function updated_last ( $user_id ) {
+		
+		// The Query
+		$args = array (
+			'author'		=> $user_id,
+			'post_status' => array(
+				'publish',
+				'private',
+				),
+			'orderby' 	=> 'modified',
+			'order'		=> 'DESC',
+			'posts_per_page'	=> 1,
+		);
 
+		// note will miss items modified, but not authored by user
+		$last_modified_query = new WP_Query( $args );
+		
+		// The Loop
+		while ( $last_modified_query->have_posts() ) {
+			$last_modified_query->the_post();
+			$latest_updated = get_the_ID();
+			$latest_updated_time = get_the_modified_date('Y-m-d H:i:s'); // . get_the_modified_time( ' H:i:s');
+		}
+		
+		wp_reset_postdata();
 
+		return ( array (
+			'latest_updated' => $latest_updated,
+			'latest_updated_time' =>$latest_updated_time,
+			)
+		);
+
+	}
 
 }
 

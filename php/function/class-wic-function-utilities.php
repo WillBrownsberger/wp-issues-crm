@@ -194,4 +194,19 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 		
 		return ( $option_group_array );
 	}
+	
+	/*
+	*	compare strings and times
+	*/
+	public static function choose_latest_non_blank ( $value1, $time1, $value2, $time2 ) {
+		$latest = '';	
+		if ( '' < $value1 && '' == $value2 ) {
+			$latest = $value1;		
+		} elseif ( '' == $value1 && '' < $value2 ) {
+			$latest = $value2;	
+		} elseif ( '' < $value1 && '' < $value2 ) {
+			$latest =  $time2 > $time1 ? $value2 : $value1; 
+		} 
+		return ( $latest );
+	}
 }

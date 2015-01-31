@@ -46,9 +46,9 @@ abstract class WIC_DB_Access {
 				"
 				INSERT INTO wp_wic_search_log
 				( user_id, time, entity, serialized_search_array )
-				VALUES ( $user_id, %s, %s, %s )
+				VALUES ( $user_id, NOW(), %s, %s )
 				", 
-				array ( current_time( 'Y-m-d H:i:s' ),  $entity, $search ) ); 
+				array ( $entity, $search ) ); 
 
 			$save_result = $wpdb->query( $sql );
 			
@@ -59,10 +59,58 @@ abstract class WIC_DB_Access {
 			}
 		}
 	}
+	
+	/*
+	*
+	* get the latest id search for this entity from the search log 
+	*
+	*/
+	public function search_log_last ( $user_id ) {
+		
+		global $wpdb;		
+		$search_log_table = $wpdb->prefix . 'wic_search_log';
+		$entity = $this->entity;		
+		
+		$sql = 			
+			"
+			SELECT serialized_search_array, time
+			FROM $search_log_table
+			WHERE user_id = $user_id
+				AND entity = '$entity'
+				AND INSTR ( serialized_search_array, 's:3:\"key\";s:2:\"ID\"' ) > 0
+			ORDER	BY time DESC
+			LIMIT 0, 1
+			";
+			
+		// get latest constituent searched for by user
+		$latest_search = $wpdb->get_results ( $sql );
+		$latest_search_array = unserialize ( $latest_search[0]->serialized_search_array );
+		$latest_searched_for = '';
+		foreach ( $latest_search_array as $search_clause ) {
+			if ( $search_clause['key'] = 'ID' ) {
+				$latest_searched_for = $search_clause['value'];			
+			}		
+		} 	
+		
+		return ( array (
+			'latest_searched' => $latest_searched_for,
+			'latest_searched_time'  =>$latest_search[0]->time, 
+			)		
+		);
+	
+	} 	 
+	
+	/*
+	*
+	* pull the specified search off the search log by search id
+	*
+	*/
 	 
 	public static function get_search_from_search_log ( $id ) {
+		
 		global $wpdb;
-		$search_object = $wpdb->get_row ( "SELECT * from wp_wic_search_log where id = $id ");
+		
+		$search_object = $wpdb->get_row ( "SELECT * from wp_wic_search_log where id = $id " );
 		
 		$return = array (
 			'user_id' => $search_object->user_id,
@@ -167,14 +215,16 @@ abstract class WIC_DB_Access {
 				$this->made_changes = true;
 				// passing a single ID save update array will just do a time stamp
 				$second_save_update_array = array ( 
-					array ( 	'key' 	=> $id,
-								'value'	=> $this->value,
+					array ( 	'key' 	=> 'ID',
+								'value'	=> $id,
 								'wp_query_parameter' => '',
 								'soundex_enabled' => false,
 							),
 					);
 				// when doing a timestamp, WIC db_update will just do the update and not set other object properties
 				$this->db_update ( $second_save_update_array );
+				// note that this call may generate an error if there were a multivalue field created for an issue; 
+				// non-fatal:  all other updates are already done; no flags set; no tracking of last_updated_by in WP anyway
 			}						
 				
 		}

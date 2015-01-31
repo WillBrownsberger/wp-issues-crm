@@ -74,10 +74,10 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 			// if ( '' == $title && isset( $data_array['email']->get_value()[0] ) ) {
 			$control = $data_array['email'];
 			$result = $control->get_value();
-			$email_available = isset( $result[0] ); 	
+			$email_available = isset( $result[0] );
 		if ( '' == $title && $email_available ) {
 			// $title = $data_array['email']->get_value()[0]->get_email_address();
-			$title = $result[0]->get_email_address;
+			$title = $result[0]->get_email_address();
 		} 
 		// if still empty, insert word constitent
 		$title =		( '' == $title ) ? __( 'Constituent', 'wp-issues-crm' ) : $title;

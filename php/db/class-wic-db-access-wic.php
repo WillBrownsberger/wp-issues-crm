@@ -370,5 +370,30 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$this->explanation = ''; 
 	}
 
+	public function updated_last ( $user_id ) {
+		
+		global $wpdb;
+	
+		$table = $wpdb->prefix . 'wic_' . $this->entity;
+		
+		$sql = 
+			"
+			SELECT ID, last_updated_time
+			FROM $table
+			WHERE last_updated_by = $user_id
+			ORDER BY last_updated_time DESC
+			LIMIT 0, 1		
+			";
+			
+		$latest_updated_array = $wpdb->get_results( $sql );
+
+		return ( array (
+			'latest_updated' => $latest_updated_array[0]->ID,
+			'latest_updated_time' =>$latest_updated_array[0]->last_updated_time,
+			)
+		);
+
+	}
+
 }
 

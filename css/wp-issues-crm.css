@@ -282,8 +282,10 @@ select.wic-input {
 }
 
 
-.dashicons-dismiss {
-	vertical-align: middle;
+span.dashicons.dashicons-arrow-left-alt,
+span.dashicons.dashicons-smiley,
+.dashicons-dismiss, {
+	vertical-align: bottom;
 }
 .wic-input-deleted-label:hover {
 	
