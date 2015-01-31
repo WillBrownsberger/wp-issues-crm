@@ -395,5 +395,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 
 	}
 
+	
+
 }
 

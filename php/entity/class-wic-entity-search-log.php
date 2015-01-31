@@ -13,15 +13,42 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 		$this->entity = 'search_log';
 	} 
 
-	public function id_search( $id ) {
-		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-		$wic_query->list_by_id ( '(' . $id['id_requested'] . ')' );
-		$class_name = 'WIC_Entity_' . $wic_query->result[0]->entity; // entity_requested
-		$action_requested = 'redo_search_from_query'; 
-		$args = unserialize( $wic_query->result[0]->serialized_search_array ); // not an id, but will pass through
-			// normally args is array with keys 'id' and 'instance', but no error since passing to a function expecting
-		${ 'wic_entity_'. $wic_query->result[0]->entity } = new $class_name ( $action_requested, $args ) ;		
+	// request handler
+	public function id_search( $args ) {
+		$search = $this->id_retrieval( $args );
+		$class_name = 'WIC_Entity_'. $search['entity'];
+		${ $class_name } = new $class_name ( 'redo_search_from_query', $search['unserialized_search_array'], $search['unserialized_search_parameters']  ) ;		
 	}
+
+	public function get_latest ( $args ) { // get latest search
+		$latest_general_search_id = WIC_DB_Access::search_log_last_general( $args['id_requested'] );
+		$args2 = array ( 'id_requested' => $latest_general_search_id );	
+		if ( $latest > '' ) {
+			$this->id_search_to_form ( $args2 );	
+		} else {
+			WIC_Function_Utilities::wic_error ( 'Trying to go back to a new or purged search log.  Do a fresh search!' , __FILE__, __LINE__, __METHOD__, false );	
+		} 		
+	}
+	
+	// request handler
+	public function id_search_to_form( $args ) {
+		$search = $this->id_retrieval( $args );
+		$class_name = 'WIC_Entity_'. $search['entity'];
+		${ $class_name } = new $class_name ( 'redo_search_form_from_query', $search ) ;		
+	}
+	
+	protected function id_retrieval ( $args ) {
+		$id = $args['id_requested'];
+		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		$wic_query->list_by_id ( '(' . $id . ')' );
+		return ( array ( 
+			'entity' => $wic_query->result[0]->entity, 
+			'unserialized_search_array' => unserialize( $wic_query->result[0]->serialized_search_array ),
+			'unserialized_search_parameters' => unserialize( $wic_query->result[0]->serialized_search_parameters ),
+			) 
+		);
+	}	
+	
 	
 	public static function serialized_search_array_formatter ( $serialized ) {
 		
@@ -55,11 +82,18 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 					$value = ( $label > '' ) ? $label : $value;
 				}
 				
-				if ( $show_item )	{			
-					$search_phrase .= $search_clause['table'] . ': ' . 
-						$search_clause['key'] . ' ' . 
-						$search_clause['compare'] . ' ' . 
-						esc_html( $value ) . '. <br />';
+				if ( $show_item )	{	
+					if ( 'ID' == $search_clause['key']  ) { // only accessible for issues and constituents and overrides all other criteria
+						$entity_class =  'WIC_Entity_' . $search_clause['table'];
+						$args = array ( 'id_requested' => $search_clause['value'] );
+						$entity = new $entity_class( 'initialize_only', $args );
+						$search_phrase =  $search_clause['table'] . ': ' . esc_html ( $entity->get_the_title () );					
+					} else {  		
+						$search_phrase .= $search_clause['table'] . ': ' . 
+							$search_clause['key'] . ' ' . 
+							$search_clause['compare'] . ' ' . 
+							esc_html( $value ) . '. <br />';
+					}
 				}		
 			}
 		}

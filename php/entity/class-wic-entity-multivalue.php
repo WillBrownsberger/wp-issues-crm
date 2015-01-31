@@ -28,6 +28,7 @@ abstract class WIC_Entity_Multivalue extends WIC_Entity_Parent {
 		foreach ($this->fields as $field ) {
 			if ( isset ( $form_row_array[$field->field_slug] ) ) {
 				$this->data_object_array[$field->field_slug]->set_value( $form_row_array[$field->field_slug] );
+				// var_dump ( $form_row_array[$field->field_slug] );
 			}
 		}
 	}

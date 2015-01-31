@@ -901,6 +901,7 @@ button.wic-post-list-button {
 .pl-search_log-time{ width:14%;}
 .pl-search_log-serialized_search_array{ width:45%;}
 .pl-search_log-download-time{ width:20%;}
+li.pl-search_log-serialized_search_parameters{ display: none;}
 
 .pl-option_group-option_group_desc{ width:30%;}
 .pl-option_group-enabled{ width:10%;}

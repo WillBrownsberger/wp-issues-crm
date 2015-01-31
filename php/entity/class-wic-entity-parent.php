@@ -28,7 +28,7 @@ abstract class WIC_Entity_Parent {
 	*
 	* constructor just initializes minimal blank structure and passes control to named action requested
 	* 
-	* note that the current class is an abstract parent class WIC_Entity
+	* note that the current class is an abstract parent class WIC_Entity_Parent
 	* 	-- entity is chosen in the wp-issues-crm which initializes the corresponding child class  -- e.g. WIC_Constituent
 	*  
 	* args is an associative array, which MAY be populated as follows:
@@ -45,10 +45,24 @@ abstract class WIC_Entity_Parent {
 
 	/*************************************************************************************
 	*
-	*  METHODS FOR FILLING THE DATA_OBJECT_ARRAY
+	*  METHODS FOR SETTING UP AND POPULATING THE DATA_OBJECT_ARRAY
 	*
-	**************************************************************************************/
+	**************************************************************************************
+	*
+	* The major entities retain their logical properties in a single data_object_array of control objects
+	*	Some of these controls are multivalue controls, which in turn are arrays of entity objects each with their own array of controls
+	*	Have to handle the multivalue controls as arrays.
+	*
+	* To up the entity object (this sequence is built in to each populate function): 
+	*  (1) get the entity fields/properties from the data dictionary ( calling $wic_db_dictionary->get_form_fields)
+	*  (2) initialize the data object array by instantiating controls for each (each dictionary control type having a corresponding control class )
+	*  (3) populating the control objects
+	*
+	*/
 	protected function initialize_data_object_array()  {
+		// get fields for the entity
+		global $wic_db_dictionary;
+		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		// initialize_data_object_array as field_slug => control object 
 		foreach ( $this->fields as $field ) { 
 			$this->data_object_array[$field->field_slug] = WIC_Control_Factory::make_a_control( $field->field_type );
@@ -57,9 +71,10 @@ abstract class WIC_Entity_Parent {
 	}
 
 	protected function populate_data_object_array_from_submitted_form() {
+
+		$this->initialize_data_object_array();
+
 		foreach ( $this->fields as $field ) {  	
-			$this->data_object_array[$field->field_slug] = WIC_Control_Factory::make_a_control( $field->field_type );
-			$this->data_object_array[$field->field_slug]->initialize_default_values(  $this->entity, $field->field_slug, $this->entity_instance  );
 			if ( isset ( $_POST[$field->field_slug] ) ) {		
 				$this->data_object_array[$field->field_slug]->set_value( $_POST[$field->field_slug] );
 			}	
@@ -67,6 +82,9 @@ abstract class WIC_Entity_Parent {
 	}	
 
 	protected function populate_data_object_array_from_found_record( &$wic_query, $offset=0 ) {
+
+		$this->initialize_data_object_array();
+
 		foreach ( $this->data_object_array as $field_slug => $control ) { 
 			if ( ! $control->is_multivalue() && ! $control->is_transient()  ) { 
 				$control->set_value ( $wic_query->result[$offset]->{$field_slug} );
@@ -78,6 +96,39 @@ abstract class WIC_Entity_Parent {
 		} 
 	}	
 
+	protected function populate_data_object_array_with_search_parameters ( $search ) {
+	
+		$this->initialize_data_object_array();
+		// reformat $search_parameters array
+		$key_value_array = array();		
+		foreach ( $search['unserialized_search_array'] as $search_array ) {
+			if ( $search_array['table'] == $this->entity ) {
+				$key_value_array[$search_array['key']] = $search_array['value'];
+			} else {
+				// spoof an incoming form array for a multivalue control	
+				// (to the top entity multivalue control looks like any other, but its set value function needs an array)			
+				if ( ! isset ( $key_value_array[$search_array['table']] ) ) {
+					$key_value_array[$search_array['table']] = array();
+					$key_value_array[$search_array['table']][0] = array();				
+				}
+				$key_value_array[$search_array['table']][0][$search_array['key']] = $search_array['value'];		
+			}
+		}
+
+		$combined_form_values = array_merge ( $key_value_array, $search['unserialized_search_parameters']);
+
+		// pass data object array and see if have values
+		foreach ( $this->data_object_array as $field_slug => $control ) { 
+			if ( isset ( $combined_form_values[$field_slug] ) ) {
+					$control->set_value ( $combined_form_values[$field_slug] );
+			}
+		} 
+	}
+	
+	// initialize data object array for an id, but don't display a form
+	protected function initialize_only ( $args ) {
+		$this->id_search_generic ( $args['id_requested'], '', '' );	
+	}
 
 	/*************************************************************************************
 	*
@@ -223,12 +274,16 @@ abstract class WIC_Entity_Parent {
 		$new_search = new $form;
 		$new_search->layout_form( $this->data_object_array, $guidance, 'guidance' );
 	}	
+	
+	protected function search_form_from_search_array ( $form, $guidance, $serialized_search_array ) {
+		$this->populate_data_object_array_with_search_parameters ( $serialized_search_array ); 
+		$new_search = new $form;
+		$new_search->layout_form( $this->data_object_array, $guidance, 'guidance' );
+	}
 
 	// handle a save request coming from search -- 
 	// need to lose readonly fields from search form, so show save form, rather than proceeding directly
 	protected function save_from_search ( $entity_save_form, $message = '', $message_level = 'good_news', $sql = ''  ) {
-		global $wic_db_dictionary;
-		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->populate_data_object_array_from_submitted_form();
 		$save_form = new $entity_save_form;
 		$save_form->layout_form ( $this->data_object_array, $message, $message_level, $sql );		
@@ -236,8 +291,6 @@ abstract class WIC_Entity_Parent {
 
 	//handle an update request coming from a form ( $save is true or false )
 	protected function form_save_update_generic ( $save, $fail_form, $success_form ) {
-		global $wic_db_dictionary;
-		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->populate_data_object_array_from_submitted_form();
 		$this->update_ready( $save ); // false, not a save 
 		if ( false === $this->outcome ) {
@@ -274,7 +327,8 @@ abstract class WIC_Entity_Parent {
 	}
 	
 	// handle a search request for an ID coming from anywhere
-	protected function id_search_generic ( $id, $success_form, $sql = '' ) {
+	protected function id_search_generic ( $id, $success_form, $sql = '' ) { 
+		// passing a blank success form just leaves the array instantiated, but no action taken
 		// initialize data array with only the ID and do search
 		$this->data_object_array['ID'] = WIC_Control_Factory::make_a_control( 'text' );
 		$this->data_object_array['ID']->initialize_default_values(  $this->entity, 'ID', $this->entity_instance );	
@@ -297,13 +351,12 @@ abstract class WIC_Entity_Parent {
 		if ( 1 == $wic_query->found_count ) { 
 			$message = __( '', 'wp-issues-crm' );
 			$message_level =  'guidance';
-			global $wic_db_dictionary;
-			$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
-			$this->initialize_data_object_array();	
 			$this->populate_data_object_array_from_found_record ( $wic_query );			
-			$update_form = new $success_form; 
-			$update_form->layout_form ( $this->data_object_array, $message, $message_level, $sql );	
-			$this->list_after_form ( $wic_query );
+			if ( $success_form > '' ) {
+				$update_form = new $success_form; 
+				$update_form->layout_form ( $this->data_object_array, $message, $message_level, $sql );	
+				$this->list_after_form ( $wic_query );
+			}
 		} else {
 			WIC_Function_Utilities::wic_error ( sprintf ( 'Data base corrupted for record ID: %1$s in id_search_generic.' , $id ), __FILE__, __LINE__, __METHOD__, true );		
 		} 
@@ -313,10 +366,6 @@ abstract class WIC_Entity_Parent {
 	// the first form passed will be 
 	protected function form_search_generic ( $not_found_form, $found_form ) { 
 
-		global $wic_db_dictionary;
-
-		
-		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->populate_data_object_array_from_submitted_form();
 		$this->sanitize_values();
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
@@ -368,6 +417,48 @@ abstract class WIC_Entity_Parent {
 		$search_parameters = array(); // use default parameters, since original unknown
 		$wic_query->search ( $meta_query_array, $search_parameters ); 
 		$this->handle_search_results ( $wic_query, $save_form, $update_form );
+	}
+
+	// determine the latest entity which the user has saved, updated or selected from a list
+	protected function compute_latest ( $args ) {
+		$user_id = $args['id_requested'];
+		$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		$latest_update_array = $wic_access_object->updated_last ( $user_id );
+		$latest_search_array = $wic_access_object->search_log_last ( $user_id );
+		$latest = WIC_Function_Utilities::choose_latest_non_blank ( 
+			$latest_update_array['latest_updated'], 
+			$latest_update_array['latest_updated_time'],
+			$latest_search_array['latest_searched'], 
+			$latest_search_array['latest_searched_time']
+			);
+		return ( $latest );
+	}	
+	
+	// display the latest entity in an update form 
+	protected function get_latest ( $args ) {
+		$latest = $this->compute_latest ( $args  ); 	
+		$args2 = array ( 'id_requested' => $latest );	
+		if ( $latest > '' ) {
+			$this->id_search ( $args2 ); // id_search lives in the instantiated object and includes a form specific to the instantiated entity
+				// calls id_search_generic with the class
+		} else {
+			$this->new_blank_form( $args2 ); // passing the empty arg		
+		} 
+	}
+	
+	// just load the latest entity
+	protected function get_latest_no_form ( $args ) {
+		$latest = $this->compute_latest ( $args  ); 	
+		$this->id_search_generic ( $latest, '', '' ); // just retrieves the record, if no class is passed 	
+	}
+
+	// if used after calling get_latest_no_form returns latest
+	protected function get_current_ID_and_title () {
+		return ( array (
+			 'current' 	=> $this->data_object_array['ID']->get_value(),
+			 'title' 	=> $this->get_the_title(),
+			)
+		);
 	}
 
 	protected function special_entity_value_hook ( &$wic_access_object ) {

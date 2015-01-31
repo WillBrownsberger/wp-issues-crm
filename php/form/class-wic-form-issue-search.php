@@ -26,7 +26,7 @@ class WIC_Form_issue_Search extends WIC_Form_Parent  {
 		
 		$button_args_main = array(
 			'entity_requested'			=> 'issue',
-			'action_requested'			=> 'new_issue',
+			'action_requested'			=> 'new_blank_form',
 			'button_label'					=> __( 'Go to Add New', 'wp-issues-crm'),
 			'button_class'					=> 'button button-primary wic-form-button second-position',
 			'title'							=> __( 'Add a new issue.', 'wp-issues-crm' ),

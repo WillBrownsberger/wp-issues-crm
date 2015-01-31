@@ -193,7 +193,7 @@ class WIC_Admin_Dashboard {
 		$search_parameters= array(
 			'sort_order' => true,
 			'compute_total' 	=> false,
-			'retrieve_limit' 	=> 100,
+			'retrieve_limit' 	=> 30,
 			'show_deleted' 	=> true,
 			'select_mode'		=> 'id',
 			'sort_direction'	=> 'DESC',

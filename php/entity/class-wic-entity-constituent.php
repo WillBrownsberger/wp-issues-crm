@@ -35,7 +35,7 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	}
 
 	// handle a request for a blank new constituent form
-	protected function new_constituent() {
+	protected function new_blank_form() {
 		$this->new_form_generic ( 'WIC_Form_Constituent_Save' );	
 	}
 
@@ -70,13 +70,21 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		return;
 	}		
 	
+	// handle a request to return to a search form
+	protected function redo_search_form_from_query ( $search ) { 
+		$this->search_form_from_search_array ( 'WIC_Form_Constituent_Search',  __( 'Redo search.', 'wp-issues-crm'), $search );
+		return;
+	}
+
 	// set values from update process to be visible on form after save or update
 	protected function special_entity_value_hook ( &$wic_access_object ) {
 		$this->data_object_array['last_updated_time']->set_value( $wic_access_object->last_updated_time );
 		$this->data_object_array['last_updated_by']->set_value( $wic_access_object->last_updated_by );		
 	}
 	
-	
+	public function get_the_title () {
+		return ( WIC_Form_Constituent_Update::format_name_for_title ( $this->data_object_array ) ) ;	
+	}	
 	/***************************************************************************
 	*
 	* Constituent -- special formatters and validators

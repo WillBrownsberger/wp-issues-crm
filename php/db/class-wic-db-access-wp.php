@@ -311,6 +311,29 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		
 		return ( $open_posts ); 
 	}
+	
+	public static function get_wic_latest_issues ( $user_ID, $n ) {
+
+		// retrieve $n most frequently used among last 30 issues for user 
+		
+		global $wpdb;		
+		
+		$activities_table = 	$wpdb->prefix . 'wic_activity';	
+		
+		$sql = 
+			"
+			SELECT p.ID, p.post_title  
+			FROM 
+			( SELECT issue from 
+				( SELECT issue from $activities_table WHERE last_updated_by = $user_ID order by last_updated_time DESC LIMIT 0, 20 ) as latest 
+				GROUP BY issue ORDER BY count(issue) DESC limit 0, $n) AS latest_issues 
+				LEFT JOIN $wpdb->posts p  on latest_issues.issue = p.id
+			";
+
+		$latest_issues = $wpdb->get_results( $sql );
+		
+		return ( $latest_issues ); 
+	}
 
 	public function updated_last ( $user_id ) {
 		

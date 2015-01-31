@@ -27,13 +27,14 @@ abstract class WIC_DB_Access {
 		$this->entity = $entity;
 	}		
 
-	/*
-	*	publicly callable methods that will return results -- 
-	*		these methods do not alter the object array as it exists in the object calling them
+	/**********************************************************************************************
 	*
-	*/
+	*	search log functions 
+	*
+	***********************************************************************************************/
 
-	private function search_log ( $meta_query_array ) {
+	// log a search to the search log
+	private function search_log ( $meta_query_array, $search_parameters ) {
 		$entity = $this->entity;
 		if ( "constituent" == $entity || 'issue' == $entity ) {	
 
@@ -41,14 +42,15 @@ abstract class WIC_DB_Access {
 			$user_id = get_current_user_id();
 
 			$search = serialize( $meta_query_array );
+			$parameters = serialize ( $search_parameters );
 			
 			$sql = $wpdb->prepare(
 				"
 				INSERT INTO wp_wic_search_log
-				( user_id, time, entity, serialized_search_array )
-				VALUES ( $user_id, NOW(), %s, %s )
+				( user_id, time, entity, serialized_search_array,  serialized_search_parameters )
+				VALUES ( $user_id, NOW(), %s, %s, %s )
 				", 
-				array ( $entity, $search ) ); 
+				array ( $entity, $search, $parameters ) ); 
 
 			$save_result = $wpdb->query( $sql );
 			
@@ -62,7 +64,7 @@ abstract class WIC_DB_Access {
 	
 	/*
 	*
-	* get the latest id search for this entity from the search log 
+	* retrieve the latest search for an individual instance of this entity from the search log 
 	*
 	*/
 	public function search_log_last ( $user_id ) {
@@ -82,7 +84,7 @@ abstract class WIC_DB_Access {
 			LIMIT 0, 1
 			";
 			
-		// get latest constituent searched for by user
+		// get ID of latest entity instance searched for by user
 		$latest_search = $wpdb->get_results ( $sql );
 		$latest_search_array = unserialize ( $latest_search[0]->serialized_search_array );
 		$latest_searched_for = '';
@@ -99,6 +101,32 @@ abstract class WIC_DB_Access {
 		);
 	
 	} 	 
+
+	/*
+	*
+	* retrieve last NON individual retrieval ( i.e., not containing 'ID' as search key)
+	*
+	*/
+	public static function search_log_last_general ( $user_id ) {
+		
+		global $wpdb;		
+		$search_log_table = $wpdb->prefix . 'wic_search_log';
+		
+		$sql = 			
+			"
+			SELECT ID
+			FROM $search_log_table
+			WHERE user_id = $user_id
+				AND INSTR ( serialized_search_array, 's:3:\"key\";s:2:\"ID\"' ) = 0
+			ORDER	BY time DESC
+			LIMIT 0, 1
+			";
+		
+		$latest_search = $wpdb->get_results ( $sql );
+
+		return ( $latest_search[0]->ID );
+
+	} 	 	
 	
 	/*
 	*
@@ -121,6 +149,11 @@ abstract class WIC_DB_Access {
 		return ( $return );		
 	}
 
+	/*
+	*
+	* mark a search as having been downloaded
+	*
+	*/
 	public static function mark_search_as_downloaded ( $id ) {
 		global $wpdb;
 		$sql = $wpdb->prepare (
@@ -134,13 +167,18 @@ abstract class WIC_DB_Access {
 		$update_result = $wpdb->query( $sql );
 			
 		if ( 1 != $update_result ) {
-			WIC_Function_Utilities::wic_error ( 'Unknown database error in query_log.', __FILE__, __LINE__, __METHOD__, true );
+			WIC_Function_Utilities::wic_error ( 'Unknown database error in posting download event to search log.', __FILE__, __LINE__, __METHOD__, true );
 		}	
 	}		
 
 
+	/****************************************************************************************
+	*
+	*	log search request and pass through to database specific object search functions
+	*
+	******************************************************************************************/
 	public function search ( $meta_query_array, $search_parameters ) { // receives pre-assembled meta_query_array
-		$this->search_log( $meta_query_array );
+		$this->search_log( $meta_query_array, $search_parameters );
 		$this->db_search( $meta_query_array, $search_parameters );
 		return;
 	}
@@ -150,32 +188,32 @@ abstract class WIC_DB_Access {
 	}
 
 
-/* 
-*	Note on the save_update process for WIC entities which run cross multiple layers, but controlled by the process below   
-*	(1) Top level entity contains an array of controls -- see wic-entity-parent
-*			+ Basic controls each contain a value which is information about the top level entity like name (not an object property technically, but logically so)
-*			+ Multivalue controls contain arrays of entities that have a data relationship to the top level entity, like addresses for a constituent 
-*  (2) Each multivalue entity, e.g., each address is an entity with the same logical structure as the parent entity -- as a class, their entity is
-*		an extension of the parent entity.
-*  (3) So when update is submitted for the parent entity . . .
-*		 (1) The parent entity (e.g. constituent) creates a new instance of this class (actually the _WIC extension of this class ) 
-*				and passes it a pointer to its array of controls 
-*      (2) Second this object->save_update asks each of the basic controls to produce a set clause 
-*		 (3) The set clauses are applied to the database by this object's WIC extension WIC_DB_Access_WIC 
-*				(straightforward insert update for a single entity)
-*		 (4) This object->save_update then asks each of the multivalue controls in turn to do an update
-*		 (5) Each multivalue control object in turn asks each of the row entities in its row array to do a save_update 
-*		 (6) Each multivalue entities (e.g. address) issues a save update request which comes back through an new instance of this object 
-*				and does only steps (1) through (3) for that object (assuming no multivalue controls within multivalue controls, not attempted so far in this implementation. 
-*
-*
-*	note that the assembly of the save update array occurs in this database access class because
-*  updates are handled for particular entities (and this object serves a particular entity)
-*	by contrast, the search array assembly is handled at the entity level because it needs to be able to report up to
-*  a multivalue control and contribute to a join across multiple entities in addition to the primary object entity  
-*
-*
-*/	
+	/**********************************************************************************************************
+	*
+	*	Main save/update process for WP Issues CRM -- runs across multiple layers, but is controlled by the process below   
+	*	(1) Top level entity contains an array of controls -- see wic-entity-parent
+	*			+ Basic controls each contain a value which is information about the top level entity like name (not an object property technically, but logically so)
+	*			+ Multivalue controls contain arrays of entities that have a data relationship to the top level entity, like addresses for a constituent 
+	*  (2) Each multivalue entity, e.g., each address is an entity with the same logical structure as the parent entity -- as a class, their entity is
+	*		an extension of the parent entity.
+	*  (3) So when update is submitted for the parent entity . . .
+	*		 (1) The parent entity (e.g. constituent) creates a new instance of this class (actually the _WIC extension of this class ) 
+	*				and passes it a pointer to its array of controls 
+	*      (2) Second this object->save_update asks each of the basic controls to produce a set clause 
+	*		 (3) The set clauses are applied to the database by this object's WIC extension WIC_DB_Access_WIC 
+	*				(straightforward insert update for a single entity)
+	*		 (4) This object->save_update then asks each of the multivalue controls in turn to do an update
+	*		 (5) Each multivalue control object in turn asks each of the row entities in its row array to do a save_update 
+	*		 (6) Each multivalue entities (e.g. address) issues a save update request which comes back through an new instance of this object 
+	*				and does only steps (1) through (3) for that object (assuming no multivalue controls within multivalue controls, not attempted so far in this implementation. 
+	*
+	*
+	*	note that the assembly of the save update array occurs in this database access class because
+	*  updates are handled for particular entities (and this object serves a particular entity)
+	*	by contrast, the search array assembly is handled at the entity level because it needs to be able to report up to
+	*  a multivalue control and contribute to a join across multiple entities in addition to the primary object entity  
+	*
+	**********************************************************************************************************/	
 	public function save_update ( &$doa ) { 
 		$save_update_array = $this->assemble_save_update_array( $doa );
 		// each non-multivalue control reports an update clause into the assembly
@@ -233,10 +271,6 @@ abstract class WIC_DB_Access {
 	}
 
 
-	public function list_by_id ( $id_string,  $sort_direction = 'ASC' ) {
-		$this->db_list_by_id ( $id_string, $sort_direction ); 
-	}
-
 	/*
 	*
 	*	Assemble save_update array from controls.  
@@ -258,6 +292,17 @@ abstract class WIC_DB_Access {
 		return ( $save_update_array );
 	}
 
+
+	/*
+	*
+	* pass through for lister functions
+	*
+	*/
+
+	public function list_by_id ( $id_string,  $sort_direction = 'ASC' ) {
+		$this->db_list_by_id ( $id_string, $sort_direction ); 
+	}
+
 	public static function get_mysql_time() {
 		global $wpdb;
 		$now_object = $wpdb->get_results ( "SELECT NOW() AS now " );
@@ -273,6 +318,7 @@ abstract class WIC_DB_Access {
 	abstract protected function db_save ( &$meta_query_array );
 	abstract protected function db_update ( &$meta_query_array );
 	abstract protected function db_delete_by_id ( $id );
+
 	
 }
 

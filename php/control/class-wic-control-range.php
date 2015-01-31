@@ -24,11 +24,16 @@ class WIC_Control_Range extends WIC_Control_Parent {
 		return ( $control );
 	}
 		
-	public function set_value( $value ) {
+	public function set_value( $value ) { 
 		if ( is_array ( $value ) ) {
 			extract ( $value );
-			$this->value_lo = $lo;
-			$this->value_hi = $hi;		
+			if ( isset ( $lo ) ) {
+				$this->value_lo = $lo;
+				$this->value_hi = $hi;
+			} else { // this branch handles case of range coming back from search array where names are lost 
+				$this->value_lo = $value[0];
+				$this->value_hi = $value[1];
+			}		
 		} else {
 			$this->value = $value;		
 		}

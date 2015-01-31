@@ -25,7 +25,7 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 	
 	// define the form message (return a message)
 	protected function format_message ( &$data_array, $message ) {
-		$title = $this->format_name_for_title ( $data_array );
+		$title = self::format_name_for_title ( $data_array );
 		$formatted_message = sprintf ( __('Update %1$s. ' , 'wp-issues-crm'), $title )  . $message;
 		return ( $formatted_message );
 	}
@@ -63,7 +63,7 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 	}
 	
 	// support function for message
-	protected function format_name_for_title ( &$data_array ) {
+	public static function format_name_for_title ( &$data_array ) {
 
 		// construct title starting with first name
 		$title = 	$data_array['first_name']->get_value(); 

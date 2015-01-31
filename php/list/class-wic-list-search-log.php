@@ -30,7 +30,7 @@ class WIC_List_Search_Log extends WIC_List_Parent {
 		$wic_query2->list_by_id ( $id_list, 'DESC' ); 
 		
 		// loop through the rows and output a list item for each
-		foreach ( $wic_query2->result as $row_array ) {
+		foreach ( $wic_query2->result as $row_array ) { 
 
 			$row= '';
 			$line_count++;

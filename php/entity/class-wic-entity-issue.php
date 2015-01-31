@@ -24,7 +24,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	}
 	
 	// handle a request for a blank new issue form
-	protected function new_issue() {
+	protected function new_blank_form() {
 		$this->new_form_generic ( 'WIC_Form_Issue_Save', __( 'Create a new issue and save.', 'wp-issues-crm' ) );	
 	}
 
@@ -64,6 +64,12 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return;
 	}	
 	
+	// handle a request to return to a search form
+	protected function redo_search_form_from_query ( $search ) { 
+		$this->search_form_from_search_array ( 'WIC_Form_Issue_Search',  __( 'Redo search.', 'wp-issues-crm'), $search );
+		return;
+	}	
+	
 	
 	protected function special_entity_value_hook ( &$wic_access_object ) {
 		$control = $this->data_object_array['post_date'];
@@ -98,6 +104,9 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		} 
 	}		
 	
+	public function get_the_title () {
+		return ( $this->data_object_array['post_title']->get_value() );	
+	}	
 	
 	
 	/***************************************************************************

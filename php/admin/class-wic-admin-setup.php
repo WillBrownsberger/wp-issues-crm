@@ -81,9 +81,8 @@ class WIC_Admin_Setup {
 		if ( isset ( $_POST['wic_form_button'] ) ) {
 			$control_array = explode( ',', $_POST['wic_form_button'] );
 			$revalidate_always = array (
-				'new_constituent',
+				'new_blank_form',
 				'save_from_search',
-				'new_issue',
 				'save_from_search_request',
 			);  
 			if ( in_array( $control_array[1], $revalidate_always ) ) {
