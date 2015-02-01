@@ -245,36 +245,34 @@ abstract class WIC_Form_Parent  {
 
 		// if have a latest constituent, show a button linking to them as last updated
 		$list_button_args = array(
-				'entity_requested'	=> 'constituent',
-				'action_requested'	=> 'get_latest',
-				'button_class' 		=> 'button button-primary second-position',
-				'id_requested'			=> $user_id,
-				'button_label' 		=> '<span class="dashicons dashicons-smiley"></span><span class="dashicons dashicons-arrow-left-alt"></span>',				
+			'entity_requested'	=> 'constituent',
+			'action_requested'	=> 'get_latest',
+			'button_class' 		=> 'button button-primary second-position',
+			'id_requested'			=> $user_id,
+			'button_label' 		=> '<span class="dashicons dashicons-smiley"></span><span class="dashicons dashicons-arrow-left-alt"></span>',				
 		);			
 		$output = WIC_Form_Parent::create_wic_form_button( $list_button_args ) ;	
 		
 		$list_button_args = array(
-				'entity_requested'	=> 'issue',
-				'action_requested'	=> 'get_latest',
-				'button_class' 		=> 'button button-primary second-position',
-				'id_requested'			=> $user_id,
-				'button_label' 		=> '<span class="dashicons dashicons-format-aside"></span><span class="dashicons dashicons-arrow-left-alt"></span>',				
+			'entity_requested'	=> 'issue',
+			'action_requested'	=> 'get_latest',
+			'button_class' 		=> 'button button-primary second-position',
+			'id_requested'			=> $user_id,
+			'button_label' 		=> '<span class="dashicons dashicons-format-aside"></span><span class="dashicons dashicons-arrow-left-alt"></span>',				
 		);			
 		$output .= WIC_Form_Parent::create_wic_form_button( $list_button_args ) ;	
 		
 		
 		// get latest search
-		$latest_general_search_id = WIC_DB_Access::search_log_last_general( $user_id );
-		if ( $latest_general_search_id > '0' ) {
-				$list_button_args = array(
-				'entity_requested'	=> 'search_log',
-				'action_requested'	=> 'id_search_to_form',
-				'button_class' 		=> 'button button-primary second-position',
-				'id_requested'			=> $latest_general_search_id,
-				'button_label' 		=> '<span class="dashicons dashicons-search"></span></span><span class="dashicons dashicons-arrow-left-alt"></span>',				
+		$list_button_args = array(
+			'entity_requested'	=> 'search_log',
+			'action_requested'	=> 'get_latest',
+			'button_class' 		=> 'button button-primary second-position',
+			'id_requested'			=> $user_id,
+			'button_label' 		=> '<span class="dashicons dashicons-search"></span></span><span class="dashicons dashicons-arrow-left-alt"></span>',				
 		);			
 		$output .= WIC_Form_Parent::create_wic_form_button( $list_button_args ) ;	
-		}	
+		
 			
 		// return buttons
 		return ( $output );	

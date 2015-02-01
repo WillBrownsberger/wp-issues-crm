@@ -425,6 +425,10 @@ abstract class WIC_Entity_Parent {
 		$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$latest_update_array = $wic_access_object->updated_last ( $user_id );
 		$latest_search_array = $wic_access_object->search_log_last ( $user_id );
+		/*	var_dump ($latest_search_array);
+			var_dump ($latest_update_array);
+			die; */
+
 		$latest = WIC_Function_Utilities::choose_latest_non_blank ( 
 			$latest_update_array['latest_updated'], 
 			$latest_update_array['latest_updated_time'],

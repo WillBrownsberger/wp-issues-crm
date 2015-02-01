@@ -312,24 +312,42 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		return ( $open_posts ); 
 	}
 	
-	public static function get_wic_latest_issues ( $user_ID, $n ) {
+	public static function get_wic_latest_issues () {
 
-		// retrieve $n most frequently used among last 30 issues for user 
+		$user_id = get_current_user();
+		$show_latest_issue = WIC_DB_Access_WP_User::get_wic_user_preference( 'show_latest_issue' );
+		$max_issues_to_show = WIC_DB_Access_WP_User::get_wic_user_preference( 'max_issues_to_show' );
 		
 		global $wpdb;		
 		
 		$activities_table = 	$wpdb->prefix . 'wic_activity';	
+		$metakey = 	self::WIC_METAKEY . 'wic_live_issue';			
 		
-		$sql = 
-			"
-			SELECT p.ID, p.post_title  
-			FROM 
-			( SELECT issue from 
-				( SELECT issue from $activities_table WHERE last_updated_by = $user_ID order by last_updated_time DESC LIMIT 0, 20 ) as latest 
-				GROUP BY issue ORDER BY count(issue) DESC limit 0, $n) AS latest_issues 
+		if ( 'f' == $show_latest_issue ) {
+			$sql = 
+				"
+				SELECT p.ID, p.post_title  
+				FROM 
+				( SELECT issue from 
+					( SELECT issue from $activities_table WHERE last_updated_by = $user_ID order by last_updated_time DESC LIMIT 0, 30 ) as latest 
+					GROUP BY issue ORDER BY count(issue) DESC limit 0, $max_issues_to_show ) AS latest_issues 
 				LEFT JOIN $wpdb->posts p  on latest_issues.issue = p.id
-			";
-
+				LEFT JOIN $wpdb->postmeta pm on p.ID = pm.post_id AND pm.meta_key = '$metakey'
+				WHERE ( pm.meta_value = 'open' or pm.meta_value is null )
+				"; 
+		} elseif ( 'l' == $show_latest_issue ) {
+			$sql = 
+				"
+				SELECT p.ID, p.post_title  
+				FROM 
+				( SELECT DISTINCT issue from $activities_table WHERE last_updated_by = $user_ID 
+					order by last_updated_time DESC LIMIT 0, $max_issues_to_show ) as latest 
+				LEFT JOIN $wpdb->posts p  on latest_issues.issue = p.id
+				LEFT JOIN $wpdb->postmeta pm on p.ID = pm.post_id AND pm.meta_key = '$metakey'
+				WHERE ( pm.meta_value = 'open' or pm.meta_value is null )
+				";	
+		}
+		
 		$latest_issues = $wpdb->get_results( $sql );
 		
 		return ( $latest_issues ); 

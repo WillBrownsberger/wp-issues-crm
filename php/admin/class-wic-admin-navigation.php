@@ -19,11 +19,12 @@ class WIC_Admin_Navigation {
 
 	// add menu links to wp admin
 	public function menu_setup () {
-		add_menu_page( 'WP Issues CRM', 'WP Issues CRM', 'manage_wic_constituents', 'wp-issues-crm-main', array ( $this, 'do_dashboard' ), 'dashicons-smiley' ); // omit icon for now and also position		
+		add_menu_page( 'WP Issues CRM', 'WP Issues CRM', 'manage_wic_constituents', 'wp-issues-crm-main', array ( $this, 'do_dashboard' ), 'dashicons-smiley' ); 		
 		add_submenu_page( 'wp-issues-crm-main', 'Options', 'Options', 'activate_plugins', 'wp-issues-crm-options', array ( $this, 'do_options' ) );
 		add_submenu_page( 'wp-issues-crm-main', 'Fields', 'Fields', 'activate_plugins', 'wp-issues-crm-fields', array ( $this, 'do_fields' ) );
 		$wic_admin_settings = new WIC_Admin_Settings; // need to run this in the setup phase -- too late to register if wait until know on page
-		add_submenu_page( 'wp-issues-crm-main', 'WIC Settings', 'Settings', 'activate_plugins', 'wp-issues-crm-settings', array ( $wic_admin_settings, 'wp_issues_crm_settings' ) ); // omit icon for now and also position
+		add_submenu_page( 'wp-issues-crm-main', 'WIC Settings', 'Settings', 'activate_plugins', 'wp-issues-crm-settings', array ( $wic_admin_settings, 'wp_issues_crm_settings' ) ); 
+		add_submenu_page ( 'wp-issues-crm-main', 'WIC Preferences', 'Preferences', 'manage_wic_constituents', 'wp-issues-crm-preferences', array ( $this, 'do_preferences') );
 		add_submenu_page( 'wp-issues-crm-main', 'WIC Statistics', 'Statistics', 'manage_wic_constituents', 'wp-issues-crm-statistics', array ( $this, 'do_statistics' ) );	
 	}
 
@@ -60,7 +61,13 @@ class WIC_Admin_Navigation {
 		self::admin_check_security( 'manage_wic_constituents' );
 	 	WIC_Admin_Statistics::generate_storage_statistics(); 
 	}
-		
+	
+	public function do_preferences (){ 
+		self::admin_check_security( 'manage_wic_constituents' );
+		echo '<div class="wrap"><h2>' . __( 'Preferences', 'wp-issues-crm' ) . '</h2>';	
+		$wic_entity_user = new WIC_Entity_User;
+		echo '<div>';
+	}		
 
 	private static function admin_check_security ( $required_capability ) {
 		// is user logged in as administrator; if not, return

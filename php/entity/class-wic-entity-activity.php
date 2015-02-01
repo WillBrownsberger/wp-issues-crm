@@ -32,31 +32,36 @@ class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 
 	public static function get_issue_options( $value ) {
 
-		$user_id = get_current_user_id();		
-
-		// get last issue viewed by user or modified by user (if not author may not show as mod)
-		$args = array ( 'id_requested' => $user_id ); // spoof a button handoff by the request handler
-		$entity = new WIC_Entity_Issue( 'get_latest_no_form', $args ); // initialize the data_object_array with the latest
-		$latest_viewed_issue = $entity->get_current_ID_and_title(); // pull info from the doa
-
-		// initialize issues dropdown array with blank and latest viewed
+		// top element in options array is always a placeholder -- should decide
 		$issues_array = array( 
 			array ( 'value' => '' , 'label' => __( 'Activity Issue?', 'wp-issues-crm' ) ),
-			array ( 'value' => $latest_viewed_issue['current'] , 'label' => $latest_viewed_issue['title'] ),
 		);	
 
-		// set up to make sure that the existing value, on an update, appears in the list		
-		$value_in_option_list = ( $value == $latest_viewed_issue['current'] );
+		$user_id = get_current_user_id();	
+		
+		$value_in_option_list = false;	
 
-		// add latest used issues to the array
-		$recent_issues = WIC_DB_Access_WP::get_wic_latest_issues( $user_id, 3 );
-		foreach ( $recent_issues as $recent_issue ) {		
-			$issues_array[] = array(
-				'value'	=> $recent_issue->ID,
-				'label'	=>	esc_html ( $recent_issue->post_title ),
-			);
-			if ( $value == $recent_issue->ID ) {
-				$value_in_option_list = true;
+		// if user prefers, add next the last issue viewed by user or modified by user (if not author may not show as mod)
+		if ( WIC_DB_Access_WP_User::get_wic_user_preference( 'show_viewed_issue' ) )	{	
+			$args = array ( 'id_requested' => $user_id ); // spoof a button handoff by the request handler
+			$entity = new WIC_Entity_Issue( 'get_latest_no_form', $args ); // initialize the data_object_array with the latest
+			$latest_viewed_issue = $entity->get_current_ID_and_title(); // pull info from the doa
+			array_push ( $issues_array, array ( 'value' => $latest_viewed_issue['current'] , 'label' => $latest_viewed_issue['title'] ) );
+			$value_in_option_list = ( $value == $latest_viewed_issue['current'] );
+		}
+	
+
+		// if user prefers add latest used issues to the array
+		if ( WIC_DB_Access_WP_User::get_wic_user_preference( 'show_latest_issues' ) != 'x' ) {
+			$recent_issues = WIC_DB_Access_WP::get_wic_latest_issues();
+			foreach ( $recent_issues as $recent_issue ) {		
+				$issues_array[] = array(
+					'value'	=> $recent_issue->ID,
+					'label'	=>	esc_html ( $recent_issue->post_title ),
+				);
+				if ( $value == $recent_issue->ID ) {
+					$value_in_option_list = true;
+				}	
 			}
 		}
 		

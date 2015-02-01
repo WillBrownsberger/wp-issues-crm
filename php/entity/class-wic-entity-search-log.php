@@ -20,13 +20,13 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 		${ $class_name } = new $class_name ( 'redo_search_from_query', $search['unserialized_search_array'], $search['unserialized_search_parameters']  ) ;		
 	}
 
-	public function get_latest ( $args ) { // get latest search
+	public function get_latest ( $args ) { // get latest search 
 		$latest_general_search_id = WIC_DB_Access::search_log_last_general( $args['id_requested'] );
 		$args2 = array ( 'id_requested' => $latest_general_search_id );	
-		if ( $latest > '' ) {
+		if ( $latest_general_search_id > '' ) {
 			$this->id_search_to_form ( $args2 );	
 		} else {
-			WIC_Function_Utilities::wic_error ( 'Trying to go back to a new or purged search log.  Do a fresh search!' , __FILE__, __LINE__, __METHOD__, false );	
+			WIC_Function_Utilities::wic_error ( 'Finding no past searches with count not equal 1.   Do a fresh search!' , __FILE__, __LINE__, __METHOD__, false );	
 		} 		
 	}
 	
