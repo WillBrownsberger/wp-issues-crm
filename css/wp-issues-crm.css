@@ -22,6 +22,47 @@
 	padding: 20px;
 } 
 
+#wic-top-level-form {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	margin: 0 0 0 14.2222222%;
+}
+
+
+/*
+/* top-level form button styling to uniform spacing */
+/* otherwise taking default primary button styling for wp admin */  
+button.button.button-primary.wic-form-button {
+	display: inline-block;
+	font-size: 1.1em;
+	margin-right: .888%;
+	width: 13.333%;
+}
+
+button.button.button-primary.wic-top-menu-button {
+	display: inline-block;
+	font-size: 1.1em;
+	margin-right: 1.025%;
+	width: 7.3%;
+}
+
+/*
+*
+* icon styling for menus and also in forms
+*
+*/
+
+span.dashicons.dashicons-arrow-left-alt,
+span.dashicons.dashicons-smiley,
+.dashicons-dismiss, {
+	vertical-align: bottom;
+}
+
+.dashicons-email-alt {
+	vertical-align: middle;
+}
+
 
 /*
 *
@@ -30,15 +71,6 @@
 */
 
 
-/*
-/* top-level form button styling to uniform spacing */
-/* otherwise taking default primary button styling for wp admin */  
-button.button.button-primary.wic-form-button {
-	display: inline-block;
-	margin-right: .888%;
-	padding: 0 .888%;
-	width: 13.333%;
-}
 
 .wic-form-button.wic-form-button-selected {
 	background: #0490B3
@@ -282,11 +314,7 @@ select.wic-input {
 }
 
 
-span.dashicons.dashicons-arrow-left-alt,
-span.dashicons.dashicons-smiley,
-.dashicons-dismiss, {
-	vertical-align: bottom;
-}
+
 .wic-input-deleted-label:hover {
 	
 }
@@ -362,9 +390,7 @@ label.wic-label.phone-number {
 	width: 50.3%;
 }
 
-.dashicons-email-alt {
-	vertical-align: middle;
-}
+
 
 a#wic-email-icon-link {
 	text-decoration: none;	

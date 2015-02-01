@@ -23,18 +23,8 @@ class WIC_Form_Constituent_Search extends WIC_Form_Parent  {
 			'button_class'					=> 'button button-primary wic-form-button',
 			'button_label'					=> __('Search', 'wp-issues-crm')
 		);	
-		$buttons .= $this->create_wic_form_button ( $button_args_main ) . parent::backbutton (' second-position' );
-
-		$button_args_main = array(
-			'entity_requested'			=> 'constituent',
-			'action_requested'			=> 'new_blank_form',
-			'button_label'					=> __( 'Go to Add New', 'wp-issues-crm'),
-			'button_class'					=> 'button button-primary wic-form-button second-position',
-			'title'							=> __( 'Add a new constituent.', 'wp-issues-crm' ),
-		);
-
 		$buttons .= $this->create_wic_form_button ( $button_args_main );
-		
+	
 		return $buttons;
 		
 	}

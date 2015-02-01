@@ -101,7 +101,7 @@ abstract class WIC_List_Parent {
 			'name'							=> 'wic-post-export-button',
 			'value' 							=>  $wic_query->search_id, 
 		);	
-		$buttons = WIC_Form_Parent::create_wic_form_button ( $button_args_main ) . WIC_Form_Parent::backbutton (' second-position' );	
+		$buttons = WIC_Form_Parent::create_wic_form_button ( $button_args_main );	
 	
 		return ( $buttons );
 	}

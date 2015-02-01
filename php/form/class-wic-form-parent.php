@@ -235,46 +235,4 @@ abstract class WIC_Form_Parent  {
 		return ( $button );
 	}
 
-	// actually produces up to three affirmative buttons (not vulnerable to caching issues) -- last constituents, last issues, last search 
-	static public function backbutton ( $class ) {
-		
-		$button_output = '';
-
-		$user_id = get_current_user_id();
-
-
-		// if have a latest constituent, show a button linking to them as last updated
-		$list_button_args = array(
-			'entity_requested'	=> 'constituent',
-			'action_requested'	=> 'get_latest',
-			'button_class' 		=> 'button button-primary second-position',
-			'id_requested'			=> $user_id,
-			'button_label' 		=> '<span class="dashicons dashicons-smiley"></span><span class="dashicons dashicons-arrow-left-alt"></span>',				
-		);			
-		$output = WIC_Form_Parent::create_wic_form_button( $list_button_args ) ;	
-		
-		$list_button_args = array(
-			'entity_requested'	=> 'issue',
-			'action_requested'	=> 'get_latest',
-			'button_class' 		=> 'button button-primary second-position',
-			'id_requested'			=> $user_id,
-			'button_label' 		=> '<span class="dashicons dashicons-format-aside"></span><span class="dashicons dashicons-arrow-left-alt"></span>',				
-		);			
-		$output .= WIC_Form_Parent::create_wic_form_button( $list_button_args ) ;	
-		
-		
-		// get latest search
-		$list_button_args = array(
-			'entity_requested'	=> 'search_log',
-			'action_requested'	=> 'get_latest',
-			'button_class' 		=> 'button button-primary second-position',
-			'id_requested'			=> $user_id,
-			'button_label' 		=> '<span class="dashicons dashicons-search"></span></span><span class="dashicons dashicons-arrow-left-alt"></span>',				
-		);			
-		$output .= WIC_Form_Parent::create_wic_form_button( $list_button_args ) ;	
-		
-			
-		// return buttons
-		return ( $output );	
-	}
 }

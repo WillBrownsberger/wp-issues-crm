@@ -36,28 +36,30 @@ abstract class WIC_DB_Access {
 	// log a search to the search log
 	private function search_log ( $meta_query_array, $search_parameters ) {
 		$entity = $this->entity;
-		if ( ( "constituent" == $entity || 'issue' == $entity ) && true == $search_parameters['log_search']  ){	
+		if ( ( "constituent" == $entity || 'issue' == $entity ) && isset ( $search_parameters['log_search'] ) ){	
 
-			global $wpdb;
-			$user_id = get_current_user_id();
-
-			$search = serialize( $meta_query_array );
-			$parameters = serialize ( $search_parameters );
-			
-			$sql = $wpdb->prepare(
-				"
-				INSERT INTO wp_wic_search_log
-				( user_id, time, entity, serialized_search_array,  serialized_search_parameters, result_count  )
-				VALUES ( $user_id, NOW(), %s, %s, %s, %s)
-				", 
-				array ( $entity, $search, $parameters, $this->found_count ) ); 
-
-			$save_result = $wpdb->query( $sql );
-			
-			if ( 1 == $save_result ) {
-				$this->search_id = $wpdb->insert_id;	
-			} else {
-				WIC_Function_Utilities::wic_error ( 'Unknown database error in query_log.', __FILE__, __LINE__, __METHOD__, true ); 		
+			if ( $search_parameters['log_search'] ) { 
+				global $wpdb;
+				$user_id = get_current_user_id();
+	
+				$search = serialize( $meta_query_array );
+				$parameters = serialize ( $search_parameters );
+				
+				$sql = $wpdb->prepare(
+					"
+					INSERT INTO wp_wic_search_log
+					( user_id, time, entity, serialized_search_array,  serialized_search_parameters, result_count  )
+					VALUES ( $user_id, NOW(), %s, %s, %s, %s)
+					", 
+					array ( $entity, $search, $parameters, $this->found_count ) ); 
+	
+				$save_result = $wpdb->query( $sql );
+				
+				if ( 1 == $save_result ) {
+					$this->search_id = $wpdb->insert_id;	
+				} else {
+					WIC_Function_Utilities::wic_error ( 'Unknown database error in query_log.', __FILE__, __LINE__, __METHOD__, true ); 		
+				}
 			}
 		}
 	}
@@ -75,7 +77,7 @@ abstract class WIC_DB_Access {
 		
 		$sql = 			
 			"
-			SELECT serialized_search_array, time
+			SELECT serialized_search_array, serialized_search_parameters, time
 			FROM $search_log_table
 			WHERE user_id = $user_id
 				AND entity = '$entity'
@@ -90,24 +92,21 @@ abstract class WIC_DB_Access {
 		$latest_search_array = unserialize ( $latest_search[0]->serialized_search_array );
 		$latest_searched_for = '';
 		foreach ( $latest_search_array as $search_clause ) {
-			if ( $search_clause['key'] = 'ID' ) {
-				$latest_searched_for = $search_clause['value'];			
+			if ( 'ID' == $search_clause['key']  ) {
+				$latest_searched_for = $search_clause['value'];	
 			}		
 		} 	
-		
 		// if array as not an id search, $latest_searched_for will still be empty
 		// have to get ID by actually executing the search
-		if ( '' == $latest_searched_for ) {
+		if ( '' == $latest_searched_for ) { 
 			$search = array();
 			$search['unserialized_search_array'] = unserialize ( $latest_search[0]->serialized_search_array );
 			$search['unserialized_search_parameters'] = unserialize ( $latest_search[0]->serialized_search_parameters );
-			$class_name = 'WIC_Entity_' . $this->entity;
+			$class_name = 'WIC_Entity_' . $this->entity; 
 			$searching_entity = new $class_name( 'redo_search_from_meta_query_no_form', $search ); // initialize the data_object_array with the latest
 			$latest_searched_for = $searching_entity->get_the_current_ID();		
 		}
-		
-				
-		
+	
 		return ( array (
 			'latest_searched' => $latest_searched_for,
 			'latest_searched_time'  =>$latest_search[0]->time, 

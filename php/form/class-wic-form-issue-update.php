@@ -21,7 +21,7 @@ class WIC_Form_Issue_Update extends WIC_Form_Parent  {
 			'button_label'					=> __('Update issue', 'wp-issues-crm')
 		);	
 		
-		$buttons = $this->create_wic_form_button ( $button_args_main ) . parent::backbutton (' second-position' );
+		$buttons = $this->create_wic_form_button ( $button_args_main );
 		
 		$buttons .= '<a href="/wp-admin/post.php?post=' . $data_array['ID']->get_value() .'&action=edit">' .
 								__( 'Edit post in Wordpress editor.', 'wp-issues-crm' ) .

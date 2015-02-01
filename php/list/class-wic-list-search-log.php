@@ -69,8 +69,6 @@ class WIC_List_Search_Log extends WIC_List_Parent {
 	}
 
 	protected function get_the_buttons( &$wic_query ) {
-		$button = WIC_Form_Parent::backbutton ( ' ' );
-		return ( $button );
 	}
 	
  }	

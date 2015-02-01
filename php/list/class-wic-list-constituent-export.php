@@ -54,11 +54,13 @@ class WIC_List_Constituent_Export {
 		if ( ! current_user_can ( 'activate_plugins' ) ) { 
 			WIC_Function_Utilities::wic_error ( 'Download permissions inadequate.', __FILE__, __LINE__, __METHOD__, true );			 
 		} 		
-		
-		if ( isset($_POST['wp_issues_crm_post_form_nonce_field']) &&
-			check_admin_referer( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field')) 
-		{ } WIC_Function_Utilities::wic_error ( 'Apparent cross-site scripting or configuration error.', __FILE__, __LINE__, __METHOD__, true );
 
+		if ( isset($_POST['wp_issues_crm_post_form_nonce_field']) &&
+			check_admin_referer( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field') ) {
+		 } else { 
+			 WIC_Function_Utilities::wic_error ( 'Apparent cross-site xscripting or configuration error.', __FILE__, __LINE__, __METHOD__, true );
+		}
+		
 		$search = WIC_DB_Access::get_search_from_search_log( $id );	
 		$current_user = wp_get_current_user();		
 

@@ -55,9 +55,16 @@ class WIC_Admin_Setup {
 				'wic-utilities',
 				plugins_url( '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'wic-utilities.js' , __FILE__ ) 
 			);
-			
 			wp_enqueue_script('wic-utilities');
-				wp_register_style(
+
+			wp_register_script(
+				'wic-changed-page',
+				plugins_url( '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'wic-changed-page.js' , __FILE__ ) 
+			);
+			wp_enqueue_script('wic-changed-page');
+
+			
+			wp_register_style(
 				'wp-issues-crm-styles',
 				plugins_url( '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'css' . DIRECTORY_SEPARATOR . 'wp-issues-crm.css' , __FILE__ )
 				);
@@ -67,8 +74,8 @@ class WIC_Admin_Setup {
 	}
 
 	// add action to intercept press of download button before any headers sent 
-	public function do_download () {
-		if ( isset( $_POST['wic-post-export-button'] ) ) {
+	public function do_download () { 
+		if ( isset( $_POST['wic-post-export-button'] ) ) { 
 			WIC_List_Constituent_Export::do_constituent_download( $_POST['wic-post-export-button'] );	
 		}
 	}

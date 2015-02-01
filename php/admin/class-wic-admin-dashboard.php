@@ -50,22 +50,32 @@ class WIC_Admin_Dashboard {
 	private function show_top_menu_buttons ( $class_requested, $action_requested ) {
 		echo '<form id = "wic-top-level-form" method="POST" autocomplete = "on">';
 		wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); 
+		
 
 		$top_menu_buttons = array (
-			array ( 'dashboard', 	'my_cases',		__( 'My Cases', 'wp-issues-crm' ), __( 'Display list of cases assigned to me.', 'wp-issues-crm' ),  ),
-			array ( 'dashboard', 	'my_issues',	__( 'My Issues', 'wp-issues-crm' ), __( 'Display list of issues assigned to me.', 'wp-issues-crm' ) ),
-			array ( 'constituent', 	'new_form',		__( 'Constituents', 'wp-issues-crm' ), __( 'Search for constituents.', 'wp-issues-crm' ) ),
-			array ( 'issue', 			'new_form',		__( 'Issues', 'wp-issues-crm' ), __( 'Search for issues.', 'wp-issues-crm' ) ),
-			array ( 'trend', 			'new_form',		__( 'Trends', 'wp-issues-crm' ), __( 'Get activity/issue counts.', 'wp-issues-crm' ) ),
-			array ( 'dashboard', 	'search_history',	__( 'My Recent', 'wp-issues-crm' ), __( 'Review or repeat my recent searches.', 'wp-issues-crm' ) ),		
-			); 
-		
+			array ( 'constituent', 	'new_blank_form',	'<span class="dashicons dashicons-plus-alt"></span><span class="dashicons dashicons-smiley">' , __( 'New constituent.', 'wp-issues-crm' ) ), // new
+			array ( 'constituent', 	'new_form',		'<span class="dashicons dashicons-search"><span class="dashicons dashicons-smiley">', __( 'Search for constituents.', 'wp-issues-crm' ) ), // search
+			array ( 'dashboard', 	'my_cases',	 '<span class="dashicons dashicons-star-filled"></span><span class="dashicons dashicons-smiley">', __( 'Display list of cases assigned to me.', 'wp-issues-crm' ),  ),
+			array ( 'constituent', 	'get_latest',	'<span class="dashicons dashicons-smiley"></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'New constituent.', 'wp-issues-crm' ) ), // new
+
+			array ( 'issue', 			'new_blank_form',	'<span class="dashicons dashicons-plus-alt"><span class="dashicons dashicons-format-aside"></span>', __( 'New Issue.', 'wp-issues-crm' ) ),
+			array ( 'issue', 			'new_form',		'<span class="dashicons dashicons-search"><span class="dashicons dashicons-format-aside"></span>', __( 'Search for issues.', 'wp-issues-crm' ) ),
+			array ( 'dashboard', 	'my_issues',	'<span class="dashicons dashicons-star-filled"><span class="dashicons dashicons-format-aside"></span>', __( 'Display list of issues assigned to me.', 'wp-issues-crm' ) ),
+			array ( 'issue', 			'get_latest',	'<span class="dashicons dashicons-format-aside"></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'New Issue.', 'wp-issues-crm' ) ),
+
+			array ( 'search_log', 	'get_latest',	'<span class="dashicons dashicons-search"></span></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'New Issue.', 'wp-issues-crm' ) ),
+			array ( 'dashboard', 	'search_history',	'<span class="dashicons dashicons-arrow-left-alt"></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'Review or repeat my recent searches.', 'wp-issues-crm' ) ),		
+			array ( 'trend', 			'new_form',		'<span class="dashicons dashicons-chart-line"></span>', __( 'Get activity/issue counts.', 'wp-issues-crm' ) ), 
+			);		
+	
+		$user_id = get_current_user_id();
 		foreach ( $top_menu_buttons as $top_menu_button ) {
 			$selected_class = $this->is_selected ( $class_requested, $action_requested, $top_menu_button[0], $top_menu_button[1] ) ? 'wic-form-button-selected' : '';
 			$button_args = array (
 				'entity_requested'	=> $top_menu_button[0],
 				'action_requested'	=> $top_menu_button[1],
-				'button_class'			=> 'button button-primary wic-form-button ' . $selected_class,	
+				'id_requested'			=> 'get_latest' == $top_menu_button[1] ? $user_id : 0, // not actually used except in the back forms
+				'button_class'			=> 'button button-primary wic-top-menu-button ' . $selected_class,	
 				'button_label'			=>	$top_menu_button[2],
 				'title'					=>	$top_menu_button[3],
 			);
@@ -82,13 +92,9 @@ class WIC_Admin_Dashboard {
 			// also show the search buttons as headers for other actions below the top menu		
 		} else { 
 			if ( 'constituent' == $button_class  && 'new_form' ) {
-					if ( 'constituent' == $class_requested ) {
-						return true;
-					}		
+				return true;
 			} elseif ( 'issue' == $button_class  && 'new_form' ) {
-					if ( 'issue' == $class_requested ) {
-						return true;
-					}		
+				return true;
 			}
 		}
 	}

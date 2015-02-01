@@ -14,7 +14,7 @@ class WIC_Form_Issue_Save extends WIC_Form_Issue_Update  {
 			'button_class'					=> 'button button-primary wic-form-button',
 			'button_label'					=> __('Save', 'wp-issues-crm')
 		);	
-		$buttons = $this->create_wic_form_button ( $button_args_main ) . parent::backbutton (' second-position' );
+		$buttons = $this->create_wic_form_button ( $button_args_main );
 		
 		$buttons .= '<a href="/wp-admin/post-new.php">' .
 								__( 'New Post in Wordpress editor.', 'wp-issues-crm' ) .

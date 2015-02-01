@@ -22,7 +22,7 @@ class WIC_Form_Trend_Search extends WIC_Form_Parent  {
 			'button_label'					=> __('Search', 'wp-issues-crm')
 		);	
 		
-		$buttons =  $this->create_wic_form_button ( $button_args_main ) . parent::backbutton (' second-position' );
+		$buttons =  $this->create_wic_form_button ( $button_args_main );
 		
 		return ( $buttons );
 	}

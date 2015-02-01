@@ -424,7 +424,7 @@ abstract class WIC_Entity_Parent {
 		if ( '' < $save_form ) {
 			$this->handle_search_results ( $wic_query, $save_form, $update_form );
 		} else {
-			populate_data_object_array_from_found_record( $wic_query, 0 ); // take the first found if for some reason multiple	
+			$this->populate_data_object_array_from_found_record( $wic_query, 0 ); // take the first found if for some reason multiple	
 		}// sit tight with loaded array awaiting further instructions
 	}
 
@@ -440,7 +440,6 @@ abstract class WIC_Entity_Parent {
 		$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$latest_update_array = $wic_access_object->updated_last ( $user_id );
 		$latest_search_array = $wic_access_object->search_log_last ( $user_id );
-
 		$latest = WIC_Function_Utilities::choose_latest_non_blank ( 
 			$latest_update_array['latest_updated'], 
 			$latest_update_array['latest_updated_time'],
@@ -464,7 +463,7 @@ abstract class WIC_Entity_Parent {
 	
 	// just load the latest entity
 	protected function get_latest_no_form ( $args ) {
-		$latest = $this->compute_latest ( $args  ); 	
+		$latest = $this->compute_latest ( $args ); 	
 		$this->id_search_generic ( $latest, '', '' ); // just retrieves the record, if no class form is passed 	
 	}
 

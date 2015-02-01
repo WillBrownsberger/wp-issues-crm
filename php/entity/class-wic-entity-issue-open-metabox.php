@@ -107,7 +107,7 @@ Class WIC_Entity_Issue_Open_Metabox {
 	
 	
 	// for a given issue ID, see if has WIC_Live_Issue status
-	public static function is_issue_closed ( $id ) { var_dump ( $id );
+	public static function is_issue_closed ( $id ) { 
 		$issue_status = get_post_meta( $id, self::WIC_METAKEY);
 		if ( ! isset ( $issue_status [0] ) ) {
 			return ( false );		
