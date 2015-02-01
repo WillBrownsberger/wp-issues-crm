@@ -104,6 +104,11 @@ abstract class WIC_Entity_Parent {
 		foreach ( $search['unserialized_search_array'] as $search_array ) {
 			if ( $search_array['table'] == $this->entity ) {
 				$key_value_array[$search_array['key']] = $search_array['value'];
+				// the transient search parameter category_search_mode is pulled directly into the search array as a compare value
+				// by WIC_Control_Parent::create_search_clause, so it is not in the search parameter array and has to be put back for the doa
+				if ( 'post_category' == $search_array['key'] ) { 
+					$key_value_array['category_search_mode'] = $search_array['compare'];				
+				} 
 			} else {
 				// spoof an incoming form array for a multivalue control	
 				// (to the top entity multivalue control looks like any other, but its set value function needs an array)			
@@ -115,6 +120,8 @@ abstract class WIC_Entity_Parent {
 			}
 		}
 
+		var_dump (  $search['unserialized_search_parameters'] );
+		// already in key value format
 		$combined_form_values = array_merge ( $key_value_array, $search['unserialized_search_parameters']);
 
 		// pass data object array and see if have values
@@ -406,16 +413,14 @@ abstract class WIC_Entity_Parent {
 		}
 	}
 
-	public function redo_search_from_meta_query ( $meta_query_array, $save_form, $update_form ) {
-
+	// used in reconstructing searches from the search log
+	public function redo_search_from_meta_query ( $meta_query_array, $search_parameters_array, $save_form, $update_form ) {
+		
 		global $wic_db_dictionary;
-
-
 		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->initialize_data_object_array();
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-		$search_parameters = array(); // use default parameters, since original unknown
-		$wic_query->search ( $meta_query_array, $search_parameters ); 
+		$wic_query->search ( $meta_query_array, $search_parameters_array ); 
 		$this->handle_search_results ( $wic_query, $save_form, $update_form );
 	}
 

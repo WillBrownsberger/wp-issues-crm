@@ -7,6 +7,8 @@
 
 Class WIC_Entity_Issue_Open_Metabox {
 
+	const WIC_METAKEY = 'wic_data_wic_live_issue';
+
 	public function __construct() {
 		add_action('add_meta_boxes', array ( $this, 'wic_call_live_issue_meta_box' ), 10, 2);
 		add_action('save_post', array( $this, 'wic_save_live_issue_meta_box' ), 10, 2);
@@ -36,10 +38,10 @@ Class WIC_Entity_Issue_Open_Metabox {
 	
       $wic_live_issue_options =  $wic_db_dictionary->lookup_option_values( 'wic_live_issue_options' );
 	   
-		$value = ( null !== get_post_meta($post->ID, 'wic_data_wic_live_issue', true) ) ? esc_attr( get_post_meta($post->ID, 'wic_data_wic_live_issue', true)) : '';	   
+		$value = ( null !== get_post_meta($post->ID, self::WIC_METAKEY, true) ) ? esc_attr( get_post_meta($post->ID, self::WIC_METAKEY, true)) : '';	   
 	   
 		$args = array (
-			'field_slug' => 'wic_data_wic_live_issue',
+			'field_slug' => self::WIC_METAKEY,
 			'field_label'	=>	'',
 			'label_class'	=>	'',
 			'input_class'	=>	'',
@@ -84,11 +86,11 @@ Class WIC_Entity_Issue_Open_Metabox {
   			if ( isset( $_POST['wp_issues_crm_post_form_nonce_field'] ) &&  ! isset ( $_POST['wic_form_button'] ) && 
 				check_admin_referer( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field')) { 
 				// the convention in wp_issues_crm is store no record for a blank value
-				if ( '' < $_POST['wic_data_wic_live_issue'] ) {
-           		update_post_meta($post_id, 'wic_data_wic_live_issue', $_POST['wic_data_wic_live_issue'] );
+				if ( '' < $_POST[self::WIC_METAKEY] ) {
+           		update_post_meta($post_id, self::WIC_METAKEY, $_POST[self::WIC_METAKEY] );
            	} else {
            		// will just return false if no record
-           		delete_post_meta($post_id, 'wic_data_wic_live_issue', $_POST['wic_data_wic_live_issue'] );
+           		delete_post_meta($post_id, self::WIC_METAKEY, $_POST[self::WIC_METAKEY] );
            	}
 		   } else {}
    
@@ -103,6 +105,17 @@ Class WIC_Entity_Issue_Open_Metabox {
 		return  ( $title );
 	}
 	
+	
+	// for a given issue ID, see if has WIC_Live_Issue status
+	public static function is_issue_closed ( $id ) { var_dump ( $id );
+		$issue_status = get_post_meta( $id, self::WIC_METAKEY);
+		if ( ! isset ( $issue_status [0] ) ) {
+			return ( false );		
+		} else {	
+			return ( 'closed' == $issue_status[0] );
+		}
+	} 	
+	
+	
 }
 
-$wic_issue_open_metabox = new WIC_Entity_Issue_Open_Metabox;

@@ -24,7 +24,7 @@ class WIC_Admin_Navigation {
 		add_submenu_page( 'wp-issues-crm-main', 'Fields', 'Fields', 'activate_plugins', 'wp-issues-crm-fields', array ( $this, 'do_fields' ) );
 		$wic_admin_settings = new WIC_Admin_Settings; // need to run this in the setup phase -- too late to register if wait until know on page
 		add_submenu_page( 'wp-issues-crm-main', 'WIC Settings', 'Settings', 'activate_plugins', 'wp-issues-crm-settings', array ( $wic_admin_settings, 'wp_issues_crm_settings' ) ); 
-		add_submenu_page ( 'wp-issues-crm-main', 'WIC Preferences', 'Preferences', 'manage_wic_constituents', 'wp-issues-crm-preferences', array ( $this, 'do_preferences') );
+		add_submenu_page ( 'wp-issues-crm-main', 'WIC Preferences', 'User Preferences', 'manage_wic_constituents', 'wp-issues-crm-preferences', array ( $this, 'do_preferences') );
 		add_submenu_page( 'wp-issues-crm-main', 'WIC Statistics', 'Statistics', 'manage_wic_constituents', 'wp-issues-crm-statistics', array ( $this, 'do_statistics' ) );	
 	}
 
@@ -64,7 +64,7 @@ class WIC_Admin_Navigation {
 	
 	public function do_preferences (){ 
 		self::admin_check_security( 'manage_wic_constituents' );
-		echo '<div class="wrap"><h2>' . __( 'Preferences', 'wp-issues-crm' ) . '</h2>';	
+		echo '<div class="wrap"><h2>' . __( 'User Preferences', 'wp-issues-crm' ) . '</h2>';	
 		$wic_entity_user = new WIC_Entity_User;
 		echo '<div>';
 	}		

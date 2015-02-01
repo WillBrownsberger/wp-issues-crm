@@ -86,6 +86,7 @@ abstract class WIC_DB_Access {
 
 		// get ID of latest entity instance searched for by user
 		$latest_search = $wpdb->get_results ( $sql );
+		$latest_searched_for = '';
 		$latest_search_array = unserialize ( $latest_search[0]->serialized_search_array );
 		$latest_searched_for = '';
 		foreach ( $latest_search_array as $search_clause ) {
@@ -93,6 +94,12 @@ abstract class WIC_DB_Access {
 				$latest_searched_for = $search_clause['value'];			
 			}		
 		} 	
+		
+		// if array as not an id search, $latest_searched_for will still be empty
+		if ( '' == $latest_searched_for ) {
+		
+		
+		}
 		
 		return ( array (
 			'latest_searched' => $latest_searched_for,

@@ -29,7 +29,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	}
 
 	// handle a search request coming from a search form
-	protected function form_search () { 
+	protected function form_search () {  
 		$this->form_search_generic ( 'WIC_Form_Issue_Search_Again', 'WIC_Form_Issue_Update');
 		return;				
 	}
@@ -59,8 +59,8 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 	}
 
 	//handle a search request coming search log
-	protected function redo_search_from_query ( $meta_query_array ) {
-		$this->redo_search_from_meta_query ( $meta_query_array, 'WIC_Form_Issue_Save', 'WIC_Form_Issue_Update' );
+	protected function redo_search_from_query ( $search ) {  // 0 = $meta_query_array and 1 = $search_parameters_array
+		$this->redo_search_from_meta_query ( $search['unserialized_search_array'], $search['unserialized_search_parameters'], 'WIC_Form_Issue_Save', 'WIC_Form_Issue_Update' );
 		return;
 	}	
 	

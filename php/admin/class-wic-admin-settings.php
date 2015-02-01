@@ -58,6 +58,22 @@ class WIC_Admin_Settings {
             'privacy_settings' // settings section within page
        ); 
 
+       // Preference Settings
+      add_settings_section(
+            'preference_settings', // setting ID
+            'Preference Settings', // Title
+            array( $this, 'preference_settings_legend' ), // Callback
+            'wp_issues_crm_settings_page' // page ID ( a group of settings sections)
+        ); 
+
+		// naming of the callback with array elements (in the callbacks) is what ties the option array together 		
+      add_settings_field(
+            'allow_issue_dropdown_preferences', // field id
+            'Allow issue preferences', // field label
+            array( $this, 'allow_issue_dropdown_preferences_callback' ), // field call back 
+            'wp_issues_crm_settings_page', // page 
+            'preference_settings' // settings section within page
+       ); 
 
 		// Postal Interface Settings
       add_settings_section(
@@ -116,6 +132,27 @@ class WIC_Admin_Settings {
             1, checked( '1', isset( $this->plugin_options['hide_private_posts'] ), false ) );
 	}	
 	
+	
+	/*
+	*
+	* Preference Setting Callbacks
+	*
+	*/
+	// section legend call back
+	public function preference_settings_legend() {
+		_e('<p>By default, when users add new activities for a constituent, the drown down for "Activity Issue?" includes only those set as 
+		"Open for WP Issues CRM" in the Activity Tracking box on the Issue form. </p> 
+		<p>If the setting below is checked, then users can choose preferences to see additional issues in the drop down: (a) the issue that 
+		they have most recently edited; and/or (b) the most recent or most frequent issues that they have added to activities.  These additional issues
+		will appear whether or not they are affirmatively "Open for WP Issues CRM", but will not appear if they are "Closed for WP Issues CRM".</p>', 'wp-issues-crm' );
+	}
+
+	// setting field call back	
+	public function allow_issue_dropdown_preferences_callback() {
+		printf( '<input type="checkbox" id="allow_issue_dropdown_preferences" name="wp_issues_crm_plugin_options_array[allow_issue_dropdown_preferences]" value="%s" %s />',
+            1, checked( '1', isset ( $this->plugin_options['allow_issue_dropdown_preferences'] ), false ) );
+	}
+
 	/*
 	*
 	* Postal Address Interface Callbacks
@@ -157,6 +194,9 @@ class WIC_Admin_Settings {
       } 
   		if( isset( $input['hide_private_posts'] ) ) {
             $new_input['hide_private_posts'] = absint( $input['hide_private_posts'] );
+      } 
+  		if( isset( $input['allow_issue_dropdown_preferences'] ) ) {
+            $new_input['allow_issue_dropdown_preferences'] = absint( $input['allow_issue_dropdown_preferences'] );
       } 
 		if( isset( $input['use_postal_address_interface'] ) ) {
             $new_input['use_postal_address_interface'] = absint( $input['use_postal_address_interface'] );

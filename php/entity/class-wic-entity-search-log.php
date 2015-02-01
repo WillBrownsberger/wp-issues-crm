@@ -13,13 +13,14 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 		$this->entity = 'search_log';
 	} 
 
-	// request handler
+	// request handler for search log list -- re-executes query 
 	public function id_search( $args ) {
 		$search = $this->id_retrieval( $args );
 		$class_name = 'WIC_Entity_'. $search['entity'];
-		${ $class_name } = new $class_name ( 'redo_search_from_query', $search['unserialized_search_array'], $search['unserialized_search_parameters']  ) ;		
+		${ $class_name } = new $class_name ( 'redo_search_from_query', $search  ) ;		
 	}
 
+	// get the latest general search ( i.e., with return count > 1 ) and bring it back to a form
 	public function get_latest ( $args ) { // get latest search 
 		$latest_general_search_id = WIC_DB_Access::search_log_last_general( $args['id_requested'] );
 		$args2 = array ( 'id_requested' => $latest_general_search_id );	
@@ -30,13 +31,14 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 		} 		
 	}
 	
-	// request handler
+	// request handler for back to search button -- brings back to filled search form, but does not reexecute the query
 	public function id_search_to_form( $args ) {
 		$search = $this->id_retrieval( $args );
 		$class_name = 'WIC_Entity_'. $search['entity'];
 		${ $class_name } = new $class_name ( 'redo_search_form_from_query', $search ) ;		
 	}
 	
+	// get the search identified by number from the search log and return it unserialized
 	protected function id_retrieval ( $args ) {
 		$id = $args['id_requested'];
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
