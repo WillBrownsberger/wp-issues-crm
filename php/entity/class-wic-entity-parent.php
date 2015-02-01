@@ -414,15 +414,24 @@ abstract class WIC_Entity_Parent {
 	}
 
 	// used in reconstructing searches from the search log
-	public function redo_search_from_meta_query ( $meta_query_array, $search_parameters_array, $save_form, $update_form ) {
-		
+	public function redo_search_from_meta_query ( $search, $save_form, $update_form ) {
 		global $wic_db_dictionary;
 		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->initialize_data_object_array();
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-		$wic_query->search ( $meta_query_array, $search_parameters_array ); 
-		$this->handle_search_results ( $wic_query, $save_form, $update_form );
+		$wic_query->search ( $search['unserialized_search_array'], $search['unserialized_search_parameters'] ); //
+		if ( '' < $save_form ) {
+			$this->handle_search_results ( $wic_query, $save_form, $update_form );
+		} else {
+			populate_data_object_array_from_found_record( $wic_query, 0 ); // take the first found if for some reason multiple	
+		}// sit tight with loaded array awaiting further instructions
 	}
+
+	// wrap around for preceding function to invoke it without a form
+	public function redo_search_from_meta_query_no_form ( $search ) {
+		$this->redo_search_from_meta_query( $search, '' , '' );
+	}
+
 
 	// determine the latest entity which the user has saved, updated or selected from a list
 	protected function compute_latest ( $args ) {
@@ -458,7 +467,7 @@ abstract class WIC_Entity_Parent {
 	// just load the latest entity
 	protected function get_latest_no_form ( $args ) {
 		$latest = $this->compute_latest ( $args  ); 	
-		$this->id_search_generic ( $latest, '', '' ); // just retrieves the record, if no class is passed 	
+		$this->id_search_generic ( $latest, '', '' ); // just retrieves the record, if no class form is passed 	
 	}
 
 	// if used after calling get_latest_no_form returns latest
@@ -468,6 +477,10 @@ abstract class WIC_Entity_Parent {
 			 'title' 	=> $this->get_the_title(),
 			)
 		);
+	}
+
+	public function get_the_current_ID () {
+		return (  $this->data_object_array['ID']->get_value() );
 	}
 
 	protected function special_entity_value_hook ( &$wic_access_object ) {

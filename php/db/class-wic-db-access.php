@@ -96,10 +96,17 @@ abstract class WIC_DB_Access {
 		} 	
 		
 		// if array as not an id search, $latest_searched_for will still be empty
+		// have to get ID by actually executing the search
 		if ( '' == $latest_searched_for ) {
-		
-		
+			$search = array();
+			$search['unserialized_search_array'] = unserialize ( $latest_search[0]->serialized_search_array );
+			$search['unserialized_search_parameters'] = unserialize ( $latest_search[0]->serialized_search_parameters );
+			$class_name = 'WIC_Entity_' . $this->entity;
+			$searching_entity = new $class_name( 'redo_search_from_meta_query_no_form', $search ); // initialize the data_object_array with the latest
+			$latest_searched_for = $searching_entity->get_the_current_ID();		
 		}
+		
+				
 		
 		return ( array (
 			'latest_searched' => $latest_searched_for,

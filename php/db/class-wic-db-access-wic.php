@@ -395,7 +395,26 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 
 	}
 
+	// necessary to have a quick look up that by passes search logging, etc. for use in the search log!
+	public static function get_constituent_name ( $id ) {
+		
+		global $wpdb;
+		$table = $wpdb->prefix . 'wic_constituent';
+		
+		$sql = $wpdb->prepare(
+			"
+			SELECT trim( concat ( first_name, ' ', last_name ) ) as name
+			FROM $table
+			WHERE ID = %s
+			",
+			array ( $id )
+			);
+		
+		$result = $wpdb->get_results(); 		
+		
+		return ( $result[0]->name );
 	
+	}	
 
 }
 

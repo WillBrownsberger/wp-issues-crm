@@ -17,6 +17,7 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 	public function id_search( $args ) {
 		$search = $this->id_retrieval( $args );
 		$class_name = 'WIC_Entity_'. $search['entity'];
+		$search['show_form'] = true;
 		${ $class_name } = new $class_name ( 'redo_search_from_query', $search  ) ;		
 	}
 
@@ -86,10 +87,11 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 				
 				if ( $show_item )	{	
 					if ( 'ID' == $search_clause['key']  ) { // only accessible for issues and constituents and overrides all other criteria
-						$entity_class =  'WIC_Entity_' . $search_clause['table'];
-						$args = array ( 'id_requested' => $search_clause['value'] );
-						$entity = new $entity_class( 'initialize_only', $args );
-						$search_phrase =  $search_clause['table'] . ': ' . esc_html ( $entity->get_the_title () );					
+						if ( 'issue' == $search_clause['table'] ) {
+						 	$search_phrase = __( 'Issue -- ', 'wp-issues-crm' ) . get_the_title ( $search_clause['value'] );
+						} else {
+							$search_phrase = __( ' Constituent -- ', 'wp-issues-crm' ) . esc_html( WIC_DB_Access_WIC::get_constituent_name ( $search_clause['value'] ) );
+						}					
 					} else {  		
 						$search_phrase .= $search_clause['table'] . ': ' . 
 							$search_clause['key'] . ' ' . 
