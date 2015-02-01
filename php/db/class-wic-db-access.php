@@ -36,7 +36,7 @@ abstract class WIC_DB_Access {
 	// log a search to the search log
 	private function search_log ( $meta_query_array, $search_parameters ) {
 		$entity = $this->entity;
-		if ( "constituent" == $entity || 'issue' == $entity ) {	
+		if ( ( "constituent" == $entity || 'issue' == $entity ) && true == $search_parameters['log_search']  ){	
 
 			global $wpdb;
 			$user_id = get_current_user_id();

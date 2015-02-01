@@ -120,7 +120,6 @@ abstract class WIC_Entity_Parent {
 			}
 		}
 
-		var_dump (  $search['unserialized_search_parameters'] );
 		// already in key value format
 		$combined_form_values = array_merge ( $key_value_array, $search['unserialized_search_parameters']);
 
@@ -334,7 +333,7 @@ abstract class WIC_Entity_Parent {
 	}
 	
 	// handle a search request for an ID coming from anywhere
-	protected function id_search_generic ( $id, $success_form, $sql = '' ) { 
+	protected function id_search_generic ( $id, $success_form, $sql = '', $log_search = false ) { 
 		// passing a blank success form just leaves the array instantiated, but no action taken
 		// initialize data array with only the ID and do search
 		$this->data_object_array['ID'] = WIC_Control_Factory::make_a_control( 'text' );
@@ -344,6 +343,7 @@ abstract class WIC_Entity_Parent {
 		$search_parameters = array(
 			'select_mode' => '*',
 			'show_deleted' => true,		
+			'log_search' => $log_search,
 		);
 		$search_clause_args = array(
 			'match_level' => '0',
@@ -381,7 +381,8 @@ abstract class WIC_Entity_Parent {
 			'compute_total' 	=> isset ( $this->data_object_array['compute_total'] ) ? $this->data_object_array['compute_total']->get_value() : '',
 			'retrieve_limit' 	=> isset ( $this->data_object_array['retrieve_limit'] ) ? $this->data_object_array['retrieve_limit']->get_value() : '',
 			'show_deleted' 	=> isset ( $this->data_object_array['show_deleted'] ) ? $this->data_object_array['show_deleted']->get_value() : '',
-			'select_mode'		=> 'id'
+			'select_mode'		=> 'id',
+			'log_search'		=> true
 			);
 		$search_clause_args = array(
 			'match_level' =>  isset ( $this->data_object_array['match_level'] ) ? $this->data_object_array['match_level']->get_value() : '',
@@ -439,9 +440,6 @@ abstract class WIC_Entity_Parent {
 		$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$latest_update_array = $wic_access_object->updated_last ( $user_id );
 		$latest_search_array = $wic_access_object->search_log_last ( $user_id );
-		/*	var_dump ($latest_search_array);
-			var_dump ($latest_update_array);
-			die; */
 
 		$latest = WIC_Function_Utilities::choose_latest_non_blank ( 
 			$latest_update_array['latest_updated'], 
