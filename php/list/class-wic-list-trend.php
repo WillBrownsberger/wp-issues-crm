@@ -120,7 +120,7 @@ protected function format_rows( &$wic_query, &$fields ) {
 		return ( $output );		
 	} // close function 
 
-	protected function format_message( &$wic_query ) {}
+	protected function format_message( &$wic_query,$header='' ) {}
 	protected function get_the_buttons( &$wic_query ) {}
 
  }	

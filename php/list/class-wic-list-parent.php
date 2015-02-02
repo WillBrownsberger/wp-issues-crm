@@ -12,7 +12,7 @@ abstract class WIC_List_Parent {
 
 
 	// header message, e.g., for count	
-	protected abstract function format_message( &$wic_query );
+	protected abstract function format_message( &$wic_query, $header = '' ); // $header is text that will lead the message.
 	// actual row content
 	protected abstract function format_rows ( &$wic_query, &$fields );
 	
@@ -21,7 +21,7 @@ abstract class WIC_List_Parent {
 	* main function -- takes query result and sets up a list each row of which is a button
 	*
 	*/	
-	public function format_entity_list( &$wic_query, $show_top_buttons ) {
+	public function format_entity_list( &$wic_query, $show_top_buttons, $header = '' ) { 
 
 		global $wic_db_dictionary;
 
@@ -29,7 +29,7 @@ abstract class WIC_List_Parent {
 		$output = '<div id="wic-post-list"><form method="POST">' . 
 			'<div class = "wic-post-field-group wic-group-odd">';
 
-		$message = $this->format_message ( $wic_query ); 
+		$message = $this->format_message ( $wic_query, $header ); 
 		$output .= '<div id="post-form-message-box" class = "wic-form-routine-guidance" >' . esc_html( $message ) . '</div>';
 		$output .=  $this->get_the_buttons( $wic_query );	
 
@@ -94,6 +94,8 @@ abstract class WIC_List_Parent {
    // the top row of buttons over the list
   	protected function get_the_buttons( &$wic_query ) {
 
+		$user_id = get_current_user_id();
+
 		$button_args_main = array(
 			'button_class'					=> 'button button-primary wic-form-button',
 			'button_label'					=> __( 'Export All', 'wp-issues-crm' ),
@@ -102,6 +104,20 @@ abstract class WIC_List_Parent {
 			'value' 							=>  $wic_query->search_id, 
 		);	
 		$buttons = WIC_Form_Parent::create_wic_form_button ( $button_args_main );	
+
+		$test = 	( 0 == strpos ( $wic_query->sql, "9999999999") ); // retrieve limit set in WIC_Admin_Dashboard for assigned case/issues searches
+		
+		if ( $test ) {
+			$button_args = array (
+				'entity_requested'	=> 'search_log',
+				'action_requested'	=> 'get_latest',
+				'id_requested'	=> $user_id,
+				'button_class'	=> 'button button-primary wic-top-menu-button ',
+				'button_label'	=>	'<span class="dashicons dashicons-search"></span></span><span class="dashicons dashicons-arrow-left-alt"></span>',
+				'title'	=>	'Last Logged Search',
+			);
+			$buttons .= WIC_Form_Parent::create_wic_form_button( $button_args );
+		}	
 	
 		return ( $buttons );
 	}

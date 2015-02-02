@@ -26,7 +26,7 @@ class WIC_Form_User_Update extends WIC_Form_Parent  {
 	// define the form message (return a message)
 	protected function format_message ( &$data_array, $message ) {
 		$display_name = self::format_name_for_title ( $data_array );
-		$formatted_message = sprintf ( __('Update Preferences for %1$s. ' , 'wp-issues-crm'), $display_name )  . $message;
+		$formatted_message = sprintf ( __('Update Activity Dropdown Preferences for %1$s. ' , 'wp-issues-crm'), $display_name )  . $message;
 		return ( $formatted_message );
 	}
 
@@ -56,10 +56,12 @@ class WIC_Form_User_Update extends WIC_Form_Parent  {
 	protected function group_special ( $group ) {
 		return ( false );	
 	}
+
+	protected function pre_button_messaging ( &$data_array ){ echo 'here i am ';}
+
 	
 	// hooks not implemented
 	protected function supplemental_attributes() {}
-	protected function pre_button_messaging ( &$data_array ){}
 	protected function post_form_hook ( &$data_array ) {}
 	 	
 }

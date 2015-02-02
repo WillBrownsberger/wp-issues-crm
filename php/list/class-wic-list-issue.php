@@ -77,14 +77,14 @@ protected function format_rows( &$wic_query, &$fields ) {
 		return ( $output );		
 	} // close function 
 
-	protected function format_message( &$wic_query ) {
+	protected function format_message( &$wic_query, $header='' ) {
 
 		if ( $wic_query->found_count < $wic_query->retrieve_limit ) {
-			$header_message = sprintf ( __( 'Found %1$s issues. 
+			$header_message = $header . sprintf ( __( 'Found %1$s issues. 
 				Export will select all constituents with activities for any of these issues.', 'wp-issues-crm'), 
 					$wic_query->found_count );		
 		} else {
-			$header_message = sprintf ( __( 'Found total of %1$s issues, showing selected search maximum -- %2$s.  
+			$header_message = $header . sprintf ( __( 'Found total of %1$s issues, showing selected search maximum -- %2$s.  
 				Export will select all constituents with activities for any of the total %1$s issues.', 'wp-issues-crm'),
 					$wic_query->found_count, $wic_query->showing_count ); 		
 		}

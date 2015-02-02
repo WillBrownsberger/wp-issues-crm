@@ -70,7 +70,7 @@ class WIC_List_Option_Group extends WIC_List_Constituent {
 	}
 
 
-	protected function format_message( &$wic_query ) {
+	protected function format_message( &$wic_query, $header = '' ) {
 		$header_message = sprintf ( __( 'Found %1$s Customizable Option Groups.', 'wp-issues-crm'), $wic_query->found_count );		
 		return $header_message;
 	}

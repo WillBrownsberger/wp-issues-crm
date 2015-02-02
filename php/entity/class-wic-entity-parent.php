@@ -415,7 +415,7 @@ abstract class WIC_Entity_Parent {
 	}
 
 	// used in reconstructing searches from the search log
-	public function redo_search_from_meta_query ( $search, $save_form, $update_form ) {
+	public function redo_search_from_meta_query ( $search, $save_form, $update_form ) { 
 		global $wic_db_dictionary;
 		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->initialize_data_object_array();

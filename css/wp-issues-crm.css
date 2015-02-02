@@ -6,6 +6,9 @@
 *
 */
 
+#wic-main-header { 
+	margin: 0 0 20px 0;
+}
 /* SYSTEM ERROR MESSAGE */
 
 .wp-issues-crm-fatal-error {
@@ -23,10 +26,7 @@
 } 
 
 #wic-top-level-form {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	margin: 0 0 0 14.2222222%;
+	margin: 0;
 }
 
 
@@ -42,11 +42,21 @@ button.button.button-primary.wic-form-button {
 
 button.button.button-primary.wic-top-menu-button {
 	display: inline-block;
-	font-size: 1.1em;
-	margin-right: 1.025%;
-	width: 7.3%;
+	margin-right: .8888%;
+	padding: 3px 0 0 0;
+	width: 6.2222%;
 }
 
+.wic-top-menu-button span.dashicons {
+	color: white;
+}
+
+.wic-top-menu-button span.dashicons.dashicons-star-filled {
+	color: #FFD700;
+}
+
+
+}
 /*
 *
 * icon styling for menus and also in forms
@@ -64,6 +74,8 @@ span.dashicons.dashicons-smiley,
 }
 
 
+
+
 /*
 *
 * styles for main search/update/save form, from top to bottom
@@ -79,7 +91,8 @@ span.dashicons.dashicons-smiley,
 
 /* message box and notices */
 #post-form-message-box {
-	margin: 20px 1% 20px 14.222%;
+	font-size: 1.2em;
+	margin: 20px 1% 20px 7.111111%;
 	padding: 10px 0;
 }
 
@@ -101,7 +114,7 @@ span.dashicons.dashicons-smiley,
 /* 128 px is width of button plus button right margin, so this is a one button indent */  		
 #wic-post-list .wic-form-button,
 .wic-post-form .wic-form-button {
-	margin: 0 .888% 20px 14.222%;
+	margin: 0 .888% 20px 7.1111111%;
 }
 
 #wic-post-list .wic-form-button.second-position,
@@ -119,13 +132,13 @@ span.dashicons.dashicons-smiley,
 #wic-form-main-groups {
 	display: inline-block;
 	overflow-x: hidden;
-	width: 71.1111% 
+	width: 64%; 
 }
 
 
 /* label is 20% with margin */
 .wic-multivalue-control-set {
-	width: 80%;
+	width: 88.888888%;
 }
 
 .wic-multivalue-field-subgroup {
@@ -143,7 +156,7 @@ span.dashicons.dashicons-smiley,
 	overflow-x: hidden;
 	padding: 0 30px;
 	vertical-align: top;
-	width: 28.8888888%;	
+	width: 36%;	
 }
 
 
@@ -208,8 +221,8 @@ p.wic-form-field-group-legend {
 label.wic-label {
 	display: inline-block;
 	font-size: 0.8em;
-	min-width: 18.75%;
-	margin-right: 1.25%;
+	min-width: 9.722222%;
+	margin-right: 1.388888%;
 	padding: 0;
 	text-align: right;
 	vertical-align: top;
@@ -246,12 +259,12 @@ label.wic-label {
 /* name row */
 
 #wic-control-first-name {
-	width: 40%;
+	width: 33.333%;
 }
 
 label.wic-label.first-name{
-	min-width: 46.875%;
-	margin-right: 3.125%;
+	min-width: 29.16666%;
+	margin-right: 4.16666%;
 }
 
 #wic-control-first-name,
@@ -262,7 +275,7 @@ label.wic-label.first-name{
 
 #wic-control-middle-name,
 #wic-control-last-name {
-	margin-right: 1.25%;
+	margin-right: 1.38888%;
 }
 
 
@@ -273,16 +286,16 @@ label.wic-label.first-name{
 
 /* fn sized to lineup under second standard button */
 .wic-input.first-name {
-	width: 46.875%;
+	width: 62.49985%;
 	margin-bottom: 20px; /* spaces whole name row */
 }
 
 
 #wic-control-middle-name {
-	width: 18.75%
+	width: 20.83333333%;
 }
 #wic-control-last-name {
-	width: 36.4%	
+	width: 40.5%;	
 }
 
 .wic-input.last-name,
@@ -341,10 +354,10 @@ label.wic-label.phone-number {
 }
 
 /* standardize drop down width to a button width */
-.wic-input.activity-type,
-.wic-input.address-type,
-.wic-input.phone-type, 
-.wic-input.email-type {
+select.wic-input.activity-type,
+select.wic-input.address-type,
+select.wic-input.phone-type, 
+select.wic-input.email-type {
 	cursor: pointer;
 	width: 23.4375%;
 } 
@@ -563,7 +576,7 @@ ul#constituent-comment-list {
 	font-size: .8em;
 }
 .wic-form-legend {
-	margin: 10px 0 10px 14.2222222%;
+	margin: 10px 0 10px 7.11111%;
 }
 
 
@@ -627,7 +640,7 @@ ul#constituent-comment-list {
 }
 
 #wic-form-issue-search #post_title {
-	margin: 0 0 0 20%;
+	margin: 0 0 0 11.11111%;
 }
 
 .wic-input.post-title,
@@ -744,8 +757,8 @@ p.wic-radio-button input{
 
 #wic-control-option-value {
 	background: white;
-	padding: 20px;
-	margin-right: 20px; 
+	padding: 20px 20px 20px 0;
+	margin: 0 20px 20px 0; 
 }
 
 
@@ -923,10 +936,11 @@ button.wic-post-list-button {
 .wic-post-list-field.pl-search_log-entity {
 	display: none;
 }
-.pl-search_log-user_id{ width:14%;}
-.pl-search_log-time{ width:14%;}
-.pl-search_log-serialized_search_array{ width:45%;}
-.pl-search_log-download-time{ width:20%;}
+.pl-search_log-user_id{ width:14.1%;}
+.pl-search_log-time{ width:14.1%;}
+.pl-search_log-serialized_search_array{ width:42.3%;}
+.pl-search_log-download_time{ width:14.1%;}
+.pl-search_log-result_count { width: 14.1%}
 li.pl-search_log-serialized_search_parameters{ display: none;}
 
 .pl-option_group-option_group_desc{ width:30%;}
@@ -942,7 +956,7 @@ li.pl-search_log-serialized_search_parameters{ display: none;}
 
 
 .wic-list-legend {
-	margin: 10px 14.22222%;
+	margin: 10px 7.11111%;
 }
 
 /***
@@ -960,17 +974,23 @@ li.pl-search_log-serialized_search_parameters{ display: none;}
 #wic-form-trend-search label.wic-label.activity-date, 
 #wic-form-trend-search-again label.wic-label.activity-date {
 	display: inline-block;
-	min-width: 18.75%;
-	margin-right: 1.25%;
+	min-width: 9.72222%;
+	margin-right: 1.38888%;
 	padding: 0;
 	text-align: right;
 	vertical-align: top;
-} 
+}
 
 #wic-inner-field-group-trend select.wic-input.activity-type, 
 #wic-inner-field-group-trend input.wic-input.activity-date, 
 #wic-inner-field-group-trend select.wic-input.last-updated-by {
 	width: 18.1641%;
+}
+
+/* user preferences styling */
+
+#wic-inner-field-group-user-toggle-button {
+	display: none;
 }
 
 /* stats table formatting */

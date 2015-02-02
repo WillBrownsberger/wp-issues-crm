@@ -85,19 +85,20 @@ class WIC_List_Constituent extends WIC_List_Parent {
 		return ( $output );		
 	}
 
-	protected function format_message( &$wic_query ) {
+	protected function format_message( &$wic_query, $header='' ) {
 	
 		if ( $wic_query->found_count < $wic_query->retrieve_limit ) {
-			$header_message = sprintf ( __( 'Found %1$s constituents.', 'wp-issues-crm'), $wic_query->found_count );		
+			$header_message = $header . sprintf ( __( 'Found %1$s constituents.', 'wp-issues-crm'), $wic_query->found_count );		
 		} elseif ( $wic_query->found_count_real ) {
-			$header_message = sprintf ( __( 'Found total of %1$s constituents, showing selected search maximum -- %2$s.', 'wp-issues-crm'),
+			$header_message = $header . sprintf ( __( 'Found total of %1$s constituents, showing selected search maximum -- %2$s.', 'wp-issues-crm'),
 				 $wic_query->found_count, $wic_query->showing_count ); 		
 		} else {
-			$header_message = sprintf ( __( 'Showing %1$s records -- changing search options may show more records.', 'wp-issues-crm' ),
+			$header_message = $header . sprintf ( __( 'Showing %1$s records -- changing search options may show more records.', 'wp-issues-crm' ),
 				 $wic_query->showing_count );		
 		}
 		return $header_message;
 	}
+
 
  }	
 

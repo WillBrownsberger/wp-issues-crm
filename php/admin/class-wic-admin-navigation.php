@@ -37,7 +37,7 @@ class WIC_Admin_Navigation {
 
 	public function do_dashboard (){ 
 		self::admin_check_security( 'manage_wic_constituents' );
-		echo '<div class="wrap"><h2>' . __( 'WP Issues CRM', 'wp-issues-crm' ) . '</h2>';	
+		echo '<div class="wrap"><h2 id="wic-main-header">' . __( 'WP Issues CRM', 'wp-issues-crm' ) . '</h2>';	
 		$wic_admin_dashboard = new WIC_Admin_Dashboard;
 		echo '<div>';
 	}

@@ -10,7 +10,7 @@
 
 class WIC_List_Data_Dictionary extends WIC_List_Option_Group {
 
-	protected function format_message( &$wic_query ) {
+	protected function format_message( &$wic_query, $header = '' ) {
 	
 		$header_message = sprintf ( __( 'Found %1$s Customizable Fields.', 'wp-issues-crm'), $wic_query->found_count );		
 		

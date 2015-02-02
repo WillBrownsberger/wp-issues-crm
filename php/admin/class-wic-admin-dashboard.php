@@ -54,17 +54,17 @@ class WIC_Admin_Dashboard {
 
 		$top_menu_buttons = array (
 			array ( 'constituent', 	'new_blank_form',	'<span class="dashicons dashicons-plus-alt"></span><span class="dashicons dashicons-smiley">' , __( 'New constituent.', 'wp-issues-crm' ) ), // new
-			array ( 'constituent', 	'new_form',		'<span class="dashicons dashicons-search"><span class="dashicons dashicons-smiley">', __( 'Search for constituents.', 'wp-issues-crm' ) ), // search
-			array ( 'dashboard', 	'my_cases',	 '<span class="dashicons dashicons-star-filled"></span><span class="dashicons dashicons-smiley">', __( 'Display list of cases assigned to me.', 'wp-issues-crm' ),  ),
-			array ( 'constituent', 	'get_latest',	'<span class="dashicons dashicons-smiley"></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'New constituent.', 'wp-issues-crm' ) ), // new
+			array ( 'constituent', 	'new_form',		'<span class="dashicons dashicons-search"></span><span class="dashicons dashicons-smiley"></span>', __( 'Search constituents.', 'wp-issues-crm' ) ), // search
+			array ( 'dashboard', 	'my_cases',	 '<span class="dashicons dashicons-star-filled"></span><span class="dashicons dashicons-smiley"></span>', __( 'Constituents assigned to me.', 'wp-issues-crm' ),  ),
+			array ( 'constituent', 	'get_latest',	'<span class="dashicons dashicons-smiley"></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'Last constituent.', 'wp-issues-crm' ) ), // new
 
-			array ( 'issue', 			'new_blank_form',	'<span class="dashicons dashicons-plus-alt"><span class="dashicons dashicons-format-aside"></span>', __( 'New Issue.', 'wp-issues-crm' ) ),
-			array ( 'issue', 			'new_form',		'<span class="dashicons dashicons-search"><span class="dashicons dashicons-format-aside"></span>', __( 'Search for issues.', 'wp-issues-crm' ) ),
-			array ( 'dashboard', 	'my_issues',	'<span class="dashicons dashicons-star-filled"><span class="dashicons dashicons-format-aside"></span>', __( 'Display list of issues assigned to me.', 'wp-issues-crm' ) ),
-			array ( 'issue', 			'get_latest',	'<span class="dashicons dashicons-format-aside"></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'New Issue.', 'wp-issues-crm' ) ),
+			array ( 'issue', 			'new_blank_form',	'<span class="dashicons dashicons-plus-alt"></span><span class="dashicons dashicons-format-aside"></span>', __( 'New issue.', 'wp-issues-crm' ) ),
+			array ( 'issue', 			'new_form',		'<span class="dashicons dashicons-search"></span><span class="dashicons dashicons-format-aside"></span>', __( 'Search for issues.', 'wp-issues-crm' ) ),
+			array ( 'dashboard', 	'my_issues',	'<span class="dashicons dashicons-star-filled"></span><span class="dashicons dashicons-format-aside"></span>', __( 'Issues assigned to me.', 'wp-issues-crm' ) ),
+			array ( 'issue', 			'get_latest',	'<span class="dashicons dashicons-format-aside"></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'Last issue.', 'wp-issues-crm' ) ),
 
-			array ( 'search_log', 	'get_latest',	'<span class="dashicons dashicons-search"></span></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'New Issue.', 'wp-issues-crm' ) ),
-			array ( 'dashboard', 	'search_history',	'<span class="dashicons dashicons-arrow-left-alt"></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'Review or repeat my recent searches.', 'wp-issues-crm' ) ),		
+			array ( 'search_log', 	'get_latest',	'<span class="dashicons dashicons-search"></span></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'Last search.', 'wp-issues-crm' ) ),
+			array ( 'dashboard', 	'search_history',	'<span class="dashicons dashicons-arrow-left-alt"></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'Recent searches.', 'wp-issues-crm' ) ),		
 			array ( 'trend', 			'new_form',		'<span class="dashicons dashicons-chart-line"></span>', __( 'Get activity/issue counts.', 'wp-issues-crm' ) ), 
 			);		
 	
@@ -86,6 +86,8 @@ class WIC_Admin_Dashboard {
 
 	// for semantic highlight of top buttons (note, in this function referring to class as in entity, not as in css class )
 	private function is_selected ( $class_requested, $action_requested, $button_class, $button_action ) {
+		
+		return false;		
 		// if last pressed the button, show it as selected 
 		if ( $class_requested == $button_class && $action_requested == $button_action ) {
 			return true; 
@@ -117,7 +119,7 @@ class WIC_Admin_Dashboard {
 		$search_parameters= array(
 			'sort_order' => true,
 			'compute_total' 	=> false,
-			'retrieve_limit' 	=> 999999999,
+			'retrieve_limit' 	=> 9999999999,// kludge here:  this retrieve limit is a sentinel to the lister not to show the back button
 			'show_deleted' 	=> false,
 			'select_mode'		=> 'id',
 		);
@@ -146,7 +148,7 @@ class WIC_Admin_Dashboard {
 		} else {
 			$lister_class = 'WIC_List_Constituent' ;
 			$lister = new $lister_class;
-			$list = $lister->format_entity_list( $wic_query, true );
+			$list = $lister->format_entity_list( $wic_query, true, __( 'My Cases: ', 'wp-issues-crm' ) );
 			echo $list;			
 		}
 	}
@@ -158,7 +160,7 @@ class WIC_Admin_Dashboard {
 		$search_parameters= array(
 			'sort_order' => true,
 			'compute_total' 	=> false,
-			'retrieve_limit' 	=> 999999999,
+			'retrieve_limit' 	=> 9999999999, // kludge here:  this retrieve limit is a sentinel to the lister not to show the back button
 			'show_deleted' 	=> false,
 			'select_mode'		=> 'id',
 		);
@@ -187,7 +189,7 @@ class WIC_Admin_Dashboard {
 		} else {
 			$lister_class = 'WIC_List_Issue' ;
 			$lister = new $lister_class;
-			$list = $lister->format_entity_list( $wic_query, true );
+			$list = $lister->format_entity_list( $wic_query, true, __( 'My Issues: ', 'wp-issues-crm' ) );
 			echo $list;			
 		}
 	}

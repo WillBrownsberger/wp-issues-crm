@@ -19,6 +19,9 @@ jQuery(document).ready(function($) {
     $('form#wic-form-constituent-update').areYouSure();
     $('form#wic-form-issue-update').areYouSure();
     $('form#wic-form-issue-save').areYouSure();
+    $('form#wic-form-option-group-update').areYouSure();
+    $('form#wic-form-data-dictionary-update').areYouSure();
+    $('form#wic-form-data-dictionary-save').areYouSure();
 }); 
  
 (function($) {
