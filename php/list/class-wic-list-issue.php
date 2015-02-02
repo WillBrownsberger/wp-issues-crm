@@ -81,11 +81,11 @@ protected function format_rows( &$wic_query, &$fields ) {
 
 		if ( $wic_query->found_count < $wic_query->retrieve_limit ) {
 			$header_message = $header . sprintf ( __( 'Found %1$s issues. 
-				Export will select all constituents with activities for any of these issues.', 'wp-issues-crm'), 
+				Export, if available, will select all constituents with activities for any of these issues.', 'wp-issues-crm'), 
 					$wic_query->found_count );		
 		} else {
 			$header_message = $header . sprintf ( __( 'Found total of %1$s issues, showing selected search maximum -- %2$s.  
-				Export will select all constituents with activities for any of the total %1$s issues.', 'wp-issues-crm'),
+				Export, if available, will select all constituents with activities for any of the total %1$s issues.', 'wp-issues-crm'),
 					$wic_query->found_count, $wic_query->showing_count ); 		
 		}
 		return $header_message;
