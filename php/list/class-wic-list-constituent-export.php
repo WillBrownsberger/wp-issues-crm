@@ -28,19 +28,18 @@ class WIC_List_Constituent_Export {
 		global $wpdb;	
 
 		$sql = 	"SELECT first_name, last_name,  
-						GROUP_CONCAT( DISTINCT email_address SEPARATOR ';' ) as emails, 
-						max( if ( address_type = 0, city, ' ' ) ) as city, 
-						GROUP_CONCAT( DISTINCT phone_number SEPARATOR ';' ) as phones,
-						max( if ( address_type = 0, address_line, ' '	) ) as address_line_1,
-						max( if ( address_type = 0, concat ( city, ', ', state, ' ',  zip ), ' ' ) ) as address_line_2,
-						max( if ( address_type = 0, zip, ' ' ) ) as zip, 
+						email_address as emails, 
+						city as city, 
+						phone_number as phones,
+						address_line as address_line_1,
+						concat ( city, ', ', state, ' ',  zip ) as address_line_2,
+						zip, 
 						c.* 
 					FROM wp_wic_constituent c
-					left join wp_wic_email e on e.constituent_id = c.Id
+					left join wp_wic_email e on e.constituent_id = c.ID
 					left join wp_wic_phone p on p.constituent_id = c.ID
 					left join wp_wic_address a on a.constituent_id = c.ID	
 					WHERE c.ID IN $id_list
-					GROUP BY c.ID
 					"; 
 
 		$results = $wpdb->get_results ( $sql, ARRAY_A ); 

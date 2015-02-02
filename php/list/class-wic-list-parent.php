@@ -95,30 +95,30 @@ abstract class WIC_List_Parent {
   	protected function get_the_buttons( &$wic_query ) {
 
 		$user_id = get_current_user_id();
+		$buttons = '';
 
-		$button_args_main = array(
-			'button_class'					=> 'button button-primary wic-form-button',
-			'button_label'					=> __( 'Export All', 'wp-issues-crm' ),
-			'id'								=> 'wic-post-export-button',
-			'name'							=> 'wic-post-export-button',
-			'value' 							=>  $wic_query->search_id, 
-		);	
-		$buttons = WIC_Form_Parent::create_wic_form_button ( $button_args_main );	
-
-		$test = 	( 0 == strpos ( $wic_query->sql, "9999999999") ); // retrieve limit set in WIC_Admin_Dashboard for assigned case/issues searches
-		
-		if ( $test ) {
+		if ( isset ( $wic_query->search_id ) ) {
+			
+			$button_args_main = array(
+				'button_class'					=> 'button button-primary wic-form-button',
+				'button_label'					=> __( 'Export All', 'wp-issues-crm' ),
+				'id'								=> 'wic-post-export-button',
+				'name'							=> 'wic-post-export-button',
+				'value' 							=>  $wic_query->search_id, 
+			);	
+			$buttons = WIC_Form_Parent::create_wic_form_button ( $button_args_main );	
+			
 			$button_args = array (
-				'entity_requested'	=> 'search_log',
-				'action_requested'	=> 'get_latest',
-				'id_requested'	=> $user_id,
-				'button_class'	=> 'button button-primary wic-top-menu-button ',
-				'button_label'	=>	'<span class="dashicons dashicons-search"></span></span><span class="dashicons dashicons-arrow-left-alt"></span>',
-				'title'	=>	'Last Logged Search',
-			);
+					'entity_requested'	=> 'search_log',
+					'action_requested'	=> 'get_latest',
+					'id_requested'	=> $user_id,
+					'button_class'	=> 'button button-primary wic-top-menu-button ',
+					'button_label'	=>	'<span class="dashicons dashicons-search"></span></span><span class="dashicons dashicons-arrow-left-alt"></span>',
+					'title'	=>	__( 'Last Search', 'wp-issues-crm' ),
+				);
 			$buttons .= WIC_Form_Parent::create_wic_form_button( $button_args );
-		}	
-	
+		}
+		
 		return ( $buttons );
 	}
 }	
