@@ -125,6 +125,7 @@ function hideSelf( rowname ) {
 	row.className = rowClass.replace( 'visible-templated-row', 'hidden-template' ) ;
 	sendErrorMessage ( 'Row will be deleted when you save/update.' )
 	window.nextWPIssuesCRMMessage = 'You can proceed.';
+	jQuery('#wic-form-constituent-update').trigger('checkform.areYouSure');
 }
 
 function sendErrorMessage ( messageText ) {
@@ -133,7 +134,7 @@ function sendErrorMessage ( messageText ) {
 	message.innerHTML = messageText;
 	message.className = 'wic-form-errors-found';
 
-	timeout = window.setTimeout ( restoreMessage, 5000 ); 
+	timeout = window.setTimeout ( restoreMessage, 12000 ); 
 }
 
 function restoreMessage (  ) {
@@ -163,6 +164,8 @@ function moreFields( base ) {
 	var insertBase = document.getElementById( base + '[row-template]' );
 	var insertHere = insertBase.nextSibling;
 	insertHere.parentNode.insertBefore( newFields, insertHere );
+	jQuery('#wic-form-constituent-update').trigger('checkform.areYouSure'); /* must also set 'addRemoveFieldsMarksDirty' : true in Are you sure*/
+	jQuery('#wic-form-constituent-save').trigger('checkform.areYouSure');
 }
 
 // supports moreFields by walking node tree for whole multi-value group to copy in new name/ID values
@@ -211,14 +214,15 @@ function testForDupOptionValues () {
 
 	for (var j = 0;  j < sortedValues.length - 1; j++) {
    	 if (sortedValues[j + 1] == sortedValues[j]) {
-   	 	var displayValue;
-   	 	if ( '' == sortedValues[j]) {
-   	 		displayValue = '<BLANK>';
+   	 	var displayValue; 
+   	 	if ( '' == sortedValues[j].trim() ) {
+   	 		displayValue = '|BLANK|';
    	 	} else {
 				displayValue = '"' + sortedValues[j] + '"';   	 	
    	 	}
-   	 	sendErrorMessage ( 'The database value of each option must be unique.  The value ' + displayValue + ' appears more once.'  )
-			window.nextWPIssuesCRMMessage = 'You can proceed after error correction.';	
+   	 	var errorMessage = 'The database value of each option must be unique.  The value ' + displayValue + ' appears more once.  Delete an extra row using the red <span id="" class="dashicons dashicons-dismiss"></span> next to it.'
+   	 	sendErrorMessage ( errorMessage  )
+			window.nextWPIssuesCRMMessage = 'You can proceed after making values unique.';	
       	return false;
     	}
 	}	

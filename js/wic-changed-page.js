@@ -34,7 +34,7 @@ jQuery(document).ready(function($) {
         'dirtyClass' : 'dirty',
         'change' : null,
         'silent' : false,
-        'addRemoveFieldsMarksDirty' : false,
+        'addRemoveFieldsMarksDirty' : true, /* changed defaut for all; but need to also trigger check form in the moreFields javaascript' */
         'fieldEvents' : 'change keyup propertychange input',
         'fieldSelector': ":input" //:not(input[type=submit]):not(input[type=button])"
       }, options);

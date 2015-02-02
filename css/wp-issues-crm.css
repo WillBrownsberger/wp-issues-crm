@@ -655,7 +655,7 @@ ul#constituent-comment-list {
 /* styling for displayed post text */
 #wic-post-content-visible {
 	height: 300px;
-	margin: 0 0 20px 20%;
+	margin: 0 0 20px 11.111111%;
 	overflow-y: scroll;
 	width: 60%;
 
