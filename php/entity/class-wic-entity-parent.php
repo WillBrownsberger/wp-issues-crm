@@ -396,7 +396,7 @@ abstract class WIC_Entity_Parent {
 	}
 
 	// takes action depending on outcome of search
-	protected function handle_search_results ( $wic_query, $not_found_form, $found_form ) {
+	protected function handle_search_results ( $wic_query, $not_found_form, $found_form ) { 
 		$sql = $wic_query->sql;
 		if ( 0 == $wic_query->found_count ) {
 			$message = __( 'No matching record found -- search again, save new or start over.', 'wp-issues-crm' );
@@ -405,7 +405,7 @@ abstract class WIC_Entity_Parent {
 			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );			
 		} elseif ( 1 == $wic_query->found_count) { 
 			$this->data_object_array = array(); // discard possibly soft matching array values before doing straight id retrieval
-			$this->id_search_generic ( $wic_query->result[0]-> ID, $found_form, $sql );	
+			$this->id_search_generic ( $wic_query->result[0]-> ID, $found_form, $sql, true );	
 		} else {
 			$lister_class = 'WIC_List_' . $this->entity ;
 			$lister = new $lister_class;

@@ -92,12 +92,11 @@ abstract class WIC_List_Parent {
    }
    
    // the top row of buttons over the list
-  	protected function get_the_buttons( &$wic_query ) {
-
+  	protected function get_the_buttons( &$wic_query ) { 
 		$user_id = get_current_user_id();
 		$buttons = '';
 
-		if ( isset ( $wic_query->search_id ) ) {
+		if ( isset ( $wic_query->search_id ) ) { 
 			
 			$button_args_main = array(
 				'button_class'					=> 'button button-primary wic-form-button',
