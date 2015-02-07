@@ -29,15 +29,34 @@ abstract class WIC_DB_Access {
 
 	/**********************************************************************************************
 	*
-	*	search log functions 
+	*	SEARCH LOG FUNCTIONS 
 	*
+	*
+	*	Notes on search log usage -- intended scope is only: Form Searches and ID Searches off of Lists
+	*		Limited to constituents and issues. 
+	*		The search_log method is private, so invoked only in this class, and, in fact, only by the primary search method.
+	*
+	*	Searches are invoked in the following basic ways:
+	*		From a form (Entity_Parent, Always Logged)
+	*		From a single ID (Entity_Parent, Not Logged except requested as in instances below)
+	*			NOT Logged if coming from search form handling (redundant)
+	*			Logged if coming from id_search method in Entity_Constituent (from List Constituent ) and Entity_Issue, which is used in
+	*				List Trend
+	*				List Issue
+	*				Metabox
+	*				Entity Comment 
+	*				Activity Link to Issue Button
+	*		From a search array retrieved from the log (Entity_Parent (redo search and latest) and Export, Never Logged)
+	*
+	*	Additional specialized searches include:
+	*		In dup checking (Entity_Parent, Never Logged)
+	*		From specialized search arrays constructed as in Dashboard (Never Logged)
+	*		For specialized searches in multivalue controls, options and field listings (Never Logged)	
+	*	
 	***********************************************************************************************/
-
-	// log a search to the search log
 	private function search_log ( $meta_query_array, $search_parameters ) {
 		$entity = $this->entity;
-		if ( ( "constituent" == $entity || 'issue' == $entity ) && isset ( $search_parameters['log_search'] ) ){	
-
+		if ( isset ( $search_parameters['log_search'] ) ) {	
 			if ( $search_parameters['log_search'] ) { 
 				global $wpdb;
 				$user_id = get_current_user_id();
@@ -58,9 +77,21 @@ abstract class WIC_DB_Access {
 				if ( 1 == $save_result ) {
 					$this->search_id = $wpdb->insert_id;	
 				} else {
-					WIC_Function_Utilities::wic_error ( 'Unknown database error in query_log.', __FILE__, __LINE__, __METHOD__, true ); 		
+					WIC_Function_Utilities::wic_error ( 'Unknown database error in search_log.', __FILE__, __LINE__, __METHOD__, true ); 		
 				}
+			} elseif ( isset ( $search_parameters['old_search_id'] ) ) {
+				$this->search_id = $search_parameters['old_search_id'];
+				/* this branch allows a search that is just a reconstruction of a search log search to retain its
+				*  original search ID -- list_parent needs search ID to show download and redo buttons.
+				*  See WIC_Entity_Parent::redo_search_from_meta_query.  Want to bring user back to exact previous search position.
+				*  Only place this parameter is set is in that redo_search function and any redone search goes through there.
+				*  If only redisplay search form, don't want to maintain the original identity and don't actually redo search
+				*  Just show form
+				*/
 			}
+		} else {
+			wic_generate_call_trace();
+			WIC_Function_Utilities::wic_error ( 'Unset value -- $search_parameters[\'log_search\']', __FILE__, __LINE__, __METHOD__, false );
 		}
 	}
 	
@@ -77,7 +108,7 @@ abstract class WIC_DB_Access {
 		
 		$sql = 			
 			"
-			SELECT serialized_search_array, serialized_search_parameters, time
+			SELECT ID, serialized_search_array, serialized_search_parameters, time
 			FROM $search_log_table
 			WHERE user_id = $user_id
 				AND entity = '$entity'
@@ -96,10 +127,14 @@ abstract class WIC_DB_Access {
 				$latest_searched_for = $search_clause['value'];	
 			}		
 		} 	
-		// if array as not an id search, $latest_searched_for will still be empty
+		// if array was not an id search, $latest_searched_for will still be empty
 		// have to get ID by actually executing the search
 		if ( '' == $latest_searched_for ) { 
+			// set up search array same as in WIC_Entity_Search_Log::ID_retrieval for call that 
+			// ends up in same place -- WIC_Entity_Parent::redo_search_from_meta_query (although will do nothing with search_id)
 			$search = array();
+			$search['search_id'] = $latest_search[0]->ID; 
+			$search['entity'] = $entity;
 			$search['unserialized_search_array'] = unserialize ( $latest_search[0]->serialized_search_array );
 			$search['unserialized_search_parameters'] = unserialize ( $latest_search[0]->serialized_search_parameters );
 			$class_name = 'WIC_Entity_' . $this->entity; 
@@ -144,7 +179,8 @@ abstract class WIC_DB_Access {
 	
 	/*
 	*
-	* pull the specified search off the search log by search id
+	* pull the specified search off the search log by search id 
+	* (for constituent export, does not pass search parameters, only search terms)
 	*
 	*/
 	 
@@ -328,10 +364,21 @@ abstract class WIC_DB_Access {
 		return ( $this->made_changes );	
 	}
 
+
+	/*
+	*
+	* pass through for updated_last functions
+	*
+	*/
+	public function updated_last ( $user_id ) {
+		return ( $this->db_updated_last ( $user_id ) );
+	}
+
 	abstract protected function db_search ( $meta_query_array, $search_parameters );
 	abstract protected function db_save ( &$meta_query_array );
 	abstract protected function db_update ( &$meta_query_array );
 	abstract protected function db_delete_by_id ( $id );
+	abstract protected function db_updated_last ( $user_id ); 
 
 	
 }

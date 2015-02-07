@@ -51,6 +51,14 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		$this->id_search_generic ( $id, 'WIC_Form_Constituent_Update', '' , true ); // no sql, but do log search as individual
 		return;		
 	}
+	
+	// same as above, no search log
+	protected function id_search_no_log ( $args ) {
+		$id = $args['id_requested']; 
+		$this->id_search_generic ( $id, 'WIC_Form_Constituent_Update', '' , false ); 
+		return;		
+	}
+
 
 	//handle an update request coming from an update form
 	protected function form_update () {
@@ -64,7 +72,7 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 		return;
 	}
 
-	//handle a search request coming search log
+	//handle a search request coming search log (buttons with search ID go to search log first)
 	protected function redo_search_from_query ( $search ) {  
 		$this->redo_search_from_meta_query ( $search, 'WIC_Form_Constituent_Save', 'WIC_Form_Constituent_Update' );
 		return;

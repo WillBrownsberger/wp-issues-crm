@@ -100,6 +100,9 @@ class WIC_DB_Access_WP_User Extends WIC_DB_Access {
 		return ( isset ( $preferences[$preference] ) ?  $preferences[$preference] : false );
 	}
 
+	protected function db_updated_last ( $user_id ) {} // not implemented for users
+
+
 }
 
 

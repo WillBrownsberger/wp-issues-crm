@@ -91,7 +91,7 @@ abstract class WIC_List_Parent {
 		return ( $display_value );
    }
    
-   // the top row of buttons over the list
+   // the top row of buttons over the list -- down load button and change search criteria button
   	protected function get_the_buttons( &$wic_query ) { 
 		$user_id = get_current_user_id();
 		$buttons = '';
@@ -104,16 +104,18 @@ abstract class WIC_List_Parent {
 				'id'								=> 'wic-post-export-button',
 				'name'							=> 'wic-post-export-button',
 				'value' 							=>  $wic_query->search_id, 
+				'title'						=>	__( 'Download constituents', 'wp-issues-crm' ),
 			);	
 			$buttons = WIC_Form_Parent::create_wic_form_button ( $button_args_main );	
 			
+			// show search form with parameters  
 			$button_args = array (
 					'entity_requested'	=> 'search_log',
-					'action_requested'	=> 'get_latest',
-					'id_requested'	=> $user_id,
+					'action_requested'	=> 'id_search_to_form', // will display form with search criteria
+					'id_requested'	=> $wic_query->search_id,
 					'button_class'	=> 'button button-primary wic-top-menu-button ',
-					'button_label'	=>	'<span class="dashicons dashicons-search"></span></span><span class="dashicons dashicons-arrow-left-alt"></span>',
-					'title'	=>	__( 'Last Search', 'wp-issues-crm' ),
+					'button_label'	=>	'<span class="dashicons dashicons-search"></span><span class="dashicons dashicons-update"></span></span>',
+					'title'	=>	__( 'Change search criteria', 'wp-issues-crm' ),
 				);
 			$buttons .= WIC_Form_Parent::create_wic_form_button( $button_args );
 		}

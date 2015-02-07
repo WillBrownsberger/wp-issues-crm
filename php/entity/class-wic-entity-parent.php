@@ -53,10 +53,10 @@ abstract class WIC_Entity_Parent {
 	*	Some of these controls are multivalue controls, which in turn are arrays of entity objects each with their own array of controls
 	*	Have to handle the multivalue controls as arrays.
 	*
-	* To up the entity object (this sequence is built in to each populate function): 
+	* To setup up the entity object (this sequence is built in to each populate function): 
 	*  (1) get the entity fields/properties from the data dictionary ( calling $wic_db_dictionary->get_form_fields)
 	*  (2) initialize the data object array by instantiating controls for each (each dictionary control type having a corresponding control class )
-	*  (3) populating the control objects
+	*  (3) populate the control objects -- from a submitted form, from a found record, with search parameters or just initialize
 	*
 	*/
 	protected function initialize_data_object_array()  {
@@ -81,7 +81,7 @@ abstract class WIC_Entity_Parent {
 		} 
 	}	
 
-	protected function populate_data_object_array_from_found_record( &$wic_query, $offset=0 ) {
+	protected function populate_data_object_array_from_found_record( &$wic_query, $offset=0 ) { 
 
 		$this->initialize_data_object_array();
 
@@ -133,7 +133,7 @@ abstract class WIC_Entity_Parent {
 	
 	// initialize data object array for an id, but don't display a form
 	protected function initialize_only ( $args ) {
-		$this->id_search_generic ( $args['id_requested'], '', '' );	
+		$this->id_search_generic ( $args['id_requested'], '', '', false ); // no form, no sql, don't display	
 	}
 
 	/*************************************************************************************
@@ -178,7 +178,8 @@ abstract class WIC_Entity_Parent {
 			$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 			$search_parameters = array(
 				'select_mode' => 'id',
-				'show_deleted' => false,		
+				'show_deleted' => false,
+				'log_search' => false,		
 			);
 			$search_clause_args = array(
 				'match_level' => '0',
@@ -250,6 +251,10 @@ abstract class WIC_Entity_Parent {
 	*     search involving a multi-table join.  The corresponding update assembly lives in the database access
 	*		layer which, although it will support multi-entity searches, only updates one entity.
 	*
+	*  It is called in this class by dedup, id search and form search functions and also in the multivalue control class
+	*
+	*	It pass through to controls the dedup, match level and category search_clause_args, using only the dedup arg itself 
+	*
 	**************************************************************************************/
 	public function assemble_meta_query_array ( $search_clause_args ) {
 		extract ( $search_clause_args, EXTR_OVERWRITE );
@@ -268,7 +273,7 @@ abstract class WIC_Entity_Parent {
 
 	/*************************************************************************************
 	*
-	*  REQUEST HANDLERS: new form, save from search, save/update,  id search, general search, redo search from metaquery
+	*  SIMPLE FORM REQUEST HANDLERS: new form, search_form_from_search_array save form from search
 	*     Child class functions are wrap arounds to choose next forms
 	*
 	**************************************************************************************/
@@ -281,24 +286,33 @@ abstract class WIC_Entity_Parent {
 		$new_search->layout_form( $this->data_object_array, $guidance, 'guidance' );
 	}	
 	
+	// used to recreate form when changing search parameters
 	protected function search_form_from_search_array ( $form, $guidance, $serialized_search_array ) {
 		$this->populate_data_object_array_with_search_parameters ( $serialized_search_array ); 
 		$new_search = new $form;
 		$new_search->layout_form( $this->data_object_array, $guidance, 'guidance' );
 	}
 
-	// handle a save request coming from search -- 
-	// need to lose readonly fields from search form, so show save form, rather than proceeding directly
+	// handle a save request coming from a search -- 
+	// need to lose readonly fields from search form, so show save form, rather than proceeding directly to do a save from the search form
 	protected function save_from_search ( $entity_save_form, $message = '', $message_level = 'good_news', $sql = ''  ) {
 		$this->populate_data_object_array_from_submitted_form();
 		$save_form = new $entity_save_form;
 		$save_form->layout_form ( $this->data_object_array, $message, $message_level, $sql );		
 	}
 
+	/*************************************************************************************
+	*
+	* REQUEST HANDLER FOR SAVE UPDATE REQUESTS
+	*
+	*************************************************************************************/
 	//handle an update request coming from a form ( $save is true or false )
 	protected function form_save_update_generic ( $save, $fail_form, $success_form ) {
+		// populate the array from the submitted form
 		$this->populate_data_object_array_from_submitted_form();
-		$this->update_ready( $save ); // false, not a save 
+		// validate the array
+		$this->update_ready( $save ); // false, not a save
+		// if issues, show the fail form with messages; if dups, show the list of dups 
 		if ( false === $this->outcome ) {
 			$message = __( 'Not successful: ', 'wp-issues-crm' ) . $this->explanation;
 			$message_level = 'error';
@@ -312,34 +326,49 @@ abstract class WIC_Entity_Parent {
 			}	
 			return;
 		}
+		// form was good so do save/update
 		$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
-		$wic_access_object->save_update( $this->data_object_array ); 
+		$wic_access_object->save_update( $this->data_object_array );
+		// handle failed save/update 
 		if ( false === $wic_access_object->outcome ) {
 			$message =  $wic_access_object->explanation;
 			$message_level = 'error';
 			$form = new $fail_form;
 			$form->layout_form ( $this->data_object_array, $message, $message_level );
+		// proceed on successful save/update
 		} else {
-			if ( $save ) {
+			if ( $save ) { // retreive the new ID from the save process
 				$this->data_object_array['ID']->set_value( $wic_access_object->insert_id );
 			}
+			// check if changes were made
 			$this->made_changes = $wic_access_object->were_changes_made();
+			// populate any other values like ID which come from the update process
 			$this->special_entity_value_hook( $wic_access_object ); // done on both save and updates, but hook may test values
+			// show success form
 			$message = __( 'Successful.  You can update further. ', 'wp-issues-crm' );
 			$message_level = 'good_news';
 			$form = new $success_form;
 			$form->layout_form ( $this->data_object_array, $message, $message_level );					
 		}
 	}
+
+	/*************************************************************************************
+	*
+	* REQUEST HANDLER FOR SEARCH REQUESTS -- BY ID, FROM FORM, FROM SAVED SEARCH ARRAY 
+	*
+	*************************************************************************************/
 	
 	// handle a search request for an ID coming from anywhere
-	protected function id_search_generic ( $id, $success_form, $sql = '', $log_search = false ) { 
-		// passing a blank success form just leaves the array instantiated, but no action taken
-		// initialize data array with only the ID and do search
+	// passing a blank success form just leaves the array instantiated, but no action taken
+	// no fail form because fail is an error
+	protected function id_search_generic ( $id, $success_form, $sql, $log_search ) { 
+		// initialize data array with only the ID 
 		$this->data_object_array['ID'] = WIC_Control_Factory::make_a_control( 'text' );
 		$this->data_object_array['ID']->initialize_default_values(  $this->entity, 'ID', $this->entity_instance );	
 		$this->data_object_array['ID']->set_value( $id );
+		// set up search object
 		$wic_query = 	WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		// set up search arguments and parameters
 		$search_parameters = array(
 			'select_mode' => '*',
 			'show_deleted' => true,		
@@ -350,11 +379,9 @@ abstract class WIC_Entity_Parent {
 			'dup_check' => false,
 			'category_search_mode' => '',
 			);
-
 		// assemble metaquery with match_level = 0 (strict match) and dup check set to false
 		$wic_query->search ( $this->assemble_meta_query_array( $search_clause_args ), $search_parameters ); 
 		// retrieve record if found, otherwise error
-
 		if ( 1 == $wic_query->found_count ) { 
 			$message = __( '', 'wp-issues-crm' );
 			$message_level =  'guidance';
@@ -369,8 +396,7 @@ abstract class WIC_Entity_Parent {
 		} 
 	}
 	
-	// handle a search request coming from a full form
-	// the first form passed will be 
+	// make a search request based on form input
 	protected function form_search_generic ( $not_found_form, $found_form ) { 
 
 		$this->populate_data_object_array_from_submitted_form();
@@ -396,6 +422,7 @@ abstract class WIC_Entity_Parent {
 	}
 
 	// takes action depending on outcome of search
+	// the first form passed will be a save form, the second an update or may display neither and a list instead if multiple found
 	protected function handle_search_results ( $wic_query, $not_found_form, $found_form ) { 
 		$sql = $wic_query->sql;
 		if ( 0 == $wic_query->found_count ) {
@@ -405,7 +432,7 @@ abstract class WIC_Entity_Parent {
 			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );			
 		} elseif ( 1 == $wic_query->found_count) { 
 			$this->data_object_array = array(); // discard possibly soft matching array values before doing straight id retrieval
-			$this->id_search_generic ( $wic_query->result[0]-> ID, $found_form, $sql, true );	
+			$this->id_search_generic ( $wic_query->result[0]-> ID, $found_form, $sql, false );	// do not log on second search from form
 		} else {
 			$lister_class = 'WIC_List_' . $this->entity ;
 			$lister = new $lister_class;
@@ -414,32 +441,56 @@ abstract class WIC_Entity_Parent {
 		}
 	}
 
-	// used in reconstructing searches from the search log
+	// used in reconstructing searches from the search log ( CAN TERMINATE WITHOUT A FORM IF NO FORMAT GIVEN )
+	// in which case, just retrieve ID, not full record
 	public function redo_search_from_meta_query ( $search, $save_form, $update_form ) { 
 		global $wic_db_dictionary;
 		$this->fields = $wic_db_dictionary->get_form_fields( $this->entity );
 		$this->initialize_data_object_array();
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		// don't want to log previously logged search again, but do want to know ID for down load and redo search purposes
+		// talking to search function as if a new search, but with two previous parameters set
+		$search['unserialized_search_parameters']['log_search'] = false;
+		$search['unserialized_search_parameters']['old_search_id'] = $search['search_id'];
 		$wic_query->search ( $search['unserialized_search_array'], $search['unserialized_search_parameters'] ); //
 		if ( '' < $save_form ) {
-			$this->handle_search_results ( $wic_query, $save_form, $update_form );
-		} else {
-			$this->populate_data_object_array_from_found_record( $wic_query, 0 ); // take the first found if for some reason multiple	
-		}// sit tight with loaded array awaiting further instructions
+			$this->handle_search_results ( $wic_query, $save_form, $update_form ); // show form or list
+		} else { 
+			$this->data_object_array['ID']->set_value( $wic_query->result[0]->ID ); 
+			// take the first found if for some reason multiple 
+		}	// sit tight with array having just ID to report found ID 
+			// (no other variables available at this stage, have not searched by the ID)
 	}
 
 	// wrap around for preceding function to invoke it without a form
+	// used by the latest function to determine what ID was found in a singleton search result
 	public function redo_search_from_meta_query_no_form ( $search ) {
 		$this->redo_search_from_meta_query( $search, '' , '' );
 	}
+	
+	/***************************************************************************************
+	*
+	* REQUEST HANDLER FOR "LATEST" REQUESTS -- COMPUTE, SHOW FORM, INSTANTIATE FOR ACCESS TO VALUES
+	*
+	****************************************************************************************/
+	
 
-
-	// determine the latest entity which the user has saved, updated or selected from a list
-	protected function compute_latest ( $args ) {
-		$user_id = $args['id_requested'];
+	// determine the latest of this entity which the user has saved, updated or selected from a list
+	protected function compute_latest ( $args ) { 
+		$user_id = 0;
+		if ( isset ( $args['id_requested']) ) {
+			$user_id = $args['id_requested'];
+		} 
+		if ( 0 == $user_id) {
+			wic_generate_call_trace();
+			WIC_Function_Utilities::wic_error ( sprintf ( 'Bad User ID passed.' , $id ), __FILE__, __LINE__, __METHOD__, true );		
+		}
 		$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		// check last updated from database
 		$latest_update_array = $wic_access_object->updated_last ( $user_id );
+		// check last singleton found from search_log
 		$latest_search_array = $wic_access_object->search_log_last ( $user_id );
+		// determine which was later
 		$latest = WIC_Function_Utilities::choose_latest_non_blank ( 
 			$latest_update_array['latest_updated'], 
 			$latest_update_array['latest_updated_time'],
@@ -454,8 +505,10 @@ abstract class WIC_Entity_Parent {
 		$latest = $this->compute_latest ( $args  ); 	
 		$args2 = array ( 'id_requested' => $latest );	
 		if ( $latest > '' ) {
-			$this->id_search ( $args2 ); // id_search lives in the instantiated object and includes a form specific to the instantiated entity
-				// calls id_search_generic with the class
+			$this->id_search_no_log ( $args2 ); 
+				// id_search_no_log lives in the instantiated constituent or issue object
+				// and includes a form specific to the instantiated entity
+				// calls id_search_generic with the class for a constituent or issue
 		} else {
 			$this->new_blank_form( $args2 ); // passing the empty arg		
 		} 
@@ -464,10 +517,10 @@ abstract class WIC_Entity_Parent {
 	// just load the latest entity
 	protected function get_latest_no_form ( $args ) {
 		$latest = $this->compute_latest ( $args ); 	
-		$this->id_search_generic ( $latest, '', '' ); // just retrieves the record, if no class form is passed 	
+		$this->id_search_generic ( $latest, '', '', false ); // just retrieves the record, if no class forms are passed, search is not logged 	
 	}
 
-	// if used after calling get_latest_no_form returns latest
+	// return the current ID and title for the object
 	protected function get_current_ID_and_title () {
 		return ( array (
 			 'current' 	=> $this->data_object_array['ID']->get_value(),
@@ -476,6 +529,7 @@ abstract class WIC_Entity_Parent {
 		);
 	}
 
+	// return the ID of the object
 	public function get_the_current_ID () {
 		return (  $this->data_object_array['ID']->get_value() );
 	}

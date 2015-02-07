@@ -122,6 +122,7 @@ class WIC_Admin_Dashboard {
 			'retrieve_limit' 	=> 9999999999,// kludge here:  this retrieve limit is a sentinel to the lister not to show the back button
 			'show_deleted' 	=> false,
 			'select_mode'		=> 'id',
+			'log_search'		=> false,
 		);
 
 		$search_array = array (
@@ -163,6 +164,7 @@ class WIC_Admin_Dashboard {
 			'retrieve_limit' 	=> 9999999999, // kludge here:  this retrieve limit is a sentinel to the lister not to show the back button
 			'show_deleted' 	=> false,
 			'select_mode'		=> 'id',
+			'log_search'		=> false,
 		);
 
 		$search_array = array (
@@ -205,6 +207,7 @@ class WIC_Admin_Dashboard {
 			'show_deleted' 	=> true,
 			'select_mode'		=> 'id',
 			'sort_direction'	=> 'DESC',
+			'log_search'		=> false,
 		);
 
 		$search_array = array (

@@ -13,6 +13,17 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 		$this->entity = 'search_log';
 	} 
 
+	/**************************************************************************************************************************************
+	*
+	*	Search Log Request Handlers
+	*
+	*
+	*	Search log retrieval can take two approaches -- either to the search form or to the found list
+	*	Need to carry old search ID back if showing the found list, so that export and redo search buttons can work, so
+	*	   maintain old search ID in array returned from ID retrieval 
+	*
+	***************************************************************************************************************************************/
+
 	// request handler for search log list -- re-executes query 
 	public function id_search( $args ) {
 		$search = $this->id_retrieval( $args );
@@ -21,7 +32,7 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 		${ $class_name } = new $class_name ( 'redo_search_from_query', $search  ) ;		
 	}
 
-	// get the latest general search ( i.e., with return count > 1 ) and bring it back to a form
+	// get the latest general search by user ( i.e., with return count > 1 ) and bring it back to a form
 	public function get_latest ( $args ) { // get latest search 
 		$latest_general_search_id = WIC_DB_Access::search_log_last_general( $args['id_requested'] );
 		$args2 = array ( 'id_requested' => $latest_general_search_id );	
@@ -41,10 +52,11 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 	
 	// get the search identified by number from the search log and return it unserialized
 	protected function id_retrieval ( $args ) {
-		$id = $args['id_requested'];
+		$id = $args['id_requested']; // expects standard button format args
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
 		$wic_query->list_by_id ( '(' . $id . ')' );
 		return ( array ( 
+			'search_id' => $id,
 			'entity' => $wic_query->result[0]->entity, 
 			'unserialized_search_array' => unserialize( $wic_query->result[0]->serialized_search_array ),
 			'unserialized_search_parameters' => unserialize( $wic_query->result[0]->serialized_search_parameters ),
@@ -52,7 +64,11 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 		);
 	}	
 	
-	
+	/**************************************************************************************************************************************
+	*
+	*	Formatters for search log list
+	*
+	***************************************************************************************************************************************/
 	public static function serialized_search_array_formatter ( $serialized ) {
 		
 		global $wic_db_dictionary;

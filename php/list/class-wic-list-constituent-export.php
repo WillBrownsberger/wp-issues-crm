@@ -60,6 +60,7 @@ class WIC_List_Constituent_Export {
 			 WIC_Function_Utilities::wic_error ( 'Apparent cross-site xscripting or configuration error.', __FILE__, __LINE__, __METHOD__, true );
 		}
 		
+		// retrieves only the meta array, not the search parameters, since will supply own
 		$search = WIC_DB_Access::get_search_from_search_log( $id );	
 		$current_user = wp_get_current_user();		
 
@@ -70,7 +71,8 @@ class WIC_List_Constituent_Export {
 			'sort_order' 		=> true,
 			'compute_total' 	=> false,
 			'retrieve_limit' 	=> 999999999,
-			'show_deleted'		=> false
+			'show_deleted'		=> false,
+			'log_search'		=> false,
 		);
 
 		$wic_query->search ( $search['meta_query_array'], $search_parameters );

@@ -49,14 +49,6 @@ class WIC_Entity_Trend extends WIC_Entity_Parent {
 		}
 	}
 
-
-	//handle a search request coming search log
-	protected function redo_search_from_query ( $meta_query_array ) {
-		$this->redo_search_from_meta_query ( $meta_query_array, 'WIC_Form_Issue_Save', 'WIC_Form_Issue_Update' );
-		return;
-	}	
-	
-	
 	protected function special_entity_value_hook ( &$wic_access_object ) {
 		$control = $this->data_object_array['post_date'];
 		$post_date = $control->get_value();

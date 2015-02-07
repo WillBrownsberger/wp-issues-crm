@@ -33,7 +33,7 @@ class WIC_Entity_User extends WIC_Entity_Parent {
 	// handle a search request for an ID coming from anywhere
 	protected function show_user_preferences () {
 		$id = get_current_user_id();
-		$this->id_search_generic ( $id, 'WIC_Form_User_Update' );
+		$this->id_search_generic ( $id, 'WIC_Form_User_Update', '', false );
 		return;		
 	}
 

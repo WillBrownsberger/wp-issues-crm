@@ -370,7 +370,7 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 		$this->explanation = ''; 
 	}
 
-	public function updated_last ( $user_id ) {
+	public function db_updated_last ( $user_id ) {
 		
 		global $wpdb;
 	

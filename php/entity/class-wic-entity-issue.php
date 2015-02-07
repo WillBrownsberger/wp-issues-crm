@@ -46,6 +46,14 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return;		
 	}
 
+	// same as above, no search log
+	protected function id_search_no_log ( $args ) {
+		$id = $args['id_requested']; 
+		$this->id_search_generic ( $id, 'WIC_Form_Issue_Update', '' , false );  
+		return;		
+	}
+
+
 	//handle an update request coming from an update form
 	protected function form_update () {
 		$this->form_save_update_generic ( false, 'WIC_Form_Issue_Update', 'WIC_Form_Issue_Update' );
@@ -58,8 +66,8 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return;
 	}
 
-	//handle a search request coming search log
-	protected function redo_search_from_query ( $search ) {  // 0 = $meta_query_array and 1 = $search_parameters_array
+	//handle a search request coming search log (buttons with search ID go t search log first)
+	protected function redo_search_from_query ( $search ) {  
 		$this->redo_search_from_meta_query ( $search, 'WIC_Form_Issue_Save', 'WIC_Form_Issue_Update' );
 		return;
 	}	

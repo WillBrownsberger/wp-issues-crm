@@ -103,6 +103,7 @@ class WIC_Control_Multivalue extends WIC_Control_Parent {
 			'sort_order' => true,
 			'sort_direction' => $sort_direction, 
 			'retrieve_limit' => 999999999, // show all
+			'log_search' => false,
 			); 
 		$wic_query->search ( 		
 			array ( // double layer array to standardize a return that allows multivalue fields

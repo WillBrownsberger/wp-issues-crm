@@ -79,6 +79,7 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 	protected function db_save ( &$meta_query_array ) {}
 	protected function db_update( &$meta_query_array ) {  }
 	protected function db_delete_by_id ( $args ){}
+	protected function db_updated_last ( $arts ) {}
 
 }
 

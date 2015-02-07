@@ -355,7 +355,7 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 		return ( $latest_issues ); 
 	}
 
-	public function updated_last ( $user_id ) {
+	public function db_updated_last ( $user_id ) {
 		
 		// The Query
 		$args = array (
