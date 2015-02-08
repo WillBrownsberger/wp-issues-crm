@@ -31,17 +31,6 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 		$search['show_form'] = true;
 		${ $class_name } = new $class_name ( 'redo_search_from_query', $search  ) ;		
 	}
-
-	// get the latest general search by user ( i.e., with return count > 1 ) and bring it back to a form
-	public function get_latest ( $args ) { // get latest search 
-		$latest_general_search_id = WIC_DB_Access::search_log_last_general( $args['id_requested'] );
-		$args2 = array ( 'id_requested' => $latest_general_search_id );	
-		if ( $latest_general_search_id > '' ) {
-			$this->id_search_to_form ( $args2 );	
-		} else {
-			WIC_Function_Utilities::wic_error ( 'Finding no past searches with count not equal 1.   Do a fresh search!' , __FILE__, __LINE__, __METHOD__, false );	
-		} 		
-	}
 	
 	// request handler for back to search button -- brings back to filled search form, but does not reexecute the query
 	public function id_search_to_form( $args ) {

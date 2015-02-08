@@ -37,7 +37,7 @@ class WIC_Admin_Dashboard {
 					'id_requested'			=>	$control_array[2],
 					'instance'				=> '', // unnecessary in this context, absence will not create an error but here for consistency about arguments;
 				);
-				$this->show_top_menu_buttons ( $control_array[0], $control_array[1] );
+				$this->show_top_menu_buttons ( $control_array[0], $control_array[1], $control_array[2] );
 				${ 'wic_entity_'. $control_array[0]} = new $class_name ( $action_requested, $args ) ;		
 			}
 			
@@ -47,10 +47,27 @@ class WIC_Admin_Dashboard {
 		}		
 	}
 
-	private function show_top_menu_buttons ( $class_requested, $action_requested ) {
+	private function show_top_menu_buttons ( $class_requested, $action_requested, $id_requested ) {
 		echo '<form id = "wic-top-level-form" method="POST" autocomplete = "on">';
 		wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); 
-		
+
+		$user_id = get_current_user_id();
+
+		// show a back to list button if coming from a list		
+		if ( ( 'constituent' == $class_requested || 'issue' == $class_requested ) 
+				&& 'id_search' == $action_requested && absint( $id_requested ) > 0 ) {
+			$search_id = WIC_DB_Access::search_log_last_general ( $user_id, $class_requested ); 
+			// now create link button to the list from that search 	
+			$button_args = array (
+				'entity_requested'	=> 'search_log',
+				'action_requested'	=> 'id_search',
+				'id_requested'			=> $search_id,
+				'button_class'			=> 'button button-primary wic-top-menu-button back-to-list',	
+				'button_label'			=>	'<span class="dashicons dashicons-search"></span></span><span class="dashicons dashicons-arrow-left-alt"></span>',
+				'title'					=>	 __( 'Back to last search list.', 'wp-issues-crm' ), 
+			);
+			echo WIC_Form_Parent::create_wic_form_button( $button_args );		
+		}
 
 		$top_menu_buttons = array (
 			array ( 'constituent', 	'new_blank_form',	'<span class="dashicons dashicons-plus-alt"></span><span class="dashicons dashicons-smiley">' , __( 'New constituent.', 'wp-issues-crm' ) ), // new
@@ -62,13 +79,11 @@ class WIC_Admin_Dashboard {
 			array ( 'issue', 			'new_form',		'<span class="dashicons dashicons-search"></span><span class="dashicons dashicons-format-aside"></span>', __( 'Search for issues.', 'wp-issues-crm' ) ),
 			array ( 'dashboard', 	'my_issues',	'<span class="dashicons dashicons-star-filled"></span><span class="dashicons dashicons-format-aside"></span>', __( 'Issues assigned to me.', 'wp-issues-crm' ) ),
 			array ( 'issue', 			'get_latest',	'<span class="dashicons dashicons-format-aside"></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'Last issue.', 'wp-issues-crm' ) ),
-
-			array ( 'search_log', 	'get_latest',	'<span class="dashicons dashicons-search"></span></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'Last search.', 'wp-issues-crm' ) ),
+		
 			array ( 'dashboard', 	'search_history',	'<span class="dashicons dashicons-arrow-left-alt"></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'Recent searches.', 'wp-issues-crm' ) ),		
 			array ( 'trend', 			'new_form',		'<span class="dashicons dashicons-chart-line"></span>', __( 'Get activity/issue counts.', 'wp-issues-crm' ) ), 
 			);		
 	
-		$user_id = get_current_user_id();
 		foreach ( $top_menu_buttons as $top_menu_button ) {
 			$selected_class = $this->is_selected ( $class_requested, $action_requested, $top_menu_button[0], $top_menu_button[1] ) ? 'wic-form-button-selected' : '';
 			$button_args = array (

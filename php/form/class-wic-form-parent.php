@@ -223,6 +223,7 @@ abstract class WIC_Form_Parent  {
 		$id							= '';
 		$value						= '';
 		$formaction					= '';
+		$type							= 'submit';
 
 		extract ( $control_array_plus_class, EXTR_OVERWRITE );
 
@@ -231,8 +232,10 @@ abstract class WIC_Form_Parent  {
 		$id_phrase = $id > '' ? ' id = "' . $id . '" ' : ' ';
 		$formaction_phrase = $formaction > '' ? ' formaction = "' . $formaction . '" ' : ' ';
 	
-		$button =  '<button class = "' . $button_class . '" title = "' . $title . '" type="submit" name = "' . $name . '"' . $id_phrase . $formaction_phrase . ' value = "' . $button_value . '">' . $button_label . '</button>';		
+		$button =  '<button class = "' . $button_class . '" title = "' . $title . '" type="'. $type . '" name = "' . $name . '"' . $id_phrase . $formaction_phrase . ' value = "' . $button_value . '">' . $button_label . '</button>';		
 		return ( $button );
 	}
+
+
 
 }

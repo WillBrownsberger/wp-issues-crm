@@ -22,6 +22,7 @@ class WIC_Form_Constituent_Update extends WIC_Form_Parent  {
 		);	
 		
 		$button = $this->create_wic_form_button ( $button_args_main );
+
 		return ( $button  ) ;
 	}
 	

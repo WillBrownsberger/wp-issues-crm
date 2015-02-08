@@ -47,6 +47,10 @@ button.button.button-primary.wic-top-menu-button {
 	width: 6.2222%;
 }
 
+button.button.button-primary.wic-top-menu-button.back-to-list span.dashicons {
+	color: #ffd700;
+}
+
 .wic-top-menu-button span.dashicons {
 	color: white;
 }
