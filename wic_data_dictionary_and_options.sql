@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Feb 01, 2015 at 05:58 PM
+-- Generation Time: Feb 08, 2015 at 03:58 PM
 -- Server version: 5.5.41-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   PRIMARY KEY (`ID`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=148 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=149 ;
 
 --
 -- Dumping data for table `wp_wic_data_dictionary`
@@ -136,9 +136,9 @@ INSERT INTO `wp_wic_data_dictionary` (`ID`, `entity_slug`, `group_slug`, `field_
 (90, 'constituent', 'save_options', 'no_dupcheck', 'checked', 'Suppress Dup Checking', 10, 0, 0, '', 0, 0, 0, '', 0, 1, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (91, 'trend', 'trend', 'activity_date', 'date', 'Trend Period', 10, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (92, 'trend', 'trend', 'activity_type', 'select', 'Activity Type', 20, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', 'activity_type_options', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
-(93, 'trend', 'trend', 'last_updated_by', 'select', 'Activity Last Updated By', 30, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', 'activity_last_updated_by', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
+(93, 'trend', 'trend', 'last_updated_by', 'select', 'Entered By', 30, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', 'activity_last_updated_by', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (94, 'option_group', 'option_group', 'option_group_slug', 'text', 'Option Group Slug', 10, 0, 10, 'individual', 1, 0, 0, '', 1, 0, '', 'no_spaces_allowed', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
-(95, 'option_group', 'option_group', 'option_group_desc', 'text', 'Descriptive Group Label', 20, 20, 0, '', 0, 0, 0, '', 1, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
+(95, 'option_group', 'option_group', 'option_group_desc', 'text', 'Description', 20, 20, 0, '', 0, 0, 0, '', 1, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (96, 'option_group', 'option_group', 'enabled', 'select', 'Enabled', 30, 30, 0, '', 1, 0, 0, '1', 0, 0, '', '', 'enabled_disabled_array', '', 'enabled_disabled_array', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (98, 'option_value', 'option_value', 'screen_deleted', 'deleted', 'x', 1, 0, 0, '', 0, 0, 0, '', 0, 1, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (99, 'option_value', 'option_value', 'ID', 'text', 'Internal ID for Option Value', 400, 0, 0, '', 0, 0, 1, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
@@ -164,12 +164,12 @@ INSERT INTO `wp_wic_data_dictionary` (`ID`, `entity_slug`, `group_slug`, `field_
 (119, 'data_dictionary', 'data_dictionary', 'field_order', 'select', 'Screen Order', 40, 0, 0, 'individual', 0, 0, 0, '', 0, 0, '', '', 'order_array', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (120, 'data_dictionary', 'data_dictionary', 'ID', 'text', 'Internal ID for Field', 2, 0, 0, '', 0, 0, 1, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (124, 'data_dictionary', 'data_dictionary', 'like_search_enabled', 'select', 'Wild card searching', 84, 0, 0, '', 0, 0, 0, '1', 0, 0, '', '', 'like_search', '', 'like_search', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
-(147, 'search_log', 'search_log', 'result_count', 'text', 'Result Count', 110, 110, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
+(147, 'search_log', 'search_log', 'result_count', 'text', 'Result Count', 110, 45, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (141, 'user', 'user', 'max_issues_to_show', 'select', 'Number to Show', 50, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', 'count_to_ten', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (142, 'user', 'user', 'ID', 'text', 'Wordpress User ID', 10, 0, 0, 'individual', 0, 0, 1, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (143, 'user', 'user', 'display_name', 'text', 'User ', 20, 0, 0, '', 0, 1, 1, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (144, 'user', 'user', 'show_viewed_issue', 'checked', 'Show Viewed Issue', 30, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
-(145, 'user', 'user', 'show_latest_issues', 'select', 'Show Recent Activity Issues', 40, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', 'show_latest_issues_options', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
+(145, 'user', 'user', 'show_latest_issues', 'select', 'Show Used Issues', 40, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', 'show_latest_issues_options', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (146, 'search_log', 'search_log', 'serialized_search_parameters', 'text', 'Serialized Search Parameters', 100, 100, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
@@ -247,7 +247,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_option_group` (
 --
 
 INSERT INTO `wp_wic_option_group` (`ID`, `option_group_slug`, `option_group_desc`, `enabled`, `last_updated_time`, `last_updated_by`, `mark_deleted`, `is_system_reserved`) VALUES
-(1, 'activity_type_options', 'Activity Types', 1, '2015-01-28 00:00:00', 15, '', 0),
+(1, 'activity_type_options', 'Activity Types', 1, '2015-02-02 11:55:19', 15, '', 0),
 (2, 'address_type_options', 'Address Types', 1, '2015-01-26 00:00:00', 15, '', 0),
 (3, 'case_status_options', 'Issue/Case Status Options', 1, '2015-01-28 00:00:00', 15, '', 0),
 (4, 'category_search_mode_options', 'Category Search Mode Options', 1, '2015-01-24 00:00:00', 15, '', 1),
@@ -256,7 +256,7 @@ INSERT INTO `wp_wic_option_group` (`ID`, `option_group_slug`, `option_group_desc
 (7, 'gender_options', 'Gender Codes', 1, '0000-00-00 00:00:00', 0, '', 0),
 (8, 'match_level_options', 'match_level_options', 1, '0000-00-00 00:00:00', 0, '', 1),
 (9, 'party_options', 'Political Party', 1, '2015-01-24 00:00:00', 15, '', 0),
-(10, 'phone_type_options', 'Phone Types', 1, '2015-01-23 00:00:00', 15, '', 0),
+(10, 'phone_type_options', 'Phone Types', 1, '2015-02-02 14:36:25', 15, '', 0),
 (11, 'post_status_options', 'post_status_options', 1, '0000-00-00 00:00:00', 0, '', 1),
 (12, 'pro_con_options', 'Pro/Con Options', 1, '0000-00-00 00:00:00', 0, '', 0),
 (13, 'retrieve_limit_options', 'retrieve_limit_options', 1, '0000-00-00 00:00:00', 0, '', 1),
@@ -322,7 +322,7 @@ INSERT INTO `wp_wic_option_value` (`ID`, `option_group_id`, `option_value`, `opt
 (26, '12', '', 'Pro/Con?', 30, 1, '0000-00-00 00:00:00', 0),
 (27, '12', '0', 'Pro', 10, 1, '0000-00-00 00:00:00', 0),
 (28, '12', '1', 'Con', 20, 1, '0000-00-00 00:00:00', 0),
-(30, '1', '0', 'eMail', 10, 1, '2015-01-28 00:00:00', 15),
+(30, '1', '0', 'eMail', 10, 1, '2015-02-02 11:55:19', 15),
 (31, '1', '1', 'Call', 20, 1, '2015-01-28 00:00:00', 15),
 (32, '1', '2', 'Petition', 30, 1, '2015-01-28 00:00:00', 15),
 (33, '1', '3', 'Meeting', 40, 1, '2015-01-28 00:00:00', 15),
@@ -353,7 +353,7 @@ INSERT INTO `wp_wic_option_value` (`ID`, `option_group_id`, `option_value`, `opt
 (62, '10', '1', 'Cell', 10, 1, '2015-01-23 00:00:00', 15),
 (63, '10', '2', 'Work', 20, 1, '2015-01-23 00:00:00', 15),
 (64, '10', '3', 'Fax', 30, 1, '2015-01-23 00:00:00', 15),
-(65, '10', '4', 'Other', 40, 1, '2015-01-23 00:00:00', 15),
+(65, '10', '4', 'Other', 40, 1, '2015-02-02 14:36:25', 15),
 (66, '10', '', 'Type?', 50, 1, '2015-01-23 00:00:00', 15),
 (68, '16', '1', 'clo', 10, 1, '2015-01-24 00:00:00', 15),
 (69, '16', 'did', 'mulasdf', 0, 1, '2015-01-24 00:00:00', 15),
@@ -361,7 +361,7 @@ INSERT INTO `wp_wic_option_value` (`ID`, `option_group_id`, `option_value`, `opt
 (77, '17', 'e', '', 20, 1, '2015-01-24 00:00:00', 15),
 (78, '17', 'f', '', 190, 1, '2015-01-24 00:00:00', 15),
 (79, '17', 'fe', '', 10, 1, '2015-01-24 00:00:00', 15),
-(80, '1', '', 'Type?', 0, 1, '2015-01-28 00:00:00', 15),
+(80, '1', '', 'Type?', 0, 1, '2015-02-02 11:55:19', 15),
 (81, '20', '', 'N/A', 5, 1, '2015-01-24 00:00:00', 15),
 (82, '20', 'personal', 'Personal Info', 40, 1, '2015-01-24 00:00:00', 15),
 (83, '20', 'registration', 'Codes', 30, 1, '2015-01-24 00:00:00', 15),
@@ -378,8 +378,8 @@ INSERT INTO `wp_wic_option_value` (`ID`, `option_group_id`, `option_value`, `opt
 (98, '25', 'open', 'Open for WP Issues CRM', 20, 1, '2015-01-26 00:00:00', 15),
 (99, '25', '', '''Open/Closed?''', 10, 1, '2015-01-26 00:00:00', 15),
 (101, '27', 'x', 'Show only the open issues', 10, 1, '0000-00-00 00:00:00', 0),
-(102, '27', 'l', 'Show last used issues', 20, 1, '0000-00-00 00:00:00', 0),
-(103, '27', 'f', 'Show frequently used issues', 30, 1, '0000-00-00 00:00:00', 0),
+(102, '27', 'l', 'Show open and also recently used issues', 20, 1, '0000-00-00 00:00:00', 0),
+(103, '27', 'f', 'Show open issues and also frequently used issues', 30, 1, '0000-00-00 00:00:00', 0),
 (110, '28', '1', '1', 1, 1, '0000-00-00 00:00:00', 0),
 (111, '28', '2', '2', 2, 1, '0000-00-00 00:00:00', 0),
 (112, '28', '3', '3', 3, 1, '0000-00-00 00:00:00', 0),
