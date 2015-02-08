@@ -162,10 +162,11 @@ abstract class WIC_DB_Access {
 	* note that not looking at zero results -- these bounce to the user anyway
 	*
 	*/
-	public static function search_log_last_general ( $user_id, $entity ) { 
+	public function search_log_last_general ( $user_id ) { 
 		
 		global $wpdb;		
 		$search_log_table = $wpdb->prefix . 'wic_search_log';
+		$entity = $this->entity;
 		
 		$sql = 			
 			"

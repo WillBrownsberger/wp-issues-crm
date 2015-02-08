@@ -24,13 +24,6 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 		}	
 	}	
 	
-	public static function wic_debug_trace ( $method, $text ) {
-		global $wic_debug_trace;
-		if ( $wic_debug_trace ) {
-			echo '<p>' . sprintf ( __( 'In method %s, sending text %s.', 'wp-issues-crm' ), $method, $text ) . '</p>';
-		} 
-	}		
-	
 	public static function get_administrator_array() {
 	
 		$user_select_array = array();	

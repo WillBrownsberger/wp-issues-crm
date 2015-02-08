@@ -94,6 +94,4 @@ function wic_generate_call_trace() { // from http://php.net/manual/en/function.d
 	echo "\t" . implode("<br/>\n\t", $result);
 }
 
-// set global debug trace variable to false for all production sites
-$wic_debug_trace = true;
 

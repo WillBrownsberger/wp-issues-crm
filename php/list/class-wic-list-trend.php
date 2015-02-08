@@ -109,7 +109,7 @@ protected function format_rows( &$wic_query, &$fields ) {
 			$row .='</ul>';				
 			
 			$list_button_args = array(
-					'entity_requested'	=> 'Issue',
+					'entity_requested'	=> 'trend',
 					'action_requested'	=> 'id_search',
 					'button_class' 		=> 'wic-post-list-button ' . $row_class,
 					'id_requested'			=> $row_array->id,
@@ -121,7 +121,6 @@ protected function format_rows( &$wic_query, &$fields ) {
 	} // close function 
 
 	protected function format_message( &$wic_query,$header='' ) {}
-	protected function get_the_buttons( &$wic_query ) {}
 
  }	
 

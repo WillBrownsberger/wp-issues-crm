@@ -1,8 +1,9 @@
 <?php
 /*
 *
-* class-wic-db-access-wic.php
+* class-wic-db-access-trend.php
 *		intended as wraparound for wpdb to access wic tables
+*		handles "trend" object as mechanism for accessing activity queries defined here
 *
 */
 
@@ -74,6 +75,31 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 										// codex.wordpress.org/Class_Reference/wpdb#SELECT_Generic_Results 
 		$this->explanation = ''; 
 	}	
+
+
+	// differs from parent version of this function only in that accepts singleton results
+	public function search_log_last_general ( $user_id ) { 
+		
+		global $wpdb;		
+		$search_log_table = $wpdb->prefix . 'wic_search_log';
+		$entity = $this->entity;
+		
+		$sql = 			
+			"
+			SELECT ID
+			FROM $search_log_table
+			WHERE user_id = $user_id
+				AND entity = '$entity'
+			ORDER	BY time DESC
+			LIMIT 0, 1
+			";
+		
+		$latest_search = $wpdb->get_results ( $sql );
+
+		return ( $latest_search[0]->ID );
+
+	} 	
+
 
 	/* required functions not implemented */
 	protected function db_save ( &$meta_query_array ) {}

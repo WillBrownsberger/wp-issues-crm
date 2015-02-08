@@ -66,7 +66,7 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return;
 	}
 
-	//handle a search request coming search log (buttons with search ID go t search log first)
+	//handle a search request coming search log
 	protected function redo_search_from_query ( $search ) {  
 		$this->redo_search_from_meta_query ( $search, 'WIC_Form_Issue_Save', 'WIC_Form_Issue_Update' );
 		return;

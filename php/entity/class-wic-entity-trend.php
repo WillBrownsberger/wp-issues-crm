@@ -1,12 +1,11 @@
 <?php
 /*
 *
-*	wic-entity-issue.php
+*	wic-entity-trend.php
 *
-*  This class is instantiated and takes control from the parent class in the parent constructor
-*  It takes action on user requests which are the named functions.
-*  It receives the $args passed from the button ( via the dashboard ).  
-*	It is able to use generic functions from the parent.
+*  Essentially, trends are issues, but the search model is different -- driven by WIC Activities
+* 		-- so need this wraparound object
+*
 *
 */
 
@@ -29,6 +28,25 @@ class WIC_Entity_Trend extends WIC_Entity_Parent {
 		return;				
 	}
 
+	// handle a search request for an ID coming from anywhere
+	protected function id_search ( $args ) {
+		$issue_pass_through_entity = new WIC_Entity_Issue ( 'id_search', $args ) ;	
+		return;		
+	}
+
+	//handle a search request coming search log -- own function here, since need to combine form redisplay with list again
+	protected function redo_search_from_query ( $search ) { 
+		// prepare all  the data for a form  
+		$this->populate_data_object_array_with_search_parameters( $search );
+		// then also do the list
+		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity );
+		// don't want to log previously logged search again, but do want to know ID for down load and redo search purposes
+		// talking to search function as if a new search, but with two previous parameters set
+		$search['unserialized_search_parameters']['log_search'] = false;
+		$search['unserialized_search_parameters']['old_search_id'] = $search['search_id'];
+		$wic_query->search ( $search['unserialized_search_array'], $search['unserialized_search_parameters'] ); //
+		$this->handle_search_results ( $wic_query, 'WIC_Form_Trend_Search_Again', 'WIC_Form_Trend_Search_Again' ); // show form or list
+	}
 	// handle search results
 	protected function handle_search_results ( $wic_query, $not_found_form, $found_form ) {
 		$sql = $wic_query->sql;

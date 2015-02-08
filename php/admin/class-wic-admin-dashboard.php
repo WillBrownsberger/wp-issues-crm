@@ -48,15 +48,17 @@ class WIC_Admin_Dashboard {
 	}
 
 	private function show_top_menu_buttons ( $class_requested, $action_requested, $id_requested ) {
+
 		echo '<form id = "wic-top-level-form" method="POST" autocomplete = "on">';
 		wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); 
 
 		$user_id = get_current_user_id();
 
 		// show a back to list button if coming from a list		
-		if ( ( 'constituent' == $class_requested || 'issue' == $class_requested ) 
-				&& 'id_search' == $action_requested && absint( $id_requested ) > 0 ) {
-			$search_id = WIC_DB_Access::search_log_last_general ( $user_id, $class_requested ); 
+		if ( ( 'constituent' == $class_requested || 'issue' == $class_requested || 'trend' == $class_requested ) 
+				&& 'id_search' == $action_requested && absint( $id_requested ) > 0 ) { 
+			$search_entity = WIC_DB_Access_Factory::make_a_db_access_object( $class_requested );
+			$search_id = $search_entity->search_log_last_general ( $user_id ); 
 			// now create link button to the list from that search 	
 			$button_args = array (
 				'entity_requested'	=> 'search_log',
