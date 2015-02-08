@@ -119,7 +119,7 @@ class WIC_Admin_Dashboard {
 	// show top menu buttons and requested list
 	public function show_dashboard( $action_requested ) {
 		
-		$this->show_top_menu_buttons ( 'dashboard', $action_requested );
+		$this->show_top_menu_buttons ( 'dashboard', $action_requested, NULL );
 	
 		$user_ID = get_current_user_id();	
 		
@@ -164,7 +164,7 @@ class WIC_Admin_Dashboard {
 		} else {
 			$lister_class = 'WIC_List_Constituent' ;
 			$lister = new $lister_class;
-			$list = $lister->format_entity_list( $wic_query, true, __( 'My Cases: ', 'wp-issues-crm' ) );
+			$list = $lister->format_entity_list( $wic_query, __( 'My Cases: ', 'wp-issues-crm' ) );
 			echo $list;			
 		}
 	}
@@ -206,7 +206,7 @@ class WIC_Admin_Dashboard {
 		} else {
 			$lister_class = 'WIC_List_Issue' ;
 			$lister = new $lister_class;
-			$list = $lister->format_entity_list( $wic_query, true, __( 'My Issues: ', 'wp-issues-crm' ) );
+			$list = $lister->format_entity_list( $wic_query,  __( 'My Issues: ', 'wp-issues-crm' ) );
 			echo $list;			
 		}
 	}
@@ -242,7 +242,7 @@ class WIC_Admin_Dashboard {
 		} else {
 			$lister_class = 'WIC_List_Search_Log' ;
 			$lister = new $lister_class;
-			$list = $lister->format_entity_list( $wic_query, true );
+			$list = $lister->format_entity_list( $wic_query, '' );
 			echo $list;			
 		}
 	}

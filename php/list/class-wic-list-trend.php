@@ -14,7 +14,7 @@ class WIC_List_Trend extends WIC_List_Parent {
 	*
 	*/
 	
-	public function format_entity_list( &$wic_query, $show_top_buttons ) {
+	public function format_entity_list( &$wic_query, $header ) {
 
   		// set up form
 		$output = '<div id="wic-post-list"><form method="POST">' . 

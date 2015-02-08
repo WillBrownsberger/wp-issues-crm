@@ -44,41 +44,9 @@ class WIC_Entity_Trend extends WIC_Entity_Parent {
 			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );
 			$lister_class = 'WIC_List_Trend' ;
 			$lister = new $lister_class;
-			$list = $lister->format_entity_list( $wic_query, false );
+			$list = $lister->format_entity_list( $wic_query, '' );
 			echo $list;	
 		}
 	}
 
-	protected function special_entity_value_hook ( &$wic_access_object ) {
-		$control = $this->data_object_array['post_date'];
-		$post_date = $control->get_value();
-		if ( '' == $post_date ) { 
-			$this->data_object_array['post_author']->set_value( $wic_access_object->post_author );
-			$this->data_object_array['post_date']->set_value( $wic_access_object->post_date );
-			$this->data_object_array['post_status']->set_value( $wic_access_object->post_status );
-		}		
-	}	
-	
-	protected function list_after_form  ( &$wic_query ) {
-		
-		// extract $post_id	
-		$post_id = $this->data_object_array['ID']->get_value();
-		
-		// retrieve ID's of constituents referencing this issue in activities or comments
-		$args = array(
-			'id_array' => array ( $post_id ),
-			'search_id' => $wic_query->search_id,
-			); 
-		$wic_comment_query = new WIC_Entity_Comment ( 'get_constituents_by_issue_id', $args ) ;
-		
-		// append the list to the form
-		if ( 0 < $wic_comment_query->found_count ) {
-			$lister = new WIC_List_Constituent;
-			$list = $lister->format_entity_list( $wic_comment_query, true );
-		echo $list;			 
-		}	else {
-			echo '<div id="no-activities-found-message">' . __( 'No comments or activities found for issue.', 'wp-issue-crm' ) . '</div>';
-		} 
-	}		
-	
 }

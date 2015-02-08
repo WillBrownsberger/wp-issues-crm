@@ -38,7 +38,7 @@ class WIC_Entity_Data_Dictionary extends WIC_Entity_Parent {
 	// handle a search request for an ID coming from anywhere
 	protected function id_search ( $args ) {
 		$id = $args['id_requested']; 
-		$this->id_search_generic ( $id, 'WIC_Form_Data_Dictionary_Update', '', false );
+		$this->id_search_generic ( $id, 'WIC_Form_Data_Dictionary_Update', '', false, false ); // no logging and no old search ID
 		return;		
 	}
 
@@ -77,7 +77,7 @@ class WIC_Entity_Data_Dictionary extends WIC_Entity_Parent {
 		$wic_query->search ( $meta_query_array, array( 'retrieve_limit' => 9999, 'show_deleted' => true, 'log_search' => false ) );
 		$lister_class = 'WIC_List_' . $this->entity ;
 		$lister = new $lister_class;
-		$list = $lister->format_entity_list( $wic_query,true ); // true means show buttons over list
+		$list = $lister->format_entity_list( $wic_query, '' ); 
 		echo $list;
 	}
 	

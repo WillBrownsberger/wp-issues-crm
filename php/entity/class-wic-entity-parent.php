@@ -133,7 +133,7 @@ abstract class WIC_Entity_Parent {
 	
 	// initialize data object array for an id, but don't display a form
 	protected function initialize_only ( $args ) {
-		$this->id_search_generic ( $args['id_requested'], '', '', false ); // no form, no sql, don't display	
+		$this->id_search_generic ( $args['id_requested'], '', '', false, false ); // no form, no sql, no log, no old search ID -- don't display	
 	}
 
 	/*************************************************************************************
@@ -321,7 +321,7 @@ abstract class WIC_Entity_Parent {
 			if ( $this->outcome_dups ) {	
 				$lister_class = 'WIC_List_' . $this->entity;
 				$lister = new $lister_class;
-				$list = $lister->format_entity_list( $this->outcome_dups_query_object, false );
+				$list = $lister->format_entity_list( $this->outcome_dups_query_object, '' );
 				echo $list;
 			}	
 			return;
@@ -361,7 +361,9 @@ abstract class WIC_Entity_Parent {
 	// handle a search request for an ID coming from anywhere
 	// passing a blank success form just leaves the array instantiated, but no action taken
 	// no fail form because fail is an error
-	protected function id_search_generic ( $id, $success_form, $sql, $log_search ) { 
+	// carrying primary search ID supports the export and redo buttons for issues forms which have secondary constituent searches
+	protected function id_search_generic ( $id, $success_form, $sql, $log_search, $primary_search_id ) { 
+		// primary search is search from handler that has already done a form search 
 		// initialize data array with only the ID 
 		$this->data_object_array['ID'] = WIC_Control_Factory::make_a_control( 'text' );
 		$this->data_object_array['ID']->initialize_default_values(  $this->entity, 'ID', $this->entity_instance );	
@@ -373,6 +375,7 @@ abstract class WIC_Entity_Parent {
 			'select_mode' => '*',
 			'show_deleted' => true,		
 			'log_search' => $log_search,
+			'old_search_id' => $primary_search_id, // will be disregarded if log search is true
 		);
 		$search_clause_args = array(
 			'match_level' => '0',
@@ -432,11 +435,11 @@ abstract class WIC_Entity_Parent {
 			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );			
 		} elseif ( 1 == $wic_query->found_count) { 
 			$this->data_object_array = array(); // discard possibly soft matching array values before doing straight id retrieval
-			$this->id_search_generic ( $wic_query->result[0]-> ID, $found_form, $sql, false );	// do not log on second search from form
+			$this->id_search_generic ( $wic_query->result[0]-> ID, $found_form, $sql, false, $wic_query->search_id );	// do not log second search; use original ID
 		} else {
 			$lister_class = 'WIC_List_' . $this->entity ;
 			$lister = new $lister_class;
-			$list = $lister->format_entity_list( $wic_query,true );
+			$list = $lister->format_entity_list( $wic_query, '' );
 			echo $list;	
 		}
 	}
@@ -517,7 +520,7 @@ abstract class WIC_Entity_Parent {
 	// just load the latest entity
 	protected function get_latest_no_form ( $args ) {
 		$latest = $this->compute_latest ( $args ); 	
-		$this->id_search_generic ( $latest, '', '', false ); // just retrieves the record, if no class forms are passed, search is not logged 	
+		$this->id_search_generic ( $latest, '', '', false, false ); // just retrieves the record, if no class forms are passed, search is not logged 	
 	}
 
 	// return the current ID and title for the object

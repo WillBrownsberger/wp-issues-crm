@@ -152,25 +152,34 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 	public function get_constituents_by_issue_id ( $args ) {
 		
 		// designed to mimic return from a constituent search so it can be fed to constituent list
-		
+		// called by entity-issue to list constituents after and by list-constituent-export to list constituents for array of issues 
+		$id_array = array();
+		$search_id = 0;
 		extract ( $args );
 
-		global $wpdb;	
-		
+		// test incoming values	
+		// search ID should be a positive integer
+		if ( 1 > absint ( $search_id ) || $search_id != absint ( $search_id ) ) {
+			WIC_Function_Utilities::wic_error ( sprintf ( 'Bad search ID passed in list request.' , $id ), __FILE__, __LINE__, __METHOD__, false );return;		
+		}
+		// should have at least one value in search array		
 		if ( 0 == count ( $id_array ) || ( 0 == $id_array[0] ) ) {
-			return;		
+			WIC_Function_Utilities::wic_error ( sprintf ( 'No Issue IDs passed in list request.' , $id ), __FILE__, __LINE__, __METHOD__, false );return;		
 		}		
-
-		// test elements of array, protect against remote risk of SQL injection 
+		// search array should all be integers 
 		foreach ( $id_array as $id ) {
 			if ( $id != absint ($id) ) {
-				WIC_Function_Utilities::wic_error ( sprintf( 'Invalid elements in passed ID array -- %s', $id ), __FILE__, __LINE__, __METHOD__, true );
+				WIC_Function_Utilities::wic_error ( sprintf( 'Invalid elements in passed ID array -- %s', $id ), __FILE__, __LINE__, __METHOD__, false );
 			}		
 		}		
-		
+
+ 		// make wp query object available
+		global $wpdb;
+
+		// prepare ID array for use in search		
 		$id_string = implode ( ',', $id_array );		
-		// get constituents with activities
-		
+
+		// get unique constituents with activities
 		$table =  $wpdb->prefix . 'wic_' . 'activity';
 		$sql1 = 	"
 			SELECT constituent_id 
@@ -181,7 +190,7 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 		$first_array_of_constituent_ids = $wpdb->get_results ( $sql1 );
 		 
 	 	
-		// now get constituents with comments
+		// now get unique constituents with comments
 		$table =  $wpdb->prefix . 'wic_' . 'email';
 		$sql2 = 	"		
 			SELECT constituent_id  
@@ -191,53 +200,59 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 			";
 		$second_array_of_constituent_ids = $wpdb->get_results ( $sql2 );
 		
-		// now pick up the authors of the posts
+		// now pick up the authors of the posts in several steps:
 		$third_array_of_constituent_ids = array();
 
-		// now create of the emails of the authors		
+		// first create array the emails of the authors		
 		$email_array = array();
 		foreach ( $id_array as $id ) {
 			$email = '';
 			$guest_email = '';
 			$regular_user_email = '';
+			// supporting front end post no spam plugin -- check if have email in metadata for post
 			$guest_email = get_post_meta ( $id, 'twcc_post_guest_author_email', true );
+			// if not, look for wp author's email
 			if ( '' == $guest_email )  {
 				$sqltemp = "SELECT post_author from wp_posts where ID = $id ";
 				$temp_result = $wpdb->get_results ( $sqltemp );
 				$regular_user_email = get_the_author_meta ( 'user_email', $temp_result[0]->post_author ); 
 			}
+			// use guest email if non blank, otherwise, use the regular
 			if ( '' < $guest_email ) { 
 				$email = $guest_email;
 			} else {
 				$email = $regular_user_email;			
 			}
+			// if got a non-blank email from either source, put it in the array of emails
 			if ( $email > '' ) {
 				$email_array[] = $email;
 			}				
 		}
 		
+		$clean_email_array = array_unique ( $email_array ); 
+
 		// if author emails found, search for their constituent_id 
 		$sql3 = '';
-		if ( 0 < count ( $email_array ) ) {
+		if ( 0 < count ( $clean_email_array ) ) {
 			
 			$where_string = '';
-			foreach ( $email_array as $email_address ) {
-				$where_string .= ( '' == $where_string ) ? '%s' : ', %s';   		
+			foreach ( $clean_email_array as $email_address ) {
+				$where_string .= ( '' == $where_string ) ? '%s' : ' or email_address =  %s';   		
 			}
 			
 			$table =  $wpdb->prefix . 'wic_' . 'email';
 			$sql3 = $wpdb->prepare( "
 				SELECT constituent_id 
 				FROM $table
-				WHERE email_address = %s
+				WHERE email_address = $where_string
 				GROUP BY constituent_id
 				",
-				$email_array );
-					
+				$clean_email_array );
+
 			$third_array_of_constituent_ids = $wpdb->get_results( $sql3 );
 		}  			
 
-		// merge arrays of constituent IDs
+		// merge arrays of constituent IDs from the three different sources
 		$simple_combined_array_of_ids = array();
 		foreach ( $first_array_of_constituent_ids as $id ) {
 			$simple_combined_array_of_ids[] = $id->constituent_id;		
@@ -251,14 +266,15 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 		
 		$unique_ids = array_unique ( $simple_combined_array_of_ids );
 
+		// returning combined results as an array of objects with ID as property (for compatibility with WP_Query results)
 		foreach ( $unique_ids as $id ) {
 			$this->result[] = new WIC_Constituent_ID_Item ( $id );		
 		}
 
 		$this->search_id = $search_id; // just a pass through from primary searches for issues
 		$this->entity = 'constituent';
-		$this->retrieve_limit = 9999999999;
-		$this->found_count = count ( $unique_ids );
+		$this->retrieve_limit = 9999999999; // had not retrieve limits in this process
+		$this->found_count = count ( $unique_ids ); // final unique count of constituents
 		$this->found_count_real = true;
 		$this->showing_count = $this->found_count;
 		$this->sql = '(1) ' . $sql1 . '; (2) ' . $sql2 . '; (3) ' . $sql3 . ';'; 

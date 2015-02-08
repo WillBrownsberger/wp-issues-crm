@@ -21,7 +21,7 @@ abstract class WIC_List_Parent {
 	* main function -- takes query result and sets up a list each row of which is a button
 	*
 	*/	
-	public function format_entity_list( &$wic_query, $show_top_buttons, $header = '' ) { 
+	public function format_entity_list( &$wic_query, $header ) { 
 
 		global $wic_db_dictionary;
 

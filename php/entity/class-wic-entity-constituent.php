@@ -48,14 +48,14 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	// handle a search request for an ID coming from anywhere
 	protected function id_search ( $args ) {
 		$id = $args['id_requested']; 
-		$this->id_search_generic ( $id, 'WIC_Form_Constituent_Update', '' , true ); // no sql, but do log search as individual
+		$this->id_search_generic ( $id, 'WIC_Form_Constituent_Update', '' , true, false ); // no sql, but do log search as individual, no old search
 		return;		
 	}
 	
 	// same as above, no search log
 	protected function id_search_no_log ( $args ) {
 		$id = $args['id_requested']; 
-		$this->id_search_generic ( $id, 'WIC_Form_Constituent_Update', '' , false ); 
+		$this->id_search_generic ( $id, 'WIC_Form_Constituent_Update', '' , false, false ); // no log and no original query known 
 		return;		
 	}
 
