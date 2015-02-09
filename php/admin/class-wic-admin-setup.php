@@ -77,8 +77,10 @@ class WIC_Admin_Setup {
 	public function do_download () { 
 		if ( isset( $_POST['wic-post-export-button'] ) ) { 
 			WIC_List_Constituent_Export::do_constituent_download( $_POST['wic-post-export-button'] );	
-		}
-	}
+		} elseif ( isset( $_POST['wic-category-export-button'] ) ) { 
+			WIC_List_Constituent_Export::do_constituent_category_download( $_POST['wic-category-export-button'] );	
+		}		
+ 	}
 
 	// add action to allow caching of non-save pages to facilitate back navigation in IE 
 	// while still forcing reload for new record save screens to avoid duping

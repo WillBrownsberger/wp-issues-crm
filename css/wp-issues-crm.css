@@ -876,6 +876,14 @@ button.wic-post-list-button.pl-even:hover {
 	margin: 0;
 }
 
+#wic-post-list ul.wic-post-list-category-headers {
+	font-size: 1.2em;	
+	font-weight: 700;
+	list-style: none;
+	padding: .88889% .88889%;
+	margin: 0;
+}
+
 li.wic-post-list-header,
 li.wic-post-list-field {
 	display: inline-block;
@@ -904,6 +912,20 @@ button.wic-post-list-button {
 	width: 100%;	
 }
 
+#wic-post-list ul.wic-post-list-category-line {
+ 	
+	display: inline-block;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	font-size: 1.2em;
+	font-weight: 700;
+	margin: 0;
+	padding: 0 .88889%;
+	vertical-align: top;
+	list-style: none;
+	width: 100%;	
+}
 
 /****************************************************************
 * option list styling 
@@ -964,8 +986,8 @@ li.pl-search_log-serialized_search_parameters{ display: none;}
 .pl-data_dictionary-field_type { width:20%;}
 .pl-data_dictionary-option_group { width:20%;}
 .pl-data_dictionary-enabled { width:10%;}
-
-
+.pl-trend-category { width: 30%; }
+.pl-trend-category-count { width: 60%; }
 
 .wic-list-legend {
 	margin: 10px 7.11111%;

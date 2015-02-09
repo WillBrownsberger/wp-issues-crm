@@ -167,6 +167,90 @@ class WIC_Entity_Issue extends WIC_Entity_Parent {
 		return ( $wic_category_select_array );
 	} 	
 
+
+	// same ideas as above two functions, but creates a count tree
+	public static function get_post_category_count_tree( &$category_count_array ) { 
+		global $wic_category_count_source;	// a key value array term_id=>count (count of whatever based on some previous query)	
+		global $wic_category_count_array;
+		global $wic_category_count_array_depth;
+		global $wic_category_count_array_pointer;
+		$wic_category_count_source = $category_count_array;
+		$wic_category_count_array = array();
+		$wic_category_count_array_depth = 0;
+		$wic_category_count_array_pointer = -1; // increment before store, so first will be 0
+		self::build_category_count_array( 0, 0 );
+		return ( $wic_category_count_array );
+	}
+
+	// function gets the subcategories of the current $category_id and puts them in the category_count_array and iterates for each
+	// returns the count total for itself and its subcategories
+	private static function build_category_count_array ( $category_id, $category_array_pointer ) {
+
+		global $wic_category_count_source;		
+		global $wic_category_count_array;
+		global $wic_category_count_array_depth;
+		global $wic_category_count_array_pointer;
+		
+		// increment array depth -- this is just for css class
+		$wic_category_count_array_depth++;		
+
+		// if already have a category in this iteration start the branch count with its own count (if any) 
+		$branch_count = 0;		
+		if ( 0 < $category_id ) {		
+			$branch_count = isset ( $wic_category_count_source[$category_id] ) ? $wic_category_count_source[$category_id] : 0;
+		} 
+
+		// get the list of child categories
+		$args = array(
+			'orderby'                  => 'name',
+			'order'                    => 'ASC',
+			'hide_empty'               => 0,
+			'taxonomy'                 => 'category',
+			'pad_counts'               => false, 
+			'parent'							=> $category_id,
+		); 
+
+		$subcategories = get_categories( $args );
+
+		// run through the subcategories if any
+		if ( is_array ( $subcategories ) && 0 < count ( $subcategories ) ) {		
+			foreach ( $subcategories as $category ) {
+				// put them in the array and increment the array pointer
+				$temp_array = array (
+					'value' => $category->term_id,
+					'label' => $category->name,
+					'class' => 'wic-multi-select-depth-' . $wic_category_count_array_depth,
+				);			
+				$wic_category_count_array_pointer++;
+				if ( $wic_category_count_array_pointer > 9999 ) {
+					WIC_Function_Utilities::wic_error ( __( 'Unanticipated loop condition.  Counted 10,000 Categories.' ), __FILE__, __LINE__, __METHOD__, true );
+				}
+				$wic_category_count_array[$wic_category_count_array_pointer] = $temp_array;
+				// add their own branch count (iterating) to the current branch count
+				$branch_count = $branch_count + self::build_category_count_array ( $category->term_id, $wic_category_count_array_pointer );
+				// note that in iterating, the passed parameters point to the same category in two parallel data structures --
+				// the taxonomy table and the current array	
+			}
+		}
+
+		// decrement array depth for css class
+		$wic_category_count_array_depth--;
+		
+		// having traversed all child categories and added their counts to the branch count, call this the parent count and save it
+		if ( $category_id > 0 ) {
+			if ( $branch_count > 0 ) {
+				$wic_category_count_array[$category_array_pointer]['count'] = $branch_count; // echo "<br>shazam: $branch_count: -- "; var_dump ( $wic_category_count_array[$parent_pointer] ); echo '<br>';
+			// for elements with no count of their own and now child count, drop them
+			} else {
+				 unset ( $wic_category_count_array[$category_array_pointer] );
+			}
+		}
+		
+		// report this to be included upwards in the hierarchy		
+		return ( $branch_count );
+
+	} 
+
 	// for issue list: retrieve the values as well as formatting
 	public static function get_post_categories ( $post_id ) {
 		$categories = get_the_category ( $post_id );

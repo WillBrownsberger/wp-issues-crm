@@ -40,12 +40,13 @@ abstract class WIC_DB_Access {
 	*		From a form (Entity_Parent, Always Logged)
 	*		From a single ID (Entity_Parent, Not Logged except requested as in instances below)
 	*			NOT Logged if coming from search form handling (redundant)
-	*			Logged if coming from id_search method in Entity_Constituent (from List Constituent ) and Entity_Issue, which is used in
-	*				List Trend
-	*				List Issue
-	*				Metabox
-	*				Entity Comment 
-	*				Activity Link to Issue Button
+	*			Logged if coming from id_search method in Entity_Constituent (from List Constituent ) 
+	*			Also logged if coming through ID search method in Entity_Issue, which is used in all of the following places:
+	*				List Trend (logged)
+	*				List Issue (logged)
+	*				Metabox (logged)
+	*				Entity Comment ( logged )
+	*				Activity Link to Issue Button (logged)
 	*		From a search array retrieved from the log (Entity_Parent (redo search and latest) and Export, Never Logged)
 	*
 	*	Additional specialized searches include:

@@ -13,6 +13,12 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 
 	protected function db_search( $meta_query_array, $search_parameters ) { 
 
+		// parse activities where clause
+		$where_clause = $this->parse_activities_where_clause ( $meta_query_array ); 
+		$where = $where_clause['where'];
+		$values = $where_clause['values'];
+
+
 		// search parameters ignored
 
 		$top_entity = 'activity'; // trend passes through variables to an activity query
@@ -21,28 +27,7 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 		// set global access object 
 		global $wpdb;
 
-		// prepare $where clause
-		$where = '';
-		$values = array();
-		// explode the meta_query_array into where string and array ready for wpdb->prepare
-		foreach ( $meta_query_array as $where_item ) {
 
-			$field_name		= $where_item['key'];
-			$table 			= 'activity';
-			$compare 		= $where_item['compare'];
-			
-			// set up $where clause with placeholders and array to fill them
-			if ( '=' == $compare || '>' == $compare || '<' == $compare || '!=' == $compare ) {  // straight strict match			
-				$where .= " AND $table.$field_name $compare %s ";
-				$values[] = $where_item['value'];
-			} elseif ( 'BETWEEN' == $compare ) { // date range
-				$where .= " AND $table.$field_name >= %s AND $table.$field_name <= %s" ;  			
-				$values[] = $where_item['value'][0];
-				$values[] = $where_item['value'][1];
-			} else {
-				WIC_Function_Utilities::wic_error ( sprintf( 'Incorrect compare settings for field %1$s.', $this->field->field_slug ), __FILE__, __LINE__, __METHOD__, true );
-			}
-		}
 
 		// straight activity query to start
 		$join = $wpdb->prefix . 'wic_activity activity inner join ' . $wpdb->prefix . 'wic_constituent c on c.id = activity.constituent_id';
@@ -100,6 +85,67 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 
 	} 	
 
+	public function search_activities_with_category_slice ( $meta_query_array, $category_id ) {
+		// parse activities where clause
+		$where_clause = $this->parse_activities_where_clause ( $meta_query_array ); 
+		$where = $where_clause['where'];
+		$values = $where_clause['values'];
+		$where; 
+
+		$top_entity = 'activity'; // trend passes through variables to an activity query
+		$deleted_clause = 'AND c.mark_deleted != \'deleted\'';
+				 
+		// set global access object 
+		global $wpdb;
+
+		// do it all in one join -- get non-deleted constituents with activities meeting criteria in category
+		$join = 	$wpdb->prefix . 'wic_activity activity inner join ' . 
+					$wpdb->prefix . 'wic_constituent c on c.id = activity.constituent_id inner join ' .
+					$wpdb->term_relationships . ' tr on activity.issue = tr.object_id inner join ' .
+					$wpdb->term_taxonomy . ' tt on tt.term_taxonomy_id = tr.term_taxonomy_id';
+
+		// prepare SQL
+		$activity_sql = "
+					SELECT constituent_id as ID
+					FROM 	$join
+					WHERE 1=1 $deleted_clause $where AND tt.term_id = $category_id
+					GROUP BY activity.constituent_ID 
+					LIMIT 0, 9999999
+					";	
+		$activity_sql = ( $where > '' ) ? $wpdb->prepare( $activity_sql, $values ) : $activity_sql;	
+
+		$this->result = $wpdb->get_results ( $activity_sql );
+		
+	}
+
+
+	// utility
+	private function parse_activities_where_clause( $meta_query_array ) {
+		// prepare $where clause
+		$where = '';
+		$values = array();
+		// explode the meta_query_array into where string and array ready for wpdb->prepare
+		foreach ( $meta_query_array as $where_item ) {
+
+			$field_name		= $where_item['key'];
+			$table 			= 'activity';
+			$compare 		= $where_item['compare'];
+			
+			// set up $where clause with placeholders and array to fill them
+			if ( '=' == $compare || '>' == $compare || '<' == $compare || '!=' == $compare ) {  // straight strict match			
+				$where .= " AND $table.$field_name $compare %s ";
+				$values[] = $where_item['value'];
+			} elseif ( 'BETWEEN' == $compare ) { // date range
+				$where .= " AND $table.$field_name >= %s AND $table.$field_name <= %s" ;  			
+				$values[] = $where_item['value'][0];
+				$values[] = $where_item['value'][1];
+			} else {
+				WIC_Function_Utilities::wic_error ( sprintf( 'Incorrect compare settings for field %1$s.', $this->field->field_slug ), __FILE__, __LINE__, __METHOD__, true );
+			}
+		}
+	
+		return ( array ( 'where' => $where, 'values' => $values ) );
+	}
 
 	/* required functions not implemented */
 	protected function db_save ( &$meta_query_array ) {}

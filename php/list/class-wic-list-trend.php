@@ -39,6 +39,9 @@ class WIC_List_Trend extends WIC_List_Parent {
 		$output .= '</ul></li>'; // header complete
 		$output .= $this->format_rows( $wic_query, $fields ); // format list item rows from child class	
 		$output .= '</ul>'; // close ul for the whole list
+		
+		$output .= $this->category_stats ( $wic_query );		
+
 		$output .= 	wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ) .
 		'</form></div>'; 
 		
@@ -119,6 +122,63 @@ protected function format_rows( &$wic_query, &$fields ) {
 		} // close for each row
 		return ( $output );		
 	} // close function 
+
+
+	protected function category_stats ( &$wic_query ) {
+		
+		// get an array of issue counts by category ( term_id => issue count )
+		$category_count_array = array();
+		foreach ( $wic_query->result as $row_array ) { 
+			$post_categories = get_the_category ( $row_array->id ); 
+			if ( is_array ( $post_categories ) and count ( $post_categories ) > 0 ) {
+				foreach ( $post_categories as $category ) {		
+					if ( isset ( $category_count_array[$category->term_id] ) ) {
+						$category_count_array[$category->term_id] = $category_count_array[$category->term_id]  + 1;					
+					} else {
+						$category_count_array[$category->term_id]  = 1;					
+					}							
+				}
+			}	
+		}
+
+
+		// recreate the site's category tree slicing out only those branches with positive counts from the search
+		$trimmed_category_tree = WIC_Entity_Issue::get_post_category_count_tree( $category_count_array );
+		
+		$line_count = 1;
+	
+		$output = '<h2>' . __( 'Download Constituents with Found Activities By Category', 'wp-issues-crm' ) . '</h2>' ;
+		$output .= '<ul class = "wic-post-list">'; // open a ul of category buttons
+			$output .= '<li class = "pl-odd">' . // create a header	
+					'<ul class = "wic-post-list-category-headers">' .				
+						'<li class = "wic-post-list-header pl-trend-category">' . __( 'Category', 'wp-issues-crm' ) . '</li>' .
+						'<li class = "wic-post-list-header pl-trend-category-count">' . __( 'Count: Issues in Category with Found Activities', 'wp-issues-crm' ) . '</li>' .
+					'</ul>' .
+				'</li>';
+		foreach ( $trimmed_category_tree as $category ) {
+			$row= '';
+			$line_count++;
+			$row_class = ( 0 == $line_count % 2 ) ? "pl-even" : "pl-odd";
+			$row = '<ul class = "wic-post-list-category-line" >' . 
+						'<li class = "wic-post-list-field pl-trend-category '. $category['class'] . '">' .  esc_html( $category['label'] ) . '</li>' .
+						'<li class = "wic-post-list-field pl-trend-category-count">' . $category['count']  . '</li>' .
+					'<ul>';
+					
+			$list_button_args = array(
+					'button_class' 		=> 'wic-post-list-button ' . $row_class,
+					'name'					=> 'wic-category-export-button',
+					'id'						=> 'wic-category-export-button',
+					'value'					=> $category['value'],
+					'button_label' 		=> $row,	
+					'title'					=>	__( 'Download constituents', 'wp-issues-crm' ),			
+			);			
+			$output .= '<li>' . WIC_Form_Parent::create_wic_form_button( $list_button_args ) . '</li>'; // out put a category list in the array	 
+		}
+		$output .= '</ul>'; // close ul of category buttons
+			 		
+		return ( $output );
+
+	}
 
 	protected function format_message( &$wic_query,$header='' ) {}
 
