@@ -193,6 +193,14 @@ span.dashicons.dashicons-smiley,
 	display: none;
 }
 
+#wic-field-group-current_option_group_usage,
+#wic-field-group-current_field_config {
+	margin: 20px 20px 20px 11.1111111%;
+}
+
+#wic-form-option-group-save #wic-field-group-current_option_group_usage {
+	display: none;
+}
 
 .show-hide-legend {
 	font-size: 0.6em;
@@ -525,7 +533,7 @@ textarea.wic-input.activity-note {
 } 
 
 #wic-field-group-comment {
-	margin: 20px 0 10px 20%;
+	margin: 20px 0 10px 11.1111%;
 }
 
 /* format comment list, shown only on update screen */

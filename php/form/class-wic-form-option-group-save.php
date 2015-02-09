@@ -43,7 +43,7 @@ class WIC_Form_Option_Group_Save extends WIC_Form_Option_Group_Update  {
 
 	// hooks not implemented
 	protected function get_the_legends( $sql = '' ) {}	
-	protected function group_special( $group ) {}
+	protected function group_special( $group ) {} // don't want to show the value usage on a save (can't);
 	protected function pre_button_messaging ( &$data_array ){}
 	protected function post_form_hook ( &$data_array ) {} 
 

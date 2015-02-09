@@ -63,5 +63,47 @@ class WIC_DB_Access_Dictionary Extends WIC_DB_Access_WIC {
 		return ( 'custom_field_' == substr ( $value, 0, 13 ) ); 
 	}	
 	
+	// return customizable fields from form layout
+	public static function get_current_customizable_form_field_layout ( $entity ) {
+		global $wpdb;
+		$table1 = $wpdb->prefix . 'wic_form_field_groups';
+		$table2 = $wpdb->prefix . 'wic_option_value';			
+		$table3 = $wpdb->prefix . 'wic_data_dictionary';
+		
+		$sql = "
+			select group_label, field_label, field_order
+			from $table1 g 
+			left join $table2 v on v.option_value = g.group_slug
+			left join $table3 d on g.group_slug = d.group_slug 
+			where g.entity_slug = '$entity' and v.option_group_id = 20 
+			order by sidebar_location, group_order, field_order
+			";
+		
+		$form_fields = $wpdb->get_results( $sql );
+		
+		return ( $form_fields );
+	}	
+	
+	// return tables and fields that are using a given option group	
+	public static function get_current_fields_using_option_group ( $option_group ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'wic_data_dictionary';
+		
+		$sql = $wpdb->prepare ( 
+			"
+			select entity_slug, field_slug, field_label
+			from $table 
+			where option_group = %s
+			",
+			array ( $option_group )
+			);
+		
+		$fields_using_option = $wpdb->get_results( $sql );
+		
+		return ( $fields_using_option );
+	}	
+	
+	protected function db_get_option_value_counts( $field_slug ) {} // not implemented for dictionary
+	
 }
 

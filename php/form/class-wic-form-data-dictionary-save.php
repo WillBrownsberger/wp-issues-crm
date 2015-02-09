@@ -5,13 +5,8 @@
 *
 */
 
-class WIC_Form_Data_Dictionary_Save extends WIC_Form_Parent  {
+class WIC_Form_Data_Dictionary_Save extends WIC_Form_Data_Dictionary_Update {
 	
-	// associate form with entity in data dictionary
-	protected function get_the_entity() {
-		return ( 'data_dictionary' );	
-	}
-
 	// define the top row of buttons (return a row of wic_form_button s)
 	protected function get_the_buttons ( &$data_array ) {
 
@@ -40,17 +35,5 @@ class WIC_Form_Data_Dictionary_Save extends WIC_Form_Parent  {
 	protected function get_the_formatted_control ( $control ) {
 		return ( $control->save_control() ); 
 	}
-
-	// screen in all groups (only one)
-	protected function group_screen ( $group ) {
-		return true;	
-	}
-
-	// hooks not implemented
-	protected function supplemental_attributes() {}
-	protected function get_the_legends( $sql = '' ) {}	
-	protected function group_special( $group ) {}
-	protected function pre_button_messaging ( &$data_array ){}
-	protected function post_form_hook ( &$data_array ) {} 
 
 }

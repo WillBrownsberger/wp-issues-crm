@@ -416,5 +416,20 @@ class WIC_DB_Access_WIC Extends WIC_DB_Access {
 	
 	}	
 
+	protected function db_get_option_value_counts( $field_slug ) {
+			
+		global $wpdb;
+	
+		$table = $wpdb->prefix . 'wic_' . $this->entity;
+	
+		$sql = "SELECT $field_slug as field_value, count(ID) as value_count from $table group by $field_slug ORDER BY $field_slug";
+	
+		$field_value_counts = $wpdb->get_results( $sql );
+		
+		return ( $field_value_counts );	
+	
+	} 
+
+
 }
 

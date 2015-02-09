@@ -372,6 +372,9 @@ abstract class WIC_DB_Access {
 		return ( $this->made_changes );	
 	}
 
+	public function get_option_value_counts ( $field_slug ) {
+		return ( $this->db_get_option_value_counts ( $field_slug ) );	
+	}
 
 	/*
 	*
@@ -387,6 +390,7 @@ abstract class WIC_DB_Access {
 	abstract protected function db_update ( &$meta_query_array );
 	abstract protected function db_delete_by_id ( $id );
 	abstract protected function db_updated_last ( $user_id ); 
+	abstract protected function db_get_option_value_counts ( $field_slug );
 
 	
 }

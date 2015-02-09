@@ -19,7 +19,7 @@ class WIC_Admin_Navigation {
 
 	// add menu links to wp admin
 	public function menu_setup () {
-		add_menu_page( 'WP Issues CRM', 'WP Issues CRM', 'manage_wic_constituents', 'wp-issues-crm-main', array ( $this, 'do_dashboard' ), 'dashicons-smiley' ); 		
+		add_menu_page( 'WP Issues CRM', 'WP Issues CRM', 'manage_wic_constituents', 'wp-issues-crm-main', array ( $this, 'do_dashboard' ), 'dashicons-smiley', '4.19544595294' ); 		
 		add_submenu_page( 'wp-issues-crm-main', 'Options', 'Options', 'activate_plugins', 'wp-issues-crm-options', array ( $this, 'do_options' ) );
 		add_submenu_page( 'wp-issues-crm-main', 'Fields', 'Fields', 'activate_plugins', 'wp-issues-crm-fields', array ( $this, 'do_fields' ) );
 		$wic_admin_settings = new WIC_Admin_Settings; // need to run this in the setup phase -- too late to register if wait until know on page

@@ -389,6 +389,31 @@ class WIC_DB_Access_WP Extends WIC_DB_Access {
 
 	}
 
+	protected function db_get_option_value_counts( $field_slug ) {
+			
+		global $wpdb;
+	
+		$meta_key  = self::WIC_METAKEY . $field_slug;	
+	
+		$table1 = $wpdb->posts;
+		$table2 = $wpdb->postmeta;
+
+		$sql = "SELECT if( null = meta_value, '', meta_value ) as field_value, count(p.ID) as value_count 
+		FROM $table1 p left join 
+			( SELECT ID, meta_value FROM $table1 inner join $table2 on post_id = ID WHERE meta_key = '$meta_key' ) AS marked_posts 
+			ON marked_posts.ID = p.id  
+		WHERE ( post_status = 'private' or post_status = 'publish' )
+		GROUP BY if( null = meta_value, '', meta_value ) 
+		ORDER BY if( null = meta_value, '', meta_value )
+		";
+
+		$field_value_counts = $wpdb->get_results( $sql );
+		
+		return ( $field_value_counts );	
+	
+	} 
+
+
 }
 
 
