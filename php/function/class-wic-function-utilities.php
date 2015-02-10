@@ -18,7 +18,7 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 		echo '<div class="' . $error_class . '">' . ' 
 			<h3>' . $fatal_phrase . __( $text, 'wp-issues-crm' ) . '</h3>' .  
 			'<p>' . sprintf ( __( '  File Reporting: %s on line number %s -- method %s.', 'wp-issues-crm' ), $file, $line, $method ) . '</p>' . 
-		'</h3</div>';
+		'</div>';
 		if ( $fatal ) {
 			die;		
 		}	

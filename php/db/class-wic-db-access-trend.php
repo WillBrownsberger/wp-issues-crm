@@ -85,8 +85,10 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 
 	} 	
 
-	public function search_activities_with_category_slice ( $meta_query_array, $category_id ) {
-		// parse activities where clause
+	public function search_activities_with_category_slice ( $meta_query_array, $category_contributors ) { 
+		// category_contributors is comma separated string of term id's
+		
+		// parse activities where clause from array
 		$where_clause = $this->parse_activities_where_clause ( $meta_query_array ); 
 		$where = $where_clause['where'];
 		$values = $where_clause['values'];
@@ -108,7 +110,7 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 		$activity_sql = "
 					SELECT constituent_id as ID
 					FROM 	$join
-					WHERE 1=1 $deleted_clause $where AND tt.term_id = $category_id
+					WHERE 1=1 $deleted_clause $where AND tt.term_id IN ( $category_contributors )
 					GROUP BY activity.constituent_ID 
 					LIMIT 0, 9999999
 					";	

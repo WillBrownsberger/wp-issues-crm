@@ -94,23 +94,27 @@ class WIC_List_Constituent_Export {
 
 
 	// apply a category screen to the constituents from the last trend search
-	public static function do_constituent_category_download( $category_id ) {
+	public static function do_constituent_category_download( $search_id_and_contributors ) { // search id and category_contributors is comma separated string of term id's
 		self::do_download_security_checks(); 
 		$user_id = get_current_user_id();
 		// set up a trend data access object 
 		$wic_query = WIC_DB_Access_Factory::make_a_db_access_object( 'trend' );
-		// identify the last trend search
-		$last_trend_search = $wic_query->search_log_last_general ( $user_id );
-		// get the parameters of the last trend search
-		$search =  WIC_DB_Access::get_search_from_search_log( $last_trend_search );
+		// pull the search ID out of the input string
+		$input_array = explode ( ',', $search_id_and_contributors);
+		$search_id = $input_array[0];
+		unset ( $input_array[0] );
+		// prepare string of category term_id's for sql use
+		$category_contributors = implode ( ',',  $input_array );
+		// get the parameters of the current trend search
+		$search =  WIC_DB_Access::get_search_from_search_log( $search_id );
 		// initiate a query with those activity search parameters and issue category as an additional criterion
-		$wic_query->search_activities_with_category_slice( $search['meta_query_array'], $category_id );
+		$wic_query->search_activities_with_category_slice( $search['meta_query_array'], $category_contributors );
 		// pass the retrieved constituent ID's to assembly function for details	
 		$results = self::assemble_list_for_export ( $wic_query ); 
 		// send the file
 		self::do_the_export ( $results );
 		// mark the whole search as downloaded (no mechanism to mark slice)	
-		WIC_DB_Access::mark_search_as_downloaded( $last_trend_search  );
+		WIC_DB_Access::mark_search_as_downloaded( $search_id  );
 		// done -- no log marking
 		exit;
 	}

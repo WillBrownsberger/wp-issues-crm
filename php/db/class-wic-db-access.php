@@ -139,7 +139,8 @@ abstract class WIC_DB_Access {
 	
 		return ( array (
 			'latest_searched' => $latest_searched_for,
-			'latest_searched_time'  =>$latest_search[0]->time, 
+			'latest_searched_time'  =>$latest_search[0]->time,
+			'latest_search_ID' => $latest_search[0]->ID,  
 			)		
 		);
 	

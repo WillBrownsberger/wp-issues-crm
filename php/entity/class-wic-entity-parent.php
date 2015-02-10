@@ -492,7 +492,8 @@ abstract class WIC_Entity_Parent {
 		if ( isset ( $args['id_requested']) ) {
 			$user_id = $args['id_requested'];
 		} 
-		if ( 0 == $user_id) {
+		// test for positive integer user ID
+		if ( 1 > $user_id || $user_id != absint( $user_id ) ) {
 			wic_generate_call_trace();
 			WIC_Function_Utilities::wic_error ( sprintf ( 'Bad User ID passed.' , $id ), __FILE__, __LINE__, __METHOD__, true );		
 		}
@@ -508,27 +509,42 @@ abstract class WIC_Entity_Parent {
 			$latest_search_array['latest_searched'], 
 			$latest_search_array['latest_searched_time']
 			);
-		return ( $latest );
+		
+		$return_array = array();
+		// set latest if found
+		if ( $latest > '' ) {
+			$return_array['latest_entity'] = $latest;		
+		}		
+		// set latest search if source of latest
+		if ( $latest == $latest_search_array['latest_searched'] ) {
+			$return_array['latest_search_ID'] = $latest_search_array['latest_search_ID'];
+		}
+		
+		return ( $return_array );
+		
 	}	
 	
-	// display the latest entity in an update form 
-	protected function get_latest ( $args ) {
-		$latest = $this->compute_latest ( $args  ); 	
-		$args2 = array ( 'id_requested' => $latest );	
-		if ( $latest > '' ) {
+	// display the latest of this entity for the user in an update form 
+	protected function get_latest ( $args ) { // as passed to function, args should contain user ID as 'id_requested'
+		$latest_array = $this->compute_latest ( $args  ); 
+		if ( isset ( $latest_array['latest_entity'] ) ) {	
+			$args2 = array ( 'id_requested' => $latest_array['latest_entity'] );
+			if ( isset ( $latest_array['latest_search_ID'] ) ) {
+				$args2['old_search_ID'] = $latest_array['latest_search_ID'];
+			}		
 			$this->id_search_no_log ( $args2 ); 
 				// id_search_no_log lives in the instantiated constituent or issue object
 				// and includes a form specific to the instantiated entity
 				// calls id_search_generic with the class for a constituent or issue
 		} else {
-			$this->new_blank_form( $args2 ); // passing the empty arg		
+			$this->new_blank_form(); 		
 		} 
 	}
 	
 	// just load the latest entity
 	protected function get_latest_no_form ( $args ) {
-		$latest = $this->compute_latest ( $args ); 	
-		$this->id_search_generic ( $latest, '', '', false, false ); // just retrieves the record, if no class forms are passed, search is not logged 	
+		$latest_array = $this->compute_latest ( $args ); 	
+		$this->id_search_generic ( $latest_array['latest_entity'], '', '', false, false ); // just retrieves the record, if no class forms are passed, search is not logged 	
 	}
 
 	// return the current ID and title for the object

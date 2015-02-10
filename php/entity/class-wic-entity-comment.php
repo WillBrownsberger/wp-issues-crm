@@ -143,7 +143,6 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 	
 	/********
 	*
-	*
 	* $id_array of issue ID's from issue query
 	* $search_id is just a pass through for use in download link
 	*   in WIC_List_Constituent
@@ -160,16 +159,16 @@ class WIC_Entity_Comment extends WIC_Entity_Multivalue {
 		// test incoming values	
 		// search ID should be a positive integer
 		if ( 1 > absint ( $search_id ) || $search_id != absint ( $search_id ) ) {
-			WIC_Function_Utilities::wic_error ( sprintf ( 'Bad search ID passed in list request.' , $id ), __FILE__, __LINE__, __METHOD__, false );return;		
+			WIC_Function_Utilities::wic_error ( sprintf ( __( 'Bad |search ID| passed in list request -- |%s|.', 'wp-issues-crm' ) , $search_id ), __FILE__, __LINE__, __METHOD__, false );		
 		}
 		// should have at least one value in search array		
 		if ( 0 == count ( $id_array ) || ( 0 == $id_array[0] ) ) {
-			WIC_Function_Utilities::wic_error ( sprintf ( 'No Issue IDs passed in list request.' , $id ), __FILE__, __LINE__, __METHOD__, false );return;		
+			WIC_Function_Utilities::wic_error ( __( 'No non-zero issue ID passed in search request.', 'wp-issues-crm' ) , __FILE__, __LINE__, __METHOD__, false );		
 		}		
 		// search array should all be integers 
 		foreach ( $id_array as $id ) {
 			if ( $id != absint ($id) ) {
-				WIC_Function_Utilities::wic_error ( sprintf( 'Invalid elements in passed ID array -- %s', $id ), __FILE__, __LINE__, __METHOD__, false );
+				WIC_Function_Utilities::wic_error ( sprintf( __( 'Invalid |element| in passed ID array -- |%s|', 'wp-issues-crm' ), $id ), __FILE__, __LINE__, __METHOD__, true );
 			}		
 		}		
 

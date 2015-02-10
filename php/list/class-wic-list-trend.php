@@ -124,7 +124,7 @@ protected function format_rows( &$wic_query, &$fields ) {
 	} // close function 
 
 
-	protected function category_stats ( &$wic_query ) {
+	protected function category_stats ( &$wic_query ) { 
 		
 		// get an array of issue counts by category ( term_id => issue count )
 		$category_count_array = array();
@@ -163,12 +163,15 @@ protected function format_rows( &$wic_query, &$fields ) {
 						'<li class = "wic-post-list-field pl-trend-category '. $category['class'] . '">' .  esc_html( $category['label'] ) . '</li>' .
 						'<li class = "wic-post-list-field pl-trend-category-count">' . $category['count']  . '</li>' .
 					'<ul>';
+			
+			$category_contributors = implode ( ',' , $category['twigs'] );
+			$search_id_and_contributors = $wic_query->search_id . ',' . $category_contributors;
 					
 			$list_button_args = array(
 					'button_class' 		=> 'wic-post-list-button ' . $row_class,
 					'name'					=> 'wic-category-export-button',
 					'id'						=> 'wic-category-export-button',
-					'value'					=> $category['value'],
+					'value'					=> $search_id_and_contributors,
 					'button_label' 		=> $row,	
 					'title'					=>	__( 'Download constituents', 'wp-issues-crm' ),			
 			);			

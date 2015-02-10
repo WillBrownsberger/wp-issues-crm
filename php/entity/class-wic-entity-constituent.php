@@ -55,7 +55,8 @@ class WIC_Entity_Constituent extends WIC_Entity_Parent {
 	// same as above, no search log
 	protected function id_search_no_log ( $args ) {
 		$id = $args['id_requested']; 
-		$this->id_search_generic ( $id, 'WIC_Form_Constituent_Update', '' , false, false ); // no log and no original query known 
+		$old_search_id = isset ( $args['old_search_ID'] ) ? $args['old_search_ID'] : false;
+		$this->id_search_generic ( $id, 'WIC_Form_Constituent_Update', '' , false, $old_search_id ); // no search log but carry old search if known   
 		return;		
 	}
 

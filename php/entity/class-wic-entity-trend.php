@@ -28,7 +28,7 @@ class WIC_Entity_Trend extends WIC_Entity_Parent {
 		return;				
 	}
 
-	// handle a search request for an ID coming from anywhere
+	// handle a search request for an ID coming from anywhere (really for own list of issues, pass through to issue entity)
 	protected function id_search ( $args ) {
 		$issue_pass_through_entity = new WIC_Entity_Issue ( 'id_search', $args ) ;	
 		return;		
