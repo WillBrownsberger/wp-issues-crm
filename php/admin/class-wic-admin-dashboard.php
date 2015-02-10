@@ -57,6 +57,7 @@ class WIC_Admin_Dashboard {
 		// show a back to list button if coming from a list		
 		if ( ( 'constituent' == $class_requested || 'issue' == $class_requested || 'trend' == $class_requested ) 
 				&& 'id_search' == $action_requested && absint( $id_requested ) > 0 ) { 
+			// get last general search for this entity type
 			$search_entity = WIC_DB_Access_Factory::make_a_db_access_object( $class_requested );
 			$search_id = $search_entity->search_log_last_general ( $user_id ); 
 			// now create link button to the list from that search 	
@@ -103,18 +104,11 @@ class WIC_Admin_Dashboard {
 
 	// for semantic highlight of top buttons (note, in this function referring to class as in entity, not as in css class )
 	private function is_selected ( $class_requested, $action_requested, $button_class, $button_action ) {
-		
-		return false;		
 		// if last pressed the button, show it as selected 
 		if ( $class_requested == $button_class && $action_requested == $button_action ) {
 			return true; 
-			// also show the search buttons as headers for other actions below the top menu		
 		} else { 
-			if ( 'constituent' == $button_class  && 'new_form' ) {
-				return true;
-			} elseif ( 'issue' == $button_class  && 'new_form' ) {
-				return true;
-			}
+			return false;
 		}
 	}
 

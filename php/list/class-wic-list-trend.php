@@ -40,8 +40,6 @@ class WIC_List_Trend extends WIC_List_Parent {
 		$output .= $this->format_rows( $wic_query, $fields ); // format list item rows from child class	
 		$output .= '</ul>'; // close ul for the whole list
 		
-		$output .= $this->category_stats ( $wic_query );		
-
 		$output .= 	wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ) .
 		'</form></div>'; 
 		
@@ -124,8 +122,13 @@ protected function format_rows( &$wic_query, &$fields ) {
 	} // close function 
 
 
-	protected function category_stats ( &$wic_query ) { 
-		
+	// create tree-form list of categories as buttons for download of constituents 
+	public function category_stats ( &$wic_query ) { 
+	
+  		// set up form
+		$output = '<div id="wic-post-list"><form method="POST">' . 
+			'<div class = "wic-post-field-group wic-group-odd">';
+
 		// get an array of issue counts by category ( term_id => issue count )
 		$category_count_array = array();
 		foreach ( $wic_query->result as $row_array ) { 
@@ -146,13 +149,12 @@ protected function format_rows( &$wic_query, &$fields ) {
 		$trimmed_category_tree = WIC_Entity_Issue::get_post_category_count_tree( $category_count_array );
 		
 		$line_count = 1;
-	
-		$output = '<h2>' . __( 'Download Constituents with Found Activities By Category', 'wp-issues-crm' ) . '</h2>' ;
+
 		$output .= '<ul class = "wic-post-list">'; // open a ul of category buttons
 			$output .= '<li class = "pl-odd">' . // create a header	
 					'<ul class = "wic-post-list-category-headers">' .				
 						'<li class = "wic-post-list-header pl-trend-category">' . __( 'Category', 'wp-issues-crm' ) . '</li>' .
-						'<li class = "wic-post-list-header pl-trend-category-count">' . __( 'Count: Issues in Category with Found Activities', 'wp-issues-crm' ) . '</li>' .
+						'<li class = "wic-post-list-header pl-trend-category-count">' . __( 'Count: Issues in Category with Found Activities in Period', 'wp-issues-crm' ) . '</li>' .
 					'</ul>' .
 				'</li>';
 		foreach ( $trimmed_category_tree as $category ) {
@@ -179,11 +181,18 @@ protected function format_rows( &$wic_query, &$fields ) {
 		}
 		$output .= '</ul>'; // close ul of category buttons
 			 		
-		return ( $output );
+		$output .= 	wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ) .
+		'</form></div>'; 
+		
+		$output .= 	'<p class = "wic-list-legend">' . __('Counts for categories may exceed actual count of issues 
+			if multiple categories assigned to issues.  Each assignment of a category counts to the category total.', 'wp-issues-crm' )	. '</p>';
+		$output .= 	'<p class = "wic-list-legend">' . __('Search SQL was:', 'wp-issues-crm' )	 .  $wic_query->sql . '</p>';	
+
+		return $output;
 
 	}
 
-	protected function format_message( &$wic_query,$header='' ) {}
+	protected function format_message( &$wic_query, $header='' ) {}
 
  }	
 

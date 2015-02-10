@@ -87,9 +87,9 @@ span.dashicons.dashicons-smiley,
 */
 
 
-
-.wic-form-button.wic-form-button-selected {
-	background: #0490B3
+.button.button-primary.wic-top-menu-button.wic-form-button-selected span.dashicons.dashicons-format-aside,
+.button.button-primary.wic-top-menu-button.wic-form-button-selected span.dashicons.dashicons-smiley {
+	color: #FFD700;
 }
 
 

@@ -33,6 +33,49 @@ class WIC_Admin_Settings {
 		// settings sections and fields dictate what is output when do_settings_sections is called passing the page ID
 		// here 'page' is collection of settings, and can, but need not, equal a menu registered page (but needs to be invoked on one)	
 
+       // Menu Position Setting
+      add_settings_section(
+            'menu_position', // setting ID
+            'Menu Position', // Title
+            array( $this, 'menu_position_legend' ), // Callback
+            'wp_issues_crm_settings_page' // page ID ( a group of settings sections)
+        ); 
+
+		// naming of the callback with array elements (in the callbacks) is what ties the option array together 		
+      add_settings_field(
+            'menu_position_top', // field id
+            'High on Admin Menu', // field label
+            array( $this, 'menu_position_top_callback' ), // field call back 
+            'wp_issues_crm_settings_page', // page 
+            'menu_position' // settings section within page
+       ); 
+
+
+       // Security Settings
+      add_settings_section(
+            'security_settings', // setting ID
+            'Security Settings', // Title
+            array( $this, 'security_settings_legend' ), // Callback
+            'wp_issues_crm_settings_page' // page ID ( a group of settings sections)
+        ); 
+
+		// naming of the callback with array elements (in the callbacks) is what ties the option array together 		
+      add_settings_field(
+            'access_level_required', // field id
+            'WP Issues CRM', // field label
+            array( $this, 'access_level_required_callback' ), // field call back 
+            'wp_issues_crm_settings_page', // page 
+            'security_settings' // settings section within page
+       ); 
+			
+      add_settings_field(
+            'access_level_required_downloads', // field id
+            'WP Issues CRM Downloads', // field label
+            array( $this, 'access_level_required_downloads_callback' ), // field call back 
+            'wp_issues_crm_settings_page', // page 
+            'security_settings' // settings section within page
+       ); 
+
        // Privacy Settings
       add_settings_section(
             'privacy_settings', // setting ID
@@ -104,6 +147,76 @@ class WIC_Admin_Settings {
 
 	/*
 	*
+	* Menu Position Callbacks
+	*
+	*/
+	// section legend call back
+	public function menu_position_legend() {
+		echo '<p>' . __('By default WP Issues CRM will appear at the bottom of the left sidebar menu in the Wordpress Admin Screen.  Use this setting
+		to promote it to the position just above Posts.', 'wp-issues-crm' ) . '</p>';
+	}
+
+	// setting field call back	
+	public function menu_position_top_callback() {
+		printf( '<input type="checkbox" id="menu_position_tope" name="wp_issues_crm_plugin_options_array[menu_position_top]" value="%s" %s />',
+            1, checked( '1', isset ( $this->plugin_options['menu_position_top'] ), false ) );
+	}
+
+	/*
+	*
+	* Security Callbacks
+	*
+	*/
+	// section legend call back
+	public function security_settings_legend() {
+		echo '<p>' . __( 'You can decide who among your user community can access (a) basic WP Issues CRM functions; (b) downloads.
+			Administrators always have access to both.  You can more broadly grant access to Editors and to Authors. ', 'wp-issues-crm' ) .  
+			__( 'You can assign to some users the role "Constituent Managers" (via their User Profile).   
+			They will have no Wordpress editing capabilities and will have access to WP Issues CRM only if you choose
+			"Only Constituent Managers and Administrators" here.', 'wp-issues-crm' ).   '</p>';
+	}
+
+	// setting field call back	
+	public function access_level_required_callback() { 
+		global $wic_db_dictionary; 
+		$option_array = $wic_db_dictionary->lookup_option_values( 'capability_levels' );		
+		
+		$value = isset ( $this->plugin_options['access_level_required'] ) ? $this->plugin_options['access_level_required'] : '';
+	
+		$args = array (
+			'field_label'	 	=> '',
+			'option_array'    => $option_array,
+			'input_class' 	   => '',
+			'field_slug_css'	=> '',
+			'onchange' 			=> '',
+			'field_slug'		=> 'wp_issues_crm_plugin_options_array[access_level_required]',
+			'value'				=> $value ,		
+		);		
+		echo WIC_Control_Select::create_control( $args );
+	}
+
+	// setting field call back	
+	public function access_level_required_downloads_callback() {
+		global $wic_db_dictionary; 
+		$option_array = $wic_db_dictionary->lookup_option_values( 'capability_levels' );		
+		
+		$value = isset ( $this->plugin_options['access_level_required_downloads'] ) ? $this->plugin_options['access_level_required_downloads'] : '';
+	
+		$args = array (
+			'field_label'	 	=> '',
+			'option_array'    => $option_array,
+			'input_class' 	   => '',
+			'field_slug_css'	=> '',
+			'onchange' 			=> '',
+			'field_slug'		=> 'wp_issues_crm_plugin_options_array[access_level_required_downloads]',
+			'value'				=> $value ,		
+		);		
+		echo WIC_Control_Select::create_control( $args );
+	}	
+
+
+	/*
+	*
 	* Privacy Callbacks
 	*
 	*/
@@ -122,13 +235,13 @@ class WIC_Admin_Settings {
 
 	// setting field call back	
 	public function all_posts_private_callback() {
-		printf( '<input type="checkbox" id="use_postal_address_interface" name="wp_issues_crm_plugin_options_array[all_posts_private]" value="%s" %s />',
+		printf( '<input type="checkbox" id="all_posts_private" name="wp_issues_crm_plugin_options_array[all_posts_private]" value="%s" %s />',
             1, checked( '1', isset ( $this->plugin_options['all_posts_private'] ), false ) );
 	}
 
 	// setting field call back	
 	public function hide_private_posts_callback() {
-		printf( '<input type="checkbox" id="use_postal_address_interface" name="wp_issues_crm_plugin_options_array[hide_private_posts]" value="%s" %s />',
+		printf( '<input type="checkbox" id="hide_private_posts" name="wp_issues_crm_plugin_options_array[hide_private_posts]" value="%s" %s />',
             1, checked( '1', isset( $this->plugin_options['hide_private_posts'] ), false ) );
 	}	
 	
@@ -189,6 +302,9 @@ class WIC_Admin_Settings {
 	// call back for the option array (used by options.php in handling the form on return)
 	public function sanitize ( $input ) {
 		$new_input = array();
+		if( isset( $input['menu_position_top'] ) ) {
+            $new_input['menu_position_top'] = absint( $input['menu_position_top'] );
+      } 
 		if( isset( $input['all_posts_private'] ) ) {
             $new_input['all_posts_private'] = absint( $input['all_posts_private'] );
       } 
@@ -204,6 +320,12 @@ class WIC_Admin_Settings {
 		if( isset( $input['user_name_for_postal_address_interface'] ) ) {
             $new_input['user_name_for_postal_address_interface'] = sanitize_text_field( $input['user_name_for_postal_address_interface'] );
       } 
+  		if( isset( $input['access_level_required'] ) ) {
+            $new_input['access_level_required'] = sanitize_text_field( $input['access_level_required'] );
+      }
+		if( isset( $input['access_level_required_downloads'] ) ) {
+            $new_input['access_level_required_downloads'] = sanitize_text_field( $input['access_level_required_downloads'] );
+      }        
       return ( $new_input );      
 	}
 

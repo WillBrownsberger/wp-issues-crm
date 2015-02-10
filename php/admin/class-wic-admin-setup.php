@@ -108,15 +108,15 @@ class WIC_Admin_Setup {
 
 
 	public function wic_set_up_roles_and_capabilities() {
-	
-		// give administrators access to the plugin 
+
+		// give administrators the manage constituents capacity	
 	   $role = get_role( 'administrator' );
 	   $role->add_cap( 'manage_wic_constituents' ); 
-	
-		// give editors access to the plugin 
+	   // deny/remove it from editors 
+	   // ( cleaning up legacy entries in database; may grant editors access through Settings panel )	
 	   $role = get_role( 'editor' );
-	   $role->add_cap( 'manage_wic_constituents' ); 
-	
+	   $role->remove_cap( 'manage_wic_constituents' );	
+
 		// define a role that has limited author privileges and access to the plugin
 		
 		// first remove the role in case the capabilities array below has been revised  	

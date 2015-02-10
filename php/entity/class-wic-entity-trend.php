@@ -62,7 +62,11 @@ class WIC_Entity_Trend extends WIC_Entity_Parent {
 			$form->layout_form ( $this->data_object_array, $message, $message_level, $sql );
 			$lister_class = 'WIC_List_Trend' ;
 			$lister = new $lister_class;
-			$list = $lister->format_entity_list( $wic_query, '' );
+			if ( 'issues' == $this->data_object_array['trend_search_mode']->get_value() ) {
+				$list = $lister->format_entity_list( $wic_query, '' );
+			} else {
+				$list = $lister->category_stats( $wic_query, '' );			
+			}
 			echo $list;	
 		}
 	}
