@@ -55,10 +55,6 @@ button.button.button-primary.wic-top-menu-button.back-to-list span.dashicons {
 	color: white;
 }
 
-.wic-top-menu-button span.dashicons.dashicons-star-filled {
-	color: #FFD700;
-}
-
 
 }
 /*
@@ -77,16 +73,16 @@ span.dashicons.dashicons-smiley,
 	vertical-align: middle;
 }
 
-
-
-
 /*
 *
 * styles for main search/update/save form, from top to bottom
 *
 */
-
-
+.button.button-primary.wic-top-menu-button.wic-form-button-selected span.dashicons.dashicons-plus-alt,
+.button.button-primary.wic-top-menu-button.wic-form-button-selected span.dashicons.dashicons-search,
+.button.button-primary.wic-top-menu-button.wic-form-button-selected span.dashicons.dashicons-star-filled,
+.button.button-primary.wic-top-menu-button.wic-form-button-selected span.dashicons.dashicons-arrow-left-alt,
+.button.button-primary.wic-top-menu-button.wic-form-button-selected span.dashicons.dashicons-chart-line,
 .button.button-primary.wic-top-menu-button.wic-form-button-selected span.dashicons.dashicons-format-aside,
 .button.button-primary.wic-top-menu-button.wic-form-button-selected span.dashicons.dashicons-smiley {
 	color: #FFD700;

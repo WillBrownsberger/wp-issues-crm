@@ -253,7 +253,7 @@ class WIC_Admin_Settings {
 	*/
 	// section legend call back
 	public function preference_settings_legend() {
-		_e('<p>By default, when users add new activities for a constituent, the drown down for "Activity Issue?" includes only those set as 
+		_e('<p>By default, when users add new activities for a constituent, the drop down for "Activity Issue?" includes only those set as 
 		"Open for WP Issues CRM" in the Activity Tracking box on the Issue form. </p> 
 		<p>If the setting below is checked, then users can choose preferences to see additional issues in the drop down: (a) the issue that 
 		they have most recently edited; and/or (b) the most recent or most frequent issues that they have added to activities.  These additional issues
