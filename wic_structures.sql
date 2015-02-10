@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Feb 08, 2015 at 03:58 PM
+-- Generation Time: Feb 10, 2015 at 06:50 PM
 -- Server version: 5.5.41-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_constituent` (
   KEY `last_updated_by` (`last_updated_by`),
   KEY `last_updated_time_2` (`last_updated_time`),
   KEY `last_updated_by_2` (`last_updated_by`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171541 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171543 ;
 
 -- --------------------------------------------------------
 
@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   PRIMARY KEY (`ID`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=149 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=150 ;
 
 -- --------------------------------------------------------
 
@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_email` (
   KEY `email_type` (`email_type`),
   KEY `last_updated_time` (`last_updated_time`),
   KEY `last_updated_by` (`last_updated_by`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10614 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10615 ;
 
 -- --------------------------------------------------------
 
@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_form_field_groups` (
   `last_updated_time` datetime NOT NULL,
   `last_updated_by` bigint(20) NOT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=32 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=34 ;
 
 -- --------------------------------------------------------
 
@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_option_group` (
   `mark_deleted` varchar(10) NOT NULL,
   `is_system_reserved` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=29 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=31 ;
 
 -- --------------------------------------------------------
 
@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_option_value` (
   `last_updated_by` bigint(20) NOT NULL,
   PRIMARY KEY (`ID`),
   KEY `enabled` (`enabled`,`option_group_id`,`value_order`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=116 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=124 ;
 
 -- --------------------------------------------------------
 
@@ -274,7 +274,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_search_log` (
   PRIMARY KEY (`ID`),
   KEY `user-entity-time` (`user_id`,`entity`,`time`),
   KEY `user-time` (`user_id`,`time`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1857 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2056 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
