@@ -36,10 +36,7 @@ class WIC_Form_User_Update extends WIC_Form_Parent  {
 	}
 
 	// legends
-	protected function get_the_legends( $sql = '' ) {
-		$legend = __( 'WP Issues CRM shows options', 'wp-issues-crm'  );
-		return ($legend);	
-	}
+	protected function get_the_legends( $sql = '' ) {}
 	
 	// support function for message
 	public static function format_name_for_title ( &$data_array ) {
