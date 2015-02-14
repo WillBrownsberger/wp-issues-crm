@@ -51,8 +51,10 @@ class WIC_Entity_Activity extends WIC_Entity_Multivalue {
 				$entity = new WIC_Entity_Issue( 'get_latest_no_form', $args ); // initialize the data_object_array with the latest
 				$latest_viewed_issue = $entity->get_current_ID_and_title(); // pull info from the doa
 				if ( ! WIC_Entity_Issue_Open_Metabox::is_issue_closed ( $latest_viewed_issue['current'] ) ) { // allow open or not-defined status
-					array_push ( $issues_array, array ( 'value' => $latest_viewed_issue['current'] , 'label' => $latest_viewed_issue['title'] ) );
-					$value_in_option_list = ( $value == $latest_viewed_issue['current'] );
+					if ( $latest_viewed_issue['current'] > '0' ) {
+						array_push ( $issues_array, array ( 'value' => $latest_viewed_issue['current'] , 'label' => $latest_viewed_issue['title'] ) );
+						$value_in_option_list = ( $value == $latest_viewed_issue['current'] );
+					}
 				}
 			}
 

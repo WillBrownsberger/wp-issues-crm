@@ -197,7 +197,7 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 	
 	/*
 	*	compare strings and times
-	*/
+	*
 	public static function choose_latest_non_blank ( $value1, $time1, $value2, $time2 ) {
 		$latest = '';	
 		if ( '' < $value1 && '' == $value2 ) {
@@ -208,5 +208,5 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 			$latest =  $time2 > $time1 ? $value2 : $value1; 
 		} 
 		return ( $latest );
-	}
+	} */
 }

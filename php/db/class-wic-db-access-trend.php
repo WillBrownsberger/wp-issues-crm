@@ -62,7 +62,7 @@ class WIC_DB_Access_Trend Extends WIC_DB_Access {
 	}	
 
 
-	// differs from parent version of this function only in that accepts singleton results
+	// no parent version of this function
 	public function search_log_last_general ( $user_id ) { 
 		
 		global $wpdb;		

@@ -28,6 +28,9 @@ class WIC_Admin_Setup {
 		// set up download hook -- admin init is early enough to intercept button for download
 		add_action( 'admin_init', array( $this, 'do_download' ) );	
 		
+		// maintain log pointer cookie
+		add_action( 'admin_init', 'WIC_Admin_Dashboard::maintain_log_cookie' );	
+		
 		// control cache headers --  (only if sending plugin's main forms)
 		add_action( 'send_headers', array ( $this , 'wic_change_cache_header' ) );
 		

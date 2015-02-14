@@ -26,7 +26,7 @@ class WIC_Form_User_Update extends WIC_Form_Parent  {
 	// define the form message (return a message)
 	protected function format_message ( &$data_array, $message ) {
 		$display_name = self::format_name_for_title ( $data_array );
-		$formatted_message = sprintf ( __('Update Activity Dropdown Preferences for %1$s. ' , 'wp-issues-crm'), $display_name )  . $message;
+		$formatted_message = sprintf ( __('Set Preferences for %1$s. ' , 'wp-issues-crm'), $display_name )  . $message;
 		return ( $formatted_message );
 	}
 
@@ -47,9 +47,14 @@ class WIC_Form_User_Update extends WIC_Form_Parent  {
 		return  ( $data_array['display_name']->get_value() );
 	}
 	
-	// group screen
-	protected function group_screen( $group ) {
-		return ( true ) ;	
+	// group screen -- don't show dropdown preferences unless global settings allow it
+	protected function group_screen( $group ) { 
+		$wic_plugin_options = get_option( 'wp_issues_crm_plugin_options_array' ); 
+		if ( 'user' == $group->group_slug && isset ( $wic_plugin_options['allow_issue_dropdown_preferences'] ) ) {
+			return ( true );	
+		} elseif ( 'user' != $group->group_slug ) {
+			return (true);		
+		}
 	}
 	
 	// special group handling for the comment group
@@ -57,7 +62,7 @@ class WIC_Form_User_Update extends WIC_Form_Parent  {
 		return ( false );	
 	}
 
-	protected function pre_button_messaging ( &$data_array ){ echo 'here i am ';}
+	protected function pre_button_messaging ( &$data_array ){}
 
 	
 	// hooks not implemented

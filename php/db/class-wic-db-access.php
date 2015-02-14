@@ -36,6 +36,8 @@ abstract class WIC_DB_Access {
 	*		Limited to constituents and issues. 
 	*		The search_log method is private, so invoked only in this class, and, in fact, only by the primary search method.
 	*
+	*	NOTE: Also log saves as if id searches so can go back to constituent or issue from search	
+	*
 	*	Searches are invoked in the following basic ways:
 	*		From a form (Entity_Parent, Always Logged)
 	*		From a single ID (Entity_Parent, Not Logged except requested as in instances below)
@@ -55,7 +57,10 @@ abstract class WIC_DB_Access {
 	*		For specialized searches in multivalue controls, options and field listings (Never Logged)	
 	*	
 	***********************************************************************************************/
-	private function search_log ( $meta_query_array, $search_parameters ) {
+	public function search_log ( $meta_query_array, $search_parameters ) {
+		// would like this to be private but make it public 
+		// since want to log saves as searches and 
+		// have to do that form top entity form request
 		$entity = $this->entity;
 		if ( isset ( $search_parameters['log_search'] ) ) {	
 			if ( $search_parameters['log_search'] ) { 
@@ -163,7 +168,7 @@ abstract class WIC_DB_Access {
 	* retrieve last NON individual retrieval ( i.e., not containing 'ID' as search key)
 	* note that not looking at zero results -- these bounce to the user anyway
 	*
-	*/
+	*
 	public function search_log_last_general ( $user_id ) { 
 		
 		global $wpdb;		
@@ -185,7 +190,37 @@ abstract class WIC_DB_Access {
 
 		return ( $latest_search[0]->ID );
 
+	} 	 	*/
+	
+	/*
+	*
+	* retrieve last logged event
+	*
+	*/
+	public static function search_log_last_entry ( $user_id ) { 
+		
+		global $wpdb;		
+		$search_log_table = $wpdb->prefix . 'wic_search_log';
+		
+		$sql = 			
+			"
+			SELECT ID
+			FROM $search_log_table
+			WHERE user_id = $user_id
+			ORDER	BY time DESC
+			LIMIT 0, 1
+			";
+		
+		$latest_search = $wpdb->get_results ( $sql );
+
+		$return =  isset ( $latest_search[0]->ID ) ?  $latest_search[0]->ID : false;
+
+		return ( $return );
+
 	} 	 	
+	
+	
+		
 	
 	/*
 	*
@@ -283,15 +318,15 @@ abstract class WIC_DB_Access {
 				$this->db_update ( $save_update_array );		
 			} else {
 				$this->db_save ( $save_update_array );
-			}	
+			}
 		}
 		// at this stage, the main entity update has occurred and return values for the top level entity have been set (preliminary) 
 		// if main update OK, do multivalue ( child ) updates
 		if ( $this->outcome ) {
 			// set the parent entity ID in case of an insert 
-			$id =  ( $doa['ID']->get_value() > 0 ) ? $doa['ID']->get_value() : $this->insert_id;
+			$id = ( $doa['ID']->get_value() > 0 ) ? $doa['ID']->get_value() : $this->insert_id;
 			$errors = '';
-			// now ask each multivalue to control to do its save_updates 			
+			// now ask each multivalue control to do its save_updates 			
 			$multivalue_fields_have_changes = false;			
 			foreach ( $doa as $field => $control ) {
 				if ( $control->is_multivalue() ) {

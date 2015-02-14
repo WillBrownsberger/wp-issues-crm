@@ -18,7 +18,7 @@ class WIC_Admin_Navigation {
 	}	
 
 	// add menu links to wp admin
-	public function menu_setup () {
+	public function menu_setup () {  
 	
 		// get menu positioning and required security level		
 		$wic_plugin_options = get_option( 'wp_issues_crm_plugin_options_array' ); 
@@ -33,10 +33,7 @@ class WIC_Admin_Navigation {
 		// need to run add setting  before add page -- too late to register if try not to do the work until on the page 		
 		$wic_admin_settings = new WIC_Admin_Settings; 
 		add_submenu_page( 'wp-issues-crm-main', 'WIC Settings', 'Settings', 'activate_plugins', 'wp-issues-crm-settings', array ( $wic_admin_settings, 'wp_issues_crm_settings' ) ); 
-		// show preferences page only if enabled
-		if ( 1 == $wic_plugin_options['allow_issue_dropdown_preferences'] ) {
-			add_submenu_page ( 'wp-issues-crm-main', 'WIC Preferences', 'User Preferences', $main_security_setting, 'wp-issues-crm-preferences', array ( $this, 'do_preferences') );
-		}
+		add_submenu_page ( 'wp-issues-crm-main', 'WIC Preferences', 'User Preferences', $main_security_setting, 'wp-issues-crm-preferences', array ( $this, 'do_preferences') );
 		add_submenu_page( 'wp-issues-crm-main', 'WIC Statistics', 'Statistics', $main_security_setting, 'wp-issues-crm-statistics', array ( $this, 'do_statistics' ) );	
 	}
 
@@ -47,7 +44,7 @@ class WIC_Admin_Navigation {
 	*
 	*/
 
-	public function do_dashboard (){ 
+	public function do_dashboard (){
 		self::admin_check_security( '' );
 		echo '<div class="wrap"><h2 id="wic-main-header">' . __( 'WP Issues CRM', 'wp-issues-crm' ) . '</h2>';	
 		$wic_admin_dashboard = new WIC_Admin_Dashboard;

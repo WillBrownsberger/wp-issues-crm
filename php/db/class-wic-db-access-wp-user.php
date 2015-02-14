@@ -21,13 +21,15 @@ class WIC_DB_Access_WP_User Extends WIC_DB_Access {
 		$show_viewed_issue 	= isset ( $preferences['show_viewed_issue'] ) ? $preferences['show_viewed_issue'] : ''; 
 		$show_latest_issue 	= isset ( $preferences['show_latest_issues'] ) ? $preferences['show_latest_issues'] : ''; 
 		$max_issues_to_show 	= isset ( $preferences['max_issues_to_show'] ) ? $preferences['max_issues_to_show'] : '';
+		$first_form			 	= isset ( $preferences['first_form'] ) ? $preferences['first_form'] : '';
 		
 		$user_preferences = new WIC_DB_User_Preferences_Object ( 
 			$current_user->id, 
 			$current_user->display_name,
 			$show_viewed_issue,
 			$show_latest_issue,
-			$max_issues_to_show
+			$max_issues_to_show,
+			$first_form
 		);
 
 		$interface_array = array ( $user_preferences );		

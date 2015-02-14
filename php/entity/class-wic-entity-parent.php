@@ -345,8 +345,27 @@ abstract class WIC_Entity_Parent {
 			$form->layout_form ( $this->data_object_array, $message, $message_level );
 		// proceed on successful save/update
 		} else {
-			if ( $save ) { // retreive the new ID from the save process
+			if ( $save ) { 
+				// retrieve the new ID from the save process
 				$this->data_object_array['ID']->set_value( $wic_access_object->insert_id );
+				// in this branch, i.e., case of a save, want to spoof a search log entry as an id search so can return to saved entity
+				// note that in the case of an update, the search log already has an entry pointing to the entity, since found it for update
+				// so . . . .  prepare search log items ( as in WIC_Entity_Parent->id_search_generic )
+				$search_clause_args = array(
+					'match_level' => '0',
+					'dup_check' => false,
+					'category_search_mode' => '',
+					);
+				// invoke the search_clause creator from ID control (comes assembled with own wrapper array)
+				$meta_query_array = $this->data_object_array['ID']->create_search_clause( $search_clause_args );
+				$search_parameters = array (
+					'select_mode' 		=> '*',
+					'show_deleted' 	=> true,	
+					'log_search' 		=> true,
+					'old_search_id' 	=> false,
+				);
+				$wic_access_object->found_count = 1; // as if had done a search
+				$wic_access_object->search_log ( $meta_query_array, $search_parameters );						
 			}
 			// check if changes were made
 			$this->made_changes = $wic_access_object->were_changes_made();
@@ -487,7 +506,7 @@ abstract class WIC_Entity_Parent {
 	
 
 	// determine the latest of this entity which the user has saved, updated or selected from a list
-	protected function compute_latest ( $args ) { 
+	/* protected function compute_latest ( $args ) { 
 		$user_id = 0;
 		if ( isset ( $args['id_requested']) ) {
 			$user_id = $args['id_requested'];
@@ -522,9 +541,9 @@ abstract class WIC_Entity_Parent {
 		
 		return ( $return_array );
 		
-	}	
+	}	*/
 	
-	// display the latest of this entity for the user in an update form 
+/*	// display the latest of this entity for the user in an update form 
 	protected function get_latest ( $args ) { // as passed to function, args should contain user ID as 'id_requested'
 		$latest_array = $this->compute_latest ( $args  ); 
 		if ( isset ( $latest_array['latest_entity'] ) ) {	
@@ -539,22 +558,37 @@ abstract class WIC_Entity_Parent {
 		} else {
 			$this->new_blank_form(); 		
 		} 
-	}
+	} */
 	
-	// just load the latest entity
+	// just load the latest entity -- used to give title to drop down when grabbing latest entity
 	protected function get_latest_no_form ( $args ) {
-		$latest_array = $this->compute_latest ( $args ); 	
-		$this->id_search_generic ( $latest_array['latest_entity'], '', '', false, false ); // just retrieves the record, if no class forms are passed, search is not logged 	
+		// $latest_array = $this->compute_latest ( $args ); 
+		// just get it direct form the search log
+		$user_id = $args['id_requested']; // assume this is good 
+		$wic_access_object = WIC_DB_Access_Factory::make_a_db_access_object( $this->entity ); // bypassing compute_latest
+		$latest_array = $wic_access_object->search_log_last ( $user_id ); // bypassing compute_latest
+
+		if ( $latest_array['latest_searched'] > '0' ) {								 	
+			$this->id_search_generic ( $latest_array['latest_searched'], '', '', false, false ); // just retrieves the record, if no class forms are passed, search is not logged 	
+		}	
 	}
 
 	// return the current ID and title for the object
 	protected function get_current_ID_and_title () {
-		return ( array (
-			 'current' 	=> $this->data_object_array['ID']->get_value(),
-			 'title' 	=> $this->get_the_title(),
-			)
-		);
-	}
+		if ( isset ( $this->data_object_array['ID'] ) ) { 
+			return ( array (
+				 'current' 	=> $this->data_object_array['ID']->get_value(),
+				 'title' 	=> $this->get_the_title(),
+				)
+			);
+		} else {
+			return ( array (
+				 'current' 	=> '',
+				 'title' 	=> '',
+				)
+			);
+		}
+	} 
 
 	// return the ID of the object
 	public function get_the_current_ID () {

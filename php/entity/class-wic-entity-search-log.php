@@ -24,6 +24,25 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 	*
 	***************************************************************************************************************************************/
 
+	// navigation from back button
+	public function back ( $args ) { // takes no actual arguments, working with cookie sent to last form
+		$cookie = $_COOKIE['wp_issues_crm_log'] ;
+		$log = explode( ',', $cookie['log'] );
+		$target = 1 == $cookie['possible_new_log_entry'] ? $cookie['log_pointer'] : $cookie['log_pointer'] - 1;
+		$this->id_search ( array ( 'id_requested' => $log[$target] ) ); 	
+	}
+
+	// navigation from forward button
+	public function forward ( $args ) { // takes no actual argument, working with cookie sent to last form
+		$cookie = $_COOKIE['wp_issues_crm_log'] ;
+		$log = explode( ',', $cookie['log'] );
+		if ( 1 == $cookie['possible_new_log_entry'] ) {
+			WIC_Function_Utilities::wic_error ( 'Forward button submitted when no forward action available.', __FILE__, __LINE__, __METHOD__, false );		
+		}
+		$target = $cookie['log_pointer'] + 1; // button is not enabled is this is not a good value
+		$this->id_search ( array ( 'id_requested' => $log[$target] ) ); 	
+	}
+
 	// request handler for search log list -- re-executes query 
 	public function id_search( $args ) {
 		$search = $this->id_retrieval( $args );
