@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Feb 10, 2015 at 06:50 PM
+-- Generation Time: Feb 14, 2015 at 08:09 AM
 -- Server version: 5.5.41-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.5
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_data_dictionary` (
   PRIMARY KEY (`ID`),
   KEY `entity_slug` (`entity_slug`),
   KEY `field_group` (`group_slug`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=150 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=151 ;
 
 --
 -- Dumping data for table `wp_wic_data_dictionary`
@@ -125,9 +125,9 @@ INSERT INTO `wp_wic_data_dictionary` (`ID`, `entity_slug`, `group_slug`, `field_
 (73, 'issue', 'issue_creation', 'post_date', 'date', 'Created Date', 20, 0, 10, '', 0, 1, 0, '', 0, 0, 'date', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (74, 'issue', 'issue_creation', 'post_status', 'select', 'Visibility', 30, 60, 0, '', 0, 1, 0, '', 0, 0, 'post_status', '', 'post_status_options', '', 'post_status_options', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (75, 'issue', 'issue_creation', 'ID', 'text', 'Post ID', 40, 1, 0, '', 0, 1, 0, '', 0, 0, 'p', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
-(81, 'search_log', 'search_log', 'id', 'text', 'ID', 10, -1, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
-(82, 'search_log', 'search_log', 'user_id', 'text', 'User ID', 15, 10, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', 'user_id_formatter', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
-(83, 'search_log', 'search_log', 'time', 'text', 'SearchTime', 20, 20, 10, '', 0, 0, 0, '', 0, 0, '', '', '', '', 'time_formatter', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
+(81, 'search_log', 'search_log', 'ID', 'text', 'ID', 10, -1, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
+(82, 'search_log', 'search_log', 'user_id', 'text', 'User ID', 15, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', 'user_id_formatter', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
+(83, 'search_log', 'search_log', 'time', 'text', 'Search Time', 20, 20, 10, '', 0, 0, 0, '', 0, 0, '', '', '', '', 'time_formatter', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (84, 'search_log', 'search_log', 'entity', 'text', 'Entity', 30, 30, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (86, 'search_log', 'search_log', 'serialized_search_array', 'text', 'Search Details', 40, 40, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', 'serialized_search_array_formatter', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (87, 'search_log', 'search_log', 'download_time', 'text', 'Last Download', 50, 50, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', 'download_time_formatter', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
@@ -171,7 +171,8 @@ INSERT INTO `wp_wic_data_dictionary` (`ID`, `entity_slug`, `group_slug`, `field_
 (144, 'user', 'user', 'show_viewed_issue', 'checked', 'Show Viewed Issue', 30, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (145, 'user', 'user', 'show_latest_issues', 'select', 'Show Used Issues', 40, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', 'show_latest_issues_options', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (146, 'search_log', 'search_log', 'serialized_search_parameters', 'text', 'Serialized Search Parameters', 100, 100, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
-(149, 'trend', 'trend', 'trend_search_mode', 'select', 'Trend Search Mode', 50, 0, 0, '', 0, 0, 0, '', 0, 1, '', '', 'trend_search_modes', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00');
+(149, 'trend', 'trend', 'trend_search_mode', 'select', 'Trend Search Mode', 50, 0, 0, '', 0, 0, 0, '', 0, 1, '', '', 'trend_search_modes', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
+(150, 'user', 'startup', 'first_form', 'select', 'Startup Form', 60, 0, 0, '', 0, 0, 0, 'search_history', 0, 0, '', '', 'first_form', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -191,7 +192,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_form_field_groups` (
   `last_updated_time` datetime NOT NULL,
   `last_updated_by` bigint(20) NOT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=34 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=35 ;
 
 --
 -- Dumping data for table `wp_wic_form_field_groups`
@@ -223,9 +224,10 @@ INSERT INTO `wp_wic_form_field_groups` (`ID`, `entity_slug`, `group_slug`, `grou
 (28, 'option_group', 'option_group', 'Option Groups', '', 10, 1, 0, '0000-00-00 00:00:00', 0),
 (29, 'option_value', 'option_value', 'Option Values', '', 0, 0, 0, '0000-00-00 00:00:00', 0),
 (30, 'data_dictionary', 'data_dictionary', 'Customizable Fields', '', 10, 1, 0, '0000-00-00 00:00:00', 0),
-(31, 'user', 'user', 'WP Issues CRM User Preferences', '', 0, 1, 0, '0000-00-00 00:00:00', 0),
+(31, 'user', 'user', 'Activity Dropdown', 'Select what issues will show as options when adding new activities.  ', 5, 1, 0, '0000-00-00 00:00:00', 0),
 (32, 'data_dictionary', 'current_field_config', 'Existing Groups and Fields', 'Refer to the list of current groups and fields on the constituent form to choose where to position your custom field.', 20, 1, 0, '0000-00-00 00:00:00', 0),
-(33, 'option_group', 'current_option_group_usage', 'Existing Database Values for this Option', 'Refer to the listing below of actually used option values for this option group when modifying the option value list.', 90, 1, 0, '0000-00-00 00:00:00', 0);
+(33, 'option_group', 'current_option_group_usage', 'Existing Database Values for this Option', 'Refer to the listing below of actually used option values for this option group when modifying the option value list.', 90, 1, 0, '0000-00-00 00:00:00', 0),
+(34, 'user', 'startup', 'Startup Screen', 'Select screen to start on.', 3, 1, 0, '0000-00-00 00:00:00', 0);
 
 -- --------------------------------------------------------
 
@@ -243,7 +245,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_option_group` (
   `mark_deleted` varchar(10) NOT NULL,
   `is_system_reserved` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=31 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=32 ;
 
 --
 -- Dumping data for table `wp_wic_option_group`
@@ -273,7 +275,8 @@ INSERT INTO `wp_wic_option_group` (`ID`, `option_group_slug`, `option_group_desc
 (27, 'show_latest_issues_options', 'Options for Activity Issues Dropdown', 1, '0000-00-00 00:00:00', 0, '', 1),
 (28, 'count_to_ten', 'Number of issues to retrieve', 1, '0000-00-00 00:00:00', 0, '', 0),
 (29, 'trend_search_modes', 'Trend Search Modes', 1, '2015-02-10 12:00:00', 15, '0', 1),
-(30, 'capability_levels', 'Capability Levels', 1, '2015-02-11 16:38:00', 15, '', 0);
+(30, 'capability_levels', 'Capability Levels', 1, '2015-02-11 16:38:00', 15, '', 0),
+(31, 'first_form', 'Form to show on startup', 1, '0000-00-00 00:00:00', 0, '', 1);
 
 -- --------------------------------------------------------
 
@@ -292,7 +295,7 @@ CREATE TABLE IF NOT EXISTS `wp_wic_option_value` (
   `last_updated_by` bigint(20) NOT NULL,
   PRIMARY KEY (`ID`),
   KEY `enabled` (`enabled`,`option_group_id`,`value_order`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=124 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=127 ;
 
 --
 -- Dumping data for table `wp_wic_option_value`
@@ -397,7 +400,10 @@ INSERT INTO `wp_wic_option_value` (`ID`, `option_group_id`, `option_value`, `opt
 (120, '30', 'activate_plugins', 'Administrator (activate_plugins)', 10, 1, '2015-02-10 12:00:00', 15),
 (121, '30', 'edit_others_posts', 'Editors and above (edit_others_posts)', 20, 1, '2015-02-10 00:00:00', 15),
 (122, '30', 'edit_posts', 'Authors and above (edit_posts)', 30, 1, '0000-00-00 00:00:00', 15),
-(123, '30', 'manage_wic_constituents', 'Only Constituent Managers and Administrators', 40, 1, '0000-00-00 00:00:00', 0);
+(123, '30', 'manage_wic_constituents', 'Only Constituent Managers and Administrators', 40, 1, '0000-00-00 00:00:00', 0),
+(124, '31', 'my_cases', 'Cases assigned to me', 10, 1, '0000-00-00 00:00:00', 0),
+(125, '31', 'my_issues', 'Issues assigned to me', 20, 1, '0000-00-00 00:00:00', 0),
+(126, '31', 'search_history', 'My recent activity', 30, 1, '0000-00-00 00:00:00', 0);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
