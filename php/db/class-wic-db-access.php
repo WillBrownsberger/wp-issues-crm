@@ -73,7 +73,7 @@ abstract class WIC_DB_Access {
 				$sql = $wpdb->prepare(
 					"
 					INSERT INTO wp_wic_search_log
-					( user_id, time, entity, serialized_search_array,  serialized_search_parameters, result_count  )
+					( user_id, search_time, entity, serialized_search_array,  serialized_search_parameters, result_count  )
 					VALUES ( $user_id, NOW(), %s, %s, %s, %s)
 					", 
 					array ( $entity, $search, $parameters, $this->found_count ) ); 
@@ -114,12 +114,12 @@ abstract class WIC_DB_Access {
 		
 		$sql = 			
 			"
-			SELECT ID, serialized_search_array, serialized_search_parameters, time
+			SELECT ID, serialized_search_array, serialized_search_parameters, search_time
 			FROM $search_log_table
 			WHERE user_id = $user_id
 				AND entity = '$entity'
 				AND result_count = 1
-			ORDER	BY time DESC
+			ORDER	BY search_time DESC
 			LIMIT 0, 1
 			";
 
@@ -144,7 +144,7 @@ abstract class WIC_DB_Access {
 	
 		return ( array (
 			'latest_searched' => $latest_searched_for,
-			'latest_searched_time'  =>$latest_search[0]->time,
+			'latest_searched_time'  =>$latest_search[0]->search_time,
 			'latest_search_ID' => $latest_search[0]->ID,  
 			)		
 		);
@@ -182,7 +182,7 @@ abstract class WIC_DB_Access {
 			WHERE user_id = $user_id
 				AND entity = '$entity'
 				AND result_count > 1
-			ORDER	BY time DESC
+			ORDER	BY search_time DESC
 			LIMIT 0, 1
 			";
 		
@@ -207,7 +207,7 @@ abstract class WIC_DB_Access {
 			SELECT ID
 			FROM $search_log_table
 			WHERE user_id = $user_id
-			ORDER	BY time DESC
+			ORDER	BY search_time DESC
 			LIMIT 0, 1
 			";
 		

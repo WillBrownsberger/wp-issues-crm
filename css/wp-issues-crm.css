@@ -980,7 +980,7 @@ button.wic-post-list-button {
 	display: none;
 }
 .pl-search_log-user_id{ width:14.1%;}
-.pl-search_log-time{ width:14.1%;}
+.pl-search_log-search_time{ width:14.1%;}
 .pl-search_log-serialized_search_array{ width:42.3%;}
 .pl-search_log-download_time{ width:14.1%;}
 .pl-search_log-result_count { width: 14.1%}

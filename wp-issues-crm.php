@@ -35,11 +35,17 @@
 *  This module also includes hide private posts function (the only function created in the public name space by this plugin).
 */
 
+// database setup on activation
+//include_once dirname( __FILE__ ) . '/php/db/class-wic-db-setup.php';
+//register_activation_hook ( __FILE__, 'WIC_DB_Setup::database_setup' ); 
+//add_action( 'plugins_loaded', 'WIC_DB_Setup::update_db_check' );
+
 // if is_admin, load necessary ( and only necessary ) components in admin
 if ( is_admin() ) {
 	if ( ! spl_autoload_register('wp_issues_crm_autoloader', true, true ) ) { // true throw errors, true, prepend
 		die ( __( 'Fatal Error: Unable to register wp_issues_crm_autoloader in wp-issues-crm.php', 'wp-issues-crm' ) );	
 	};
+
 	$wic_admin_setup = new WIC_Admin_Setup;
 // otherwise execute the one function in this plugin that acts directly on the front end 
 } else {
@@ -93,5 +99,6 @@ function wic_generate_call_trace() { // from http://php.net/manual/en/function.d
 	
 	echo "\t" . implode("<br/>\n\t", $result);
 }
+
 
 
