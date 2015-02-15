@@ -118,6 +118,7 @@ class WIC_DB_Setup {
 		update_option( 'wp_issues_crm_dictionary_version', $wp_issues_crm_dictionary_version );		
 	}
 	
+	// replace standard prefix with possible site table prefix
 	private static function site_table_names_in_sql ( $sql ) {
 		
 		global $wpdb;
