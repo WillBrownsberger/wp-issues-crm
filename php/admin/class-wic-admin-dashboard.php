@@ -318,7 +318,6 @@ class WIC_Admin_Dashboard {
 						// lower new log_entry_flag here, because either (a) I am just continuing a walk up/down the log
 						// or (b), I digressed from the log to a non-loggable action, but have returned to the log with a back action (log has been truncated)			
 						$possible_new_log_entry = 0; 
-								
 					} elseif ( 'search_log' == $control_array[0] && 'id_search' == $control_array[1] ) {
 						// a search log id search is essentially a pointer move combined with a new log entry
 						$slice_length = ( -1 == $log_pointer ) ? 1 : $log_pointer + 1; 
@@ -326,6 +325,8 @@ class WIC_Admin_Dashboard {
 						$log[] = $control_array[2]; // add the search log entry to the cookie log
 						$log_pointer++; // increment the pointer
 						$possible_new_log_entry = 0; // the new log entry is already done, so don't set flag to do catch up
+					} elseif ( 'dashboard' == $control_array[0] && 'search_history' == $control_array[1] ) {
+						$possible_new_log_entry = 0; // from search history can only go to non-loggable event; 
 					} else { // its something other than a pointer move, new flag should be set to 1 since maybe going do a new loggable event
 						$possible_new_log_entry = 1;
 						// drop array entries forward of current pointer, because am walking in a new direction
