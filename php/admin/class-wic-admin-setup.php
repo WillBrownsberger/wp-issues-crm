@@ -13,11 +13,8 @@
 */
 class WIC_Admin_Setup {
 
-	// does all registration and action adds ( except settings )	
+	// does all registration and action adds ( except activation and settings )	
 	public function __construct() {
-
-		// set up roles and capabilities
-		register_activation_hook ( __FILE__, array ( $this, 'wic_set_up_roles_and_capabilities' ) );
 		
 		// add metabox -- take care: this fires on all save/updates of posts; 
 		$wic_issue_open_metabox = new WIC_Entity_Issue_Open_Metabox;

@@ -35,10 +35,22 @@
 *  This module also includes hide private posts function (the only function created in the public name space by this plugin).
 */
 
-// database setup on activation
-//include_once dirname( __FILE__ ) . '/php/db/class-wic-db-setup.php';
-//register_activation_hook ( __FILE__, 'WIC_DB_Setup::database_setup' ); 
-//add_action( 'plugins_loaded', 'WIC_DB_Setup::update_db_check' );
+// set version globals;
+global $wp_issues_crm_dictionary_version;
+global $wp_issues_crm_db_version;
+$wp_issues_crm_dictionary_version = '1.0';
+$wp_issues_crm_db_version = '1.0';
+
+
+// check for database install or updates -- note that the 'plugins_loaded' hook fires before is_admin is set, so too late if put in admin_setup
+include_once dirname( __FILE__ ) . '/php/db/class-wic-db-setup.php';
+register_activation_hook ( __FILE__, 'WIC_DB_Setup::update_db_check' ); // check will trigger install
+add_action( 'plugins_loaded', 'WIC_DB_Setup::update_db_check' ); // here because upgrade does not trigger activation hook
+
+// set up access framework . . note that if alter this scheme will need to also add 'plugins_loaded' hook for 
+// since activation_hook not automatically triggered on upgrades
+register_activation_hook ( __FILE__, array ( 'WIC_Admin_Setup', 'wic_set_up_roles_and_capabilities' ) );
+
 
 // if is_admin, load necessary ( and only necessary ) components in admin
 if ( is_admin() ) {
