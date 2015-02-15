@@ -1,12 +1,3 @@
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-
-
 INSERT INTO wp_wic_data_dictionary (ID, entity_slug, group_slug, field_slug, field_type, field_label, field_order, listing_order, sort_clause_order, required, dedup, readonly, hidden, field_default, like_search_enabled, transient, wp_query_parameter, placeholder, option_group, onchange, list_formatter, reverse_sort, customizable, enabled, mark_deleted, last_updated_by, last_updated_time) VALUES
 (1, 'activity', 'activity', 'screen_deleted', 'deleted', 'x', 1, 0, 0, '', 0, 0, 0, '', 0, 1, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (2, 'constituent', 'registration', 'ID', 'text', 'Internal Id', 420, 0, 0, '', 0, 1, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
@@ -117,7 +108,6 @@ INSERT INTO wp_wic_data_dictionary (ID, entity_slug, group_slug, field_slug, fie
 (146, 'search_log', 'search_log', 'serialized_search_parameters', 'text', 'Serialized Search Parameters', 100, 100, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (149, 'trend', 'trend', 'trend_search_mode', 'select', 'Trend Search Mode', 50, 0, 0, '', 0, 0, 0, '', 0, 1, '', '', 'trend_search_modes', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (150, 'user', 'startup', 'first_form', 'select', 'Startup Form', 60, 0, 0, '', 0, 0, 0, 'search_history', 0, 0, '', '', 'first_form', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00');
-
 INSERT INTO wp_wic_form_field_groups (ID, entity_slug, group_slug, group_label, group_legend, group_order, initial_open, sidebar_location, last_updated_time, last_updated_by) VALUES
 (1, 'constituent', 'contact', 'Contact', '', 10, 1, 0, '0000-00-00 00:00:00', 0),
 (5, 'constituent', 'case', 'Case Management', '', 30, 1, 1, '0000-00-00 00:00:00', 0),
@@ -148,7 +138,6 @@ INSERT INTO wp_wic_form_field_groups (ID, entity_slug, group_slug, group_label, 
 (32, 'data_dictionary', 'current_field_config', 'Existing Groups and Fields', 'Refer to the list of current groups and fields on the constituent form to choose where to position your custom field.', 20, 1, 0, '0000-00-00 00:00:00', 0),
 (33, 'option_group', 'current_option_group_usage', 'Existing Database Values for this Option', 'Refer to the listing below of actually used option values for this option group when modifying the option value list.', 90, 1, 0, '0000-00-00 00:00:00', 0),
 (34, 'user', 'startup', 'Startup Screen', 'Select screen to start on.', 3, 1, 0, '0000-00-00 00:00:00', 0);
-
 INSERT INTO wp_wic_option_group (ID, option_group_slug, option_group_desc, enabled, last_updated_time, last_updated_by, mark_deleted, is_system_reserved) VALUES
 (1, 'activity_type_options', 'Activity Types', 1, '2015-02-02 11:55:19', 15, '', 0),
 (2, 'address_type_options', 'Address Types', 1, '2015-01-26 00:00:00', 15, '', 0),
@@ -175,7 +164,6 @@ INSERT INTO wp_wic_option_group (ID, option_group_slug, option_group_desc, enabl
 (29, 'trend_search_modes', 'Trend Search Modes', 1, '2015-02-10 12:00:00', 15, '0', 1),
 (30, 'capability_levels', 'Capability Levels', 1, '2015-02-11 16:38:00', 15, '', 0),
 (31, 'first_form', 'Form to show on startup', 1, '0000-00-00 00:00:00', 0, '', 1);
-
 INSERT INTO wp_wic_option_value (ID, option_group_id, option_value, option_label, value_order, enabled, last_updated_time, last_updated_by) VALUES
 (1, '3', '', '', 30, 1, '2015-01-28 00:00:00', 15),
 (2, '3', '0', 'Closed', 10, 1, '2015-01-28 00:00:00', 15),
@@ -273,7 +261,3 @@ INSERT INTO wp_wic_option_value (ID, option_group_id, option_value, option_label
 (124, '31', 'my_cases', 'Cases assigned to me', 10, 1, '0000-00-00 00:00:00', 0),
 (125, '31', 'my_issues', 'Issues assigned to me', 20, 1, '0000-00-00 00:00:00', 0),
 (126, '31', 'search_history', 'My recent activity', 30, 1, '0000-00-00 00:00:00', 0);
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

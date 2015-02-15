@@ -14,7 +14,12 @@
 class WIC_Admin_Setup {
 
 	// does all registration and action adds ( except activation and settings )	
-	public function __construct() {
+	public function __construct() {  
+	 	
+	 	// load dictionary and navigation
+	 	// use the _admin_menu hook which fires just before admin_menu -- 
+	 	// which is where the navigation needs to be fired 
+		add_action ( '_admin_menu', array( $this, 'basic_setup' ) ); 
 		
 		// add metabox -- take care: this fires on all save/updates of posts; 
 		$wic_issue_open_metabox = new WIC_Entity_Issue_Open_Metabox;
@@ -27,24 +32,26 @@ class WIC_Admin_Setup {
 		
 		// maintain log pointer cookie
 		add_action( 'admin_init', 'WIC_Admin_Dashboard::maintain_log_cookie' );	
-		
-		// control cache headers --  (only if sending plugin's main forms)
-		add_action( 'send_headers', array ( $this , 'wic_change_cache_header' ) );
-		
+
+		// optionally set default display of posts to private 		
 		$plugin_options = get_option( 'wp_issues_crm_plugin_options_array' );		
 		if ( isset( $plugin_options['all_posts_private'] ) ) {
-		// optionally set default display of posts to private 
 	 		add_action( 'post_submitbox_misc_actions' , array ( $this, 'default_post_visibility' ) );
 	 	}
-	 	
+
+	}
+
+	// load dictionary and navigation
+	public function basic_setup() { 
 	 	// set up dictionary
 	 	global $wic_db_dictionary;
 	 	$wic_db_dictionary = new WIC_DB_Dictionary; // needed for metabox, so load always on admin (two quick db calls)
 	 	
 	 	// load navigation (which includes menu set up)
-		$wp_issues_crm_admin = new WIC_Admin_Navigation;  // small pass through, so minimal load on non-WIC pages
-
+		$wp_issues_crm_admin = new WIC_Admin_Navigation;  // small pass through, so minimal load on non-WIC pages	
+	
 	}
+
 
 	// load scripts and styles only for this plugin's pages
 	public function add_wic_scripts ( $hook ) {
@@ -81,31 +88,6 @@ class WIC_Admin_Setup {
 			WIC_List_Constituent_Export::do_constituent_category_download( $_POST['wic-category-export-button'] );	
 		}		
  	}
-
-	// add action to allow caching of non-save pages to facilitate back navigation in IE 
-	// while still forcing reload for new record save screens to avoid duping
-	// https://core.trac.wordpress.org/browser/tags/4.1/src//wp-includes/class-wp.php#L0 (line 448)
-	// fires after other headers sent, so can override previously sent Cache-Control header
-	public function wic_change_cache_header() {
-		if ( isset ( $_POST['wic_form_button'] ) ) {
-			$control_array = explode( ',', $_POST['wic_form_button'] );
-			$revalidate_always = array (
-				'new_blank_form',
-				'save_from_search',
-				'save_from_search_request',
-			);  
-			if ( in_array( $control_array[1], $revalidate_always ) ) {
-				header( "Cache-Control: no-cache, no-store, must-revalidate" );	
-				// http://blogs.msdn.com/b/ie/archive/2010/07/14/caching-improvements-in-internet-explorer-9.aspx
-				// http://www.mobify.com/blog/beginners-guide-to-http-cache-headers/
-				// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9.3
-				// http://blog.httpwatch.com/2008/10/15/two-important-differences-between-firefox-and-ie-caching/
-			} else {
-				header( "Cache-Control: private, max-age=0" );			
-			}
-		}
-	}
-
 
 	public function wic_set_up_roles_and_capabilities() {
 

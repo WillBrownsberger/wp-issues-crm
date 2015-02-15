@@ -14,7 +14,7 @@ class WIC_Admin_Navigation {
 
 	// sets up menu
 	public function __construct() { // class instantiated in plugin main 
-		add_action( 'admin_menu', array ( $this, 'menu_setup' ) );
+		add_action( 'admin_menu', array ( $this, 'menu_setup' ) ); // precedes admin_init
 	}	
 
 	// add menu links to wp admin

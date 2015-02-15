@@ -19,6 +19,7 @@ class WIC_DB_Setup {
 	*
 	*	manual steps in package preparation of export from development
 	*		set without autoincrement settings, without 'if not exists' and without back ticks (uncheck all object creation options)
+	*		remove all statements other than the create table statements
 	*
 	*	note: all wic_issues_crm tables use the utf8 character set and utf8_general_ci collation  
 	*
@@ -54,7 +55,7 @@ class WIC_DB_Setup {
 		
 	}
 	
-	public static function update_db_check () {
+	public static function update_db_check () { 
 
 		global $wp_issues_crm_db_version; // see wp-issues-crm.php
 		global $wp_issues_crm_dictionary_version; // see wp-issues-crm.php
@@ -62,16 +63,17 @@ class WIC_DB_Setup {
 		// check if database up to date; if not, run setup 
 		$installed_version = get_option( 'wp_issues_crm_db_version');
 		if ( $wp_issues_crm_db_version != $installed_version ) { // returns false if absent, so also triggered on first run
-			self::database_setup();		
+			self::database_setup();
 		}
 
 		// check if dictionary is populated -- if not, install -- assuming either a fresh installation . . .
 		// or a reset of all options fields (i.e., truncate dictionary, field_groups, option_group, option_value )
+		// note that if tables dropped, not truncated, must reset version options to trigger database reinstall
 		global $wpdb;
 		$table = $wpdb->prefix . 'wic_data_dictionary';
 		$test = $wpdb->get_results ( "SELECT ID FROM $table LIMIT 0, 1 " );
 		if ( ! isset( $test[0]->ID ) ) {
-			self:dictionary_install();
+			self::dictionary_install();
 		} else {  // if already populated, run upgrade script if necessary
 			$dictionary_version = get_option( 'wp_issues_crm_dictionary_version' );
 			if ( $wp_issues_crm_dictionary_version != $dictionary_version ) {
@@ -87,10 +89,14 @@ class WIC_DB_Setup {
 		global $wpdb;		
 		
 		// load the table set up sql 
-		$sql = file_get_contents( plugin_dir_path ( __FILE__ ) . '../../sql/wic_dictionary_and_options.sql' );
+		$sql = file_get_contents( plugin_dir_path ( __FILE__ ) . '../../sql/wic_data_dictionary_and_options.sql' );
 		$sql = self::site_table_names_in_sql ( $sql );
 		
-		$wpdb->query ( $sql );
+		// execute statements one by one
+		$sql_array = explode ( ';', $sql );
+		foreach ( $sql_array as $sql_statement ) {
+			$wpdb->query ( $sql_statement );
+		}
 		
 		if ( false !== get_option ( 'wp_issues_crm_dictionary_version' ) ) {
 			update_option( 'wp_issues_crm_dictionary_version', $wp_issues_crm_dictionary_version );		

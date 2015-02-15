@@ -53,11 +53,10 @@ register_activation_hook ( __FILE__, array ( 'WIC_Admin_Setup', 'wic_set_up_role
 
 
 // if is_admin, load necessary ( and only necessary ) components in admin
-if ( is_admin() ) {
+if ( is_admin() ) { 
 	if ( ! spl_autoload_register('wp_issues_crm_autoloader', true, true ) ) { // true throw errors, true, prepend
 		die ( __( 'Fatal Error: Unable to register wp_issues_crm_autoloader in wp-issues-crm.php', 'wp-issues-crm' ) );	
 	};
-
 	$wic_admin_setup = new WIC_Admin_Setup;
 // otherwise execute the one function in this plugin that acts directly on the front end 
 } else {
@@ -87,7 +86,6 @@ function wp_issues_crm_autoloader( $class ) {
    		require_once $class_file;
    	} else {
 	   	wic_generate_call_trace();
-	   	echo 
 			die ( '<h3>' . sprintf(  __( 'Fatal configuration error -- missing file %s; failed in autoload in wp-issues-crm.php, line 43.', 'wp_issues_crm' ), $class_file ) . '</h3>' );   
 	   } 
 	}	

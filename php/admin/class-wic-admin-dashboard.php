@@ -343,13 +343,15 @@ class WIC_Admin_Dashboard {
 		}
 
 		// having updated log for previous form submission and set pointer and flag from current form submission, set the cookie 
-		$log_string = implode( ',', $log ); 
-		setcookie ( 'wp_issues_crm_log[user]', 						$user, 						0, '/wp-admin/', '', false, true );
-		setcookie ( 'wp_issues_crm_log[log]', 							$log_string, 				0, '/wp-admin/', '', false, true );
-		setcookie ( 'wp_issues_crm_log[log_pointer]', 				$log_pointer, 				0, '/wp-admin/', '', false, true );		
-		setcookie ( 'wp_issues_crm_log[possible_new_log_entry]', $possible_new_log_entry,0, '/wp-admin/', '', false, true );
-		setcookie ( 'wp_issues_crm_log[last_log_entry]', 			$last_log_entry, 			0, '/wp-admin/', '', false, true );
-		
+		// to avoid triggering errors in activation routine, check if headers sent
+		if ( ! headers_sent() ) {	
+			$log_string = implode( ',', $log ); 
+			setcookie ( 'wp_issues_crm_log[user]', 						$user, 						0, '/wp-admin/', '', false, true );
+			setcookie ( 'wp_issues_crm_log[log]', 							$log_string, 				0, '/wp-admin/', '', false, true );
+			setcookie ( 'wp_issues_crm_log[log_pointer]', 				$log_pointer, 				0, '/wp-admin/', '', false, true );		
+			setcookie ( 'wp_issues_crm_log[possible_new_log_entry]', $possible_new_log_entry,0, '/wp-admin/', '', false, true );
+			setcookie ( 'wp_issues_crm_log[last_log_entry]', 			$last_log_entry, 			0, '/wp-admin/', '', false, true ); 
+		}
 		
 		// back and forward buttons will be responding to the cookie just sent, because
 		// 	in the form, they are blind to the cookie content -- see this->show_top_menu_buttons
