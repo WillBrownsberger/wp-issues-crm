@@ -22,10 +22,10 @@ class WIC_Admin_Dashboard {
 	*/
 	
 	public function __construct() { 
-
+	
+		ob_start();
 		// is submitting a previous form; 
 		if ( isset ( $_POST['wic_form_button'] ) ) {
-				
 			//parse button arguments
 			$control_array = explode( ',', $_POST['wic_form_button'] ); 
 			if ( '' == $control_array[0] || 'dashboard' == $control_array[0] ) { 
@@ -38,30 +38,34 @@ class WIC_Admin_Dashboard {
 					'id_requested'			=>	$control_array[2],
 					'instance'				=> '', // unnecessary in this context, absence will not create an error but here for consistency about arguments;
 				);
-				$this->show_top_menu_buttons ( $control_array[0], $control_array[1], $control_array[2] );
 				${ 'wic_entity_'. $control_array[0]} = new $class_name ( $action_requested, $args ) ;		
 			}
 			
 		// logged in user, but not coming from form -- show first form
 		} else {
 			$this->show_dashboard( WIC_DB_Access_WP_User::get_wic_user_preference( 'first_form' ) );
-		}		
+		}
+		$form_output = ob_get_clean(); // main form output grabbed from buffer
+		$this->show_top_menu_buttons ( $control_array[0], $control_array[1], $control_array[2] );
+		echo $form_output;
 	}
 
 	private function show_top_menu_buttons ( $class_requested, $action_requested, $id_requested ) {  
 
-		global $wp_issues_crm_enable_backward;
-		global $wp_issues_crm_enable_forward; 
 
 		echo '<form id = "wic-top-level-form" method="POST" autocomplete = "on">';
 		wp_nonce_field( 'wp_issues_crm_post', 'wp_issues_crm_post_form_nonce_field', true, true ); 
 
+		$back_forward_enabled =  WIC_DB_Search_History::history_buttons();
+		extract ( $back_forward_enabled ); 
+
 		$user_id = get_current_user_id();
 
+		//  all top nav buttons start new directions of user navigation -- if are the selected action (and not back/forward), then set history in $this->is_selected
 		$top_menu_buttons = array (
+			array ( 'search_log', 'back', '<span class="dashicons dashicons-arrow-left-alt"></span>' , __( 'Previous search or item', 'wp-issues-crm' ), $disable_backward ),
+			array ( 'search_log', 'forward', '<span class="dashicons dashicons-arrow-right-alt"></span>', __( 'Next search or item', 'wp-issues-crm' ), $disable_forward ),
 			// go to constituent options
-			array ( 'search_log', 	'back',	'<span class="dashicons dashicons-arrow-left-alt"></span>' , __( 'Previous search or item', 'wp-issues-crm' ), 0 ==  $wp_issues_crm_enable_backward ),
-			array ( 'search_log', 	'forward', '<span class="dashicons dashicons-arrow-right-alt"></span>', __( 'Next search or item', 'wp-issues-crm' ), 0 ==  $wp_issues_crm_enable_forward  ),
 			array ( 'constituent', 	'new_blank_form',	'<span class="dashicons dashicons-plus-alt"></span><span class="dashicons dashicons-smiley">' , __( 'New constituent.', 'wp-issues-crm' ), false ), // new
 			array ( 'constituent', 	'new_form',		'<span class="dashicons dashicons-search"></span><span class="dashicons dashicons-smiley"></span>', __( 'Search constituents.', 'wp-issues-crm' ), false ), // search
 			array ( 'dashboard', 	'my_cases',	 '<span class="dashicons dashicons-star-filled"></span><span class="dashicons dashicons-smiley"></span>', __( 'Constituents assigned to me.', 'wp-issues-crm' ), false  ),
@@ -77,8 +81,6 @@ class WIC_Admin_Dashboard {
 			array ( 'dashboard', 	'search_history',	'<span class="dashicons dashicons-arrow-left-alt"></span><span class="dashicons dashicons-arrow-left-alt"></span>', __( 'Recent searches.', 'wp-issues-crm' ), false ),		
 			);		
 
-
-	
 		foreach ( $top_menu_buttons as $top_menu_button ) {
 			$selected_class = $this->is_selected ( $class_requested, $action_requested, $top_menu_button[0], $top_menu_button[1] ) ? 'wic-form-button-selected' : '';
 			$button_class = 'button button-primary wic-top-menu-button ' . $selected_class;	
@@ -101,6 +103,9 @@ class WIC_Admin_Dashboard {
 	private function is_selected ( $class_requested, $action_requested, $button_class, $button_action ) {
 		// if last pressed the button, show it as selected 
 		if ( $class_requested == $button_class && $action_requested == $button_action ) {
+			if ( 'back' != $action_requested && 'forward' != $action_requested ) {
+				WIC_DB_Search_History::new_history_branch ();  // all top nav buttons start new directions of user navigation
+			}
 			return true; 
 		} else { 
 			return false;
@@ -115,8 +120,6 @@ class WIC_Admin_Dashboard {
 	// show the top menu buttons and call the action requested for the dashboard	
 	private function show_dashboard( $action_requested ) {
 		
-		$this->show_top_menu_buttons ( 'dashboard', $action_requested, NULL );
-	
 		$user_ID = get_current_user_id();	
 		
 		// bullet proofed to always yield an action, but $action_requested should always be specified
@@ -250,135 +253,6 @@ class WIC_Admin_Dashboard {
 			$list = $lister->format_entity_list( $wic_query, '' );
 			echo $list;			
 		}
-	}
-	
-	/**************************************************************************************************
-	*
-	*	Maintenance of session navigation cookie -- sends a cookie that carries string of pointers back to the search log
-	*	Walk back through search log; act like browser back/forward, but avoiding caching issues and possile double submission of data
-	*	Items in the search log are constituents/issues viewed (including saved/updated) and searches.  
-	*
-	*  Invoked in WIC_Admin_Setup through admin_init hook so is called before any content sent by wordpress
-	*  placed here for ease of maintenance with in conjunction with main navigation buttons
-	*
-	***************************************************************************************************/
-	public static function maintain_log_cookie () { // set these non-persistent cookies even if not visiting wp_issues_crm;
-		
-		global $wpdb; 
-		$db_time = $wpdb->get_results ( "SELECT NOW() AS now" );
-		$now = $db_time[0]->now; // use db time for perfect consistency with search_log time stamping	
-		
-		global $wp_issues_crm_enable_backward;
-		global $wp_issues_crm_enable_forward;	
-		
-		// define and initialize variables that will be set into a cookie array
-		$user							= get_current_user_id();
-		// the following three variables maintained based on database search log
-		$log							= array( '0' );	// previous visited search log entries as a stack (string, while actually in the cookie)-- latest visited = last
-		$log_pointer				= -1; // will be incremented when user does a loggable action
- 		$log_time_stamp 			= $now;
- 		// the following two variables are outgoing information that influence handling of the first three
-		$possible_new_log_entry	= 1;	// 1 says new step, outside chain -- on next receive, must roll array; 
- 		$last_log_entry			= 0;	// retain this when slicing array, so that don't add it back on next pass through
-			
-
-		// if cookie is set, update cookie values as necessary
-		if ( isset ( $_COOKIE['wp_issues_crm_log'] ) ) {
-			if ( $user == $_COOKIE['wp_issues_crm_log']['user'] ) { // just make sure that logged in user from this browser has not changed
-				// extract other cookie components (physically, separate cookies) -- get variables as named above
-				extract ( $_COOKIE['wp_issues_crm_log'], EXTR_OVERWRITE ) ; 
-				$log =  explode ( ',', $log ); // convert the string in the cookie into an array
-				// first, figure out whether last form generated loggable event that needs to be added -- this is catch-up:
-				// the "last form" was processed in the same submit that generated the cookie being evaluated, but after it was generated 
-				// can't update cookie after processing form submission, because wordpress has already sent headers when wp_issues_crm is processing form
-				// so, have to look back to previous form submission through the database search log in order to to maintain the cookie  
-				if ( 1 == $possible_new_log_entry ) { // set in outgoing cookie by logic below to include any action that could generate new loggable event  
-					// get actual latest log entry
-					$search_log_last_entry_array = WIC_DB_Access::search_log_last_entry( get_current_user_id() );  
-					if ( $search_log_last_entry_array ) { // if search log has any entries for this user, false is a boundary condition
-						extract ( $search_log_last_entry_array, EXTR_OVERWRITE ); 
-						// if latest search_log entry is not already in the cookie, put it in (may be from the prior session)
-						if ( -1 == $log_pointer ) { // first log entry for this cookie, initialize array, another boundary condition
-							$log = array ( $search_log_last_entry );
-							$log_pointer++;
-							$log_time_stamp = $search_log_last_entry_time;	
-						} elseif ( $last_log_entry != $search_log_last_entry 				// don't bring back later log entries after truncating
-									   && $log[$log_pointer] != $search_log_last_entry 	// don't bother with repeats
-										&& $search_log_last_entry_time > $log_time_stamp 	// don't go back to old entries after branching to dashboard search history
-										) {  
-							$log[] = $search_log_last_entry; // push new new log entry to end of log array
-							$log_pointer++; // increment the log pointer
-							$log_time_stamp = $search_log_last_entry_time; // take the time stamp from the search_log
-						}  
-					}	// doing nothing if no database search_log entries
-				}
-				// now look at latest action requested by user and set pointer (possibly truncating log array) and possible new entry flag
-				if ( isset (  $_POST['wic_form_button'] ) ) {			
-					$control_array = explode( ',', $_POST['wic_form_button'] );
-					// if back or forward, move pointer 
-					if ( 'search_log' == $control_array[0] && ( 'back' == $control_array[1] || 'forward' == $control_array[1]  ) ) {
-						if ( 'back' == $control_array[1] ) {
-							if ( $log_pointer > 0 ) {
-								$log_pointer--; // decrement log pointer					
-							}				
-						} elseif ( 'forward' == $control_array[1]  )  {
-							if ( $log_pointer < ( count ( $log ) - 1 ) ) {
-								$log_pointer++; // increment log pointer					
-							}					
-						}
-						// lower new log_entry_flag here, because either (a) I am just continuing a walk up/down the log
-						// or (b), I digressed from the log to a non-loggable action, but have returned to the log with a back action (log has been truncated)			
-						$possible_new_log_entry = 0; 
-					} else {
-						// else going some place new so truncate cookie log after current pointer (could be at end, nothing lost)
-						$last_log_entry = $log [ count ( $log ) - 1 ]; // take note of last entry in dropped tail (subtract 1 because count starts from 1, indexing from zero) 
-						$slice_length = ( -1 == $log_pointer ) ? 1 : $log_pointer + 1;
-						$log = array_slice ( $log, 0, $slice_length ); // truncate the cookie log, because branching to a new location
-						// note, pointer does not necessarily move -- pointing to last entry in remaining log
-						if ( 'search_log' == $control_array[0] && 'id_search' == $control_array[1] ) {
-								// a search log id search is essentially a pointer move combined with copying an old db log entry as a new cookie log entry
-							$log[] = $control_array[2]; // add the search log entry to the cookie log
-							$log_pointer++; // increment the pointer
-							$log_time_stamp = $now; // as if new event in sequence
-							$possible_new_log_entry = 0; // the new log entry is already done, so don't set flag to do catch up
-						} else {
-							if ( 'dashboard' == $control_array[0] && 'search_history' == $control_array[1] ) {
-								$possible_new_log_entry = 0; // from search history can only go to non-new event and if do, will log the move 
-							} else { // its something other than a pointer move, new flag should be set to 1 since maybe going do a new loggable event
-								$possible_new_log_entry = 1;
-							}
-						} 
-					}
-				}
-				// limit length of cookie 
-				if ( count ( $log ) > 20 ) { 
-					$discard = array_shift ( $log );
-					$log_pointer = count ( $log ) - 1; // should equal hard coded limit - 1; 
-				} 
-			} 
-		}
-
-		// having updated log for previous form submission and set pointer and flag from current form submission, set the cookie 
-		// to avoid triggering errors in activation routine, check if headers sent
-		if ( ! headers_sent() ) {	
-			$log_string = implode( ',', $log ); 
-			setcookie ( 'wp_issues_crm_log[user]', 						$user, 						0, '/wp-admin/', '', false, true );
-			setcookie ( 'wp_issues_crm_log[log]', 							$log_string, 				0, '/wp-admin/', '', false, true );
-			setcookie ( 'wp_issues_crm_log[log_pointer]', 				$log_pointer, 				0, '/wp-admin/', '', false, true );		
-			setcookie ( 'wp_issues_crm_log[possible_new_log_entry]', $possible_new_log_entry,0, '/wp-admin/', '', false, true );
-			setcookie ( 'wp_issues_crm_log[last_log_entry]', 			$last_log_entry, 			0, '/wp-admin/', '', false, true ); 
-			setcookie ( 'wp_issues_crm_log[log_time_stamp]', 			$log_time_stamp, 			0, '/wp-admin/', '', false, true );
-		}
-		
-		// back and forward buttons will be responding to the cookie just sent, because
-		// 	in the form, they are blind to the cookie content -- see this->show_top_menu_buttons
-		// 	so by the time they are acted on,we have the cookie back --
-		//		wic_entity_search_log->back actually handles the back request looking at this cookie
-		// need global variables to tell buttons whether to setup as enabled	--
-		// 	this is a static function so not available when get around to instantiating this class as an object	
-		$wp_issues_crm_enable_backward = ( $log_pointer > 0 );
-		$wp_issues_crm_enable_forward =  $log_pointer <  count ( $log ) - 1 && $log_pointer > - 1  ;	
-	
 	}
 
 }

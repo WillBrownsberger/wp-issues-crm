@@ -29,9 +29,6 @@ class WIC_Admin_Setup {
 
 		// set up download hook -- admin init is early enough to intercept button for download
 		add_action( 'admin_init', array( $this, 'do_download' ) );	
-		
-		// maintain log pointer cookie
-		add_action( 'admin_init', 'WIC_Admin_Dashboard::maintain_log_cookie' );	
 
 		// optionally set default display of posts to private 		
 		$plugin_options = get_option( 'wp_issues_crm_plugin_options_array' );		

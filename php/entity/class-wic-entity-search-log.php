@@ -25,31 +25,28 @@ class WIC_Entity_Search_Log extends WIC_Entity_Parent {
 	***************************************************************************************************************************************/
 
 	// navigation from back button
-	public function back ( $args ) { // takes no actual arguments, working with cookie sent to last form
-		$cookie = $_COOKIE['wp_issues_crm_log'] ;
-		$log = explode( ',', $cookie['log'] );
-		$target = 1 == $cookie['possible_new_log_entry'] ? $cookie['log_pointer'] : $cookie['log_pointer'] - 1;
-		$this->id_search ( array ( 'id_requested' => $log[$target] ) ); 	
+	public function back ( $args ) { // takes no actual arguments, working with history
+		$this->id_search_execute ( array ( 'id_requested' => WIC_DB_Search_History::history_pointer_move( false ) ) ); 	
 	}
 
 	// navigation from forward button
-	public function forward ( $args ) { // takes no actual argument, working with cookie sent to last form
-		$cookie = $_COOKIE['wp_issues_crm_log'] ;
-		$log = explode( ',', $cookie['log'] );
-		if ( 1 == $cookie['possible_new_log_entry'] ) {
-			WIC_Function_Utilities::wic_error ( 'Forward button submitted when no forward action available.', __FILE__, __LINE__, __METHOD__, false );		
-		}
-		$target = $cookie['log_pointer'] + 1; // button is not enabled is this is not a good value
-		$this->id_search ( array ( 'id_requested' => $log[$target] ) ); 	
+	public function forward ( $args ) { // takes no actual arguments, working with history
+		$this->id_search_execute ( array ( 'id_requested' => WIC_DB_Search_History::history_pointer_move( true ) ) ); 	
 	}
 
-	// request handler for search log list -- re-executes query 
+	// request handler for search log list -- adds search_log id to user history and then executes query 
 	public function id_search( $args ) {
+		WIC_DB_Search_History::update_search_history( $args['id_requested'] );
+		$this->id_search_execute( $args );	
+	}
+	
+	// request handler for search log list -- re-executes query 
+	public function id_search_execute( $args ) {
 		$search = $this->id_retrieval( $args );
 		$class_name = 'WIC_Entity_'. $search['entity'];
 		$search['show_form'] = true;
 		${ $class_name } = new $class_name ( 'redo_search_from_query', $search  ) ;		
-	}
+	}	
 	
 	// request handler for back to search button -- brings back to filled search form, but does not reexecute the query
 	public function id_search_to_form( $args ) {

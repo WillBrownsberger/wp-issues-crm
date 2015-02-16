@@ -60,7 +60,7 @@ abstract class WIC_DB_Access {
 	public function search_log ( $meta_query_array, $search_parameters ) {
 		// would like this to be private but make it public 
 		// since want to log saves as searches and 
-		// have to do that form top entity form request
+		// have to do that from top entity form request
 		$entity = $this->entity;
 		if ( isset ( $search_parameters['log_search'] ) ) {	
 			if ( $search_parameters['log_search'] ) { 
@@ -81,7 +81,8 @@ abstract class WIC_DB_Access {
 				$save_result = $wpdb->query( $sql );
 				
 				if ( 1 == $save_result ) {
-					$this->search_id = $wpdb->insert_id;	
+					$this->search_id = $wpdb->insert_id;
+					 WIC_DB_Search_History::update_search_history( $this->search_id );	
 				} else {
 					WIC_Function_Utilities::wic_error ( 'Unknown database error in search_log.', __FILE__, __LINE__, __METHOD__, true ); 		
 				}
