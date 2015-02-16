@@ -204,7 +204,7 @@ abstract class WIC_DB_Access {
 		
 		$sql = 			
 			"
-			SELECT ID
+			SELECT ID, search_time
 			FROM $search_log_table
 			WHERE user_id = $user_id
 			ORDER	BY search_time DESC
@@ -213,7 +213,13 @@ abstract class WIC_DB_Access {
 		
 		$latest_search = $wpdb->get_results ( $sql );
 
-		$return =  isset ( $latest_search[0]->ID ) ?  $latest_search[0]->ID : false;
+		$return =  isset ( $latest_search[0]->ID ) ?  
+				array ( 
+					'search_log_last_entry' => $latest_search[0]->ID, 
+					'search_log_last_entry_time' => $latest_search[0]->search_time 
+				) 
+				: 
+				false;
 
 		return ( $return );
 

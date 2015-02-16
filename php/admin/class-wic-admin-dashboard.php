@@ -263,45 +263,56 @@ class WIC_Admin_Dashboard {
 	*
 	***************************************************************************************************/
 	public static function maintain_log_cookie () { // set these non-persistent cookies even if not visiting wp_issues_crm;
-	
+		
+		global $wpdb; 
+		$db_time = $wpdb->get_results ( "SELECT NOW() AS now" );
+		$now = $db_time[0]->now; // use db time for perfect consistency with search_log time stamping	
+		
 		global $wp_issues_crm_enable_backward;
 		global $wp_issues_crm_enable_forward;	
 		
 		// define and initialize variables that will be set into a cookie array
 		$user							= get_current_user_id();
+		// the following three variables maintained based on database search log
 		$log							= array( '0' );	// previous visited search log entries as a stack (string, while actually in the cookie)-- latest visited = last
 		$log_pointer				= -1; // will be incremented when user does a loggable action
+ 		$log_time_stamp 			= $now;
+ 		// the following two variables are outgoing information that influence handling of the first three
 		$possible_new_log_entry	= 1;	// 1 says new step, outside chain -- on next receive, must roll array; 
- 		$last_log_entry			= 0;	// retain this when slicing array, so that don't add it back on next pass through			
+ 		$last_log_entry			= 0;	// retain this when slicing array, so that don't add it back on next pass through
+			
 
 		// if cookie is set, update cookie values as necessary
 		if ( isset ( $_COOKIE['wp_issues_crm_log'] ) ) {
 			if ( $user == $_COOKIE['wp_issues_crm_log']['user'] ) { // just make sure that logged in user from this browser has not changed
-				// extract other cookie components (physically, separate cookies)
-				$log							=  explode ( ',', $_COOKIE['wp_issues_crm_log']['log'] );
-				$log_pointer				= 	$_COOKIE['wp_issues_crm_log']['log_pointer'];
-				$possible_new_log_entry =  $_COOKIE['wp_issues_crm_log']['possible_new_log_entry'];
-				$last_log_entry			=  $_COOKIE['wp_issues_crm_log']['last_log_entry'];
-				// first, figure out whether last form generated loggable event that needs to be added -- this catch-up:
+				// extract other cookie components (physically, separate cookies) -- get variables as named above
+				extract ( $_COOKIE['wp_issues_crm_log'], EXTR_OVERWRITE ) ; 
+				$log =  explode ( ',', $log ); // convert the string in the cookie into an array
+				// first, figure out whether last form generated loggable event that needs to be added -- this is catch-up:
 				// the "last form" was processed in the same submit that generated the cookie being evaluated, but after it was generated 
 				// can't update cookie after processing form submission, because wordpress has already sent headers when wp_issues_crm is processing form
 				// so, have to look back to previous form submission through the database search log in order to to maintain the cookie  
-				if ( 1 == $possible_new_log_entry ) {  
-					// get actual latest log entry  
-					$latest_log_entry = WIC_DB_Access::search_log_last_entry( get_current_user_id() );
-					if ( $latest_log_entry ) { // if search log has any entries for this user, false is a boundary condition 
-						// if latest log entry is not already in the cookie, put it in (may be from the prior session)
+				if ( 1 == $possible_new_log_entry ) { // set in outgoing cookie by logic below to include any action that could generate new loggable event  
+					// get actual latest log entry
+					$search_log_last_entry_array = WIC_DB_Access::search_log_last_entry( get_current_user_id() );  
+					if ( $search_log_last_entry_array ) { // if search log has any entries for this user, false is a boundary condition
+						extract ( $search_log_last_entry_array, EXTR_OVERWRITE ); 
+						// if latest search_log entry is not already in the cookie, put it in (may be from the prior session)
 						if ( -1 == $log_pointer ) { // first log entry for this cookie, initialize array, another boundary condition
-							$log = array ( $latest_log_entry );
+							$log = array ( $search_log_last_entry );
 							$log_pointer++;
-						} elseif ( $last_log_entry != $latest_log_entry && $latest_log_entry != $log[$log_pointer] ) {  
-							// normal processing -- compare cookie log last entry prior to slice to latest db log entry and also avoid dups
-							$log[] = $latest_log_entry; // push new new log entry to end of log array
+							$log_time_stamp = $search_log_last_entry_time;	
+						} elseif ( $last_log_entry != $search_log_last_entry 				// don't bring back later log entries after truncating
+									   && $log[$log_pointer] != $search_log_last_entry 	// don't bother with repeats
+										&& $search_log_last_entry_time > $log_time_stamp 	// don't go back to old entries after branching to dashboard search history
+										) {  
+							$log[] = $search_log_last_entry; // push new new log entry to end of log array
 							$log_pointer++; // increment the log pointer
-						} // doing nothing if no database search_log entries 
-					}	
+							$log_time_stamp = $search_log_last_entry_time; // take the time stamp from the search_log
+						}  
+					}	// doing nothing if no database search_log entries
 				}
-				// now look at latest action requested and set pointer (possibly truncating log array) and set possible new entry flag
+				// now look at latest action requested by user and set pointer (possibly truncating log array) and possible new entry flag
 				if ( isset (  $_POST['wic_form_button'] ) ) {			
 					$control_array = explode( ',', $_POST['wic_form_button'] );
 					// if back or forward, move pointer 
@@ -312,33 +323,37 @@ class WIC_Admin_Dashboard {
 							}				
 						} elseif ( 'forward' == $control_array[1]  )  {
 							if ( $log_pointer < ( count ( $log ) - 1 ) ) {
-								$log_pointer++; // decrement log pointer					
+								$log_pointer++; // increment log pointer					
 							}					
 						}
 						// lower new log_entry_flag here, because either (a) I am just continuing a walk up/down the log
 						// or (b), I digressed from the log to a non-loggable action, but have returned to the log with a back action (log has been truncated)			
 						$possible_new_log_entry = 0; 
-					} elseif ( 'search_log' == $control_array[0] && 'id_search' == $control_array[1] ) {
-						// a search log id search is essentially a pointer move combined with a new log entry
-						$slice_length = ( -1 == $log_pointer ) ? 1 : $log_pointer + 1; 
-						$log = array_slice ( $log, 0, $slice_length ); // do a slice because branching to a new location in the log 
-						$log[] = $control_array[2]; // add the search log entry to the cookie log
-						$log_pointer++; // increment the pointer
-						$possible_new_log_entry = 0; // the new log entry is already done, so don't set flag to do catch up
-					} elseif ( 'dashboard' == $control_array[0] && 'search_history' == $control_array[1] ) {
-						$possible_new_log_entry = 0; // from search history can only go to non-loggable event; 
-					} else { // its something other than a pointer move, new flag should be set to 1 since maybe going do a new loggable event
-						$possible_new_log_entry = 1;
-						// drop array entries forward of current pointer, because am walking in a new direction
-						$last_log_entry = $log [ count ( $log ) - 1 ]; // last log entry (subtract 1 because count starts from 1, indexing from zero) 
-						$slice_length = ( -1 == $log_pointer ) ? 1 : $log_pointer + 1; 
-						$log = array_slice ( $log, 0, $slice_length ); // if slice length = count, slice is identity, as in initial position or extension of the log 
+					} else {
+						// else going some place new so truncate cookie log after current pointer (could be at end, nothing lost)
+						$last_log_entry = $log [ count ( $log ) - 1 ]; // take note of last entry in dropped tail (subtract 1 because count starts from 1, indexing from zero) 
+						$slice_length = ( -1 == $log_pointer ) ? 1 : $log_pointer + 1;
+						$log = array_slice ( $log, 0, $slice_length ); // truncate the cookie log, because branching to a new location
+						// note, pointer does not necessarily move -- pointing to last entry in remaining log
+						if ( 'search_log' == $control_array[0] && 'id_search' == $control_array[1] ) {
+								// a search log id search is essentially a pointer move combined with copying an old db log entry as a new cookie log entry
+							$log[] = $control_array[2]; // add the search log entry to the cookie log
+							$log_pointer++; // increment the pointer
+							$log_time_stamp = $now; // as if new event in sequence
+							$possible_new_log_entry = 0; // the new log entry is already done, so don't set flag to do catch up
+						} else {
+							if ( 'dashboard' == $control_array[0] && 'search_history' == $control_array[1] ) {
+								$possible_new_log_entry = 0; // from search history can only go to non-new event and if do, will log the move 
+							} else { // its something other than a pointer move, new flag should be set to 1 since maybe going do a new loggable event
+								$possible_new_log_entry = 1;
+							}
+						} 
 					}
 				}
 				// limit length of cookie 
 				if ( count ( $log ) > 20 ) { 
 					$discard = array_shift ( $log );
-					$log_pointer = count ( $log ) - 1; // should equal limit - 1; 
+					$log_pointer = count ( $log ) - 1; // should equal hard coded limit - 1; 
 				} 
 			} 
 		}
@@ -352,6 +367,7 @@ class WIC_Admin_Dashboard {
 			setcookie ( 'wp_issues_crm_log[log_pointer]', 				$log_pointer, 				0, '/wp-admin/', '', false, true );		
 			setcookie ( 'wp_issues_crm_log[possible_new_log_entry]', $possible_new_log_entry,0, '/wp-admin/', '', false, true );
 			setcookie ( 'wp_issues_crm_log[last_log_entry]', 			$last_log_entry, 			0, '/wp-admin/', '', false, true ); 
+			setcookie ( 'wp_issues_crm_log[log_time_stamp]', 			$log_time_stamp, 			0, '/wp-admin/', '', false, true );
 		}
 		
 		// back and forward buttons will be responding to the cookie just sent, because
