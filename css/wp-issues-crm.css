@@ -1031,6 +1031,11 @@ li.pl-search_log-serialized_search_parameters{ display: none;}
 }
 
 /* user preferences styling */
+button#wic-inner-field-group-userid-toggle-button {
+	display: none;
+}
+
+
 button#wic-inner-field-group-user-toggle-button,
 button#wic-inner-field-group-startup-toggle-button {
 	margin: 20px 0 10px 11.11111%;

@@ -27,13 +27,13 @@ class WIC_Admin_Navigation {
 
 		// add menu and submenu pages
 		add_menu_page( 'WP Issues CRM', 'WP Issues CRM', $main_security_setting, 'wp-issues-crm-main', array ( $this, 'do_dashboard' ), 'dashicons-smiley', $menu_position ); 		
+		add_submenu_page ( 'wp-issues-crm-main', 'WIC Preferences', 'User Preferences', $main_security_setting, 'wp-issues-crm-preferences', array ( $this, 'do_preferences') );
 		// show settings, fields and options pages only to administrators 
 		add_submenu_page( 'wp-issues-crm-main', 'Options', 'Options', 'activate_plugins', 'wp-issues-crm-options', array ( $this, 'do_options' ) );
 		add_submenu_page( 'wp-issues-crm-main', 'Fields', 'Fields', 'activate_plugins', 'wp-issues-crm-fields', array ( $this, 'do_fields' ) );
 		// need to run add setting  before add page -- too late to register if try not to do the work until on the page 		
 		$wic_admin_settings = new WIC_Admin_Settings; 
 		add_submenu_page( 'wp-issues-crm-main', 'WIC Settings', 'Settings', 'activate_plugins', 'wp-issues-crm-settings', array ( $wic_admin_settings, 'wp_issues_crm_settings' ) ); 
-		add_submenu_page ( 'wp-issues-crm-main', 'WIC Preferences', 'User Preferences', $main_security_setting, 'wp-issues-crm-preferences', array ( $this, 'do_preferences') );
 		add_submenu_page( 'wp-issues-crm-main', 'WIC Statistics', 'Statistics', $main_security_setting, 'wp-issues-crm-statistics', array ( $this, 'do_statistics' ) );	
 	}
 
