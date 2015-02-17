@@ -22,12 +22,17 @@ class WIC_Admin_Dashboard {
 	*/
 	
 	public function __construct() { 
-	
+
 		ob_start();
 		// is submitting a previous form; 
 		if ( isset ( $_POST['wic_form_button'] ) ) {
 			//parse button arguments
 			$control_array = explode( ',', $_POST['wic_form_button'] ); 
+			// before handling request check if a top menu button and if so, do branch
+			if ( '' == $control_array[0] || 'dashboard' == $control_array[0] || 'new_form' == $control_array[1] || 'new_blank_form'  == $control_array[1] ) {
+				WIC_DB_Search_History::new_history_branch (); 
+			}
+			//proceed to handle request
 			if ( '' == $control_array[0] || 'dashboard' == $control_array[0] ) { 
 				// $control_array[0] should never be empty if button is set, but bullet proof to dashboard, which is also bullet proof
 				$this->show_dashboard( $control_array [1] );		
@@ -43,6 +48,7 @@ class WIC_Admin_Dashboard {
 			
 		// logged in user, but not coming from form -- show first form
 		} else {
+			WIC_DB_Search_History::new_history_branch (); 
 			$this->show_dashboard( WIC_DB_Access_WP_User::get_wic_user_preference( 'first_form' ) );
 		}
 		$form_output = ob_get_clean(); // main form output grabbed from buffer
@@ -103,9 +109,6 @@ class WIC_Admin_Dashboard {
 	private function is_selected ( $class_requested, $action_requested, $button_class, $button_action ) {
 		// if last pressed the button, show it as selected 
 		if ( $class_requested == $button_class && $action_requested == $button_action ) {
-			if ( 'back' != $action_requested && 'forward' != $action_requested ) {
-				WIC_DB_Search_History::new_history_branch ();  // all top nav buttons start new directions of user navigation
-			}
 			return true; 
 		} else { 
 			return false;
