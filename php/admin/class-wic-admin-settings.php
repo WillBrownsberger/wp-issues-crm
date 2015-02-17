@@ -222,15 +222,17 @@ class WIC_Admin_Settings {
 	*/
 	// section legend call back
 	public function privacy_settings_legend() {
-		_e('<p>The "Issues" created within WP Issues CRM are just Wordpress posts that are automatically created as private. 
+		echo '<p>' . __('The "Issues" created within WP Issues CRM are just Wordpress posts that are automatically created as private. 
 		Public posts cannot be created, nor their content altered, in WP_Issues_CRM. (Public posts
-		can, however, be searched for as issues and viewed through WP_Issues_CRM.  Additionally, one can change the title and categories of pubic posts through WP Issues CRM.)</p>
-		<p>From time to time, you may prefer to use the main Wordpress post editor, which has more features, to create or edit private issues.  
+		can, however, be searched for as issues and viewed through WP_Issues_CRM.  
+		Additionally, one can change the title and categories of pubic posts through WP Issues CRM.)', 'wp-issues-crm' ) . '</p>' .
+		'<p>' . __( 'From time to time, you may prefer to use the main Wordpress post editor, which has more features, to create or edit private issues.  
 		To minimize risk of accidentally publicizing private issues through the Wordpress post editor, check the box below to 
 		make "private" the default setting for all Wordpress posts.  Either way, you an always override the default visibility 
-		setting in the "Publish" metabox in the Wordpress post editor.</p>
-		<p>Private issues and posts are not visible on the front end of your website except to administrators and possibly the post authors.  So, there is no risk of disclosing private issues/posts,
-		but if they are cluttering the administrator view of the front end, you can exclude them from front end queries using the setting here.</p>', 'wp-issues-crm' );
+		setting in the "Publish" metabox in the Wordpress post editor.', 'wp-issues-crm' ) . '</p>' .
+		'<p>' . __('Private issues and posts are not visible on the front end of your website except 
+		to administrators and possibly the post authors.  So, there is no risk of disclosing private issues/posts,
+		but if they are cluttering the administrator view of the front end, you can exclude them from front end queries using the setting here.', 'wp-issues-crm' ) . '</p>';
 	}
 
 	// setting field call back	
@@ -253,11 +255,11 @@ class WIC_Admin_Settings {
 	*/
 	// section legend call back
 	public function preference_settings_legend() {
-		_e('<p>By default, when users add new activities for a constituent, the drop down for "Activity Issue?" includes only those set as 
-		"Open for WP Issues CRM" in the Activity Tracking box on the Issue form. </p> 
-		<p>If the setting below is checked, then users can choose preferences to see additional issues in the drop down: (a) the issue that 
+		echo '<p>' . __( 'By default, when users add new activities for a constituent, the drop down for "Activity Issue?" includes only those set as 
+		"Open for WP Issues CRM" in the Activity Tracking box on the Issue form.', 'wp-issues-crm' ) .  '</p>' . 
+		'<p>' . __( 'If the setting below is checked, then users can choose preferences to see additional issues in the drop down: (a) the issue that 
 		they have most recently edited; and/or (b) the most recent or most frequent issues that they have added to activities.  These additional issues
-		will appear whether or not they are affirmatively "Open for WP Issues CRM", but will not appear if they are "Closed for WP Issues CRM".</p>', 'wp-issues-crm' );
+		will appear whether or not they are affirmatively "Open for WP Issues CRM", but will not appear if they are "Closed for WP Issues CRM".', 'wp-issues-crm' ) . '</p>';
 	}
 
 	// setting field call back	
@@ -273,16 +275,16 @@ class WIC_Admin_Settings {
 	*/
 	// section legend call back
 	public function postal_address_interface_legend() {
-		_e('<p>WP Issues CRM includes an interface to the <a href="https://www.usps.com/business/web-tools-apis/address-information.htm">United States Postal Service Address Information API.</a>  
-		This service will standardize and add zip codes to addresses entered for constituents.</p>  <p>To use it, you need to get a User Name from the USPS:</p>
-		<ol><li>Register for USPS Web Tools by filling out <a href="https://registration.shippingapis.com/">an online form.</a></li>
-			<li>After completing this form, you will receive an email from the USPS.  Forward that email back to 
-			<a href="mailto:uspstechnicalsupport@mailps.custhelp.com">uspstechnicalsupport@mailps.custhelp.com</a> with the subject line "Web Tools API Access"
-			and content simply asking for access.</li>
-			<li>The USPS will reply seeking confirmation essentially that the access is not for bulk processing and will promptly grant you access.</li>
-			<li>Once they have sent an email granting access to the API, enter Username that they give you below and enable the Interface.  Note that you do not need to
-			enter the password that they give you.</li>.
-		</ol>', 'wp-issues-crm' );
+		echo '<div id="usps"><p>' . __( 'WP Issues CRM includes an interface to the ', 'wp-issues-crm' ) . '<a href="https://www.usps.com/business/web-tools-apis/address-information.htm">United States Postal Service Address Information API.</a>' .  
+		__( ' This service will standardize and add zip codes to addresses entered for constituents.', 'wp-issues-crm' ) . '</p>  <p>' . __(' To use it, you need to get a User Name from the USPS:', 'wp-issues-crm' ) . '</p>' .
+		'<ol><li>' . __('Register for USPS Web Tools by filling out', 'wp-issues-crm' ) . ' <a href="https://registration.shippingapis.com/">' . __( 'an online form.', 'wp-issues-crm' ) . '</a></li>' .
+			'<li>' . __( 'After completing this form, you will receive an email from the USPS.  Forward that email back to ', 'wp-issues-crm' ) . '
+			<a href="mailto:uspstechnicalsupport@mailps.custhelp.com">uspstechnicalsupport@mailps.custhelp.com</a> ' . __( 'with the subject line "Web Tools API Access"
+			and content simply asking for access.', 'wp-issues-crm' ) . '</li>' .
+			'<li>' . __( 'The USPS will reply seeking confirmation essentially that the access is not for bulk processing and will promptly grant you access.', 'wp-issues-crm' ) . '</li>' .
+			'<li>' . __( 'Once they have sent an email granting access to the API, enter Username that they give you below and enable the Interface.  Note that you do not need to
+			enter the password that they give you.', 'wp-issues-crm' ) . '</li>' .
+		'</ol></div>';
 				
 	}
 

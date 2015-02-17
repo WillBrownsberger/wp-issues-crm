@@ -1,7 +1,7 @@
 <?php
 /*
 *
-* adapted from http://joe-riggs.com/blog/2009/10/address-standardization-verification-with-usps-web-tools-and-php/
+* adapted for wordpress from http://joe-riggs.com/blog/2009/10/address-standardization-verification-with-usps-web-tools-and-php/
 *
 */ 
  
@@ -44,22 +44,29 @@ class WIC_Entity_Address_USPS {
  
 	function submit_request() {
  
-		$ch = curl_init($this->url);
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, "API=Verify&XML=" . $this->toXML());
-		curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,false);
- 
-		$result = curl_exec($ch);
-		$error = curl_error($ch);
- 
-		if( empty( $error )) {
-			return $result;
+		$response = wp_remote_post( $this->url, array(
+			'method' => 'POST',
+			'timeout' => 60,
+			'redirection' => 5,
+			'httpversion' => '1.0',
+			'blocking' => true,
+			'headers' => array(),
+			'body' => array( 'API' => 'Verify', 'XML' => $this->toXML() ),
+			'cookies' => array()
+		    )
+		);
+
+		if ( is_wp_error( $response ) ) {
+		   $error_message = $response->get_error_message();
+		   WIC_Function_Utilities::wic_error ( sprintf ( 'Connection error in postal interface: %1$s' , $error_message ), __FILE__, __LINE__, __METHOD__, false );
 		} else {
-			WIC_Function_Utilities::wic_error ( $error, __FILE__, __LINE__, __METHOD__, false );
+			return ( $response['body'] );
 		}
-	}
+
+	}	
+	
+	
+	
 }
  
 ?>
