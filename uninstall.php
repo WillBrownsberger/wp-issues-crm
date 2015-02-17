@@ -4,8 +4,8 @@
 *	uninstall.php deletes options and preferences, but not core data in the main wp_issues_crm tables
 * 	 -- the risk of data loss in larger offices is too high.
 *
-*	To completely unstall wp_issues_crm, after deleting the plugin, go to phpmyadmin or the mysql console and:
-*		(1) delete the tables with in the wordpress database with names wp_wic_ . . .
+*	To completely uninstall wp_issues_crm, after deleting the plugin, go to phpmyadmin or the mysql console and:
+*		(1) delete the tables in the wordpress database with names wp_wic_ . . .
 *				- activity
 *				- address
 *				- constituent
@@ -17,7 +17,7 @@
 *				- phone
 *				- search_log
 *		(2) delete post meta data created by wp_issues_crm by running . . .
-*				DELETE FROM wp_postmeta WHERE meta_key LIKE 'wic_data_%'";
+*				DELETE FROM wp_postmeta WHERE meta_key LIKE 'wic_data_%'
 *			
 *
 */
