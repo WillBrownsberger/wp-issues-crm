@@ -28,8 +28,11 @@ class WIC_Admin_Dashboard {
 		if ( isset ( $_POST['wic_form_button'] ) ) {
 			//parse button arguments
 			$control_array = explode( ',', $_POST['wic_form_button'] ); 
-			// before handling request check if a top menu button and if so, do branch
-			if ( '' == $control_array[0] || 'dashboard' == $control_array[0] || 'new_form' == $control_array[1] || 'new_blank_form'  == $control_array[1] ) {
+			// before handling request check if a top menu button and if so, do a history branch
+			if ( '' 			== $control_array[0] || 
+				'dashboard' == $control_array[0] || 
+				'new_form' 	== $control_array[1] || 
+				'new_blank_form'  == $control_array[1] ) {
 				WIC_DB_Search_History::new_history_branch (); 
 			}
 			//proceed to handle request
@@ -48,11 +51,19 @@ class WIC_Admin_Dashboard {
 			
 		// logged in user, but not coming from form -- show first form
 		} else {
+			// do a history branch
 			WIC_DB_Search_History::new_history_branch (); 
 			$this->show_dashboard( WIC_DB_Access_WP_User::get_wic_user_preference( 'first_form' ) );
 		}
-		$form_output = ob_get_clean(); // main form output grabbed from buffer
-		$this->show_top_menu_buttons ( $control_array[0], $control_array[1], $control_array[2] );
+		
+		 // main form output grabbed from buffer
+		$form_output = ob_get_clean();
+		// show top menu buttons before echoing form but after form preparation (need processing to determine whether to show back/forward buttons)
+		if ( isset ( $_POST['wic_form_button'] ) ) {
+			$this->show_top_menu_buttons ( $control_array[0], $control_array[1], $control_array[2] );
+		} else {
+			$this->show_top_menu_buttons ( 'dashboard',  WIC_DB_Access_WP_User::get_wic_user_preference( 'first_form' ), NULL );
+		}
 		echo $form_output;
 	}
 
