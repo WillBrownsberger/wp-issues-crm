@@ -35,7 +35,7 @@ class WIC_DB_Search_History {
 		$user_id = get_current_user_id();
 		// limit saved length to 50 entries;
 		if ( count ( $history_array['history'] ) > 50 ) {
-			$discard = array_shift ( $history_array['history'] ); 	// drop the earliest entry -- now, length = $cookie_length_limit
+			$discard = array_shift ( $history_array['history'] ); 	// drop the earliest entry -- now, length = hard coded history length limit
 			$history_array['pointer'] = count ( $history_array['history'] ) - 1;
 		}
 		update_option ( '_wp_issues_crm_individual_search_history_' . $user_id, serialize ( $history_array ) );
@@ -45,8 +45,16 @@ class WIC_DB_Search_History {
 		// adds a search log id to the end of the search history and sets pointer to end of history
 		// called whenever a new search log entry is made or is accessed from the search_log page ( <-<- )
 		$history_array = self::search_history_init();
+		// only add the new entry if it is not already at the end of the list -- 
+		// no need for adjacent dups in the history, but non-adjacent dups make sense
+		$count = count ( $history_array['history'] );
+		if ( 0 < $count ) {
+			if ( $search_log_id == $history_array['history'][ $count - 1 ] ) {
+				return;			
+			} 		
+		} 
 		$history_array['history'][] = $search_log_id;
-		$history_array['pointer'] = count ( $history_array['history'] ) - 1;
+		$history_array['pointer'] = $count; // $count is the new true count - 1
 		self::search_history_save ( $history_array );		
 	} 
 	
