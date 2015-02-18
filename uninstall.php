@@ -30,9 +30,9 @@ if ( !defined( 'WP_UNINSTALL_PLUGIN' ) || !defined( 'ABSPATH' ) )
 global $wpdb;
 // clean up wp_issues_crm options
 $sql = "DELETE FROM {$wpdb->prefix}options  WHERE option_name LIKE 'wp_issues_crm%' or option_name LIKE '_wp_issues_crm%' ";
-// $wpdb->query ($sql);
+$wpdb->query ($sql);
 
 // clean up wp_issues_crm user meta entries
 $sql = "DELETE FROM {$wpdb->prefix}usermeta  WHERE meta_key = 'wic_data_user_preferences' ";
-// $wpdb->query ($sql);
+$wpdb->query ($sql);
 
