@@ -73,7 +73,9 @@ class WIC_Admin_Setup {
 				'wp-issues-crm-styles',
 				plugins_url( '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'css' . DIRECTORY_SEPARATOR . 'wp-issues-crm.css' , __FILE__ )
 				);
-			wp_enqueue_style('wp-issues-crm-styles');					
+			wp_enqueue_style('wp-issues-crm-styles');
+			
+		}					
 			
 	}
 
