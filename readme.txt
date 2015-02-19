@@ -59,6 +59,10 @@ WP Issues CRM uses a fully modular object-oriented design.  It is built around a
 flexible.  It uses code recursively so that with a small code base it can offer broadly extensible functionality.  We use
 this product ourselves on a daily basis and we are committed to continuous long-term improvement of it.
 
+== Known Issues ==
+On initial install, until user has saved one issue or done at least one issues search, 
+if preferences are set to show last activity search, php warnings are generated.
+
 == Changelog ==
 0.80 completion of all plugin functions except bulk upload
 
