@@ -3,7 +3,7 @@
  * Plugin Name: WP Issues CRM
  * Plugin URI: 
  * Description: Constituent Relationship Management for organizations that respond to constituents.  Organizes constituent contacts ( calls, etc. ) around Wordpress posts and categories. 
- * Version: 0.80
+ * Version: 0.81
  * Author: Will Brownsberger
  * Author URI: http://willbrownsberger.com
  * Text Domain: wp-issues-crm
