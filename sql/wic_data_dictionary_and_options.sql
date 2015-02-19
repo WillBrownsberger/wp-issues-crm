@@ -98,7 +98,7 @@ INSERT INTO wp_wic_data_dictionary (ID, entity_slug, group_slug, field_slug, fie
 (118, 'data_dictionary', 'data_dictionary', 'enabled', 'select', 'Enabled', 100, 80, 0, '', 0, 0, 0, '1', 0, 0, '', '', 'enabled_disabled_array', '', 'enabled_disabled_array', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (119, 'data_dictionary', 'data_dictionary', 'field_order', 'select', 'Screen Order', 40, 0, 0, 'individual', 0, 0, 0, '', 0, 0, '', '', 'order_array', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (120, 'data_dictionary', 'data_dictionary', 'ID', 'text', 'Internal ID for Field', 2, 0, 0, '', 0, 0, 1, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
-(124, 'data_dictionary', 'data_dictionary', 'like_search_enabled', 'select', 'Wild card searching', 84, 0, 0, '', 0, 0, 0, '1', 0, 0, '', '', 'like_search', '', 'like_search', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
+(124, 'data_dictionary', 'data_dictionary', 'like_search_enabled', 'select', 'Search', 84, 0, 0, '', 0, 0, 0, '1', 0, 0, '', '', 'like_search', '', 'like_search', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (147, 'search_log', 'search_log', 'result_count', 'text', 'Result Count', 110, 45, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (141, 'user', 'user', 'max_issues_to_show', 'select', 'Number to Show', 50, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', 'count_to_ten', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (142, 'user', 'userid', 'ID', 'text', 'Wordpress User ID', 10, 0, 0, 'individual', 0, 0, 1, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
@@ -106,7 +106,7 @@ INSERT INTO wp_wic_data_dictionary (ID, entity_slug, group_slug, field_slug, fie
 (144, 'user', 'user', 'show_viewed_issue', 'checked', 'Show Viewed Issue', 30, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (145, 'user', 'user', 'show_latest_issues', 'select', 'Show Used Issues', 40, 0, 0, '', 0, 0, 0, '', 0, 0, '', '', 'show_latest_issues_options', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (146, 'search_log', 'search_log', 'serialized_search_parameters', 'text', 'Serialized Search Parameters', 100, 100, 0, '', 0, 0, 0, '', 0, 0, '', '', '', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
-(149, 'trend', 'trend', 'trend_search_mode', 'select', 'Trend Search Mode', 50, 0, 0, '', 0, 0, 0, '', 0, 1, '', '', 'trend_search_modes', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
+(149, 'trend', 'trend', 'trend_search_mode', 'select', 'Search Mode', 50, 0, 0, '', 0, 0, 0, '', 0, 1, '', '', 'trend_search_modes', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00'),
 (150, 'user', 'startup', 'first_form', 'select', 'Startup Form', 60, 0, 0, '', 0, 0, 0, 'search_history', 0, 0, '', '', 'first_form', '', '', 0, 0, 1, '', 0, '0000-00-00 00:00:00');
 INSERT INTO wp_wic_form_field_groups (ID, entity_slug, group_slug, group_label, group_legend, group_order, initial_open, sidebar_location, last_updated_time, last_updated_by) VALUES
 (1, 'constituent', 'contact', 'Contact', '', 10, 1, 0, '0000-00-00 00:00:00', 0),
