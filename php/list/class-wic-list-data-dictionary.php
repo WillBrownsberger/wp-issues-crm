@@ -1,10 +1,7 @@
 <?php
 /*
-* File: class-wic-list-option-group.php
+* class-wic-list-data-dictionary.php
 *
-* Description: lists entities (posts) passed as query 
-* 
-* @package wp-issues-crm
 *
 */ 
 

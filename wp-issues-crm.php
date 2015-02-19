@@ -2,12 +2,14 @@
 /**
  * Plugin Name: WP Issues CRM
  * Plugin URI: 
- * Description: Constituent Relationship Management for organizations that respond to constituents primarily on issues (e.g., legislators); does support basic case management as well. 
- * Version: 01.00
+ * Description: Constituent Relationship Management for organizations that respond to constituents.  Organizes constituent contacts ( calls, etc. ) around Wordpress posts and categories. 
+ * Version: 0.80
  * Author: Will Brownsberger
  * Author URI: http://willbrownsberger.com
  * Text Domain: wp-issues-crm
  * License: GPL2
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html 
+ *	Text Domain: wp-issues-crm
  *
  *  Copyright 2014  WILL BROWNSBERGER  (email : willbrownsberger@gmail.com)
 
@@ -35,11 +37,11 @@
 *  This module also includes hide private posts function (the only function created in the public name space by this plugin).
 */
 
-// set version globals;
+// set database version globals;
 global $wp_issues_crm_dictionary_version;
 global $wp_issues_crm_db_version;
-$wp_issues_crm_dictionary_version = '1.0';
-$wp_issues_crm_db_version = '1.0';
+$wp_issues_crm_dictionary_version = '0.80';
+$wp_issues_crm_db_version = '0.80';
 
 
 // check for database install or updates -- note that the 'plugins_loaded' hook fires before is_admin is set, so too late if put in admin_setup
@@ -69,7 +71,7 @@ if ( is_admin() ) {
 
 // function placed here so will be accessible on front end.
 function keep_private_posts_off_front_end_even_for_administrators( $query ) {
-	if ( ! is_admin() ) { // && add option setting) { 
+	if ( ! is_admin() ) { 
 		// note that this does not prevent this plugin or widgets from showing private posts to which logged in user has access
    	$query->set( 'post_status', array( 'publish' ) );			
 	}

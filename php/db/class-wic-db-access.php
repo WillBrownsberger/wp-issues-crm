@@ -3,6 +3,8 @@
 *
 * class-wic-db-access.php
 *		intended as wraparound for direct db access objects (implemented as extensions to this.) 
+*		maintains search log (which includes saves) and does all search log data access directly
+*
 */
 
 

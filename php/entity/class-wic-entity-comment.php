@@ -3,7 +3,7 @@
 *
 *	wic-entity-comment.php
 *
-*  Comment is a psuedo entity -- doesn't map directly to any database any entity and supports no updates or searching
+*  Comment is a psuedo entity -- doesn't map directly to any database entity and supports no updates or searching
 *  Just a reporting link -- supports cross table queries
 *
 */

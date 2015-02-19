@@ -1,13 +1,13 @@
 <?php
 /**
 *
-* class-wic-admin-main.php
+* class-wic-admin-settings.php
+*
 */
 
 
 class WIC_Admin_Settings {
 	/* 
-	*  This is just a router for admin pages.  All admin pages point to this call back.
 	*
 	*/
 

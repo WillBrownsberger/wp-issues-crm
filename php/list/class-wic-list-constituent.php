@@ -1,10 +1,7 @@
 <?php
 /*
-* File: class-wic-list-parent.php
-*
-* Description: lists entities (posts) passed as query 
+* class-wic-list-constituent.php
 * 
-* @package wp-issues-crm
 *
 */ 
 

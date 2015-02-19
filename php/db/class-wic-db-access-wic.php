@@ -2,7 +2,7 @@
 /*
 *
 * class-wic-db-access-wic.php
-*		intended as wraparound for wpdb to access wic tables
+*		main db access for constituents, etc.
 *
 */
 

@@ -4,7 +4,9 @@
 *
 * WIC_Control_Parent is extended by classes for each of the field types  
 * 
-*   
+* Multivalue is the most significant extension -- from the perspective of the top form,
+* a multivalue field like address (which includes multiple rows with multiple fields in each)
+* is just another control like first name.  
 *
 *
 *

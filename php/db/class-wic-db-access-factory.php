@@ -2,13 +2,11 @@
 /*
 *
 * class-wic-db-access-factory.php
-*		intended as wraparound for wpdb 
 *
-* supports multiple formats for data access to be further implemented in subclasses
-*		WIC_Dedicated_Table_Access
-*		WIC_WP_Post_Access
+* supports multiple approaches to data access to be further implemented in extensions of WP_DB_Access
 *
-* note, that as for wpdb and other wordpress object, this object includes all necessary pre-database sanitization and validation
+* all extensions support an access model that looks to the entity seeking access like the Wordpress $wpdb object
+* this allows compatibility across forms accessing wordpress posts and forms accessing wp_issues_crm custom tables
 *
 * 
 */

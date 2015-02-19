@@ -1,17 +1,14 @@
 <?php
 /**
 *
-* class-wic-functions.pp
+* class-wic-function-utilities.php
 *
 **/
  
 
 class WIC_Function_Utilities { // functions that serve multiple entities	
-	
-	/*
-	*  display option array of administrators of the system
-	*/	
 
+	// display error message
 	public static function wic_error ( $text, $file, $line, $method, $fatal ) {
 		$fatal_phrase = $fatal ? __( 'WP Issues CRM Fatal Error: ', 'wp-issues-crm' ) : __( 'WP Issues CRM Non Fatal Error: ', 'wp_issues_crm' );
 		$error_class  = $fatal ? 'wp-issues-crm-fatal-error' : 'wp-issues-crm-non-fatal-error'; 
@@ -24,11 +21,12 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 		}	
 	}	
 	
+	// get administrator array
 	public static function get_administrator_array() {
 	
 		$user_select_array = array();	
 	
-		$roles = array( 'Administrator', 'Editor', 'wic_constituent_manager' ) ;
+		$roles = array( 'Administrator', 'Editor', 'Author', 'wic_constituent_manager' ) ;
 		
 		foreach ( $roles as $role ) {
 			$user_query_args = 	array (
@@ -55,6 +53,7 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 		
 	}
 	
+	// get array of people who updated table  
 	private static function get_last_updated_by_array( $table ) {
 		global $wpdb;
 		$table = $wpdb->prefix . $table;
@@ -195,18 +194,4 @@ class WIC_Function_Utilities { // functions that serve multiple entities
 		return ( $option_group_array );
 	}
 	
-	/*
-	*	compare strings and times
-	*
-	public static function choose_latest_non_blank ( $value1, $time1, $value2, $time2 ) {
-		$latest = '';	
-		if ( '' < $value1 && '' == $value2 ) {
-			$latest = $value1;		
-		} elseif ( '' == $value1 && '' < $value2 ) {
-			$latest = $value2;	
-		} elseif ( '' < $value1 && '' < $value2 ) {
-			$latest =  $time2 > $time1 ? $value2 : $value1; 
-		} 
-		return ( $latest );
-	} */
 }

@@ -1,11 +1,8 @@
 <?php
 /*
-* File: class-wic-list-constituent_export.php
+* class-wic-list-constituent-export.php
 *
-* Description: isolates export functions which are custom and bypasses database isolation classes 
 * 
-* @package wp-issues-crm
-*
 */ 
 
 class WIC_List_Constituent_Export {

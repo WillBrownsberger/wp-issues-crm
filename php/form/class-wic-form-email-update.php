@@ -1,13 +1,8 @@
 <?php
 /*
 *
-*  class-wic-form-multivalue-update.php
+*  class-wic-form-email-update.php
 *
-*	this form is for an instance of a multivalue field -- a row (or rows, if multiple groups) of controls, not a full form
-*	  
-*	entity in this context is the entity that the multivalue field may contain several instances of 
-*   -- this form generator doesn't need to know the instance value; 
-* 	 -- the control objects within each row know which row they are implementing
 *
 */
 

@@ -67,6 +67,7 @@ class WIC_Admin_Setup {
 			);
 			wp_enqueue_script('wic-changed-page');
 
+
 			
 			wp_register_style(
 				'wp-issues-crm-styles',
@@ -74,7 +75,6 @@ class WIC_Admin_Setup {
 				);
 			wp_enqueue_style('wp-issues-crm-styles');					
 			
-		}
 	}
 
 	// add action to intercept press of download button before any headers sent 

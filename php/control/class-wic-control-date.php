@@ -24,5 +24,12 @@ class WIC_Control_Date extends WIC_Control_Range {
  		return ( date_format( $test, 'Y-m-d' ) );
 	}
 	
+	protected static function create_control ( $control_args ) { 
+		$control_args['input_class'] .= ' datepicker ';
+		$control = parent::create_control( $control_args);  
+		return ( $control );
+	}
+	
+	
 }
 

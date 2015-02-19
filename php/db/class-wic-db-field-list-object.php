@@ -1,7 +1,7 @@
 <?php
 /*
 * class-wic-db-field-list-object.php
-*	just a convenience
+*	supports retrieval of lists in format like $wpdb output
 *
 */
 

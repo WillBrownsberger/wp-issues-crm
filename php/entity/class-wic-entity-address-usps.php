@@ -2,6 +2,7 @@
 /*
 *
 * adapted for wordpress from http://joe-riggs.com/blog/2009/10/address-standardization-verification-with-usps-web-tools-and-php/
+* original used curl functions for http post
 *
 */ 
  
@@ -68,5 +69,3 @@ class WIC_Entity_Address_USPS {
 	
 	
 }
- 
-?>

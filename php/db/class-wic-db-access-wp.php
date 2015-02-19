@@ -2,7 +2,7 @@
 /*
 *
 * class-wic-db-access-wp.php
-*		intended as wraparound for wpdb 
+*		intended as wraparound for $wpdb 
 *
 *
 * 

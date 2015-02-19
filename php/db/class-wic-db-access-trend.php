@@ -2,7 +2,6 @@
 /*
 *
 * class-wic-db-access-trend.php
-*		intended as wraparound for wpdb to access wic tables
 *		handles "trend" object as mechanism for accessing activity queries defined here
 *
 */

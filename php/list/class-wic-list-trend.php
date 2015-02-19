@@ -1,10 +1,7 @@
 <?php
 /*
-* File: class-wic-list-trend.php
+* class-wic-list-trend.php
 *
-* Description: lists entities (posts) passed as query 
-* 
-* @package wp-issues-crm
 *
 */ 
 

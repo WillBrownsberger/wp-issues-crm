@@ -3,10 +3,6 @@
 *
 *	wic-constituent.php
 *
-*  This class is instantiated and takes control from the parent class in the parent constructor
-*  It takes action on user requests which are the named functions.
-*  It receives the $args passed from the button ( via the dashboard )  
-*	It is mostly able to use generic functions from the parent.
 *
 */
 

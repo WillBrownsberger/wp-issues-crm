@@ -15,7 +15,7 @@ abstract class WIC_Form_Parent  {
 	*  One public function -- layout form
 	*	Abstract protected functions for child forms to fill in form details 
 	*
-	*	Also includes two public static functions for button creation -- create_wic_form_button and back_button
+	*	Also includes public static function for standard button creation
 	*
 	*/
 

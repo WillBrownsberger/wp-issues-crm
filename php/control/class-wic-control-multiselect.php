@@ -1,6 +1,6 @@
 <?php
 /*
-* wic-control-select.php
+* wic-control-multiselect.php
 *
 */
 class WIC_Control_Multiselect extends WIC_Control_Select {

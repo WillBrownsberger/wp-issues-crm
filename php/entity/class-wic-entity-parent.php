@@ -3,7 +3,7 @@
 *
 * class-wic-entity-parent.php
 *
-* base class for wic tables/entities
+* base class for wp issues crm tables/entities -- instantiates particular object in the constructor
 *
 *
 * 

@@ -1,8 +1,8 @@
 <?php
 /*
 *
-* class-wic-db-access-wic.php
-*		intended as wraparound for wpdb to access wic tables
+* class-wic-db-access-dictionary.php
+*		supports access to the dictionary for editing of the dictionary
 *
 */
 

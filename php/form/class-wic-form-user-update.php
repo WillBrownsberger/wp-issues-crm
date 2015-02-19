@@ -1,7 +1,7 @@
 <?php
 /*
 *
-*  class-wic-constituent-update-form.php
+*  class-wic-form-user-update.php
 *
 */
 

@@ -1,7 +1,8 @@
 <?php
 /**
 *
-* class-wic-admin-main.php
+* class-wic-admin-navigation.php
+*
 */
 
 

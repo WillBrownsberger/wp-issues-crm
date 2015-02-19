@@ -1,7 +1,7 @@
 <?php
 /*
 *
-*	wic-option-group.php
+*	wic-entity-data-dictionary.php
 *
 */
 

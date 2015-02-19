@@ -1,6 +1,6 @@
 <?php
 /*
-* class-wic-form.php
+* class-wic-db-dictionary.php
 *
 *
 *

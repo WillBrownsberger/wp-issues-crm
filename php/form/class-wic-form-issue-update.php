@@ -1,7 +1,7 @@
 <?php
 /*
 *
-*  class-wic-search-form.php
+*  class-form-issue-update.php
 *
 */
 

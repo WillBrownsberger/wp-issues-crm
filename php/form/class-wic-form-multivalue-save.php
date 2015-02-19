@@ -1,7 +1,7 @@
 <?php
 /*
 *
-*  class-wic-form-multivalue-update.php
+*  class-wic-form-multivalue-save.php
 *
 *	this form is for an instance of a multivalue field -- a row (or rows, if multiple groups) of controls, not a full form
 *	  

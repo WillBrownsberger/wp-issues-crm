@@ -2,7 +2,7 @@
 /*
 *
 * class-wic-db-access-wp-user.php
-*		 wraparound for access to wp user meta wpdb 
+*		 wraparound for access to wp user meta  
 *
 *
 * 

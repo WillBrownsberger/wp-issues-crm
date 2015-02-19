@@ -2,7 +2,7 @@
 /*
 *
 * class-wic-db-setup.php
-*		accesses sql to  
+*		accesses sql to create or update database and dictionary  
 */
 
 
