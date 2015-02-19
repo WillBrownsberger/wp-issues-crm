@@ -39,7 +39,7 @@ We appreciate and seek your feedback and want to know how we can continue to imp
 
 == Screenshots ==
 
-1. WP Issues CRM allows you to configure appearance, privacy, security.  You can also accelerate data entry by giving
+1. WP Issues CRM allows you to configure menu, privacy and security options.  You can also accelerate data entry by 
 automatically serving users their latest issues visited when they are entering constituent activity information.  The
 plugin also includes an interface to the USPS Postal Service for zip code lookup. 
 2. You can create your own custom fields and define options for the custom dropdowns that you create.  You can also
